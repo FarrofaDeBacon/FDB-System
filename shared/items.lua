@@ -22,14 +22,15 @@ RSGShared.Items = {
     handcuffs  = { name = 'handcuffs',  label = 'Hand Cuffs',    weight = 100, type = 'item', image = 'handcuffs.png',                 unique = false, useable = true, shouldClose = true, description = 'Used for cuffs' },
 
     -- horse items
-    horse_brush     = { name = 'horse_brush',     label = 'Horse Brush',     weight = 100, type = 'item', image = 'horse_brush.png',     unique = false, useable = true, shouldClose = true, description = 'brush used to clean your horse' },
-    horse_lantern   = { name = 'horse_lantern',   label = 'Horse Lantern',   weight = 100, type = 'item', image = 'horse_lantern.png',   unique = false, useable = true, shouldClose = true, description = 'to see in the dark' },
-    horse_holster   = { name = 'horse_holster',   label = 'Horse Holster',   weight = 100, type = 'item', image = 'horse_holster.png',   unique = false, useable = true, shouldClose = true, description = 'Somewhere to put your gun' },
-    horse_stimulant = { name = 'horse_stimulant', label = 'Horse Stimulant', weight = 100, type = 'item', image = 'horse_stimulant.png', unique = false, useable = true, shouldClose = true, description = 'Given to horses' },
-    horse_reviver   = { name = 'horse_reviver',   label = 'Horse Reviver',   weight = 100, type = 'item', image = 'horse_reviver.png',   unique = false, useable = true, shouldClose = true, description = 'Given to horses' },
-    carrot          = { name = 'carrot',          label = 'Carrot',          weight = 100, type = 'item', image = 'carrot.png',          unique = false, useable = true, decay = 120, delete = true, shouldClose = true, description = 'Horses like these' },
-    sugarcube       = { name = 'sugarcube',       label = 'Sugar Cube',      weight = 100, type = 'item', image = 'sugarcube.png',       unique = false, useable = true, shouldClose = true, description = 'Horses like these' },
-    apple           = { name = 'apple',           label = 'Apple',           weight = 100, type = 'item', image = 'apple.png',           unique = false, useable = true, decay = 120, delete = true, shouldClose = true, description = 'Horses like these' },
+    horse_brush         = { name = 'horse_brush',       label = 'Horse Brush',          weight = 100, type = 'item', image = 'horse_brush.png',                 unique = false, useable = true, shouldClose = true, description = 'Brush used to clean your horse' },
+    horse_lantern       = { name = 'horse_lantern',     label = 'Horse Lantern',        weight = 100, type = 'item', image = 'horse_lantern.png',               unique = false, useable = true, shouldClose = true, description = 'To see in the dark' },
+    horse_stimulant     = { name = 'horse_stimulant',   label = 'Horse Stimulant',      weight = 100, type = 'item', image = 'horse_stimulant.png',             unique = false, useable = true, shouldClose = true, description = 'Given to horses' },
+    horse_reviver       = { name = 'horse_reviver',     label = 'Horse Reviver',        weight = 100, type = 'item', image = 'horse_reviver.png',               unique = false, useable = true, shouldClose = true, description = 'Given to horses' },
+    horse_carrot        = { name = 'horse_carrot',      label = 'Horse Carrot',         weight = 100, type = 'item', image = 'horse_carrot.png',                unique = false, useable = true, shouldClose = true, description = 'Horses like these' },
+    horse_apple         = { name = 'horse_apple',       label = 'Horse Apple',          weight = 100, type = 'item', image = 'horse_apple.png',                 unique = false, useable = true, shouldClose = true, description = 'A crisp snack for your horse' },
+    sugarcube           = { name = 'sugarcube',         label = 'Sugar Cube',           weight = 100, type = 'item', image = 'sugarcube.png',                   unique = false, useable = true, shouldClose = true, description = 'Horses like these' },
+    haysnack            = { name = 'haysnack',          label = 'Hay Snack',            weight = 100, type = 'item', image = 'hay_cube.png',                    unique = false, useable = true, shouldClose = true, description = 'Hay snack for horses' },
+    horsemeal           = { name = 'horsemeal',         label = 'Horse Meal',           weight = 100, type = 'item', image = 'consumable_horse_meal.png',       unique = false, useable = true, shouldClose = true, description = 'A meal of oats for your horse' },
 
     -- animal items
     legendary_pelt = { name = 'legendary_pelt', label = 'Legendary Pelt', weight = 100, type = 'item', image = 'legendary_pelt.png', unique = false, useable = true, shouldClose = true, description = 'Legendary' },
