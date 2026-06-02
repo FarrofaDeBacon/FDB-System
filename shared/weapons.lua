@@ -37,7 +37,7 @@ RSGShared.Weapons = {
 	[`weapon_shotgun_repeating`]               = { name = 'weapon_shotgun_repeating',               label = 'Repeating Shotgun',                  weapontype = 'Shotgun',      ammotype = 'AMMO_SHOTGUN',  damagereason = 'Placeholder' },
     -- bow
 	[`weapon_bow`]                             = { name = 'weapon_bow',                             label = 'Sandard Bow',                        weapontype = 'Bow',          ammotype = 'AMMO_ARROW',    damagereason = 'Placeholder' },
-	[`weapon_bow_improved`]                    = { name = 'weapon_bow',                             label = 'Improved Bow',                       weapontype = 'Bow',          ammotype = 'AMMO_ARROW',    damagereason = 'Placeholder' },
+	[`weapon_bow_improved`]                    = { name = 'weapon_bow_improved',                    label = 'Improved Bow',                       weapontype = 'Bow',          ammotype = 'AMMO_ARROW',    damagereason = 'Placeholder' },
     -- lasso
 	[`weapon_lasso`]                           = { name = 'weapon_lasso',                           label = 'Sandard Lasso',                      weapontype = 'Lasso',        ammotype = nil,             damagereason = 'Placeholder' },
 	[`weapon_lasso_reinforced`]                = { name = 'weapon_lasso_reinforced',                label = 'Reinforced Lasso',                   weapontype = 'Lasso',        ammotype = nil,             damagereason = 'Placeholder' },
