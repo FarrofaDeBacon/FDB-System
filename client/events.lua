@@ -17,7 +17,7 @@ RegisterNetEvent('RSGCore:Client:OnPlayerLoaded', function()
     --if not RSGCore.Config.Server.PVP then return end
     --SetCanAttackFriendly(PlayerPedId(), true, false)
     --NetworkSetFriendlyFireOption(true)
-    if RSGConfig.EnablePVP then
+    if RSGConfig.Server.PVP then
         Citizen.InvokeNative(0xF808475FA571D823, true)
         SetRelationshipBetweenGroups(5, `PLAYER`, `PLAYER`)
     end
@@ -34,6 +34,7 @@ RegisterNetEvent('RSGCore:Client:OnPlayerUnload', function()
 end)
 
 RegisterNetEvent('RSGCore:Client:PvpHasToggled', function(pvp_state)
+    RSGConfig.Server.PVP = pvp_state
     SetCanAttackFriendly(PlayerPedId(), pvp_state, false)
     NetworkSetFriendlyFireOption(pvp_state)
 end)

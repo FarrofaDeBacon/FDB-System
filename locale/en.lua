@@ -9,6 +9,8 @@ local Translations = {
         item_not_exist              = 'Item does not exist',
         too_heavy                   = 'Inventory too full',
         location_not_exist          = 'Location does not exist',
+        job_not_exist               = 'Job does not exist',
+        gang_not_exist              = 'Gang does not exist',
         duplicate_license           = '[RSGCORE] - Duplicate Rockstar License Found',
         no_valid_license            = '[RSGCORE] - No Valid Rockstar License Found',
         not_whitelisted             = '[RSGCORE] - You\'re not whitelisted for this server',
@@ -25,6 +27,8 @@ local Translations = {
         server_opened = 'The server has been opened',
         server_closed = 'The server has been closed',
         teleported_waypoint = 'Teleported To Waypoint.',
+        job_set = 'Job set successfully',
+        gang_set = 'Gang set successfully',
     },
     info = {
         received_paycheck = 'You received your paycheck of $%{value}',

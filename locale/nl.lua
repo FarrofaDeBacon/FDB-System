@@ -9,6 +9,8 @@ local Translations = {
         item_not_exist = 'Item bestaat niet',
         too_heavy = 'Broekzakken zitten vol',
         location_not_exist = 'Locatie bestaat niet',
+        job_not_exist               = 'Job does not exist',
+        gang_not_exist              = 'Gang does not exist',
         duplicate_license = 'Dubbele Rockstar-licentie gevonden',
         no_valid_license  = 'Geen geldige Rockstar-licentie gevonden',
         not_whitelisted = 'U bent niet whitelisted voor deze server',
@@ -24,6 +26,8 @@ local Translations = {
         server_opened = 'De server is geopend',
         server_closed = 'De server is gesloten',
         teleported_waypoint = 'Geteleporteerd naar bestemming',
+        job_set = 'Job set successfully',
+        gang_set = 'Gang set successfully',
     },
     info = {
         received_paycheck = 'Je hebt je salaris ontvangen van $%{value}',
@@ -39,7 +43,7 @@ local Translations = {
     },
     command = {
         tp = {
-            help = 'Teleport naar speler of coördinaten (Alleen Admin)',
+            help = 'Teleport naar speler of coÃ¶rdinaten (Alleen Admin)',
             params = {
                 x = { name = 'id/x', help = 'ID van speler of X-positie'},
                 y = { name = 'y', help = 'Y positie'},

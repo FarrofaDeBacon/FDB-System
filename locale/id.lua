@@ -9,6 +9,8 @@ local Translations = {
         item_not_exist = 'Barang tidak tersedia',
         too_heavy = 'Inventory terlalu penuh',
         location_not_exist = 'Lokasi tidak tersedia',
+        job_not_exist               = 'Job does not exist',
+        gang_not_exist              = 'Gang does not exist',
         duplicate_license = 'Ditemukan Lisensi Rockstar Duplikat',
         no_valid_license  = 'Tidak Ditemukan Lisensi Rockstar yang Valid',
         not_whitelisted = 'Kamu tidak masuk daftar putih untuk server ini',
@@ -24,6 +26,8 @@ local Translations = {
         server_opened = 'Server telah dibuka',
         server_closed = 'Server telah ditutup',
         teleported_waypoint = 'Diteleportasi ke Titik Arah.',
+        job_set = 'Job set successfully',
+        gang_set = 'Gang set successfully',
     },
     info = {
         received_paycheck = 'Kamu telah menerima gaji $%{value}',

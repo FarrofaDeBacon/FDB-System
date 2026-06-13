@@ -41,21 +41,11 @@ end
 ---@param speed number - The speed at which the entity should turn
 ---@return number - The time at which the entity was looked at
 function RSGCore.Functions.LookAtEntity(entity, timeout, speed)
-    local involved = GetInvokingResource()
-    if not DoesEntityExist(entity) then
-        turnPromise:reject(involved .. ' :^1  Entity does not exist')
-        return turnPromise.value
-    end
-    if not type(entity) == 'number' then
-        turnPromise:reject(involved .. ' :^1  Entity must be a number')
-        return turnPromise.value
-    end
-    if not type(speed) == 'number' then
-        turnPromise:reject(involved .. ' :^1  Speed must be a number')
-        return turnPromise.value
-    end
-    if speed > 5.0 then speed = 5.0 end
-    if timeout > 5000 then timeout = 5000 end
+    if not DoesEntityExist(entity) then return end
+    if type(entity) ~= 'number' then return end
+    if speed and type(speed) ~= 'number' then return end
+    if speed and speed > 5.0 then speed = 5.0 end
+    if not timeout or timeout > 5000 then timeout = 5000 end
     local ped = PlayerPedId()
     local playerPos = GetEntityCoords(ped)
     local targetPos = GetEntityCoords(entity)
@@ -659,11 +649,11 @@ function RSGCore.Functions.GetCardinalDirection(entity)
         if ((heading >= 0 and heading < 45) or (heading >= 315 and heading < 360)) then
             return 'North'
         elseif (heading >= 45 and heading < 135) then
-            return 'West'
+            return 'East'
         elseif (heading >= 135 and heading < 225) then
             return 'South'
         elseif (heading >= 225 and heading < 315) then
-            return 'East'
+            return 'West'
         end
     else
         return 'Cardinal Direction Error'

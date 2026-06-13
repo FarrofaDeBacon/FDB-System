@@ -251,7 +251,17 @@ end, 'user')
 RSGCore.Commands.Add('setjob', Lang:t('command.setjob.help'), { { name = Lang:t('command.setjob.params.id.name'), help = Lang:t('command.setjob.params.id.help') }, { name = Lang:t('command.setjob.params.job.name'), help = Lang:t('command.setjob.params.job.help') }, { name = Lang:t('command.setjob.params.grade.name'), help = Lang:t('command.setjob.params.grade.help') } }, true, function(source, args)
     local Player = RSGCore.Functions.GetPlayer(tonumber(args[1]))
     if Player then
-        Player.Functions.SetJob(tostring(args[2]), tonumber(args[3]))
+        local job = tostring(args[2])
+        local grade = tonumber(args[3])
+        if not RSGCore.Shared.Jobs[job] then
+            TriggerClientEvent('ox_lib:notify', source, {title = Lang:t('error.job_not_exist'), type = 'error', duration = 5000 })
+            return
+        end
+        if GetResourceState('rsg-multijob') == 'started' then
+            exports['rsg-multijob']:AddJobToPlayer(Player.PlayerData.citizenid, job, grade)
+        end
+        Player.Functions.SetJob(job, grade)
+        TriggerClientEvent('ox_lib:notify', source, {title = Lang:t('success.job_set'), type = 'success', duration = 5000 })
     else
         TriggerClientEvent('ox_lib:notify', source, {title = Lang:t('error.not_online'), type = 'error', duration = 5000 })
     end
@@ -267,7 +277,11 @@ end, 'user')
 RSGCore.Commands.Add('setgang', Lang:t('command.setgang.help'), { { name = Lang:t('command.setgang.params.id.name'), help = Lang:t('command.setgang.params.id.help') }, { name = Lang:t('command.setgang.params.gang.name'), help = Lang:t('command.setgang.params.gang.help') }, { name = Lang:t('command.setgang.params.grade.name'), help = Lang:t('command.setgang.params.grade.help') } }, true, function(source, args)
     local Player = RSGCore.Functions.GetPlayer(tonumber(args[1]))
     if Player then
-        Player.Functions.SetGang(tostring(args[2]), tonumber(args[3]))
+        if Player.Functions.SetGang(tostring(args[2]), tonumber(args[3])) then
+            TriggerClientEvent('ox_lib:notify', source, {title = Lang:t('success.gang_set'), type = 'success', duration = 5000 })
+        else
+            TriggerClientEvent('ox_lib:notify', source, {title = Lang:t('error.gang_not_exist'), type = 'error', duration = 5000 })
+        end
     else
         TriggerClientEvent('ox_lib:notify', source, {title = Lang:t('error.not_online'), type = 'error', duration = 5000 })
     end
