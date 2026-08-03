@@ -186,10 +186,12 @@ RegisterNetEvent('FDBCore:Command:ShowMe3D', function(senderId, msg)
     local sender = GetPlayerFromServerId(senderId)
     CreateThread(function()
         local displayTime = 10000 + GetGameTimer()
+        local targetPed = GetPlayerPed(sender)
         while displayTime > GetGameTimer() do
-            local targetPed = GetPlayerPed(sender)
-            local tCoords = GetEntityCoords(targetPed)
-            Draw3DText(tCoords, msg)
+            if DoesEntityExist(targetPed) then
+                local tCoords = GetEntityCoords(targetPed)
+                Draw3DText(tCoords, msg)
+            end
             Wait(0)
         end
     end)

@@ -5,9 +5,10 @@ CreateThread(function()
     local active = false
     local timer = 0
     while true do 
-        Wait(0)
-
-        if FDBCore.Config.Server.PVP then
+        if not FDBCore.Config.Server.PVP then
+            Wait(1000)
+        else
+            Wait(0)
             if active == false and not IsPedOnMount(cache.ped) and not IsPedInAnyVehicle(cache.ped) then
                 SetRelationshipBetweenGroups(3, `PLAYER`, `PLAYER`)
             else
