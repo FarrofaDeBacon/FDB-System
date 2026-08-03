@@ -132,20 +132,34 @@ end, 'admin')
 -- Permissions
 
 FDBCore.Commands.Add('addpermission', Lang:t('command.addpermission.help'), { { name = Lang:t('command.addpermission.params.id.name'), help = Lang:t('command.addpermission.params.id.help') }, { name = Lang:t('command.addpermission.params.permission.name'), help = Lang:t('command.addpermission.params.permission.help') } }, true, function(source, args)
-    local Player = FDBCore.Functions.GetPlayer(tonumber(args[1]))
+    local targetId = tonumber(args[1])
+    if not targetId or targetId <= 0 then
+        TriggerClientEvent('ox_lib:notify', source, {title = Lang:t('error.not_online'), type = 'error', duration = 5000 })
+        return
+    end
+    local Player = FDBCore.Functions.GetPlayer(targetId)
     local permission = tostring(args[2]):lower()
     if Player then
         FDBCore.Functions.AddPermission(Player.PlayerData.source, permission)
+        local executorName = source == 0 and 'Console' or GetPlayerName(source)
+        TriggerEvent('fdb-log:server:CreateLog', 'admin', 'AddPermission', 'green', ('**%s** granted permission **%s** to **%s** (ID: %d)'):format(executorName, permission, GetPlayerName(Player.PlayerData.source), Player.PlayerData.source))
     else
         TriggerClientEvent('ox_lib:notify', source, {title = Lang:t('error.not_online'), type = 'error', duration = 5000 })
     end
 end, 'god')
 
 FDBCore.Commands.Add('removepermission', Lang:t('command.removepermission.help'), { { name = Lang:t('command.removepermission.params.id.name'), help = Lang:t('command.removepermission.params.id.help') }, { name = Lang:t('command.removepermission.params.permission.name'), help = Lang:t('command.removepermission.params.permission.help') } }, true, function(source, args)
-    local Player = FDBCore.Functions.GetPlayer(tonumber(args[1]))
+    local targetId = tonumber(args[1])
+    if not targetId or targetId <= 0 then
+        TriggerClientEvent('ox_lib:notify', source, {title = Lang:t('error.not_online'), type = 'error', duration = 5000 })
+        return
+    end
+    local Player = FDBCore.Functions.GetPlayer(targetId)
     local permission = tostring(args[2]):lower()
     if Player then
         FDBCore.Functions.RemovePermission(Player.PlayerData.source, permission)
+        local executorName = source == 0 and 'Console' or GetPlayerName(source)
+        TriggerEvent('fdb-log:server:CreateLog', 'admin', 'RemovePermission', 'red', ('**%s** revoked permission **%s** from **%s** (ID: %d)'):format(executorName, permission, GetPlayerName(Player.PlayerData.source), Player.PlayerData.source))
     else
         TriggerClientEvent('ox_lib:notify', source, {title = Lang:t('error.not_online'), type = 'error', duration = 5000 })
     end
