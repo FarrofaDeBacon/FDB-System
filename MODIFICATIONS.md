@@ -66,7 +66,8 @@ Este documento registra todas as alterações estruturais, correções de segura
 - **Comandos de Atribuição de Job e Gangue (`setjob` / `setgang`)**:
   - Restritos estritamente ao nível de acesso **`admin`** (`FDBCore.Commands.Add('setjob', ..., 'admin')` / `FDBCore.Commands.Add('setgang', ..., 'admin')`).
   - Validação de existência de Job/Gangue (`FDBCore.Shared.Jobs[job]` / `FDBCore.Shared.Gangs[gang]`).
-  - Fallback automático seguro para `level = 0` ('No Grades') em `Player.Functions.SetJob`/`SetGang` caso a grade informada não exista no dicionário. (Commit hash: `30a6cb92d16d4eb381edbc652da4b10ef2936bfd`).
+  - Fallback automático seguro para `level = 0` ('No Grades') em `Player.Functions.SetJob`/`SetGang` caso a grade informada não exista no dicionário.
+  - *Nota de Arquitetura*: Os comandos `/setjob` e `/setgang` utilizam permissão genérica de administração (`'admin'`), sem hierarquia por facção individual no core. O gerenciamento de hierarquias de chefia e contratações in-game (ex.: chefe de polícia promovendo subordinados) é intencionalmente delegado aos recursos companheiros de bossmenu. (Commit hash: `30a6cb92d16d4eb381edbc652da4b10ef2936bfd`).
 
 ---
 
