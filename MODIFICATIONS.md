@@ -13,8 +13,8 @@ Este documento registra todas as alterações estruturais, correções de segura
 | **Fase 2** | Camada de Banco de Dados (`oxmysql`) | ✅ APROVADA | Runner de migração com `pcall`, DDL idempotente, índices em `players`. |
 | **Fase 3** | Eventos, Exports & Rebrand | ✅ APROVADA | Rebrand literal RSG→FDB em todo o repo. Exports nativos preservados. |
 | **Fase 4** | Inventário & Concorrência | ✅ APROVADA | Prevenção de duplicação/perda de estado, travas anti-NaN/infinito e lock coalescente de I/O em `Player.Save`. |
-| **Fase 5** | Jobs, Gangs & Permissões | ⏳ PRÓXIMA | Hierarquias validadas com permissão de quem chama. |
-| **Fase 6** | Performance & StateBags | ⏳ PENDENTE | Redução de broadcast e otimização de loops `Citizen.Wait`. |
+| **Fase 5** | Jobs, Gangs & Permissões | ✅ APROVADA | Validação de target online, auditoria via `fdb-log`, permissão `'god'` para `addpermission`/`removepermission` e `'admin'` para `/setjob`/`/setgang`. (Commit: `30a6cb92d16d4eb381edbc652da4b10ef2936bfd`) |
+| **Fase 6** | Performance & StateBags | ⏳ PRÓXIMA | Redução de broadcast e otimização de loops `Citizen.Wait`. |
 | **Fase 7** | Documentação Final & Wiki | ⏳ PENDENTE | READMEs por módulo e Wiki central de exports. |
 
 ---
@@ -57,6 +57,16 @@ Este documento registra todas as alterações estruturais, correções de segura
 - **Validações Sanitizadas Anti-NaN e Anti-Infinito**:
   - Adicionadas checagens de `not amount or amount ~= amount or amount == math.huge or amount == -math.huge or amount < 0` em `AddMoney`, `RemoveMoney`, `SetMoney`, `AddRep` e `RemoveRep`.
   - Proteção de saldo mínimo em `AddRep` impedindo reputações negativas (`math.max(0, currentRep + addAmount)`).
+
+### 5. Jobs, Gangs & Permissões (`FDB-Core/server/commands.lua` & `functions.lua`)
+- **Comandos de Permissão (`addpermission` / `removepermission`)**:
+  - Restritos estritamente ao nível de acesso **`god`** (`FDBCore.Commands.Add(..., 'god')`).
+  - Adicionada validação de target online (`targetId <= 0` ou `Player == nil`).
+  - Integrado log de auditoria em `fdb-log:server:CreateLog` registrando concessões (verde) e revogações (vermelho), tratando `source == 0` como `'Console'`.
+- **Comandos de Atribuição de Job e Gangue (`setjob` / `setgang`)**:
+  - Restritos estritamente ao nível de acesso **`admin`** (`FDBCore.Commands.Add('setjob', ..., 'admin')` / `FDBCore.Commands.Add('setgang', ..., 'admin')`).
+  - Validação de existência de Job/Gangue (`FDBCore.Shared.Jobs[job]` / `FDBCore.Shared.Gangs[gang]`).
+  - Fallback automático seguro para `level = 0` ('No Grades') em `Player.Functions.SetJob`/`SetGang` caso a grade informada não exista no dicionário. (Commit hash: `30a6cb92d16d4eb381edbc652da4b10ef2936bfd`).
 
 ---
 
