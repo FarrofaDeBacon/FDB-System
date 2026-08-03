@@ -12,8 +12,8 @@ Este documento registra todas as alterações estruturais, correções de segura
 | **Fase 1.5** | Auditoria de Recursos Companheiros | 📅 AGENDADA | Escopo para `rsg-inventory`, `rsg-banking` e lojas. |
 | **Fase 2** | Camada de Banco de Dados (`oxmysql`) | ✅ APROVADA | Runner de migração com `pcall`, DDL idempotente, índices em `players`. |
 | **Fase 3** | Eventos, Exports & Rebrand | ✅ APROVADA | Rebrand literal RSG→FDB em todo o repo. Exports nativos preservados. |
-| **Fase 4** | Inventário & Concorrência | ⏳ PRÓXIMA | Prevenção de duplicação/perda de itens e validações server-side. |
-| **Fase 5** | Jobs, Gangs & Permissões | ⏳ PENDENTE | Hierarquias validadas com permissão de quem chama. |
+| **Fase 4** | Inventário & Concorrência | ✅ APROVADA | Prevenção de duplicação/perda de estado, travas anti-NaN/infinito e lock coalescente de I/O em `Player.Save`. |
+| **Fase 5** | Jobs, Gangs & Permissões | ⏳ PRÓXIMA | Hierarquias validadas com permissão de quem chama. |
 | **Fase 6** | Performance & StateBags | ⏳ PENDENTE | Redução de broadcast e otimização de loops `Citizen.Wait`. |
 | **Fase 7** | Documentação Final & Wiki | ⏳ PENDENTE | READMEs por módulo e Wiki central de exports. |
 
@@ -47,6 +47,16 @@ Este documento registra todas as alterações estruturais, correções de segura
   - Atualizado o prefixo de eventos: `RSG:` / `RSGCore:` ➔ `FDB:` / `FDBCore:`.
   - Atualizado o nome do recurso base: `rsg-core` ➔ `fdb-core`.
   - **Preservação de Exports Nativos**: Todos os exports públicos que não continham `RSG` no nome original (`AddJob`, `AddItem`, `RemoveJob`, `SetMethod`, `SetField`, `ExploitBan`, `GetCoreObject`, `DrawText`, `createPrompt`, etc.) foram mantidos idênticos sem alteração ou criação de namespace hierárquico.
+
+### 4. Estado do Player, Dinheiro & Concorrência de I/O (`FDB-Core/server/player.lua`)
+- **Lock Coalescente em `FDBCore.Player.Save`**:
+  - As flags `saveInProgress` e `savePending` são inicializadas como `false` em `CreatePlayer`.
+  - Se um novo pedido de save ocorrer enquanto uma query de I/O já estiver em andamento, o estado marca `savePending = true` e evita queries simultâneas no pool `oxmysql`.
+  - No término do callback, o runner verifica se o player ainda existe em memória e, se `savePending` for verdadeiro, auto-dispara a nova gravação com o snapshot mais recente.
+  - O fluxo no `playerDropped` (disconnect) passa exatamente pelo mesmo `Player.Functions.Save()` -> `FDBCore.Player.Save(source)`, ficando totalmente coberto pela trava de coalescimento.
+- **Validações Sanitizadas Anti-NaN e Anti-Infinito**:
+  - Adicionadas checagens de `not amount or amount ~= amount or amount == math.huge or amount == -math.huge or amount < 0` em `AddMoney`, `RemoveMoney`, `SetMoney`, `AddRep` e `RemoveRep`.
+  - Proteção de saldo mínimo em `AddRep` impedindo reputações negativas (`math.max(0, currentRep + addAmount)`).
 
 ---
 
