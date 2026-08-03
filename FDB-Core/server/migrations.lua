@@ -3,15 +3,24 @@
 
 local function RunDatabaseMigrations()
     MySQL.ready(function()
-        -- Ensure schema_migrations table exists
-        MySQL.query.await([[
-            CREATE TABLE IF NOT EXISTS `schema_migrations` (
-                `id` INT AUTO_INCREMENT PRIMARY KEY,
-                `version` VARCHAR(50) NOT NULL UNIQUE,
-                `name` VARCHAR(255) NOT NULL,
-                `executed_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-        ]])
+        local resourceName = GetCurrentResourceName()
+
+        -- Ensure schema_migrations table exists safely
+        local initOk, initErr = pcall(function()
+            MySQL.query.await([[
+                CREATE TABLE IF NOT EXISTS `schema_migrations` (
+                    `id` INT AUTO_INCREMENT PRIMARY KEY,
+                    `version` VARCHAR(50) NOT NULL UNIQUE,
+                    `name` VARCHAR(255) NOT NULL,
+                    `executed_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            ]])
+        end)
+
+        if not initOk then
+            RSGCore.ShowError(resourceName, ('[MIGRATION FATAL] Failed to initialize schema_migrations table: %s'):format(to_string(initErr)))
+            return
+        end
 
         local migrations = {
             { version = '001', name = '001_create_migrations_table_and_core_indexes.sql' },
@@ -19,18 +28,59 @@ local function RunDatabaseMigrations()
         }
 
         for _, mig in ipairs(migrations) do
-            local executed = MySQL.scalar.await('SELECT 1 FROM schema_migrations WHERE version = ?', { mig.version })
+            local executed = false
+            local checkOk, checkErr = pcall(function()
+                executed = MySQL.scalar.await('SELECT 1 FROM schema_migrations WHERE version = ?', { mig.version })
+            end)
+
+            if not checkOk then
+                RSGCore.ShowError(resourceName, ('[MIGRATION ERROR] Failed checking status of version %s: %s'):format(mig.version, tostring(checkErr)))
+                return
+            end
+
             if not executed then
-                local resourceName = GetCurrentResourceName()
                 local fileContent = LoadResourceFile(resourceName, 'database/migrations/' .. mig.name)
-                if fileContent then
-                    -- Execute SQL migration
-                    MySQL.query.await(fileContent)
-                    -- Record migration execution
-                    MySQL.insert.await('INSERT INTO schema_migrations (version, name) VALUES (?, ?)', { mig.version, mig.name })
-                    RSGCore.ShowSuccess(resourceName, ('Executed Migration [%s]: %s'):format(mig.version, mig.name))
+                if not fileContent or fileContent:match('^%s*$') then
+                    RSGCore.ShowError(resourceName, ('[MIGRATION ERROR] Migration file missing or empty: database/migrations/%s'):format(mig.name))
+                    return
+                end
+
+                -- Split migration by semicolon to safely support multi-statement files
+                local statements = {}
+                for statement in fileContent:gmatch('[^;]+') do
+                    local trimmed = statement:match('^%s*(.-)%s*$')
+                    if trimmed and #trimmed > 0 and not trimmed:match('^%-%-') then
+                        table.insert(statements, trimmed)
+                    end
+                end
+
+                local migrationSuccess = true
+                for idx, stmt in ipairs(statements) do
+                    local stmtOk, stmtErr = pcall(function()
+                        MySQL.query.await(stmt)
+                    end)
+
+                    if not stmtOk then
+                        RSGCore.ShowError(resourceName, ('[MIGRATION ERROR] Failed applying %s (statement %d): %s'):format(mig.name, idx, tostring(stmtErr)))
+                        migrationSuccess = false
+                        break
+                    end
+                end
+
+                if migrationSuccess then
+                    local recordOk, recordErr = pcall(function()
+                        MySQL.insert.await('INSERT INTO schema_migrations (version, name) VALUES (?, ?)', { mig.version, mig.name })
+                    end)
+
+                    if recordOk then
+                        RSGCore.ShowSuccess(resourceName, ('Executed Migration [%s]: %s'):format(mig.version, mig.name))
+                    else
+                        RSGCore.ShowError(resourceName, ('[MIGRATION ERROR] Applied %s but failed to record status: %s'):format(mig.name, tostring(recordErr)))
+                        return
+                    end
                 else
-                    RSGCore.ShowError(resourceName, ('Failed to load migration file: database/migrations/%s'):format(mig.name))
+                    RSGCore.ShowError(resourceName, ('[MIGRATION HALTED] Stopped execution at migration [%s] due to error'):format(mig.version))
+                    return
                 end
             end
         end
