@@ -41,8 +41,10 @@ if readyFunction ~= nil then
         end
 
         if not columnsExist["weight"] or not columnsExist["slots"] then
-            MySQL.query.await('ALTER TABLE players ADD COLUMN weight INT DEFAULT '..RSGCore.Config.Player.PlayerDefaults.weight..';')
-            MySQL.query.await('ALTER TABLE players ADD COLUMN slots INT DEFAULT '..RSGCore.Config.Player.PlayerDefaults.slots..';')
+            local defaultWeight = tonumber(RSGCore.Config.Player.PlayerDefaults.weight) or 100000
+            local defaultSlots = tonumber(RSGCore.Config.Player.PlayerDefaults.slots) or 40
+            MySQL.query.await('ALTER TABLE players ADD COLUMN weight INT DEFAULT ?;', { defaultWeight })
+            MySQL.query.await('ALTER TABLE players ADD COLUMN slots INT DEFAULT ?;', { defaultSlots })
             RSGCore.ShowSuccess(GetCurrentResourceName(), 'Added weight and slots columns to players table')
         end
     end)
