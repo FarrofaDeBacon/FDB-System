@@ -25,24 +25,24 @@ local function tPrint(tbl, indent)
     end
 end
 
-RegisterServerEvent('RSGCore:DebugSomething', function(tbl, indent, resource)
+RegisterServerEvent('FDBCore:DebugSomething', function(tbl, indent, resource)
     local src = source
     if src and src ~= 0 then
-        if not RSGCore.Functions.HasPermission(src, 'admin') then return end
+        if not FDBCore.Functions.HasPermission(src, 'admin') then return end
     end
-    print(('\x1b[4m\x1b[36m[ %s : DEBUG]\x1b[0m'):format(resource or 'RSGCore'))
+    print(('\x1b[4m\x1b[36m[ %s : DEBUG]\x1b[0m'):format(resource or 'FDBCore'))
     tPrint(tbl, indent)
     print('\x1b[4m\x1b[36m[ END DEBUG ]\x1b[0m')
 end)
 
-function RSGCore.Debug(tbl, indent)
-    TriggerEvent('RSGCore:DebugSomething', tbl, indent, GetInvokingResource() or 'qb-core')
+function FDBCore.Debug(tbl, indent)
+    TriggerEvent('FDBCore:DebugSomething', tbl, indent, GetInvokingResource() or 'qb-core')
 end
 
-function RSGCore.ShowError(resource, msg)
+function FDBCore.ShowError(resource, msg)
     print('\x1b[31m[' .. resource .. ':ERROR]\x1b[0m ' .. msg)
 end
 
-function RSGCore.ShowSuccess(resource, msg)
+function FDBCore.ShowSuccess(resource, msg)
     print('\x1b[32m[' .. resource .. ':LOG]\x1b[0m ' .. msg)
 end

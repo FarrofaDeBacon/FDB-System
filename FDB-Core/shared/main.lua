@@ -1,9 +1,9 @@
-RSGShared = RSGShared or {}
+FDBShared = FDBShared or {}
 
 local StringCharset = {}
 local NumberCharset = {}
 
-RSGShared.StarterItems = {
+FDBShared.StarterItems = {
     bread = { amount = 5, item = 'bread' },
     water = { amount = 5, item = 'water' },
 }
@@ -12,17 +12,17 @@ for i = 48, 57 do NumberCharset[#NumberCharset + 1] = string.char(i) end
 for i = 65, 90 do StringCharset[#StringCharset + 1] = string.char(i) end
 for i = 97, 122 do StringCharset[#StringCharset + 1] = string.char(i) end
 
-function RSGShared.RandomStr(length)
+function FDBShared.RandomStr(length)
     if length <= 0 then return '' end
-    return RSGShared.RandomStr(length - 1) .. StringCharset[math.random(1, #StringCharset)]
+    return FDBShared.RandomStr(length - 1) .. StringCharset[math.random(1, #StringCharset)]
 end
 
-function RSGShared.RandomInt(length)
+function FDBShared.RandomInt(length)
     if length <= 0 then return '' end
-    return RSGShared.RandomInt(length - 1) .. NumberCharset[math.random(1, #NumberCharset)]
+    return FDBShared.RandomInt(length - 1) .. NumberCharset[math.random(1, #NumberCharset)]
 end
 
-function RSGShared.SplitStr(str, delimiter)
+function FDBShared.SplitStr(str, delimiter)
     local result = {}
     local from = 1
     local delim_from, delim_to = string.find(str, delimiter, from)
@@ -35,39 +35,39 @@ function RSGShared.SplitStr(str, delimiter)
     return result
 end
 
-function RSGShared.Trim(value)
+function FDBShared.Trim(value)
     if not value then return nil end
     return (string.gsub(value, '^%s*(.-)%s*$', '%1'))
 end
 
-function RSGShared.FirstToUpper(value)
+function FDBShared.FirstToUpper(value)
     if not value then return nil end
     return (value:gsub("^%l", string.upper))
 end
 
-function RSGShared.Round(value, numDecimalPlaces)
+function FDBShared.Round(value, numDecimalPlaces)
     if not numDecimalPlaces then return math.floor(value + 0.5) end
     local power = 10 ^ numDecimalPlaces
     return math.floor((value * power) + 0.5) / (power)
 end
 
-function RSGShared.ChangeVehicleExtra(vehicle, extra, enable)
+function FDBShared.ChangeVehicleExtra(vehicle, extra, enable)
     if DoesExtraExist(vehicle, extra) then
         if enable then
             SetVehicleExtra(vehicle, extra, false)
             if not IsVehicleExtraTurnedOn(vehicle, extra) then
-                RSGShared.ChangeVehicleExtra(vehicle, extra, enable)
+                FDBShared.ChangeVehicleExtra(vehicle, extra, enable)
             end
         else
             SetVehicleExtra(vehicle, extra, true)
             if IsVehicleExtraTurnedOn(vehicle, extra) then
-                RSGShared.ChangeVehicleExtra(vehicle, extra, enable)
+                FDBShared.ChangeVehicleExtra(vehicle, extra, enable)
             end
         end
     end
 end
 
-function RSGShared.SetDefaultVehicleExtras(vehicle, config)
+function FDBShared.SetDefaultVehicleExtras(vehicle, config)
     -- Clear Extras
     for i = 1, 20 do
         if DoesExtraExist(vehicle, i) then
@@ -76,11 +76,11 @@ function RSGShared.SetDefaultVehicleExtras(vehicle, config)
     end
 
     for id, enabled in pairs(config) do
-        RSGShared.ChangeVehicleExtra(vehicle, tonumber(id), type(enabled) == 'boolean' and enabled or true)
+        FDBShared.ChangeVehicleExtra(vehicle, tonumber(id), type(enabled) == 'boolean' and enabled or true)
     end
 end
 
-RSGShared.MaleNoGloves = {
+FDBShared.MaleNoGloves = {
     [0] = true,
     [1] = true,
     [2] = true,
@@ -118,7 +118,7 @@ RSGShared.MaleNoGloves = {
     [132] = true
 }
 
-RSGShared.FemaleNoGloves = {
+FDBShared.FemaleNoGloves = {
     [0] = true,
     [1] = true,
     [2] = true,
@@ -162,5 +162,5 @@ RSGShared.FemaleNoGloves = {
 }
 
 exports('GetWeapons', function()
-    return RSGShared.Weapons
+    return FDBShared.Weapons
 end)

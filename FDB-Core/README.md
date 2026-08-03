@@ -1,9 +1,9 @@
-# RSG-Core Premium Fork
+# FDB-Core Premium Fork
 
-[![CI](https://github.com/Rexshack-RedM/rsg-core/actions/workflows/ci.yml/badge.svg)](https://github.com/Rexshack-RedM/rsg-core/actions)
+[![CI](https://github.com/Rexshack-RedM/fdb-core/actions/workflows/ci.yml/badge.svg)](https://github.com/Rexshack-RedM/fdb-core/actions)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
-An enterprise-grade, server-authoritative RedM framework derived from RSG-Core, focused on extreme code quality, strict security validation, optimized database execution, and comprehensive documentation.
+An enterprise-grade, server-authoritative RedM framework derived from FDB-Core, focused on extreme code quality, strict security validation, optimized database execution, and comprehensive documentation.
 
 ---
 
@@ -11,21 +11,21 @@ An enterprise-grade, server-authoritative RedM framework derived from RSG-Core, 
 
 - **Server-Authoritative**: All currency, inventory, job, and permission mutations are strictly validated on the server.
 - **Async Database Layer**: Exclusively utilizes `oxmysql` with non-blocking promises and callbacks.
-- **Standardized Conventions**: Events use `RSG:<Module>:<Action>` and exports use `RSG.<Module>.<Action>`.
+- **Standardized Conventions**: Events use `FDB:<Module>:<Action>` and exports use `FDB.<Module>.<Action>`.
 - **Automated CI**: Built-in syntax and lint validation on every push and pull request.
 
 ---
 
 ## Installation
 
-1. Clone this repository into your server's `resources/[framework]/rsg-core` folder:
+1. Clone this repository into your server's `resources/[framework]/fdb-core` folder:
    ```bash
-   git clone <YOUR_FORK_URL> rsg-core
+   git clone <YOUR_FORK_URL> fdb-core
    ```
-2. Ensure `oxmysql` is started prior to `rsg-core` in your `server.cfg`:
+2. Ensure `oxmysql` is started prior to `fdb-core` in your `server.cfg`:
    ```cfg
    ensure oxmysql
-   ensure rsg-core
+   ensure fdb-core
    ```
 3. Import the required database schema into MySQL.
 

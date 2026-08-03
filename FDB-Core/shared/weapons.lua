@@ -1,5 +1,5 @@
-RSGShared = RSGShared or {}
-RSGShared.Weapons = {
+FDBShared = FDBShared or {}
+FDBShared.Weapons = {
     -- revolver
     [`weapon_revolver_cattleman`]              = { name = 'weapon_revolver_cattleman',              label = 'Cattleman Revolver',                 weapontype = 'Revolver',     ammotype = 'AMMO_REVOLVER', damagereason = 'Placeholder' },
     [`weapon_revolver_cattleman_mexican`]      = { name = 'weapon_revolver_cattleman_mexican',      label = 'Cattleman Mexican Revolver',         weapontype = 'Revolver',     ammotype = 'AMMO_REVOLVER', damagereason = 'Placeholder' },

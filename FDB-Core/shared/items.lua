@@ -1,5 +1,5 @@
-RSGShared = RSGShared or {}
-RSGShared.Items = {
+FDBShared = FDBShared or {}
+FDBShared.Items = {
 
     -----------------------------------------------
     -- YOUR CUSTOM ITEMS

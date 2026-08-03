@@ -1,46 +1,46 @@
-RSGCore.Functions = {}
+FDBCore.Functions = {}
 
 -- Callbacks
 
-function RSGCore.Functions.CreateClientCallback(name, cb)
-    RSGCore.ClientCallbacks[name] = cb
+function FDBCore.Functions.CreateClientCallback(name, cb)
+    FDBCore.ClientCallbacks[name] = cb
 end
 
-function RSGCore.Functions.TriggerClientCallback(name, cb, ...)
-    if not RSGCore.ClientCallbacks[name] then return end
-    RSGCore.ClientCallbacks[name](cb, ...)
+function FDBCore.Functions.TriggerClientCallback(name, cb, ...)
+    if not FDBCore.ClientCallbacks[name] then return end
+    FDBCore.ClientCallbacks[name](cb, ...)
 end
 
-function RSGCore.Functions.TriggerCallback(name, cb, ...)
-    RSGCore.ServerCallbacks[name] = cb
-    TriggerServerEvent('RSGCore:Server:TriggerCallback', name, ...)
+function FDBCore.Functions.TriggerCallback(name, cb, ...)
+    FDBCore.ServerCallbacks[name] = cb
+    TriggerServerEvent('FDBCore:Server:TriggerCallback', name, ...)
 end
 
-function RSGCore.Debug(resource, obj, depth)
-    TriggerServerEvent('RSGCore:DebugSomething', resource, obj, depth)
+function FDBCore.Debug(resource, obj, depth)
+    TriggerServerEvent('FDBCore:DebugSomething', resource, obj, depth)
 end
 
 -- Player
 
-function RSGCore.Functions.GetPlayerData(cb)
-    if not cb then return RSGCore.PlayerData end
-    cb(RSGCore.PlayerData)
+function FDBCore.Functions.GetPlayerData(cb)
+    if not cb then return FDBCore.PlayerData end
+    cb(FDBCore.PlayerData)
 end
 
-function RSGCore.Functions.GetCoords(entity)
+function FDBCore.Functions.GetCoords(entity)
     local coords = GetEntityCoords(entity)
     return vector4(coords.x, coords.y, coords.z, GetEntityHeading(entity))
 end
 
-function RSGCore.Functions.HasItem(items, amount)
-    return exports['rsg-inventory']:HasItem(items, amount)
+function FDBCore.Functions.HasItem(items, amount)
+    return exports['fdb-inventory']:HasItem(items, amount)
 end
 
 ---@param entity number - The entity to look at
 ---@param timeout number - The time in milliseconds before the function times out
 ---@param speed number - The speed at which the entity should turn
 ---@return number - The time at which the entity was looked at
-function RSGCore.Functions.LookAtEntity(entity, timeout, speed)
+function FDBCore.Functions.LookAtEntity(entity, timeout, speed)
     if not DoesEntityExist(entity) then return end
     if type(entity) ~= 'number' then return end
     if speed and type(speed) ~= 'number' then return end
@@ -85,22 +85,22 @@ end
 --- @param duration number - The duration of the animation in milliseconds. -1 will play the animation indefinitely
 --- @param upperbodyOnly boolean - If true, the animation will only affect the upper body of the ped
 --- @return number - The timestamp indicating when the animation concluded. For animations set to loop indefinitely, this will still return the maximum duration of the animation.
-function RSGCore.Functions.PlayAnim(animDict, animName, upperbodyOnly, duration)
+function FDBCore.Functions.PlayAnim(animDict, animName, upperbodyOnly, duration)
     local flags = upperbodyOnly and 16 or 0
     local runTime = duration or -1
     lib.playAnim(cache.ped, animDict, animName, 8.0, 3.0, runTime, flags, 0.0, false, false, true)
 end
 
-function RSGCore.Functions.IsWearingGloves()
+function FDBCore.Functions.IsWearingGloves()
     local ped = PlayerPedId()
     local armIndex = GetPedDrawableVariation(ped, 3)
     local model = GetEntityModel(ped)
     if model == `mp_m_freemode_01` then
-        if RSGCore.Shared.MaleNoGloves[armIndex] then
+        if FDBCore.Shared.MaleNoGloves[armIndex] then
             return false
         end
     else
-        if RSGCore.Shared.FemaleNoGloves[armIndex] then
+        if FDBCore.Shared.FemaleNoGloves[armIndex] then
             return false
         end
     end
@@ -109,19 +109,19 @@ end
 
 -- World Getters
 
-function RSGCore.Functions.GetVehicles()
+function FDBCore.Functions.GetVehicles()
     return GetGamePool('CVehicle')
 end
 
-function RSGCore.Functions.GetObjects()
+function FDBCore.Functions.GetObjects()
     return GetGamePool('CObject')
 end
 
-function RSGCore.Functions.GetPlayers()
+function FDBCore.Functions.GetPlayers()
     return GetActivePlayers()
 end
 
-function RSGCore.Functions.GetPlayersFromCoords(coords, distance)
+function FDBCore.Functions.GetPlayersFromCoords(coords, distance)
     local players = GetActivePlayers()
     local ped = PlayerPedId()
     if coords then
@@ -141,14 +141,14 @@ function RSGCore.Functions.GetPlayersFromCoords(coords, distance)
     return closePlayers
 end
 
-function RSGCore.Functions.GetClosestPlayer(coords)
+function FDBCore.Functions.GetClosestPlayer(coords)
     local ped = PlayerPedId()
     if coords then
         coords = type(coords) == 'table' and vec3(coords.x, coords.y, coords.z) or coords
     else
         coords = GetEntityCoords(ped)
     end
-    local closestPlayers = RSGCore.Functions.GetPlayersFromCoords(coords)
+    local closestPlayers = FDBCore.Functions.GetPlayersFromCoords(coords)
     local closestDistance = -1
     local closestPlayer = -1
     for i = 1, #closestPlayers, 1 do
@@ -165,7 +165,7 @@ function RSGCore.Functions.GetClosestPlayer(coords)
     return closestPlayer, closestDistance
 end
 
-function RSGCore.Functions.GetPeds(ignoreList)
+function FDBCore.Functions.GetPeds(ignoreList)
     local pedPool = GetGamePool('CPed')
     local peds = {}
     local ignoreTable = {}
@@ -181,7 +181,7 @@ function RSGCore.Functions.GetPeds(ignoreList)
     return peds
 end
 
-function RSGCore.Functions.GetClosestPed(coords, ignoreList)
+function FDBCore.Functions.GetClosestPed(coords, ignoreList)
     local ped = PlayerPedId()
     if coords then
         coords = type(coords) == 'table' and vec3(coords.x, coords.y, coords.z) or coords
@@ -189,7 +189,7 @@ function RSGCore.Functions.GetClosestPed(coords, ignoreList)
         coords = GetEntityCoords(ped)
     end
     ignoreList = ignoreList or {}
-    local peds = RSGCore.Functions.GetPeds(ignoreList)
+    local peds = FDBCore.Functions.GetPeds(ignoreList)
     local closestDistance = -1
     local closestPed = -1
     for i = 1, #peds, 1 do
@@ -204,7 +204,7 @@ function RSGCore.Functions.GetClosestPed(coords, ignoreList)
     return closestPed, closestDistance
 end
 
-function RSGCore.Functions.GetClosestVehicle(coords)
+function FDBCore.Functions.GetClosestVehicle(coords)
     local ped = PlayerPedId()
     local vehicles = GetGamePool('CVehicle')
     local closestDistance = -1
@@ -226,7 +226,7 @@ function RSGCore.Functions.GetClosestVehicle(coords)
     return closestVehicle, closestDistance
 end
 
-function RSGCore.Functions.GetClosestObject(coords)
+function FDBCore.Functions.GetClosestObject(coords)
     local ped = PlayerPedId()
     local objects = GetGamePool('CObject')
     local closestDistance = -1
@@ -250,7 +250,7 @@ end
 -- Vehicle
 
 ---@deprecated use lib.requestModel from ox_lib
-RSGCore.Functions.LoadModel = lib.requestModel
+FDBCore.Functions.LoadModel = lib.requestModel
 
 ---@deprecated use qbx.spawnVehicle from modules/lib.lua
 ---@param model string|number
@@ -258,7 +258,7 @@ RSGCore.Functions.LoadModel = lib.requestModel
 ---@param coords? vector4 player position if not specified
 ---@param isnetworked? boolean defaults to true
 ---@param teleportInto boolean teleport player to driver seat if true
-function RSGCore.Functions.SpawnVehicle(model, cb, coords, isnetworked, teleportInto)
+function FDBCore.Functions.SpawnVehicle(model, cb, coords, isnetworked, teleportInto)
     local playerCoords = GetEntityCoords(cache.ped)
     local combinedCoords = vec4(playerCoords.x, playerCoords.y, playerCoords.z, GetEntityHeading(cache.ped))
     coords = type(coords) == 'table' and vec4(coords.x, coords.y, coords.z, coords.w or combinedCoords.w) or coords or combinedCoords
@@ -276,22 +276,22 @@ function RSGCore.Functions.SpawnVehicle(model, cb, coords, isnetworked, teleport
     if cb then cb(veh) end
 end
 
-function RSGCore.Functions.DeleteVehicle(vehicle)
+function FDBCore.Functions.DeleteVehicle(vehicle)
     SetEntityAsMissionEntity(vehicle, true, true)
     DeleteVehicle(vehicle)
 end
 
-function RSGCore.Functions.GetPlate(vehicle)
+function FDBCore.Functions.GetPlate(vehicle)
     if vehicle == 0 then return end
-    return RSGCore.Shared.Trim(GetVehicleNumberPlateText(vehicle))
+    return FDBCore.Shared.Trim(GetVehicleNumberPlateText(vehicle))
 end
 
-function RSGCore.Functions.GetVehicleLabel(vehicle)
+function FDBCore.Functions.GetVehicleLabel(vehicle)
     if vehicle == nil or vehicle == 0 then return end
     return GetLabelText(GetDisplayNameFromVehicleModel(GetEntityModel(vehicle)))
 end
 
-function RSGCore.Functions.GetVehicleProperties(vehicle)
+function FDBCore.Functions.GetVehicleProperties(vehicle)
     if DoesEntityExist(vehicle) then
         local pearlescentColor, wheelColor = GetVehicleExtraColours(vehicle)
 
@@ -341,14 +341,14 @@ function RSGCore.Functions.GetVehicleProperties(vehicle)
 
         return {
             model = GetEntityModel(vehicle),
-            plate = RSGCore.Functions.GetPlate(vehicle),
+            plate = FDBCore.Functions.GetPlate(vehicle),
             plateIndex = GetVehicleNumberPlateTextIndex(vehicle),
-            bodyHealth = RSGCore.Shared.Round(GetVehicleBodyHealth(vehicle), 0.1),
-            engineHealth = RSGCore.Shared.Round(GetVehicleEngineHealth(vehicle), 0.1),
-            tankHealth = RSGCore.Shared.Round(GetVehiclePetrolTankHealth(vehicle), 0.1),
-            fuelLevel = RSGCore.Shared.Round(GetVehicleFuelLevel(vehicle), 0.1),
-            dirtLevel = RSGCore.Shared.Round(GetVehicleDirtLevel(vehicle), 0.1),
-            oilLevel = RSGCore.Shared.Round(GetVehicleOilLevel(vehicle), 0.1),
+            bodyHealth = FDBCore.Shared.Round(GetVehicleBodyHealth(vehicle), 0.1),
+            engineHealth = FDBCore.Shared.Round(GetVehicleEngineHealth(vehicle), 0.1),
+            tankHealth = FDBCore.Shared.Round(GetVehiclePetrolTankHealth(vehicle), 0.1),
+            fuelLevel = FDBCore.Shared.Round(GetVehicleFuelLevel(vehicle), 0.1),
+            dirtLevel = FDBCore.Shared.Round(GetVehicleDirtLevel(vehicle), 0.1),
+            oilLevel = FDBCore.Shared.Round(GetVehicleOilLevel(vehicle), 0.1),
             color1 = colorPrimary,
             color2 = colorSecondary,
             pearlescentColor = pearlescentColor,
@@ -369,7 +369,7 @@ function RSGCore.Functions.GetVehicleProperties(vehicle)
     end
 end
 
-function RSGCore.Functions.SetVehicleProperties(vehicle, props)
+function FDBCore.Functions.SetVehicleProperties(vehicle, props)
     if DoesEntityExist(vehicle) then
         if props.extras then
             for id, enabled in pairs(props.extras) do
@@ -469,7 +469,7 @@ end
 
 -- Unused
 
-function RSGCore.Functions.DrawText(x, y, width, height, scale, r, g, b, a, text)
+function FDBCore.Functions.DrawText(x, y, width, height, scale, r, g, b, a, text)
     -- Use local function instead
     SetTextFont(4)
     SetTextScale(scale, scale)
@@ -479,7 +479,7 @@ function RSGCore.Functions.DrawText(x, y, width, height, scale, r, g, b, a, text
     EndTextCommandDisplayText(x - width / 2, y - height / 2 + 0.005)
 end
 
-function RSGCore.Functions.DrawText3D(x, y, z, text)
+function FDBCore.Functions.DrawText3D(x, y, z, text)
     -- Use local function instead
     SetTextScale(0.35, 0.35)
     SetTextFont(4)
@@ -496,9 +496,9 @@ function RSGCore.Functions.DrawText3D(x, y, z, text)
 end
 
 ---@deprecated use lib.requestAnimDict from ox_lib
-RSGCore.Functions.RequestAnimDict = lib.requestAnimDict
+FDBCore.Functions.RequestAnimDict = lib.requestAnimDict
 
-function RSGCore.Functions.GetClosestBone(entity, list)
+function FDBCore.Functions.GetClosestBone(entity, list)
     local playerCoords, bone, coords, distance = GetEntityCoords(PlayerPedId())
     for _, element in pairs(list) do
         local boneCoords = GetWorldPositionOfEntityBone(entity, element.id or element)
@@ -517,7 +517,7 @@ function RSGCore.Functions.GetClosestBone(entity, list)
     return bone, coords, distance
 end
 
-function RSGCore.Functions.GetBoneDistance(entity, boneType, boneIndex)
+function FDBCore.Functions.GetBoneDistance(entity, boneType, boneIndex)
     local bone
     if boneType == 1 then
         bone = GetPedBoneIndex(entity, boneIndex)
@@ -529,17 +529,17 @@ function RSGCore.Functions.GetBoneDistance(entity, boneType, boneIndex)
     return #(boneCoords - playerCoords)
 end
 
-function RSGCore.Functions.AttachProp(ped, model, boneId, x, y, z, xR, yR, zR, vertex)
+function FDBCore.Functions.AttachProp(ped, model, boneId, x, y, z, xR, yR, zR, vertex)
     local modelHash = type(model) == 'string' and joaat(model) or model
     local bone = GetPedBoneIndex(ped, boneId)
-    RSGCore.Functions.LoadModel(modelHash)
+    FDBCore.Functions.LoadModel(modelHash)
     local prop = CreateObject(modelHash, 1.0, 1.0, 1.0, 1, 1, 0)
     AttachEntityToEntity(prop, ped, bone, x, y, z, xR, yR, zR, 1, 1, 0, 1, not vertex and 2 or 0, 1)
     SetModelAsNoLongerNeeded(modelHash)
     return prop
 end
 
-function RSGCore.Functions.SpawnClear(coords, radius)
+function FDBCore.Functions.SpawnClear(coords, radius)
     if coords then
         coords = type(coords) == 'table' and vec3(coords.x, coords.y, coords.z) or coords
     else
@@ -559,13 +559,13 @@ function RSGCore.Functions.SpawnClear(coords, radius)
 end
 
 ---@deprecated use lib.requestAnimDict from ox_lib
-RSGCore.Functions.LoadAnimSet = lib.requestAnimSet
+FDBCore.Functions.LoadAnimSet = lib.requestAnimSet
 
 ---@deprecated use lib.requestNamedPtfxAsset from ox_lib
-RSGCore.Functions.LoadParticleDictionary = lib.requestNamedPtfxAsset
+FDBCore.Functions.LoadParticleDictionary = lib.requestNamedPtfxAsset
 
 ---@deprecated use ParticleFx natives directly
-function RSGCore.Functions.StartParticleAtCoord(dict, ptName, looped, coords, rot, scale, alpha, color, duration)    coords = type(coords) == 'table' and vec3(coords.x, coords.y, coords.z) or coords or GetEntityCoords(cache.ped)
+function FDBCore.Functions.StartParticleAtCoord(dict, ptName, looped, coords, rot, scale, alpha, color, duration)    coords = type(coords) == 'table' and vec3(coords.x, coords.y, coords.z) or coords or GetEntityCoords(cache.ped)
 
     lib.requestNamedPtfxAsset(dict)
     UseParticleFxAssetNextCall(dict)
@@ -592,7 +592,7 @@ function RSGCore.Functions.StartParticleAtCoord(dict, ptName, looped, coords, ro
 end
 
 ---@deprecated use ParticleFx natives directly
-function RSGCore.Functions.StartParticleOnEntity(dict, ptName, looped, entity, bone, offset, rot, scale, alpha, color, evolution, duration)
+function FDBCore.Functions.StartParticleOnEntity(dict, ptName, looped, entity, bone, offset, rot, scale, alpha, color, evolution, duration)
     lib.requestNamedPtfxAsset(dict)
     UseParticleFxAssetNextCall(dict)
     local particleHandle = nil
@@ -633,16 +633,16 @@ function RSGCore.Functions.StartParticleOnEntity(dict, ptName, looped, entity, b
     return particleHandle
 end
 
-function RSGCore.Functions.GetStreetNametAtCoords(coords)
+function FDBCore.Functions.GetStreetNametAtCoords(coords)
     local streetname1, streetname2 = GetStreetNameAtCoord(coords.x, coords.y, coords.z)
     return { main = GetStreetNameFromHashKey(streetname1), cross = GetStreetNameFromHashKey(streetname2) }
 end
 
-function RSGCore.Functions.GetZoneAtCoords(coords)
+function FDBCore.Functions.GetZoneAtCoords(coords)
     return GetLabelText(GetNameOfZone(coords))
 end
 
-function RSGCore.Functions.GetCardinalDirection(entity)
+function FDBCore.Functions.GetCardinalDirection(entity)
     entity = DoesEntityExist(entity) and entity or PlayerPedId()
     if DoesEntityExist(entity) then
         local heading = GetEntityHeading(entity)
@@ -660,7 +660,7 @@ function RSGCore.Functions.GetCardinalDirection(entity)
     end
 end
 
-function RSGCore.Functions.GetCurrentTime()
+function FDBCore.Functions.GetCurrentTime()
     local obj = {}
     obj.min = GetClockMinutes()
     obj.hour = GetClockHours()
@@ -676,7 +676,7 @@ function RSGCore.Functions.GetCurrentTime()
     return obj
 end
 
-function RSGCore.Functions.GetGroundZCoord(coords)
+function FDBCore.Functions.GetGroundZCoord(coords)
     if not coords then return end
 
     local retval, groundZ = GetGroundZFor_3dCoord(coords.x, coords.y, coords.z, 0)
@@ -687,7 +687,7 @@ function RSGCore.Functions.GetGroundZCoord(coords)
     end
 end
 
-function RSGCore.Functions.GetGroundHash(entity)
+function FDBCore.Functions.GetGroundHash(entity)
     local coords = GetEntityCoords(entity)
     local num = StartShapeTestCapsule(coords.x, coords.y, coords.z + 4, coords.x, coords.y, coords.z - 2.0, 1, 1, entity, 7)
     local retval, success, endCoords, surfaceNormal, materialHash, entityHit = GetShapeTestResultEx(num)

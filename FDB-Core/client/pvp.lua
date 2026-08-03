@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 local pvp = true
 
 CreateThread(function()
@@ -7,14 +7,14 @@ CreateThread(function()
     while true do 
         Wait(0)
 
-        if RSGCore.Config.Server.PVP then
+        if FDBCore.Config.Server.PVP then
             if active == false and not IsPedOnMount(cache.ped) and not IsPedInAnyVehicle(cache.ped) then
                 SetRelationshipBetweenGroups(3, `PLAYER`, `PLAYER`)
             else
                 SetRelationshipBetweenGroups(1, `PLAYER`, `PLAYER`)
             end
 
-            if IsControlJustPressed(0, RSGCore.Shared.Keybinds['E']) then
+            if IsControlJustPressed(0, FDBCore.Shared.Keybinds['E']) then
                 timer = 0
                 active = true
                 while timer < 200 do 
@@ -25,7 +25,7 @@ CreateThread(function()
                 active = false
             end
 
-            if IsControlJustPressed(0, RSGCore.Shared.Keybinds['F']) then
+            if IsControlJustPressed(0, FDBCore.Shared.Keybinds['F']) then
                 Wait(500)
                 SetRelationshipBetweenGroups(1, `PLAYER`, `PLAYER`)
                 active = false

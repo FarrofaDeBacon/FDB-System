@@ -1,14 +1,14 @@
-RSGCore = {}
-RSGCore.PlayerData = {}
-RSGCore.Config = RSGConfig
-RSGCore.Shared = RSGShared
-RSGCore.ClientCallbacks = {}
-RSGCore.ServerCallbacks = {}
+FDBCore = {}
+FDBCore.PlayerData = {}
+FDBCore.Config = FDBConfig
+FDBCore.Shared = FDBShared
+FDBCore.ClientCallbacks = {}
+FDBCore.ServerCallbacks = {}
 
 exports('GetCoreObject', function()
-    return RSGCore
+    return FDBCore
 end)
 
 -- To use this export in a script instead of manifest method
 -- Just put this line of code below at the very top of the script
--- local RSGCore = exports['rsg-core']:GetCoreObject()
+-- local FDBCore = exports['fdb-core']:GetCoreObject()

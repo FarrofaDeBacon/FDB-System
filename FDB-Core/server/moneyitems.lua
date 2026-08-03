@@ -12,7 +12,7 @@ local moneyItems = {
         cent = 'blood_cent',
     },
     gold = {
-        unit = RSGCore.Config.Money.GoldItem,
+        unit = FDBCore.Config.Money.GoldItem,
     },
 }
 
@@ -73,7 +73,7 @@ end
 ----------------------------
 
 local function handleAddMoney(src, moneytype, amount)
-    local player = RSGCore.Functions.GetPlayer(src)
+    local player = FDBCore.Functions.GetPlayer(src)
     if not player or not moneyItems[moneytype] then return end
 
     if moneytype == 'gold' then
@@ -81,7 +81,7 @@ local function handleAddMoney(src, moneytype, amount)
             player.Functions.AddItem(moneyItems.gold.unit, amount)
         end
         if Player(src).state.inv_busy then
-            TriggerClientEvent('rsg-inventory:client:updateInventory', src)
+            TriggerClientEvent('fdb-inventory:client:updateInventory', src)
         end
         return
     end
@@ -96,12 +96,12 @@ local function handleAddMoney(src, moneytype, amount)
     end
 
     if Player(src).state.inv_busy then
-        TriggerClientEvent('rsg-inventory:client:updateInventory', src)
+        TriggerClientEvent('fdb-inventory:client:updateInventory', src)
     end
 end
 
 local function handleRemoveMoney(src, moneytype, amount)
-    local player = RSGCore.Functions.GetPlayer(src)
+    local player = FDBCore.Functions.GetPlayer(src)
     if not player or not moneyItems[moneytype] then return false end
 
     local inventoryMoney = getInventoryMoney(player.PlayerData)
@@ -110,7 +110,7 @@ local function handleRemoveMoney(src, moneytype, amount)
         if inventoryMoney.gold < amount then return false end
         removeItems(player, moneyItems.gold.unit, amount)
         if Player(src).state.inv_busy then
-            TriggerClientEvent('rsg-inventory:client:updateInventory', src)
+            TriggerClientEvent('fdb-inventory:client:updateInventory', src)
         end
         return true
     end
@@ -145,14 +145,14 @@ local function handleRemoveMoney(src, moneytype, amount)
     end
 
     if Player(src).state.inv_busy then
-        TriggerClientEvent('rsg-inventory:client:updateInventory', src)
+        TriggerClientEvent('fdb-inventory:client:updateInventory', src)
     end
 
     return true
 end
 
 local function handleSetMoney(src, moneytype, amount)
-    local player = RSGCore.Functions.GetPlayer(src)
+    local player = FDBCore.Functions.GetPlayer(src)
     if not player or not moneyItems[moneytype] then return end
 
     local function removeAllItems(itemName)
@@ -165,7 +165,7 @@ local function handleSetMoney(src, moneytype, amount)
         removeAllItems(moneyItems.gold.unit)
         if amount > 0 then player.Functions.AddItem(moneyItems.gold.unit, amount) end
         if Player(src).state.inv_busy then
-            TriggerClientEvent('rsg-inventory:client:updateInventory', src)
+            TriggerClientEvent('fdb-inventory:client:updateInventory', src)
         end
         return
     end
@@ -180,7 +180,7 @@ local function handleSetMoney(src, moneytype, amount)
     if cents > 0 then player.Functions.AddItem(moneyItems[moneytype].cent, cents) end
 
     if Player(src).state.inv_busy then
-        TriggerClientEvent('rsg-inventory:client:updateInventory', src)
+        TriggerClientEvent('fdb-inventory:client:updateInventory', src)
     end
 end
 
@@ -189,15 +189,15 @@ end
 -----------------------------------------------------------------
 
 local initialized = {}
-RegisterNetEvent('RSGCore:Server:OnPlayerLoaded')
-AddEventHandler('RSGCore:Server:OnPlayerLoaded', function()
+RegisterNetEvent('FDBCore:Server:OnPlayerLoaded')
+AddEventHandler('FDBCore:Server:OnPlayerLoaded', function()
     local src = source
-    local player = RSGCore.Functions.GetPlayer(src)
+    local player = FDBCore.Functions.GetPlayer(src)
     if not player then return end
 
     local money = getInventoryMoney(player.PlayerData)
 
-    if RSGCore.Config.Money.EnableMoneyItems then
+    if FDBCore.Config.Money.EnableMoneyItems then
         local cash = calculateTotal(money.cashDollars, money.cashCents)
         local bloodmoney = calculateTotal(money.bloodDollars, money.bloodCents)
 
@@ -215,7 +215,7 @@ AddEventHandler('RSGCore:Server:OnPlayerLoaded', function()
         removeItems(player, moneyItems.bloodmoney.dollar, math.huge, 'money-item-cleanup')
     end
 
-    if RSGCore.Config.Gold.EnableGoldItems then
+    if FDBCore.Config.Gold.EnableGoldItems then
         if money.gold ~= player.PlayerData.money.gold then
             handleSetMoney(src, 'gold', player.PlayerData.money.gold)
         end
@@ -233,14 +233,14 @@ end)
 
 function IsMoneyItemEnabled(moneytype)
     if moneytype == 'gold' then
-        return RSGCore.Config.Gold.EnableGoldItems
+        return FDBCore.Config.Gold.EnableGoldItems
     end
 
-    return RSGCore.Config.Money.EnableMoneyItems
+    return FDBCore.Config.Money.EnableMoneyItems
         and (moneytype == 'cash' or moneytype == 'bloodmoney')
 end
 
-if RSGCore.Config.Money.EnableMoneyItems or RSGCore.Config.Gold.EnableGoldItems then
+if FDBCore.Config.Money.EnableMoneyItems or FDBCore.Config.Gold.EnableGoldItems then
 
     local moneyHandlers = {
         add = handleAddMoney,
@@ -248,7 +248,7 @@ if RSGCore.Config.Money.EnableMoneyItems or RSGCore.Config.Gold.EnableGoldItems 
         set = handleSetMoney,
     }
 
-    AddEventHandler('RSGCore:Server:OnMoneyChange', function(src, moneytype, amount, operation, reason)
+    AddEventHandler('FDBCore:Server:OnMoneyChange', function(src, moneytype, amount, operation, reason)
         if not IsMoneyItemEnabled(moneytype) then return end
         local handler = moneyHandlers[operation]
         if handler then
@@ -262,7 +262,7 @@ if RSGCore.Config.Money.EnableMoneyItems or RSGCore.Config.Gold.EnableGoldItems 
 
         local money = getInventoryMoney(playerData)
 
-        if RSGCore.Config.Money.EnableMoneyItems then
+        if FDBCore.Config.Money.EnableMoneyItems then
             local cash = calculateTotal(money.cashDollars, money.cashCents)
             local bloodmoney = calculateTotal(money.bloodDollars, money.bloodCents)
 
@@ -281,7 +281,7 @@ if RSGCore.Config.Money.EnableMoneyItems or RSGCore.Config.Gold.EnableGoldItems 
             end
         end
 
-        if RSGCore.Config.Gold.EnableGoldItems and money.gold ~= playerData.money.gold then
+        if FDBCore.Config.Gold.EnableGoldItems and money.gold ~= playerData.money.gold then
             local operation = money.gold > (playerData.money.gold or 0) and 'add' or 'remove'
             local amount = math.abs(money.gold - (playerData.money.gold or 0))
             playerData.money.gold = money.gold

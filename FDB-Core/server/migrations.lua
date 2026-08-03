@@ -18,7 +18,7 @@ local function RunDatabaseMigrations()
         end)
 
         if not initOk then
-            RSGCore.ShowError(resourceName, ('[MIGRATION FATAL] Failed to initialize schema_migrations table: %s'):format(to_string(initErr)))
+            FDBCore.ShowError(resourceName, ('[MIGRATION FATAL] Failed to initialize schema_migrations table: %s'):format(to_string(initErr)))
             return
         end
 
@@ -34,14 +34,14 @@ local function RunDatabaseMigrations()
             end)
 
             if not checkOk then
-                RSGCore.ShowError(resourceName, ('[MIGRATION ERROR] Failed checking status of version %s: %s'):format(mig.version, tostring(checkErr)))
+                FDBCore.ShowError(resourceName, ('[MIGRATION ERROR] Failed checking status of version %s: %s'):format(mig.version, tostring(checkErr)))
                 return
             end
 
             if not executed then
                 local fileContent = LoadResourceFile(resourceName, 'database/migrations/' .. mig.name)
                 if not fileContent or fileContent:match('^%s*$') then
-                    RSGCore.ShowError(resourceName, ('[MIGRATION ERROR] Migration file missing or empty: database/migrations/%s'):format(mig.name))
+                    FDBCore.ShowError(resourceName, ('[MIGRATION ERROR] Migration file missing or empty: database/migrations/%s'):format(mig.name))
                     return
                 end
 
@@ -64,9 +64,9 @@ local function RunDatabaseMigrations()
                         local errStr = tostring(stmtErr)
                         -- Ignore duplicate index / duplicate key name errors (MySQL 1061 ER_DUP_KEYNAME) for DDL idempotency
                         if errStr:find('1061') or errStr:find('Duplicate key name') or errStr:find('already exists') then
-                            RSGCore.ShowSuccess(resourceName, ('[MIGRATION NOTICE] Skipped existing index/table in %s (statement %d)'):format(mig.name, idx))
+                            FDBCore.ShowSuccess(resourceName, ('[MIGRATION NOTICE] Skipped existing index/table in %s (statement %d)'):format(mig.name, idx))
                         else
-                            RSGCore.ShowError(resourceName, ('[MIGRATION ERROR] Failed applying %s (statement %d): %s'):format(mig.name, idx, errStr))
+                            FDBCore.ShowError(resourceName, ('[MIGRATION ERROR] Failed applying %s (statement %d): %s'):format(mig.name, idx, errStr))
                             migrationSuccess = false
                             break
                         end
@@ -79,13 +79,13 @@ local function RunDatabaseMigrations()
                     end)
 
                     if recordOk then
-                        RSGCore.ShowSuccess(resourceName, ('Executed Migration [%s]: %s'):format(mig.version, mig.name))
+                        FDBCore.ShowSuccess(resourceName, ('Executed Migration [%s]: %s'):format(mig.version, mig.name))
                     else
-                        RSGCore.ShowError(resourceName, ('[MIGRATION ERROR] Applied %s but failed to record status: %s'):format(mig.name, tostring(recordErr)))
+                        FDBCore.ShowError(resourceName, ('[MIGRATION ERROR] Applied %s but failed to record status: %s'):format(mig.name, tostring(recordErr)))
                         return
                     end
                 else
-                    RSGCore.ShowError(resourceName, ('[MIGRATION HALTED] Stopped execution at migration [%s] due to error'):format(mig.version))
+                    FDBCore.ShowError(resourceName, ('[MIGRATION HALTED] Stopped execution at migration [%s] due to error'):format(mig.version))
                     return
                 end
             end

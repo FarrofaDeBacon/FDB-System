@@ -1,8 +1,8 @@
-RSGShared = RSGShared or {}
+FDBShared = FDBShared or {}
 
--- use RSGCore.Shared.Keybinds['J']
+-- use FDBCore.Shared.Keybinds['J']
 
-RSGShared.Keybinds = {
+FDBShared.Keybinds = {
     -- Letters
     ['A'] = 0x7065027D,
     ['B'] = 0x4CC0E2FE,

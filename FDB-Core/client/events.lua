@@ -11,17 +11,17 @@ end
 -- Player load and unload handling
 -- New method for checking if logged in across all scripts (optional)
 -- if LocalPlayer.state['isLoggedIn'] then
-RegisterNetEvent('RSGCore:Client:OnPlayerLoaded', function()
+RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', function()
     ShutdownLoadingScreenNui()
     LocalPlayer.state:set('isLoggedIn', true, false)
-    --if not RSGCore.Config.Server.PVP then return end
+    --if not FDBCore.Config.Server.PVP then return end
     --SetCanAttackFriendly(PlayerPedId(), true, false)
     --NetworkSetFriendlyFireOption(true)
-    if RSGConfig.Server.PVP then
+    if FDBConfig.Server.PVP then
         Citizen.InvokeNative(0xF808475FA571D823, true)
         SetRelationshipBetweenGroups(5, `PLAYER`, `PLAYER`)
     end
-    if RSGConfig.Player.RevealMap then
+    if FDBConfig.Player.RevealMap then
         SetMinimapHideFow(true)
     end
     Citizen.InvokeNative(0x39363DFD04E91496, PlayerId(), true) -- enable mercy kil
@@ -29,27 +29,27 @@ RegisterNetEvent('RSGCore:Client:OnPlayerLoaded', function()
     Citizen.InvokeNative(0xDE1B1907A83A1550, PlayerPedId(), 0.0) -- SetHealthRechargeMultiplier
 end)
 
-RegisterNetEvent('RSGCore:Client:OnPlayerUnload', function()
+RegisterNetEvent('FDBCore:Client:OnPlayerUnload', function()
     LocalPlayer.state:set('isLoggedIn', false, false)
 end)
 
-RegisterNetEvent('RSGCore:Client:PvpHasToggled', function(pvp_state)
-    RSGConfig.Server.PVP = pvp_state
+RegisterNetEvent('FDBCore:Client:PvpHasToggled', function(pvp_state)
+    FDBConfig.Server.PVP = pvp_state
     SetCanAttackFriendly(PlayerPedId(), pvp_state, false)
     NetworkSetFriendlyFireOption(pvp_state)
 end)
 
 -- Teleport Commands
 
-RegisterNetEvent('RSGCore:Command:TeleportToPlayer', function(coords)
+RegisterNetEvent('FDBCore:Command:TeleportToPlayer', function(coords)
     SetEntityCoords(cache.ped, coords.x, coords.y, coords.z) 
 end)
 
-RegisterNetEvent('RSGCore:Command:TeleportToCoords', function(x, y, z, h)
+RegisterNetEvent('FDBCore:Command:TeleportToCoords', function(x, y, z, h)
     SetEntityCoords(cache.ped, x, y, z) 
 end)
 
-RegisterNetEvent('RSGCore:Command:GoToMarker', function()
+RegisterNetEvent('FDBCore:Command:GoToMarker', function()
     local coords = GetWaypointCoords()
     local groundZ = GetHeightmapBottomZForPosition(coords.x, coords.y)
     local vehicle = GetVehiclePedIsIn(cache.ped, false)
@@ -77,13 +77,13 @@ RegisterNetEvent('RSGCore:Command:GoToMarker', function()
 end)
 
 -- Noclip Command
-RegisterNetEvent('RSGCore:Command:ToggleNoClip', function()
+RegisterNetEvent('FDBCore:Command:ToggleNoClip', function()
     ExecuteCommand('txAdmin:menu:noClipToggle')
 end)
 
 -- Vehicle Commands
 
-RegisterNetEvent('RSGCore:Command:SpawnVehicle', function(vehName)
+RegisterNetEvent('FDBCore:Command:SpawnVehicle', function(vehName)
     local ped = PlayerPedId()
     local hash = joaat(vehName)
     local veh = GetVehiclePedIsUsing(ped)
@@ -104,7 +104,7 @@ RegisterNetEvent('RSGCore:Command:SpawnVehicle', function(vehName)
     SetModelAsNoLongerNeeded(hash)
 end)
 
-RegisterNetEvent('RSGCore:Command:DeleteVehicle', function()
+RegisterNetEvent('FDBCore:Command:DeleteVehicle', function()
     local ped = PlayerPedId()
     local veh = GetVehiclePedIsUsing(ped)
     if veh ~= 0 then
@@ -124,34 +124,34 @@ end)
 
 -- Other stuff
 
-RegisterNetEvent('RSGCore:Player:SetPlayerData', function(val)
-    RSGCore.PlayerData = val
+RegisterNetEvent('FDBCore:Player:SetPlayerData', function(val)
+    FDBCore.PlayerData = val
 end)
 
-RegisterNetEvent('RSGCore:Player:UpdatePlayerData', function()
-    TriggerServerEvent('RSGCore:UpdatePlayer')
+RegisterNetEvent('FDBCore:Player:UpdatePlayerData', function()
+    TriggerServerEvent('FDBCore:UpdatePlayer')
 end)
 
 -- This event is exploitable and should not be used. It has been deprecated, and will be removed soon.
-RegisterNetEvent('RSGCore:Client:UseItem', function(item)
-    RSGCore.Debug(string.format('%s triggered RSGCore:Client:UseItem by ID %s with the following data. This event is deprecated due to exploitation, and will be removed soon. Check qb-inventory for the right use on this event.', GetInvokingResource(), GetPlayerServerId(PlayerId())))
-    RSGCore.Debug(item)
+RegisterNetEvent('FDBCore:Client:UseItem', function(item)
+    FDBCore.Debug(string.format('%s triggered FDBCore:Client:UseItem by ID %s with the following data. This event is deprecated due to exploitation, and will be removed soon. Check qb-inventory for the right use on this event.', GetInvokingResource(), GetPlayerServerId(PlayerId())))
+    FDBCore.Debug(item)
 end)
 
 -- Callback Events --
 
 -- Client Callback
-RegisterNetEvent('RSGCore:Client:TriggerClientCallback', function(name, ...)
-    RSGCore.Functions.TriggerClientCallback(name, function(...)
-        TriggerServerEvent('RSGCore:Server:TriggerClientCallback', name, ...)
+RegisterNetEvent('FDBCore:Client:TriggerClientCallback', function(name, ...)
+    FDBCore.Functions.TriggerClientCallback(name, function(...)
+        TriggerServerEvent('FDBCore:Server:TriggerClientCallback', name, ...)
     end, ...)
 end)
 
 -- Server Callback
-RegisterNetEvent('RSGCore:Client:TriggerCallback', function(name, ...)
-    if RSGCore.ServerCallbacks[name] then
-        RSGCore.ServerCallbacks[name](...)
-        RSGCore.ServerCallbacks[name] = nil
+RegisterNetEvent('FDBCore:Client:TriggerCallback', function(name, ...)
+    if FDBCore.ServerCallbacks[name] then
+        FDBCore.ServerCallbacks[name](...)
+        FDBCore.ServerCallbacks[name] = nil
     end
 end)
 
@@ -182,7 +182,7 @@ local function Draw3DText(coords, str)
     end
 end
 
-RegisterNetEvent('RSGCore:Command:ShowMe3D', function(senderId, msg)
+RegisterNetEvent('FDBCore:Command:ShowMe3D', function(senderId, msg)
     local sender = GetPlayerFromServerId(senderId)
     CreateThread(function()
         local displayTime = 10000 + GetGameTimer()
@@ -196,23 +196,23 @@ RegisterNetEvent('RSGCore:Command:ShowMe3D', function(senderId, msg)
 end)
 
 -- Listen to Shared being updated
-RegisterNetEvent('RSGCore:Client:OnSharedUpdate', function(tableName, key, value)
-    RSGCore.Shared[tableName][key] = value
-    TriggerEvent('RSGCore:Client:UpdateObject')
+RegisterNetEvent('FDBCore:Client:OnSharedUpdate', function(tableName, key, value)
+    FDBCore.Shared[tableName][key] = value
+    TriggerEvent('FDBCore:Client:UpdateObject')
 end)
 
-RegisterNetEvent('RSGCore:Client:OnSharedUpdateMultiple', function(tableName, values)
+RegisterNetEvent('FDBCore:Client:OnSharedUpdateMultiple', function(tableName, values)
     for key, value in pairs(values) do
-        RSGCore.Shared[tableName][key] = value
+        FDBCore.Shared[tableName][key] = value
     end
-    TriggerEvent('RSGCore:Client:UpdateObject')
+    TriggerEvent('FDBCore:Client:UpdateObject')
 end)
 
-RegisterNetEvent('RSGCore:Client:SharedUpdate', function(table)
-    RSGCore.Shared = table
+RegisterNetEvent('FDBCore:Client:SharedUpdate', function(table)
+    FDBCore.Shared = table
 end)
 
-if RSGConfig.HidePlayerNames then
+if FDBConfig.HidePlayerNames then
     CreateThread(function()
         while true do
             Wait(5000)
@@ -247,7 +247,7 @@ RegisterNUICallback('validateCSRF', function(data, cb)
         csrfToken = nil
         cb({ valid = true })
     else
-        TriggerServerEvent('RSGCore:Server:KickCSRF')
+        TriggerServerEvent('FDBCore:Server:KickCSRF')
         cb({ valid = false })
     end
 end)

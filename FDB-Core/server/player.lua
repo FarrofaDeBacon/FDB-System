@@ -1,15 +1,15 @@
-RSGCore.Players = {}
-RSGCore.Player = {}
+FDBCore.Players = {}
+FDBCore.Player = {}
 
 -- On player login get their data or set defaults
 -- Don't touch any of this unless you know what you are doing
 -- Will cause major issues!
 
 local resourceName = GetCurrentResourceName()
-function RSGCore.Player.Login(source, citizenid, newData)
+function FDBCore.Player.Login(source, citizenid, newData)
     if source and source ~= '' then
         if citizenid then
-            local license = RSGCore.Functions.GetIdentifier(source, 'license')
+            local license = FDBCore.Functions.GetIdentifier(source, 'license')
             local PlayerData = MySQL.prepare.await('SELECT * FROM players where citizenid = ?', { citizenid })
             if PlayerData and license == PlayerData.license then
                 PlayerData.money = json.decode(PlayerData.money)
@@ -18,22 +18,22 @@ function RSGCore.Player.Login(source, citizenid, newData)
                 PlayerData.position = json.decode(PlayerData.position)
                 PlayerData.metadata = json.decode(PlayerData.metadata)
                 PlayerData.charinfo = json.decode(PlayerData.charinfo)
-                RSGCore.Player.CheckPlayerData(source, PlayerData)
+                FDBCore.Player.CheckPlayerData(source, PlayerData)
             else
                 DropPlayer(source, Lang:t('info.exploit_dropped'))
-                TriggerEvent('rsg-log:server:CreateLog', 'anticheat', 'Anti-Cheat', 'white', GetPlayerName(source) .. ' Has Been Dropped For Character Joining Exploit', false)
+                TriggerEvent('fdb-log:server:CreateLog', 'anticheat', 'Anti-Cheat', 'white', GetPlayerName(source) .. ' Has Been Dropped For Character Joining Exploit', false)
             end
         else
-            RSGCore.Player.CheckPlayerData(source, newData)
+            FDBCore.Player.CheckPlayerData(source, newData)
         end
         return true
     else
-        RSGCore.ShowError(resourceName, 'ERROR RSGCore.PLAYER.LOGIN - NO SOURCE GIVEN!')
+        FDBCore.ShowError(resourceName, 'ERROR FDBCore.PLAYER.LOGIN - NO SOURCE GIVEN!')
         return false
     end
 end
 
-function RSGCore.Player.GetOfflinePlayer(citizenid)
+function FDBCore.Player.GetOfflinePlayer(citizenid)
     if citizenid then
         local PlayerData = MySQL.prepare.await('SELECT * FROM players where citizenid = ?', { citizenid })
         if PlayerData then
@@ -43,25 +43,25 @@ function RSGCore.Player.GetOfflinePlayer(citizenid)
             PlayerData.position = json.decode(PlayerData.position)
             PlayerData.metadata = json.decode(PlayerData.metadata)
             PlayerData.charinfo = json.decode(PlayerData.charinfo)
-            return RSGCore.Player.CheckPlayerData(nil, PlayerData)
+            return FDBCore.Player.CheckPlayerData(nil, PlayerData)
         end
     end
     return nil
 end
 
-function RSGCore.Player.GetPlayerByLicense(license)
+function FDBCore.Player.GetPlayerByLicense(license)
     if license then
-        local source = RSGCore.Functions.GetSource(license)
+        local source = FDBCore.Functions.GetSource(license)
         if source > 0 then
-            return RSGCore.Players[source]
+            return FDBCore.Players[source]
         else
-            return RSGCore.Player.GetOfflinePlayerByLicense(license)
+            return FDBCore.Player.GetOfflinePlayerByLicense(license)
         end
     end
     return nil
 end
 
-function RSGCore.Player.GetOfflinePlayerByLicense(license)
+function FDBCore.Player.GetOfflinePlayerByLicense(license)
     if license then
         local PlayerData = MySQL.prepare.await('SELECT * FROM players where license = ?', { license })
         if PlayerData then
@@ -71,7 +71,7 @@ function RSGCore.Player.GetOfflinePlayerByLicense(license)
             PlayerData.position = json.decode(PlayerData.position)
             PlayerData.metadata = json.decode(PlayerData.metadata)
             PlayerData.charinfo = json.decode(PlayerData.charinfo)
-            return RSGCore.Player.CheckPlayerData(nil, PlayerData)
+            return FDBCore.Player.CheckPlayerData(nil, PlayerData)
         end
     end
     return nil
@@ -90,19 +90,19 @@ local function applyDefaults(playerData, defaults)
     end
 end
 
-function RSGCore.Player.CheckPlayerData(source, PlayerData)
+function FDBCore.Player.CheckPlayerData(source, PlayerData)
     PlayerData = PlayerData or {}
     local Offline = not source
 
     if source then
         PlayerData.source = source
-        PlayerData.license = PlayerData.license or RSGCore.Functions.GetIdentifier(source, 'license')
+        PlayerData.license = PlayerData.license or FDBCore.Functions.GetIdentifier(source, 'license')
         PlayerData.name = GetPlayerName(source)
     end
 
     local validatedJob = false
     if PlayerData.job and PlayerData.job.name ~= nil and PlayerData.job.grade and PlayerData.job.grade.level ~= nil then
-        local jobInfo = RSGCore.Shared.Jobs[PlayerData.job.name]
+        local jobInfo = FDBCore.Shared.Jobs[PlayerData.job.name]
 
         if jobInfo then
             local jobGradeInfo = jobInfo.grades[tostring(PlayerData.job.grade.level)]
@@ -124,7 +124,7 @@ function RSGCore.Player.CheckPlayerData(source, PlayerData)
 
     local validatedGang = false
     if PlayerData.gang and PlayerData.gang.name ~= nil and PlayerData.gang.grade and PlayerData.gang.grade.level ~= nil then
-        local gangInfo = RSGCore.Shared.Gangs[PlayerData.gang.name]
+        local gangInfo = FDBCore.Shared.Gangs[PlayerData.gang.name]
 
         if gangInfo then
             local gangGradeInfo = gangInfo.grades[tostring(PlayerData.gang.grade.level)]
@@ -144,30 +144,30 @@ function RSGCore.Player.CheckPlayerData(source, PlayerData)
         PlayerData.gang = nil
     end
 
-    applyDefaults(PlayerData, RSGCore.Config.Player.PlayerDefaults)
+    applyDefaults(PlayerData, FDBCore.Config.Player.PlayerDefaults)
 
-    if GetResourceState('rsg-inventory') ~= 'missing' then
-        PlayerData.items = exports['rsg-inventory']:LoadInventory(PlayerData.source, PlayerData.citizenid)
+    if GetResourceState('fdb-inventory') ~= 'missing' then
+        PlayerData.items = exports['fdb-inventory']:LoadInventory(PlayerData.source, PlayerData.citizenid)
     end
 
-    return RSGCore.Player.CreatePlayer(PlayerData, Offline)
+    return FDBCore.Player.CreatePlayer(PlayerData, Offline)
 end
 
 -- On player logout
 
-function RSGCore.Player.Logout(source)
-    TriggerClientEvent('RSGCore:Client:OnPlayerUnload', source)
-    TriggerEvent('RSGCore:Server:OnPlayerUnload', source)
-    TriggerClientEvent('RSGCore:Player:UpdatePlayerData', source)
+function FDBCore.Player.Logout(source)
+    TriggerClientEvent('FDBCore:Client:OnPlayerUnload', source)
+    TriggerEvent('FDBCore:Server:OnPlayerUnload', source)
+    TriggerClientEvent('FDBCore:Player:UpdatePlayerData', source)
     Wait(200)
-    RSGCore.Players[source] = nil
+    FDBCore.Players[source] = nil
 end
 
 -- Create a new character
 -- Don't touch any of this unless you know what you are doing
 -- Will cause major issues!
 
-function RSGCore.Player.CreatePlayer(PlayerData, Offline)
+function FDBCore.Player.CreatePlayer(PlayerData, Offline)
     local self = {}
     self.Functions = {}
     self.PlayerData = PlayerData
@@ -176,23 +176,23 @@ function RSGCore.Player.CreatePlayer(PlayerData, Offline)
     function self.Functions.UpdatePlayerData()
         if self.Offline then return end
 
-        if RSGCore.Config.Money.EnableMoneyItems or RSGCore.Config.Gold.EnableGoldItems then
+        if FDBCore.Config.Money.EnableMoneyItems or FDBCore.Config.Gold.EnableGoldItems then
             self.PlayerData = SynchronizeMoneyItems(self.PlayerData)
         end
 
-        TriggerEvent('RSGCore:Player:SetPlayerData', self.PlayerData)
-        TriggerClientEvent('RSGCore:Player:SetPlayerData', self.PlayerData.source, self.PlayerData)
+        TriggerEvent('FDBCore:Player:SetPlayerData', self.PlayerData)
+        TriggerClientEvent('FDBCore:Player:SetPlayerData', self.PlayerData.source, self.PlayerData)
     end
 
     function self.Functions.SetJob(job, grade)
         job = job:lower()
         grade = grade or '0'
-        if not RSGCore.Shared.Jobs[job] then return false end
+        if not FDBCore.Shared.Jobs[job] then return false end
         self.PlayerData.job = {
             name = job,
-            label = RSGCore.Shared.Jobs[job].label,
-            onduty = RSGCore.Shared.Jobs[job].defaultDuty,
-            type = RSGCore.Shared.Jobs[job].type or 'none',
+            label = FDBCore.Shared.Jobs[job].label,
+            onduty = FDBCore.Shared.Jobs[job].defaultDuty,
+            type = FDBCore.Shared.Jobs[job].type or 'none',
             grade = {
                 name = 'No Grades',
                 level = 0,
@@ -201,7 +201,7 @@ function RSGCore.Player.CreatePlayer(PlayerData, Offline)
             }
         }
         local gradeKey = tostring(grade)
-        local jobGradeInfo = RSGCore.Shared.Jobs[job].grades[gradeKey]
+        local jobGradeInfo = FDBCore.Shared.Jobs[job].grades[gradeKey]
         if jobGradeInfo then
             self.PlayerData.job.grade.name = jobGradeInfo.name
             self.PlayerData.job.grade.level = tonumber(gradeKey)
@@ -212,8 +212,8 @@ function RSGCore.Player.CreatePlayer(PlayerData, Offline)
 
         if not self.Offline then
             self.Functions.UpdatePlayerData()
-            TriggerEvent('RSGCore:Server:OnJobUpdate', self.PlayerData.source, self.PlayerData.job)
-            TriggerClientEvent('RSGCore:Client:OnJobUpdate', self.PlayerData.source, self.PlayerData.job)
+            TriggerEvent('FDBCore:Server:OnJobUpdate', self.PlayerData.source, self.PlayerData.job)
+            TriggerClientEvent('FDBCore:Client:OnJobUpdate', self.PlayerData.source, self.PlayerData.job)
         end
 
         return true
@@ -222,10 +222,10 @@ function RSGCore.Player.CreatePlayer(PlayerData, Offline)
     function self.Functions.SetGang(gang, grade)
         gang = gang:lower()
         grade = grade or '0'
-        if not RSGCore.Shared.Gangs[gang] then return false end
+        if not FDBCore.Shared.Gangs[gang] then return false end
         self.PlayerData.gang = {
             name = gang,
-            label = RSGCore.Shared.Gangs[gang].label,
+            label = FDBCore.Shared.Gangs[gang].label,
             grade = {
                 name = 'No Grades',
                 level = 0,
@@ -233,7 +233,7 @@ function RSGCore.Player.CreatePlayer(PlayerData, Offline)
             }
         }
         local gradeKey = tostring(grade)
-        local gangGradeInfo = RSGCore.Shared.Gangs[gang].grades[gradeKey]
+        local gangGradeInfo = FDBCore.Shared.Gangs[gang].grades[gradeKey]
         if gangGradeInfo then
             self.PlayerData.gang.grade.name = gangGradeInfo.name
             self.PlayerData.gang.grade.level = tonumber(gradeKey)
@@ -243,21 +243,21 @@ function RSGCore.Player.CreatePlayer(PlayerData, Offline)
 
         if not self.Offline then
             self.Functions.UpdatePlayerData()
-            TriggerEvent('RSGCore:Server:OnGangUpdate', self.PlayerData.source, self.PlayerData.gang)
-            TriggerClientEvent('RSGCore:Client:OnGangUpdate', self.PlayerData.source, self.PlayerData.gang)
+            TriggerEvent('FDBCore:Server:OnGangUpdate', self.PlayerData.source, self.PlayerData.gang)
+            TriggerClientEvent('FDBCore:Client:OnGangUpdate', self.PlayerData.source, self.PlayerData.gang)
         end
 
         return true
     end
 
     function self.Functions.HasItem(items, amount)
-        return RSGCore.Functions.HasItem(self.PlayerData.source, items, amount)
+        return FDBCore.Functions.HasItem(self.PlayerData.source, items, amount)
     end
 
     function self.Functions.SetJobDuty(onDuty)
         self.PlayerData.job.onduty = not not onDuty
-        TriggerEvent('RSGCore:Server:OnJobUpdate', self.PlayerData.source, self.PlayerData.job)
-        TriggerClientEvent('RSGCore:Client:OnJobUpdate', self.PlayerData.source, self.PlayerData.job)
+        TriggerEvent('FDBCore:Server:OnJobUpdate', self.PlayerData.source, self.PlayerData.job)
+        TriggerClientEvent('FDBCore:Client:OnJobUpdate', self.PlayerData.source, self.PlayerData.job)
         self.Functions.UpdatePlayerData()
     end
 
@@ -332,16 +332,16 @@ function RSGCore.Player.CreatePlayer(PlayerData, Offline)
         if not self.Offline then
             self.Functions.UpdatePlayerData()
             if amount > 100000 then
-                TriggerEvent('rsg-log:server:CreateLog', 'playermoney', 'AddMoney', 'lightgreen', '**' .. GetPlayerName(self.PlayerData.source) .. ' (citizenid: ' .. self.PlayerData.citizenid .. ' | id: ' .. self.PlayerData.source .. ')** $' .. amount .. ' (' .. moneytype .. ') added, new ' .. moneytype .. ' balance: ' .. self.PlayerData.money[moneytype] .. ' reason: ' .. reason, true)
+                TriggerEvent('fdb-log:server:CreateLog', 'playermoney', 'AddMoney', 'lightgreen', '**' .. GetPlayerName(self.PlayerData.source) .. ' (citizenid: ' .. self.PlayerData.citizenid .. ' | id: ' .. self.PlayerData.source .. ')** $' .. amount .. ' (' .. moneytype .. ') added, new ' .. moneytype .. ' balance: ' .. self.PlayerData.money[moneytype] .. ' reason: ' .. reason, true)
             else
-                TriggerEvent('rsg-log:server:CreateLog', 'playermoney', 'AddMoney', 'lightgreen', '**' .. GetPlayerName(self.PlayerData.source) .. ' (citizenid: ' .. self.PlayerData.citizenid .. ' | id: ' .. self.PlayerData.source .. ')** $' .. amount .. ' (' .. moneytype .. ') added, new ' .. moneytype .. ' balance: ' .. self.PlayerData.money[moneytype] .. ' reason: ' .. reason)
+                TriggerEvent('fdb-log:server:CreateLog', 'playermoney', 'AddMoney', 'lightgreen', '**' .. GetPlayerName(self.PlayerData.source) .. ' (citizenid: ' .. self.PlayerData.citizenid .. ' | id: ' .. self.PlayerData.source .. ')** $' .. amount .. ' (' .. moneytype .. ') added, new ' .. moneytype .. ' balance: ' .. self.PlayerData.money[moneytype] .. ' reason: ' .. reason)
             end
 
             if not IsMoneyItemEnabled(moneytype) then
                 TriggerClientEvent('hud:client:OnMoneyChange', self.PlayerData.source, moneytype, amount, false)
             end
-            TriggerClientEvent('RSGCore:Client:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'add', reason)
-            TriggerEvent('RSGCore:Server:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'add', reason)
+            TriggerClientEvent('FDBCore:Client:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'add', reason)
+            TriggerEvent('FDBCore:Server:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'add', reason)
         end
 
         return true
@@ -355,28 +355,28 @@ function RSGCore.Player.CreatePlayer(PlayerData, Offline)
         if amount < 0 then return end
         if moneytype == 'gold' and amount % 1 ~= 0 then return false end
         if not self.PlayerData.money[moneytype] then return false end
-        for _, mtype in pairs(RSGCore.Config.Money.DontAllowMinus) do
+        for _, mtype in pairs(FDBCore.Config.Money.DontAllowMinus) do
             if mtype == moneytype then
                 if (self.PlayerData.money[moneytype] - amount) < 0 then
                     return false
                 end
             end
         end
-        if self.PlayerData.money[moneytype] - amount < RSGCore.Config.Money.MinusLimit then return false end
+        if self.PlayerData.money[moneytype] - amount < FDBCore.Config.Money.MinusLimit then return false end
         self.PlayerData.money[moneytype] = self.PlayerData.money[moneytype] - amount
 
         if not self.Offline then
             self.Functions.UpdatePlayerData()
             if amount > 100000 then
-                TriggerEvent('rsg-log:server:CreateLog', 'playermoney', 'RemoveMoney', 'red', '**' .. GetPlayerName(self.PlayerData.source) .. ' (citizenid: ' .. self.PlayerData.citizenid .. ' | id: ' .. self.PlayerData.source .. ')** $' .. amount .. ' (' .. moneytype .. ') removed, new ' .. moneytype .. ' balance: ' .. self.PlayerData.money[moneytype] .. ' reason: ' .. reason, true)
+                TriggerEvent('fdb-log:server:CreateLog', 'playermoney', 'RemoveMoney', 'red', '**' .. GetPlayerName(self.PlayerData.source) .. ' (citizenid: ' .. self.PlayerData.citizenid .. ' | id: ' .. self.PlayerData.source .. ')** $' .. amount .. ' (' .. moneytype .. ') removed, new ' .. moneytype .. ' balance: ' .. self.PlayerData.money[moneytype] .. ' reason: ' .. reason, true)
             else
-                TriggerEvent('rsg-log:server:CreateLog', 'playermoney', 'RemoveMoney', 'red', '**' .. GetPlayerName(self.PlayerData.source) .. ' (citizenid: ' .. self.PlayerData.citizenid .. ' | id: ' .. self.PlayerData.source .. ')** $' .. amount .. ' (' .. moneytype .. ') removed, new ' .. moneytype .. ' balance: ' .. self.PlayerData.money[moneytype] .. ' reason: ' .. reason)
+                TriggerEvent('fdb-log:server:CreateLog', 'playermoney', 'RemoveMoney', 'red', '**' .. GetPlayerName(self.PlayerData.source) .. ' (citizenid: ' .. self.PlayerData.citizenid .. ' | id: ' .. self.PlayerData.source .. ')** $' .. amount .. ' (' .. moneytype .. ') removed, new ' .. moneytype .. ' balance: ' .. self.PlayerData.money[moneytype] .. ' reason: ' .. reason)
             end
             if not IsMoneyItemEnabled(moneytype) then
                 TriggerClientEvent('hud:client:OnMoneyChange', self.PlayerData.source, moneytype, amount, true)
             end
-            TriggerClientEvent('RSGCore:Client:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'remove', reason)
-            TriggerEvent('RSGCore:Server:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'remove', reason)
+            TriggerClientEvent('FDBCore:Client:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'remove', reason)
+            TriggerEvent('FDBCore:Server:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'remove', reason)
         end
 
         return true
@@ -395,12 +395,12 @@ function RSGCore.Player.CreatePlayer(PlayerData, Offline)
 
         if not self.Offline then
             self.Functions.UpdatePlayerData()
-            TriggerEvent('rsg-log:server:CreateLog', 'playermoney', 'SetMoney', 'green', '**' .. GetPlayerName(self.PlayerData.source) .. ' (citizenid: ' .. self.PlayerData.citizenid .. ' | id: ' .. self.PlayerData.source .. ')** $' .. amount .. ' (' .. moneytype .. ') set, new ' .. moneytype .. ' balance: ' .. self.PlayerData.money[moneytype] .. ' reason: ' .. reason)
+            TriggerEvent('fdb-log:server:CreateLog', 'playermoney', 'SetMoney', 'green', '**' .. GetPlayerName(self.PlayerData.source) .. ' (citizenid: ' .. self.PlayerData.citizenid .. ' | id: ' .. self.PlayerData.source .. ')** $' .. amount .. ' (' .. moneytype .. ') set, new ' .. moneytype .. ' balance: ' .. self.PlayerData.money[moneytype] .. ' reason: ' .. reason)
             if not IsMoneyItemEnabled(moneytype) then
                 TriggerClientEvent('hud:client:OnMoneyChange', self.PlayerData.source, moneytype, math.abs(difference), difference < 0)
             end
-            TriggerClientEvent('RSGCore:Client:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'set', reason)
-            TriggerEvent('RSGCore:Server:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'set', reason)
+            TriggerClientEvent('FDBCore:Client:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'set', reason)
+            TriggerEvent('FDBCore:Server:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'set', reason)
         end
 
         return true
@@ -414,16 +414,16 @@ function RSGCore.Player.CreatePlayer(PlayerData, Offline)
 
     function self.Functions.Save()
         if self.Offline then
-            RSGCore.Player.SaveOffline(self.PlayerData)
+            FDBCore.Player.SaveOffline(self.PlayerData)
         else
             self.Functions.PersistStateBags()
-            RSGCore.Player.Save(self.PlayerData.source)
+            FDBCore.Player.Save(self.PlayerData.source)
         end
     end
 
     function self.Functions.Logout()
         if self.Offline then return end
-        RSGCore.Player.Logout(self.PlayerData.source)
+        FDBCore.Player.Logout(self.PlayerData.source)
     end
 
     function self.Functions.AddMethod(methodName, handler)
@@ -466,9 +466,9 @@ function RSGCore.Player.CreatePlayer(PlayerData, Offline)
         return self
     else
         self.Functions.InitializeStateBags()
-        RSGCore.Players[self.PlayerData.source] = self
-        RSGCore.Player.Save(self.PlayerData.source)
-        TriggerEvent('RSGCore:Server:PlayerLoaded', self)
+        FDBCore.Players[self.PlayerData.source] = self
+        FDBCore.Player.Save(self.PlayerData.source)
+        TriggerEvent('FDBCore:Server:PlayerLoaded', self)
         self.Functions.UpdatePlayerData()
     end
 end
@@ -476,28 +476,28 @@ end
 -- Add a new function to the Functions table of the player class
 -- Use-case:
 --[[
-    AddEventHandler('RSGCore:Server:PlayerLoaded', function(Player)
-        RSGCore.Functions.AddPlayerMethod(Player.PlayerData.source, "functionName", function(oneArg, orMore)
+    AddEventHandler('FDBCore:Server:PlayerLoaded', function(Player)
+        FDBCore.Functions.AddPlayerMethod(Player.PlayerData.source, "functionName", function(oneArg, orMore)
             -- do something here
         end)
     end)
 ]]
 
-function RSGCore.Functions.AddPlayerMethod(ids, methodName, handler)
+function FDBCore.Functions.AddPlayerMethod(ids, methodName, handler)
     local idType = type(ids)
     if idType == 'number' then
         if ids == -1 then
-            for _, v in pairs(RSGCore.Players) do
+            for _, v in pairs(FDBCore.Players) do
                 v.Functions.AddMethod(methodName, handler)
             end
         else
-            if not RSGCore.Players[ids] then return end
+            if not FDBCore.Players[ids] then return end
 
-            RSGCore.Players[ids].Functions.AddMethod(methodName, handler)
+            FDBCore.Players[ids].Functions.AddMethod(methodName, handler)
         end
     elseif idType == 'table' and table.type(ids) == 'array' then
         for i = 1, #ids do
-            RSGCore.Functions.AddPlayerMethod(ids[i], methodName, handler)
+            FDBCore.Functions.AddPlayerMethod(ids[i], methodName, handler)
         end
     end
 end
@@ -505,36 +505,36 @@ end
 -- Add a new field table of the player class
 -- Use-case:
 --[[
-    AddEventHandler('RSGCore:Server:PlayerLoaded', function(Player)
-        RSGCore.Functions.AddPlayerField(Player.PlayerData.source, "fieldName", "fieldData")
+    AddEventHandler('FDBCore:Server:PlayerLoaded', function(Player)
+        FDBCore.Functions.AddPlayerField(Player.PlayerData.source, "fieldName", "fieldData")
     end)
 ]]
 
-function RSGCore.Functions.AddPlayerField(ids, fieldName, data)
+function FDBCore.Functions.AddPlayerField(ids, fieldName, data)
     local idType = type(ids)
     if idType == 'number' then
         if ids == -1 then
-            for _, v in pairs(RSGCore.Players) do
+            for _, v in pairs(FDBCore.Players) do
                 v.Functions.AddField(fieldName, data)
             end
         else
-            if not RSGCore.Players[ids] then return end
+            if not FDBCore.Players[ids] then return end
 
-            RSGCore.Players[ids].Functions.AddField(fieldName, data)
+            FDBCore.Players[ids].Functions.AddField(fieldName, data)
         end
     elseif idType == 'table' and table.type(ids) == 'array' then
         for i = 1, #ids do
-            RSGCore.Functions.AddPlayerField(ids[i], fieldName, data)
+            FDBCore.Functions.AddPlayerField(ids[i], fieldName, data)
         end
     end
 end
 
 -- Save player info to database (make sure citizenid is the primary key in your database)
 
-function RSGCore.Player.Save(source)
+function FDBCore.Player.Save(source)
     local ped = GetPlayerPed(source)
     local pcoords = GetEntityCoords(ped)
-    local PlayerData = RSGCore.Players[source].PlayerData
+    local PlayerData = FDBCore.Players[source].PlayerData
     if PlayerData then
         MySQL.insert('INSERT INTO players (citizenid, cid, license, name, money, charinfo, job, gang, position, metadata, weight, slots) VALUES (:citizenid, :cid, :license, :name, :money, :charinfo, :job, :gang, :position, :metadata, :weight, :slots) ON DUPLICATE KEY UPDATE cid = :cid, name = :name, money = :money, charinfo = :charinfo, job = :job, gang = :gang, position = :position, metadata = :metadata, weight = :weight, slots = :slots', {
             citizenid = PlayerData.citizenid,
@@ -550,14 +550,14 @@ function RSGCore.Player.Save(source)
             weight = PlayerData.weight,
             slots = PlayerData.slots,
         })
-        if GetResourceState('rsg-inventory') ~= 'missing' then exports['rsg-inventory']:SaveInventory(source) end
-        RSGCore.ShowSuccess(resourceName, PlayerData.name .. ' PLAYER SAVED!')
+        if GetResourceState('fdb-inventory') ~= 'missing' then exports['fdb-inventory']:SaveInventory(source) end
+        FDBCore.ShowSuccess(resourceName, PlayerData.name .. ' PLAYER SAVED!')
     else
-        RSGCore.ShowError(resourceName, 'ERROR RSGCore.PLAYER.SAVE - PLAYERDATA IS EMPTY!')
+        FDBCore.ShowError(resourceName, 'ERROR FDBCore.PLAYER.SAVE - PLAYERDATA IS EMPTY!')
     end
 end
 
-function RSGCore.Player.SaveOffline(PlayerData)
+function FDBCore.Player.SaveOffline(PlayerData)
     if PlayerData then
         MySQL.insert('INSERT INTO players (citizenid, cid, license, name, money, charinfo, job, gang, position, metadata, weight, slots) VALUES (:citizenid, :cid, :license, :name, :money, :charinfo, :job, :gang, :position, :metadata, :weight, :slots) ON DUPLICATE KEY UPDATE cid = :cid, name = :name, money = :money, charinfo = :charinfo, job = :job, gang = :gang, position = :position, metadata = :metadata, weight = :weight, slots = :slots', {
             citizenid = PlayerData.citizenid,
@@ -573,10 +573,10 @@ function RSGCore.Player.SaveOffline(PlayerData)
             weight = PlayerData.weight,
             slots = PlayerData.slots,
         })
-        if GetResourceState('rsg-inventory') ~= 'missing' then exports['rsg-inventory']:SaveInventory(PlayerData, true) end
-        RSGCore.ShowSuccess(resourceName, PlayerData.name .. ' OFFLINE PLAYER SAVED!')
+        if GetResourceState('fdb-inventory') ~= 'missing' then exports['fdb-inventory']:SaveInventory(PlayerData, true) end
+        FDBCore.ShowSuccess(resourceName, PlayerData.name .. ' OFFLINE PLAYER SAVED!')
     else
-        RSGCore.ShowError(resourceName, 'ERROR RSGCore.PLAYER.SAVEOFFLINE - PLAYERDATA IS EMPTY!')
+        FDBCore.ShowError(resourceName, 'ERROR FDBCore.PLAYER.SAVEOFFLINE - PLAYERDATA IS EMPTY!')
     end
 end
 
@@ -593,8 +593,8 @@ local playertables = { -- Add tables as needed
     { table = 'telegrams'},
 }
 
-function RSGCore.Player.DeleteCharacter(source, citizenid)
-    local license = RSGCore.Functions.GetIdentifier(source, 'license')
+function FDBCore.Player.DeleteCharacter(source, citizenid)
+    local license = FDBCore.Functions.GetIdentifier(source, 'license')
     local result = MySQL.scalar.await('SELECT license FROM players where citizenid = ?', { citizenid })
     if license == result then
         local query = 'DELETE FROM %s WHERE citizenid = ?'
@@ -608,22 +608,22 @@ function RSGCore.Player.DeleteCharacter(source, citizenid)
 
         MySQL.transaction(queries, function(result2)
             if result2 then
-                TriggerEvent('rsg-log:server:CreateLog', 'joinleave', 'Character Deleted', 'red', '**' .. GetPlayerName(source) .. '** ' .. license .. ' deleted **' .. citizenid .. '**..')
+                TriggerEvent('fdb-log:server:CreateLog', 'joinleave', 'Character Deleted', 'red', '**' .. GetPlayerName(source) .. '** ' .. license .. ' deleted **' .. citizenid .. '**..')
             end
         end)
     else
         DropPlayer(source, Lang:t('info.exploit_dropped'))
-        TriggerEvent('rsg-log:server:CreateLog', 'anticheat', 'Anti-Cheat', 'white', GetPlayerName(source) .. ' Has Been Dropped For Character Deletion Exploit', true)
+        TriggerEvent('fdb-log:server:CreateLog', 'anticheat', 'Anti-Cheat', 'white', GetPlayerName(source) .. ' Has Been Dropped For Character Deletion Exploit', true)
     end
 end
 
-function RSGCore.Player.ForceDeleteCharacter(citizenid)
+function FDBCore.Player.ForceDeleteCharacter(citizenid)
     local result = MySQL.scalar.await('SELECT license FROM players where citizenid = ?', { citizenid })
     if result then
         local query = 'DELETE FROM %s WHERE citizenid = ?'
         local tableCount = #playertables
         local queries = table.create(tableCount, 0)
-        local Player = RSGCore.Functions.GetPlayerByCitizenId(citizenid)
+        local Player = FDBCore.Functions.GetPlayerByCitizenId(citizenid)
 
         if Player then
             DropPlayer(Player.PlayerData.source, 'An admin deleted the character which you are currently using')
@@ -635,7 +635,7 @@ function RSGCore.Player.ForceDeleteCharacter(citizenid)
 
         MySQL.transaction(queries, function(result2)
             if result2 then
-                TriggerEvent('rsg-log:server:CreateLog', 'joinleave', 'Character Force Deleted', 'red', 'Character **' .. citizenid .. '** got deleted')
+                TriggerEvent('fdb-log:server:CreateLog', 'joinleave', 'Character Force Deleted', 'red', 'Character **' .. citizenid .. '** got deleted')
             end
         end)
     end
@@ -643,66 +643,66 @@ end
 
 -- Inventory Backwards Compatibility
 
-function RSGCore.Player.SaveInventory(source)
-    if GetResourceState('rsg-inventory') == 'missing' then return end
-    exports['rsg-inventory']:SaveInventory(source, false)
+function FDBCore.Player.SaveInventory(source)
+    if GetResourceState('fdb-inventory') == 'missing' then return end
+    exports['fdb-inventory']:SaveInventory(source, false)
 end
 
-function RSGCore.Player.SaveOfflineInventory(PlayerData)
-    if GetResourceState('rsg-inventory') == 'missing' then return end
-    exports['rsg-inventory']:SaveInventory(PlayerData, true)
+function FDBCore.Player.SaveOfflineInventory(PlayerData)
+    if GetResourceState('fdb-inventory') == 'missing' then return end
+    exports['fdb-inventory']:SaveInventory(PlayerData, true)
 end
 
-function RSGCore.Player.GetTotalWeight(items)
-    if GetResourceState('rsg-inventory') == 'missing' then return end
-    return exports['rsg-inventory']:GetTotalWeight(items)
+function FDBCore.Player.GetTotalWeight(items)
+    if GetResourceState('fdb-inventory') == 'missing' then return end
+    return exports['fdb-inventory']:GetTotalWeight(items)
 end
 
-function RSGCore.Player.GetSlotsByItem(items, itemName)
-    if GetResourceState('rsg-inventory') == 'missing' then return end
-    return exports['rsg-inventory']:GetSlotsByItem(items, itemName)
+function FDBCore.Player.GetSlotsByItem(items, itemName)
+    if GetResourceState('fdb-inventory') == 'missing' then return end
+    return exports['fdb-inventory']:GetSlotsByItem(items, itemName)
 end
 
-function RSGCore.Player.GetFirstSlotByItem(items, itemName)
-    if GetResourceState('rsg-inventory') == 'missing' then return end
-    return exports['rsg-inventory']:GetFirstSlotByItem(items, itemName)
+function FDBCore.Player.GetFirstSlotByItem(items, itemName)
+    if GetResourceState('fdb-inventory') == 'missing' then return end
+    return exports['fdb-inventory']:GetFirstSlotByItem(items, itemName)
 end
 
 -- Util Functions
 
-function RSGCore.Player.CreateCitizenId()
-    local CitizenId = tostring(RSGCore.Shared.RandomStr(3) .. RSGCore.Shared.RandomInt(5)):upper()
+function FDBCore.Player.CreateCitizenId()
+    local CitizenId = tostring(FDBCore.Shared.RandomStr(3) .. FDBCore.Shared.RandomInt(5)):upper()
     local result = MySQL.prepare.await('SELECT EXISTS(SELECT 1 FROM players WHERE citizenid = ?) AS uniqueCheck', { CitizenId })
     if result == 0 then return CitizenId end
-    return RSGCore.Player.CreateCitizenId()
+    return FDBCore.Player.CreateCitizenId()
 end
 
-function RSGCore.Functions.CreateAccountNumber()
-    local AccountNumber = 'US0' .. math.random(1, 9) .. 'RSGCore' .. math.random(1111, 9999) .. math.random(1111, 9999) .. math.random(11, 99)
+function FDBCore.Functions.CreateAccountNumber()
+    local AccountNumber = 'US0' .. math.random(1, 9) .. 'FDBCore' .. math.random(1111, 9999) .. math.random(1111, 9999) .. math.random(11, 99)
     local result = MySQL.prepare.await('SELECT EXISTS(SELECT 1 FROM players WHERE JSON_UNQUOTE(JSON_EXTRACT(charinfo, "$.account")) = ?) AS uniqueCheck', { AccountNumber })
     if result == 0 then return AccountNumber end
-    return RSGCore.Functions.CreateAccountNumber()
+    return FDBCore.Functions.CreateAccountNumber()
 end
 
-function RSGCore.Player.CreateFingerId()
-    local FingerId = tostring(RSGCore.Shared.RandomStr(2) .. RSGCore.Shared.RandomInt(3) .. RSGCore.Shared.RandomStr(1) .. RSGCore.Shared.RandomInt(2) .. RSGCore.Shared.RandomStr(3) .. RSGCore.Shared.RandomInt(4))
+function FDBCore.Player.CreateFingerId()
+    local FingerId = tostring(FDBCore.Shared.RandomStr(2) .. FDBCore.Shared.RandomInt(3) .. FDBCore.Shared.RandomStr(1) .. FDBCore.Shared.RandomInt(2) .. FDBCore.Shared.RandomStr(3) .. FDBCore.Shared.RandomInt(4))
     local result = MySQL.prepare.await('SELECT EXISTS(SELECT 1 FROM players WHERE JSON_UNQUOTE(JSON_EXTRACT(metadata, "$.fingerprint")) = ?) AS uniqueCheck', { FingerId })
     if result == 0 then return FingerId end
-    return RSGCore.Player.CreateFingerId()
+    return FDBCore.Player.CreateFingerId()
 end
 
-function RSGCore.Player.CreateWalletId()
-    local WalletId = 'RSG-' .. math.random(11111111, 99999999)
+function FDBCore.Player.CreateWalletId()
+    local WalletId = 'FDB-' .. math.random(11111111, 99999999)
     local result = MySQL.prepare.await('SELECT EXISTS(SELECT 1 FROM players WHERE JSON_UNQUOTE(JSON_EXTRACT(metadata, "$.walletid")) = ?) AS uniqueCheck', { WalletId })
     if result == 0 then return WalletId end
-    return RSGCore.Player.CreateWalletId()
+    return FDBCore.Player.CreateWalletId()
 end
 
-function RSGCore.Player.CreateSerialNumber()
+function FDBCore.Player.CreateSerialNumber()
     local SerialNumber = math.random(11111111, 99999999)
     local result = MySQL.prepare.await('SELECT EXISTS(SELECT 1 FROM players WHERE JSON_UNQUOTE(JSON_EXTRACT(metadata, "$.phonedata.SerialNumber")) = ?) AS uniqueCheck', { SerialNumber })
     if result == 0 then return SerialNumber end
-    return RSGCore.Player.CreateSerialNumber()
+    return FDBCore.Player.CreateSerialNumber()
 end
 
 PaycheckInterval() -- This starts the paycheck system
