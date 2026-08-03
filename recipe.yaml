@@ -85,6 +85,13 @@ tasks:
 
   # 5. Conexão e Criação do Banco de Dados MySQL
   - action: connect_database
+  - action: download_github
+    src: FarrofaDeBacon/FDB-System
+    ref: fix/companion-inventory-audit
+    subpath: fdbcore.sql
+    dest: ./tmp/fdbcore.sql
+  - action: query_database
+    file: ./tmp/fdbcore.sql
 
   # 6. Geração do server.cfg
   - action: write_file
