@@ -391,7 +391,7 @@ Inventory.ClearInventory = function(source, filterItems)
         if weapon ~= `WEAPON_UNARMED` then
             RemoveWeaponFromPed(ped, weapon)
         end
-        if Player(source).state.inv_busy then TriggerClientEvent('rsg-inventory:client:updateInventory', source) end
+        if Player(source).state.inv_busy then TriggerClientEvent('fdb-inventory:client:updateInventory', source) end
     end
 end
 
@@ -441,13 +441,13 @@ exports('HasItem', Inventory.HasItem)
 -- CloseInventory function closes the inventory for a given source and identifier.
 -- It sets the isOpen flag of the inventory identified by the given identifier to false.
 -- It also sets the inv_busy flag of the player identified by the given source to false.
--- Finally, it triggers the 'rsg-inventory:client:closeInv' event for the given source.
+-- Finally, it triggers the 'fdb-inventory:client:closeInv' event for the given source.
 Inventory.CloseInventory = function(source, identifier)
     if identifier and Inventories[identifier] then
         Inventories[identifier].isOpen = false
     end
     Player(source).state.inv_busy = false
-    TriggerClientEvent('rsg-inventory:client:closeInv', source)
+    TriggerClientEvent('fdb-inventory:client:closeInv', source)
 end
 
 exports('CloseInventory', Inventory.CloseInventory)
@@ -475,7 +475,7 @@ Inventory.OpenInventoryById = function(source, targetId)
     }
     Wait(1500)
     Player(targetId).state.inv_busy = true
-    TriggerClientEvent('rsg-inventory:client:openInventory', source, playerItems, formattedInventory)
+    TriggerClientEvent('fdb-inventory:client:openInventory', source, playerItems, formattedInventory)
 end
 
 exports('OpenInventoryById', Inventory.OpenInventoryById)
@@ -522,7 +522,7 @@ Inventory.OpenInventory = function (source, identifier, data)
         if RSGPlayer.PlayerData.slots ~= slots then
             RSGPlayer.PlayerData.slots = slots -- keep in-memory in sync
         end
-        TriggerClientEvent('rsg-inventory:client:openInventory', source, RSGPlayer.PlayerData.items, nil, slots)
+        TriggerClientEvent('fdb-inventory:client:openInventory', source, RSGPlayer.PlayerData.items, nil, slots)
         return
     end
 
@@ -574,7 +574,7 @@ Inventory.OpenInventory = function (source, identifier, data)
     
     Player(source).state.inv_busy = true
     Inventory.CheckPlayerItemsDecay(RSGPlayer)
-    TriggerClientEvent('rsg-inventory:client:openInventory', source, RSGPlayer.PlayerData.items, formattedInventory)
+    TriggerClientEvent('fdb-inventory:client:openInventory', source, RSGPlayer.PlayerData.items, formattedInventory)
 end
 
 exports('OpenInventory', Inventory.OpenInventory)
@@ -919,7 +919,7 @@ Inventory.RemoveItem = function(identifier, item, amount, slot, reason, isMove)
             slot = slot,
             info = inventoryItem.info
         }
-        TriggerEvent("rsg-inventory:server:itemRemovedFromPlayerInventory", identifier, item, data, reason, isMove)
+        TriggerEvent("fdb-inventory:server:itemRemovedFromPlayerInventory", identifier, item, data, reason, isMove)
     elseif Inventories[identifier] then
         Inventory.SaveStash(identifier)
     end
@@ -1019,7 +1019,7 @@ end
 
 exports('GetStashWeight', Inventory.GetStashWeight)
 
-lib.callback.register('rsg-inventory:server:getBackpackStash', function(source, uid, model)
+lib.callback.register('fdb-inventory:server:getBackpackStash', function(source, uid, model)
     local maxWeight = 5000
     local slots = 15
     local label = "Mochila"

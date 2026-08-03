@@ -12,7 +12,7 @@ end)
 
 -- Plays the "give item" animation on the player
 -- Only works if the player is not in a vehicle or on a mount
-RegisterNetEvent('rsg-inventory:client:giveAnim', function()
+RegisterNetEvent('fdb-inventory:client:giveAnim', function()
     if IsPedInAnyVehicle(cache.ped, false) or IsPedOnMount(cache.ped) then 
         return -- do nothing if in vehicle or on horse
     end

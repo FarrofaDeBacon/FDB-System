@@ -79,7 +79,7 @@ Shops.OpenShop = function(source, name)
 
     Player(source).state.inv_busy = true
     Inventory.CheckPlayerItemsDecay(player)
-    TriggerClientEvent('rsg-inventory:client:openInventory', source, player.PlayerData.items, formattedInventory)
+    TriggerClientEvent('fdb-inventory:client:openInventory', source, player.PlayerData.items, formattedInventory)
 end
 
 exports('OpenShop', Shops.OpenShop)

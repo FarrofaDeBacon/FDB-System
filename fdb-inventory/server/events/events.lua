@@ -5,12 +5,12 @@
 local FDBCore = exports['fdb-core']:GetCoreObject()
 
 -- Releases the inv_busy lock when player closes their own pocket inventory
-RegisterNetEvent('rsg-inventory:server:releaseBusy', function()
+RegisterNetEvent('fdb-inventory:server:releaseBusy', function()
     local src = source
     Player(src).state.inv_busy = false
 end)
 
-RegisterNetEvent('rsg-inventory:server:closeInventory', function(inventory)
+RegisterNetEvent('fdb-inventory:server:closeInventory', function(inventory)
     local src = source
     local RSGPlayer = RSGCore.Functions.GetPlayer(src)
     if not RSGPlayer then return end
@@ -39,7 +39,7 @@ RegisterNetEvent('rsg-inventory:server:closeInventory', function(inventory)
     if Drops[inventory] then
         Drops[inventory].isOpen = false
         if next(Drops[inventory].items) == nil and not Drops[inventory].isOpen then 
-            TriggerClientEvent('rsg-inventory:client:removeDropTarget', -1, Drops[inventory].entityId)
+            TriggerClientEvent('fdb-inventory:client:removeDropTarget', -1, Drops[inventory].entityId)
             Wait(500)
             -- Re-check state after yield (another player may have opened the drop)
             if not Drops[inventory] or Drops[inventory].isOpen then return end
@@ -62,7 +62,7 @@ end)
     Server Event: Use an item from player's inventory
     Handles weapons, throwable weapons, equipment, and regular items
 --]]
-RegisterNetEvent('rsg-inventory:server:useItem', function(item)
+RegisterNetEvent('fdb-inventory:server:useItem', function(item)
     local src = source
     local Player = RSGCore.Functions.GetPlayer(src)
     if not Player then return false end
@@ -102,7 +102,7 @@ RegisterNetEvent('rsg-inventory:server:useItem', function(item)
         -- equipment = true  you can add more 
     }
 
-    local inMelee = lib.callback.await('rsg-inventory:client:isInMelee', src)
+    local inMelee = lib.callback.await('fdb-inventory:client:isInMelee', src)
     if inMelee and not allowedDuringMelee[itemData.type] then
         TriggerClientEvent('lib:notify', src, {
             title = 'Inventory',
@@ -123,19 +123,19 @@ RegisterNetEvent('rsg-inventory:server:useItem', function(item)
             )
         end
         TriggerClientEvent('fdb-weapons:client:UseWeapon', src, itemData)
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, itemInfo, 'use')
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, itemInfo, 'use')
 
     elseif itemData.type == 'weapon_thrown' then
         TriggerClientEvent('fdb-weapons:client:UseThrownWeapon', src, itemData)
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, itemInfo, 'use')
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, itemInfo, 'use')
 
     elseif itemData.type == 'equipment' then
         TriggerClientEvent('fdb-weapons:client:UseEquipment', src, itemData)
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, itemInfo, 'use')
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, itemInfo, 'use')
 
     else
         Inventory.UseItem(itemData.name, src, itemData)
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, itemInfo, 'use')
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, itemInfo, 'use')
     end
 end)
 
@@ -157,7 +157,7 @@ end)
 -- the one actually called by the client. Keeping both registered under
 -- different names would just be dead code maintained in two places.
 
-RegisterNetEvent('rsg-inventory:server:UseHotbarSlot', function(slot)
+RegisterNetEvent('fdb-inventory:server:UseHotbarSlot', function(slot)
     local src = source
     local Player = RSGCore.Functions.GetPlayer(src)
     if not Player then return end
@@ -168,7 +168,7 @@ RegisterNetEvent('rsg-inventory:server:UseHotbarSlot', function(slot)
 
     local itemInfo = RSGCore.Shared.Items[itemData.name]
     
-    local inMelee = lib.callback.await('rsg-inventory:client:isInMelee', src)
+    local inMelee = lib.callback.await('fdb-inventory:client:isInMelee', src)
     if inMelee and not (itemData.type == 'weapon' or itemData.type == 'weapon_thrown') then
         TriggerClientEvent('lib:notify', src, {
             title = 'Inventory',
@@ -192,19 +192,19 @@ RegisterNetEvent('rsg-inventory:server:UseHotbarSlot', function(slot)
         end
         print("[rsg-inventory DEBUG] Triggering fdb-weapons:client:UseWeapon")
         TriggerClientEvent('fdb-weapons:client:UseWeapon', src, itemData)
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, itemInfo, 'use')
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, itemInfo, 'use')
 
     elseif itemData.type == 'weapon_thrown' then
         TriggerClientEvent('fdb-weapons:client:UseThrownWeapon', src, itemData)
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, itemInfo, 'use')
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, itemInfo, 'use')
 
     elseif itemData.type == 'equipment' then
         TriggerClientEvent('fdb-weapons:client:UseEquipment', src, itemData)
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, itemInfo, 'use')
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, itemInfo, 'use')
 
     else
         Inventory.UseItem(itemData.name, src, itemData)
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, itemInfo, 'use')
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, itemInfo, 'use')
     end
 end)
 
@@ -213,14 +213,14 @@ end)
     Server Event: Update player's hotbar
     Sends the first 5 inventory slots to the client for UI update
 --]]
-RegisterNetEvent('rsg-inventory:server:updateHotbar', function()
+RegisterNetEvent('fdb-inventory:server:updateHotbar', function()
     local src = source
     local Player = RSGCore.Functions.GetPlayer(src)
     if not Player then return end
 
     local items, activeSlots = Inventory.GetHotbarItems(Player)
 
-    TriggerClientEvent('rsg-inventory:client:updateHotbar', src, items, activeSlots)
+    TriggerClientEvent('fdb-inventory:client:updateHotbar', src, items, activeSlots)
 end)
 
 
@@ -231,7 +231,7 @@ local setInventoryCooldowns = {}
     Server Event: Move or swap items between inventories
     Handles stacking, splitting, moving, and swapping items between inventories
 --]]
-lib.callback.register('rsg-inventory:server:SetInventoryData', function(source, fromInventory, toInventory, fromSlot, toSlot, fromAmount, toAmount)
+lib.callback.register('fdb-inventory:server:SetInventoryData', function(source, fromInventory, toInventory, fromSlot, toSlot, fromAmount, toAmount)
     -- Rate limit per player (100ms)
     local src = source
     local now = GetGameTimer()
@@ -529,7 +529,7 @@ lib.callback.register('rsg-inventory:server:SetInventoryData', function(source, 
     end
     return false, 'no_from_item'
 end)
-RegisterNetEvent('rsg-inventory:server:openPlayerInventory', function(targetId)
+RegisterNetEvent('fdb-inventory:server:openPlayerInventory', function(targetId)
     local src = source
     local Player = RSGCore.Functions.GetPlayer(src)
     local Target = RSGCore.Functions.GetPlayer(targetId)
@@ -584,7 +584,7 @@ RegisterNetEvent('rsg-inventory:server:openPlayerInventory', function(targetId)
     Inventory.OpenInventoryById(src, targetId)
 end)
 
-RegisterNetEvent('rsg-inventory:server:openStash', function(stashId)
+RegisterNetEvent('fdb-inventory:server:openStash', function(stashId)
     local src = source
     local Player = RSGCore.Functions.GetPlayer(src)
 

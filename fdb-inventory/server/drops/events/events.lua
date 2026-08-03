@@ -1,6 +1,6 @@
 local RSGCore = exports['rsg-core']:GetCoreObject()
 -- Open drops
-RegisterNetEvent('rsg-inventory:server:openDrop', function(dropId)
+RegisterNetEvent('fdb-inventory:server:openDrop', function(dropId)
     local src = source
     local Player = RSGCore.Functions.GetPlayer(src)
     if not Player then return end
@@ -32,10 +32,10 @@ RegisterNetEvent('rsg-inventory:server:openDrop', function(dropId)
     drop.isOpen = true
 
     -- Send both player inventory and drop inventory to client
-    TriggerClientEvent('rsg-inventory:client:openInventory', src, Player.PlayerData.items, formattedInventory)
+    TriggerClientEvent('fdb-inventory:client:openInventory', src, Player.PlayerData.items, formattedInventory)
 end)
     -- update drops
-lib.callback.register('rsg-inventory:updateDrop', function(source, dropId, coords)
+lib.callback.register('fdb-inventory:updateDrop', function(source, dropId, coords)
     local drop = Drops and Drops[dropId]
     if not drop then
         return false, 'no bag'

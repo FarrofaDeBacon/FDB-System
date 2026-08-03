@@ -21,7 +21,7 @@ local function isOnCooldown(src)
     return false
 end
 
-RegisterNetEvent('rsg-inventory:server:initiateTrade', function(targetId)
+RegisterNetEvent('fdb-inventory:server:initiateTrade', function(targetId)
     local src = source
     if isOnCooldown(src) then return end
 
@@ -65,11 +65,11 @@ RegisterNetEvent('rsg-inventory:server:initiateTrade', function(targetId)
         end
     end)
 
-    TriggerClientEvent('rsg-inventory:client:tradeRequest', targetId, src, getCharName(src))
+    TriggerClientEvent('fdb-inventory:client:tradeRequest', targetId, src, getCharName(src))
     TriggerClientEvent('ox_lib:notify', src, { title = 'Trade', description = 'Trade request sent to ' .. getCharName(targetId), type = 'info', duration = 5000 })
 end)
 
-RegisterNetEvent('rsg-inventory:server:acceptTradeRequest', function(initiatorId)
+RegisterNetEvent('fdb-inventory:server:acceptTradeRequest', function(initiatorId)
     local src = source
     if isOnCooldown(src) then return end
     if pendingRequests[initiatorId] ~= src then return end
@@ -101,18 +101,18 @@ RegisterNetEvent('rsg-inventory:server:acceptTradeRequest', function(initiatorId
 
     local initiatorItems = initiator.PlayerData.items
     local targetItems = player.PlayerData.items
-    TriggerClientEvent('rsg-inventory:client:openTrade', initiatorId, tradeId, src, getCharName(src), initiatorItems, player.PlayerData)
-    TriggerClientEvent('rsg-inventory:client:openTrade', src, tradeId, initiatorId, getCharName(initiatorId), targetItems, initiator.PlayerData)
+    TriggerClientEvent('fdb-inventory:client:openTrade', initiatorId, tradeId, src, getCharName(src), initiatorItems, player.PlayerData)
+    TriggerClientEvent('fdb-inventory:client:openTrade', src, tradeId, initiatorId, getCharName(initiatorId), targetItems, initiator.PlayerData)
 end)
 
-RegisterNetEvent('rsg-inventory:server:declineTradeRequest', function(initiatorId)
+RegisterNetEvent('fdb-inventory:server:declineTradeRequest', function(initiatorId)
     if pendingRequests[initiatorId] == source then
         TriggerClientEvent('ox_lib:notify', initiatorId, { title = 'Trade', description = 'Trade request declined', type = 'error', duration = 5000 })
         pendingRequests[initiatorId] = nil
     end
 end)
 
-RegisterNetEvent('rsg-inventory:server:addTradeItem', function(tradeId, item, amount)
+RegisterNetEvent('fdb-inventory:server:addTradeItem', function(tradeId, item, amount)
     local src = source
     if isOnCooldown(src) then return end
 
@@ -171,11 +171,11 @@ RegisterNetEvent('rsg-inventory:server:addTradeItem', function(tradeId, item, am
         initiatorAccepted = trade.initiatorAccepted,
         targetAccepted = trade.targetAccepted
     }
-    TriggerClientEvent('rsg-inventory:client:updateTrade', trade.initiator, tradeData)
-    TriggerClientEvent('rsg-inventory:client:updateTrade', trade.target, tradeData)
+    TriggerClientEvent('fdb-inventory:client:updateTrade', trade.initiator, tradeData)
+    TriggerClientEvent('fdb-inventory:client:updateTrade', trade.target, tradeData)
 end)
 
-RegisterNetEvent('rsg-inventory:server:removeTradeItem', function(tradeId, tradeSlot)
+RegisterNetEvent('fdb-inventory:server:removeTradeItem', function(tradeId, tradeSlot)
     local src = source
     if isOnCooldown(src) then return end
 
@@ -207,11 +207,11 @@ RegisterNetEvent('rsg-inventory:server:removeTradeItem', function(tradeId, trade
         initiatorAccepted = trade.initiatorAccepted,
         targetAccepted = trade.targetAccepted
     }
-    TriggerClientEvent('rsg-inventory:client:updateTrade', trade.initiator, tradeData)
-    TriggerClientEvent('rsg-inventory:client:updateTrade', trade.target, tradeData)
+    TriggerClientEvent('fdb-inventory:client:updateTrade', trade.initiator, tradeData)
+    TriggerClientEvent('fdb-inventory:client:updateTrade', trade.target, tradeData)
 end)
 
-RegisterNetEvent('rsg-inventory:server:confirmTrade', function(tradeId)
+RegisterNetEvent('fdb-inventory:server:confirmTrade', function(tradeId)
     local src = source
     if isOnCooldown(src) then return end
 
@@ -232,15 +232,15 @@ RegisterNetEvent('rsg-inventory:server:confirmTrade', function(tradeId)
         initiatorAccepted = trade.initiatorAccepted,
         targetAccepted = trade.targetAccepted
     }
-    TriggerClientEvent('rsg-inventory:client:updateTrade', trade.initiator, tradeData)
-    TriggerClientEvent('rsg-inventory:client:updateTrade', trade.target, tradeData)
+    TriggerClientEvent('fdb-inventory:client:updateTrade', trade.initiator, tradeData)
+    TriggerClientEvent('fdb-inventory:client:updateTrade', trade.target, tradeData)
 
     if trade.initiatorAccepted and trade.targetAccepted then
         local initiatorPlayer = RSGCore.Functions.GetPlayer(trade.initiator)
         local targetPlayer = RSGCore.Functions.GetPlayer(trade.target)
         if not initiatorPlayer or not targetPlayer then
-            TriggerClientEvent('rsg-inventory:client:cancelTrade', trade.initiator)
-            TriggerClientEvent('rsg-inventory:client:cancelTrade', trade.target)
+            TriggerClientEvent('fdb-inventory:client:cancelTrade', trade.initiator)
+            TriggerClientEvent('fdb-inventory:client:cancelTrade', trade.target)
             Trades[tradeId] = nil
             return
         end
@@ -255,8 +255,8 @@ RegisterNetEvent('rsg-inventory:server:confirmTrade', function(tradeId)
             for _, item in pairs(trade.targetItems) do
                 Inventory.AddItem(trade.target, item.name, item.amount, false, item.info, 'trade cancel return')
             end
-            TriggerClientEvent('rsg-inventory:client:cancelTrade', trade.initiator)
-            TriggerClientEvent('rsg-inventory:client:cancelTrade', trade.target)
+            TriggerClientEvent('fdb-inventory:client:cancelTrade', trade.initiator)
+            TriggerClientEvent('fdb-inventory:client:cancelTrade', trade.target)
             Trades[tradeId] = nil
             return
         end
@@ -264,8 +264,8 @@ RegisterNetEvent('rsg-inventory:server:confirmTrade', function(tradeId)
         trade.executing = true
         local success, errorItem = Inventory.ExecuteTrade(trade)
         if success then
-            TriggerClientEvent('rsg-inventory:client:completeTrade', trade.initiator)
-            TriggerClientEvent('rsg-inventory:client:completeTrade', trade.target)
+            TriggerClientEvent('fdb-inventory:client:completeTrade', trade.initiator)
+            TriggerClientEvent('fdb-inventory:client:completeTrade', trade.target)
             TriggerClientEvent('ox_lib:notify', trade.initiator, { title = 'Trade', description = 'Trade completed successfully', type = 'success', duration = 5000 })
             TriggerClientEvent('ox_lib:notify', trade.target, { title = 'Trade', description = 'Trade completed successfully', type = 'success', duration = 5000 })
         else
@@ -279,8 +279,8 @@ RegisterNetEvent('rsg-inventory:server:confirmTrade', function(tradeId)
                 initiatorAccepted = false,
                 targetAccepted = false
             }
-            TriggerClientEvent('rsg-inventory:client:updateTrade', trade.initiator, tradeData)
-            TriggerClientEvent('rsg-inventory:client:updateTrade', trade.target, tradeData)
+            TriggerClientEvent('fdb-inventory:client:updateTrade', trade.initiator, tradeData)
+            TriggerClientEvent('fdb-inventory:client:updateTrade', trade.target, tradeData)
             local itemLabel = errorItem and RSGCore.Shared.Items[errorItem] and RSGCore.Shared.Items[errorItem].label or 'item'
             TriggerClientEvent('ox_lib:notify', trade.initiator, { title = 'Trade', description = 'Trade failed - ' .. itemLabel .. ' could not be transferred', type = 'error', duration = 5000 })
             TriggerClientEvent('ox_lib:notify', trade.target, { title = 'Trade', description = 'Trade failed - ' .. itemLabel .. ' could not be transferred', type = 'error', duration = 5000 })
@@ -288,7 +288,7 @@ RegisterNetEvent('rsg-inventory:server:confirmTrade', function(tradeId)
     end
 end)
 
-RegisterNetEvent('rsg-inventory:server:cancelTrade', function(tradeId)
+RegisterNetEvent('fdb-inventory:server:cancelTrade', function(tradeId)
     local src = source
     if isOnCooldown(src) then return end
 
@@ -304,8 +304,8 @@ RegisterNetEvent('rsg-inventory:server:cancelTrade', function(tradeId)
         Inventory.AddItem(trade.target, item.name, item.amount, false, item.info, 'trade cancel return')
     end
 
-    TriggerClientEvent('rsg-inventory:client:cancelTrade', trade.initiator)
-    TriggerClientEvent('rsg-inventory:client:cancelTrade', trade.target)
+    TriggerClientEvent('fdb-inventory:client:cancelTrade', trade.initiator)
+    TriggerClientEvent('fdb-inventory:client:cancelTrade', trade.target)
     TriggerClientEvent('ox_lib:notify', src, { title = 'Trade', description = 'Trade cancelled', type = 'info', duration = 5000 })
     Trades[tradeId] = nil
 end)
@@ -390,7 +390,7 @@ AddEventHandler('playerDropped', function()
             -- ExecuteTrade is in progress and has its own rollback.
             -- Notify the other player; ExecuteTrade will clean up the trade.
             local other = trade.initiator == src and trade.target or trade.initiator
-            TriggerClientEvent('rsg-inventory:client:cancelTrade', other)
+            TriggerClientEvent('fdb-inventory:client:cancelTrade', other)
         elseif trade.initiator == src or trade.target == src then
             -- Return escrowed items to the disconnecting player
             if trade.initiator == src then
@@ -403,15 +403,15 @@ AddEventHandler('playerDropped', function()
                     Inventory.AddItem(src, item.name, item.amount, false, item.info, 'trade disconnect return')
                 end
             end
-            TriggerClientEvent('rsg-inventory:client:cancelTrade', trade.initiator)
-            TriggerClientEvent('rsg-inventory:client:cancelTrade', trade.target)
+            TriggerClientEvent('fdb-inventory:client:cancelTrade', trade.initiator)
+            TriggerClientEvent('fdb-inventory:client:cancelTrade', trade.target)
             Trades[id] = nil
         end
     end
     for initiatorId, targetId in pairs(pendingRequests) do
         if initiatorId == src or targetId == src then
-            TriggerClientEvent('rsg-inventory:client:tradeRequestCancelled', initiatorId)
-            TriggerClientEvent('rsg-inventory:client:tradeRequestCancelled', targetId)
+            TriggerClientEvent('fdb-inventory:client:tradeRequestCancelled', initiatorId)
+            TriggerClientEvent('fdb-inventory:client:tradeRequestCancelled', targetId)
             pendingRequests[initiatorId] = nil
         end
     end

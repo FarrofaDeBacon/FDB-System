@@ -49,7 +49,7 @@ local function GetNearbyPlayers(maxDistance)
                 local dist = #(GetEntityCoords(ped) - myCoords)
                 if dist <= maxDist then
                     local sid = GetPlayerServerId(pid)
-                    local playerName = lib.callback.await('rsg-inventory:server:getPlayerName', false, sid)
+                    local playerName = lib.callback.await('fdb-inventory:server:getPlayerName', false, sid)
                     options[#options+1] = {
                         value = sid,
                         label = playerName or "Player : " .. sid,
@@ -88,7 +88,7 @@ end
 --- NUI callback to attempt a purchase
 RegisterNUICallback('AttemptPurchase', function(data, cb)
     if not validateToken(data and data.token) then cb(false) return end
-    local ok = lib.callback.await('rsg-inventory:server:attemptPurchase', false, data)
+    local ok = lib.callback.await('fdb-inventory:server:attemptPurchase', false, data)
     cb(ok)
 end)
 
@@ -100,13 +100,13 @@ RegisterNUICallback('CloseInventory', function(data, cb)
         if data.name:find('trunk-') then
             CloseTrunk()
         end
-        TriggerServerEvent('rsg-inventory:server:closeInventory', data.name)
+        TriggerServerEvent('fdb-inventory:server:closeInventory', data.name)
     elseif LocalPlayer.state.currentDrop then
-        TriggerServerEvent('rsg-inventory:server:closeInventory', LocalPlayer.state.currentDrop)
+        TriggerServerEvent('fdb-inventory:server:closeInventory', LocalPlayer.state.currentDrop)
         LocalPlayer.state.currentDrop = nil
     else
         -- Player closed their own pocket inventory — reset inv_busy on server
-        TriggerServerEvent('rsg-inventory:server:releaseBusy')
+        TriggerServerEvent('fdb-inventory:server:releaseBusy')
     end
     cb('ok')
 end)
@@ -125,7 +125,7 @@ end)
 RegisterNUICallback('UseItem', function(data, cb)
     if not validateToken(data and data.token) then cb('ok') return end
     if data and data.item then
-        TriggerServerEvent('rsg-inventory:server:useItem', data.item)
+        TriggerServerEvent('fdb-inventory:server:useItem', data.item)
     end
     cb('ok')
 end)
@@ -134,7 +134,7 @@ end)
 RegisterNUICallback('SetInventoryData', function(data, cb)
     if not validateToken(data and data.token) then cb({success = false}) return end
     if data then
-        local success, reason = lib.callback.await('rsg-inventory:server:SetInventoryData', false,
+        local success, reason = lib.callback.await('fdb-inventory:server:SetInventoryData', false,
             data.fromInventory, data.toInventory,
             data.fromSlot, data.toSlot,
             data.fromAmount, data.toAmount
@@ -169,7 +169,7 @@ RegisterNUICallback('GiveItem', function(data, cb)
         local pid, dist = GetClosestPlayerWithin(3.0)
         if pid ~= -1 and dist < 3.0 then
             local targetSid = GetPlayerServerId(pid)
-            local success = lib.callback.await('rsg-inventory:server:giveItem', false,
+            local success = lib.callback.await('fdb-inventory:server:giveItem', false,
                 targetSid, data.item.name, data.amount, data.slot, data.info, data.fromInventory
             )
             cb(success)
@@ -189,7 +189,7 @@ RegisterNUICallback('GiveItem', function(data, cb)
         local typedSid = tonumber(getplayerid[1])
         local pid, dist = GetClosestPlayerWithin(3.0)
         if pid ~= -1 and dist < 3.0 and GetPlayerServerId(pid) == typedSid then
-            local success = lib.callback.await('rsg-inventory:server:giveItem', false,
+            local success = lib.callback.await('fdb-inventory:server:giveItem', false,
                 typedSid, data.item.name, data.amount, data.slot, data.info, data.fromInventory
             )
             cb(success)
@@ -215,7 +215,7 @@ RegisterNUICallback('GiveItem', function(data, cb)
         end
         local dist = #(GetEntityCoords(GetPlayerPed(selectedPid)) - GetEntityCoords(cache.ped))
         if dist < 3.0 then
-            local success = lib.callback.await('rsg-inventory:server:giveItem', false,
+            local success = lib.callback.await('fdb-inventory:server:giveItem', false,
                 selectedSid, data.item.name, data.amount, data.slot, data.info, data.fromInventory
             )
             cb(success)
@@ -245,7 +245,7 @@ RegisterNUICallback('GetBackpackStashData', function(data, cb)
     if not validateToken(data and data.token) then cb(false) return end
     if data and data.uid then
         local model = data.model or "p_ambpack02x"
-        local backpackData = lib.callback.await('rsg-inventory:server:getBackpackStash', false, data.uid, model)
+        local backpackData = lib.callback.await('fdb-inventory:server:getBackpackStash', false, data.uid, model)
         cb(backpackData)
     else
         cb(false)
@@ -254,13 +254,13 @@ end)
 
 RegisterNUICallback('EquipItem', function(data, cb)
     if not validateToken(data and data.token) then cb(false) return end
-    TriggerServerEvent('rsg-inventory:server:EquipItem', data.slot, data.equipmentType)
+    TriggerServerEvent('fdb-inventory:server:EquipItem', data.slot, data.equipmentType)
     cb(true)
 end)
 
 RegisterNUICallback('UnequipItem', function(data, cb)
     if not validateToken(data and data.token) then cb(false) return end
-    TriggerServerEvent('rsg-inventory:server:UnequipItem', data.equipmentType, data.slot)
+    TriggerServerEvent('fdb-inventory:server:UnequipItem', data.equipmentType, data.slot)
     cb(true)
 end)
 
@@ -269,7 +269,7 @@ RegisterNUICallback('DropEquipmentItem', function(data, cb)
     -- Close inventory immediately so cursor disappears and player can move
     SetNuiFocus(false, false)
     SendNUIMessage({ action = 'close', invToken = _G.GenerateInventoryCbToken() })
-    TriggerServerEvent('rsg-inventory:server:DropEquipmentItem', data.equipmentType)
+    TriggerServerEvent('fdb-inventory:server:DropEquipmentItem', data.equipmentType)
     cb(true)
 end)
 

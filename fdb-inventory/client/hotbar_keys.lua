@@ -14,7 +14,7 @@ local HotbarKeys = {
 local function UseHotbarSlot(slot)
     if Inventory.CanPlayerUseInventory() then
         print(('[rsg-inventory] Comando hotbar slot %d executado via Loop! (Fase H6)'):format(slot))
-        TriggerServerEvent('rsg-inventory:server:UseHotbarSlot', slot)
+        TriggerServerEvent('fdb-inventory:server:UseHotbarSlot', slot)
     end
 end
 

@@ -17,7 +17,7 @@ end
 ---Fetches all current world drops from the server and adds a target interaction
 ---(`ox_target`) for each entity that still exists.
 function Drops.GetDrops()
-    local drops = lib.callback.await('rsg-inventory:server:GetCurrentDrops', false)
+    local drops = lib.callback.await('fdb-inventory:server:GetCurrentDrops', false)
     if not drops then return end
 
     for k, v in pairs(drops) do
@@ -30,7 +30,7 @@ function Drops.GetDrops()
                     label    = locale('info.o_bag'),
                     distance = 2.5,
                     onSelect = function()
-                        TriggerServerEvent('rsg-inventory:server:openDrop', k)
+                        TriggerServerEvent('fdb-inventory:server:openDrop', k)
                         LocalPlayer.state.currentDrop = k
                     end
                 }

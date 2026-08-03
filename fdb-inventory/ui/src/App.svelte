@@ -169,7 +169,7 @@
 
   async function validateToken(csrfToken) {
     try {
-      const response = await fetch("https://rsg-core/validateCSRF", {
+      const response = await fetch("https://fdb-core/validateCSRF", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json; charset=UTF-8'

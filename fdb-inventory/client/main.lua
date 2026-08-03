@@ -2,7 +2,7 @@ local RSGCore = exports['rsg-core']:GetCoreObject()
 local config = require 'shared.config'
 
 
-lib.callback.register('rsg-inventory:client:isInMelee', function()
+lib.callback.register('fdb-inventory:client:isInMelee', function()
     local ped = cache.ped
     return IsPedInMeleeCombat(ped)
 end)
@@ -18,7 +18,7 @@ CreateThread(function()
         distance = 2.5,                             -- maximum distance to interact
         onSelect = function(data)                   -- function triggered when player selects the vending machine
             data.coords = GetEntityCoords(data.entity) -- get the coords of the vending machine entity
-            TriggerServerEvent('rsg-inventory:server:openVending', data) -- request the vending inventory from server
+            TriggerServerEvent('fdb-inventory:server:openVending', data) -- request the vending inventory from server
         end,
     })
 end)

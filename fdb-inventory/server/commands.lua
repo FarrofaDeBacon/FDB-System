@@ -19,9 +19,9 @@ local function addItemToInventory(target, itemData, amount, info, context)
     amount = amount or 1
     local success = Inventory.AddItem(target, itemData.name, amount, false, info or {}, context or 'server command')
     if success then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', target, itemData, 'add', amount)
+        TriggerClientEvent('fdb-inventory:client:ItemBox', target, itemData, 'add', amount)
         if Player(target).state.inv_busy then
-            TriggerClientEvent('rsg-inventory:client:updateInventory', target)
+            TriggerClientEvent('fdb-inventory:client:updateInventory', target)
         end
     else
         notify(target, 'error.cgitem')
@@ -151,7 +151,7 @@ RegisterCommand('serversidehotbar', function(source)
     if ply.PlayerData.metadata.isdead or ply.PlayerData.metadata.inlaststand or ply.PlayerData.metadata.ishandcuffed then return end
 
     local hotbarItems, activeSlots = Inventory.GetHotbarItems(ply)
-    TriggerClientEvent('rsg-inventory:client:hotbar', source, hotbarItems, activeSlots)
+    TriggerClientEvent('fdb-inventory:client:hotbar', source, hotbarItems, activeSlots)
 end, false)
 
 -- /inventory command

@@ -8,7 +8,7 @@ local function notifyPlayer(source, messageKey, type)
     TriggerClientEvent('ox_lib:notify', source, { title = locale(messageKey), type = type or 'error', duration = 5000 })
 end
 
-lib.callback.register('rsg-inventory:server:attemptPurchase', function(source, data)
+lib.callback.register('fdb-inventory:server:attemptPurchase', function(source, data)
     -- Rate limit
     local now = os.time()
     if purchaseCooldowns[source] and now - purchaseCooldowns[source] < 1 then return false end
@@ -78,7 +78,7 @@ lib.callback.register('rsg-inventory:server:attemptPurchase', function(source, d
                 end
                 Inventory.RemoveItem(source, itemInfo.name, amount, itemInfo.slot, 'shop-sell', true)
                 Player.Functions.AddMoney('cash', buyPrice, 'shop-sell')
-                TriggerClientEvent('rsg-inventory:client:updateInventory', source)
+                TriggerClientEvent('fdb-inventory:client:updateInventory', source)
                 return true
             end
         end
@@ -113,6 +113,6 @@ lib.callback.register('rsg-inventory:server:attemptPurchase', function(source, d
 
     Player.Functions.RemoveMoney('cash', price, 'shop-purchase')
     Inventory.AddItem(source, itemInfo.name, amount, false, shopSlot.info or {}, 'shop-purchase')
-    TriggerClientEvent('rsg-inventory:client:updateInventory', source)
+    TriggerClientEvent('fdb-inventory:client:updateInventory', source)
     return true
 end)

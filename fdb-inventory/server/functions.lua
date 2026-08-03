@@ -176,7 +176,7 @@ Inventory.CheckPlayerItemsDecay = function(player)
     if needsUpdate then
         player.Functions.SetPlayerData('items', player.PlayerData.items)
         for _, item in pairs(removedItems) do 
-            TriggerClientEvent('rsg-inventory:client:ItemBox', player.PlayerData.source, RSGCore.Shared.Items[item.name], 'remove', item.amount)
+            TriggerClientEvent('fdb-inventory:client:ItemBox', player.PlayerData.source, RSGCore.Shared.Items[item.name], 'remove', item.amount)
         end
     end
 end
@@ -189,7 +189,7 @@ Inventory.CheckPlayerItemDecay = function(player, item)
     if updated then
         if delete and quality <= 0 then
             player.PlayerData.items[item.slot] = nil
-            TriggerClientEvent('rsg-inventory:client:ItemBox', player.PlayerData.source, RSGCore.Shared.Items[item.name], 'remove', item.amount)
+            TriggerClientEvent('fdb-inventory:client:ItemBox', player.PlayerData.source, RSGCore.Shared.Items[item.name], 'remove', item.amount)
         end
         
         player.Functions.SetPlayerData('items', player.PlayerData.items)

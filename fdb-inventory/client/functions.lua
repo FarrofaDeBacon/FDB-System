@@ -53,5 +53,5 @@ function Inventory.UseHotbarItem(slot)
         })
     end
 
-    TriggerServerEvent('rsg-inventory:server:useItem', itemData)
+    TriggerServerEvent('fdb-inventory:server:useItem', itemData)
 end

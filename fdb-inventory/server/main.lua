@@ -38,7 +38,7 @@ CreateThread(function()
     end
 end)
 
-RegisterNetEvent('rsg-inventory:server:EquipItem', function(slot, equipmentType)
+RegisterNetEvent('fdb-inventory:server:EquipItem', function(slot, equipmentType)
     local src = source
     local Player = RSGCore.Functions.GetPlayer(src)
     if not Player then return end
@@ -76,7 +76,7 @@ RegisterNetEvent('rsg-inventory:server:EquipItem', function(slot, equipmentType)
 
     if not isValid then
         TriggerClientEvent('RSGCore:Notify', src, "Este item nao cabe neste slot!", "error")
-        TriggerClientEvent('rsg-inventory:client:updateInventory', src)
+        TriggerClientEvent('fdb-inventory:client:updateInventory', src)
         return
     end
 
@@ -109,10 +109,10 @@ RegisterNetEvent('rsg-inventory:server:EquipItem', function(slot, equipmentType)
     end
 
     Player.Functions.SetMetaData('equipmentSlots', metadata.equipmentSlots)
-    TriggerClientEvent('rsg-inventory:client:updateInventory', src)
+    TriggerClientEvent('fdb-inventory:client:updateInventory', src)
 end)
 
-RegisterNetEvent('rsg-inventory:server:UnequipItem', function(equipmentType, targetSlot)
+RegisterNetEvent('fdb-inventory:server:UnequipItem', function(equipmentType, targetSlot)
     local src = source
     local Player = RSGCore.Functions.GetPlayer(src)
     if not Player then return end
@@ -152,17 +152,17 @@ RegisterNetEvent('rsg-inventory:server:UnequipItem', function(equipmentType, tar
 
     if not firstFreeSlot then
         TriggerClientEvent('RSGCore:Notify', src, "Seu bolso esta cheio!", "error")
-        TriggerClientEvent('rsg-inventory:client:updateInventory', src)
+        TriggerClientEvent('fdb-inventory:client:updateInventory', src)
         return
     end
 
     metadata.equipmentSlots[equipmentType] = nil
     Player.Functions.AddItem(item.name, 1, firstFreeSlot, item.info)
     Player.Functions.SetMetaData('equipmentSlots', metadata.equipmentSlots)
-    TriggerClientEvent('rsg-inventory:client:updateInventory', src)
+    TriggerClientEvent('fdb-inventory:client:updateInventory', src)
 end)
 
-RegisterNetEvent('rsg-inventory:server:DropEquipmentItem', function(equipmentType)
+RegisterNetEvent('fdb-inventory:server:DropEquipmentItem', function(equipmentType)
     local src = source
     local Player = RSGCore.Functions.GetPlayer(src)
     if not Player then return end
@@ -185,7 +185,7 @@ RSGCore.Commands.Add("clearequip", "Limpar slots de equipamentos corrompidos", {
         local metadata = Player.PlayerData.metadata
         metadata.equipmentSlots = { backpack = nil, satchel = nil, wallet = nil, holster = nil }
         Player.Functions.SetMetaData('equipmentSlots', metadata.equipmentSlots)
-        TriggerClientEvent('rsg-inventory:client:updateInventory', source)
+        TriggerClientEvent('fdb-inventory:client:updateInventory', source)
         TriggerClientEvent('RSGCore:Notify', source, "Slots de equipamento limpos!", "success")
     end
 end)

@@ -1,7 +1,7 @@
 local RSGCore = exports['rsg-core']:GetCoreObject()
 local config = require 'shared.config'
 
-RegisterNetEvent('rsg-inventory:server:openVending', function(data)
+RegisterNetEvent('fdb-inventory:server:openVending', function(data)
     local src = source
     local Player = RSGCore.Functions.GetPlayer(src)
     if not Player then return end

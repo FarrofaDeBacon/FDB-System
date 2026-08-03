@@ -15,7 +15,7 @@ end)
 
 ---Removes the target interaction from a dropped bag entity.
 ---@param dropId number Network ID of the entity that needs to have its ox_target removed
-RegisterNetEvent('rsg-inventory:client:removeDropTarget', function(dropId)
+RegisterNetEvent('fdb-inventory:client:removeDropTarget', function(dropId)
     repeat Wait(10) until NetworkDoesNetworkIdExist(dropId)
     local bag = NetworkGetEntityFromNetworkId(dropId)
     repeat Wait(10) until DoesEntityExist(bag)
@@ -24,7 +24,7 @@ end)
 
 ---Adds ox_target interactions (open / pickup) to a dropped bag entity.
 ---@param dropId number Network ID of the bag entity
-RegisterNetEvent('rsg-inventory:client:setupDropTarget', function(dropId)
+RegisterNetEvent('fdb-inventory:client:setupDropTarget', function(dropId)
     repeat Wait(10) until NetworkDoesNetworkIdExist(dropId)
     local bag = NetworkGetEntityFromNetworkId(dropId)
     repeat Wait(10) until DoesEntityExist(bag)
@@ -39,7 +39,7 @@ RegisterNetEvent('rsg-inventory:client:setupDropTarget', function(dropId)
             label    = locale('info.o_bag'),
             distance = 2.5,
             onSelect = function()
-                TriggerServerEvent('rsg-inventory:server:openDrop', newDropId)
+                TriggerServerEvent('fdb-inventory:server:openDrop', newDropId)
                 LocalPlayer.state.currentDrop = newDropId
             end,
         },

@@ -1,6 +1,6 @@
 local RSGCore = exports['rsg-core']:GetCoreObject()
 
-lib.callback.register('rsg-inventory:server:getPlayerName', function(source, targetId)
+lib.callback.register('fdb-inventory:server:getPlayerName', function(source, targetId)
     local Player = RSGCore.Functions.GetPlayer(targetId)
     if not Player then return GetPlayerName(targetId) end
     local char = Player.PlayerData.charinfo
@@ -11,7 +11,7 @@ lib.callback.register('rsg-inventory:server:getPlayerName', function(source, tar
 end)
 
 -- Register a server callback for giving an item from one player to another
-lib.callback.register('rsg-inventory:server:giveItem', function(source, target, item, amount, slot, info, fromInventory)
+lib.callback.register('fdb-inventory:server:giveItem', function(source, target, item, amount, slot, info, fromInventory)
     -- Get the player object for the source (the giver)
     local player = RSGCore.Functions.GetPlayer(source)
     -- Check if the source player exists and is not dead, in last stand, or handcuffed
@@ -103,14 +103,14 @@ lib.callback.register('rsg-inventory:server:giveItem', function(source, target, 
     end
 
     -- Trigger give animation for both players
-    TriggerClientEvent('rsg-inventory:client:giveAnim', source)
-    TriggerClientEvent('rsg-inventory:client:ItemBox', source, itemInfo, 'remove', amount)
-    TriggerClientEvent('rsg-inventory:client:giveAnim', target)
-    TriggerClientEvent('rsg-inventory:client:ItemBox', target, itemInfo, 'add', amount)
+    TriggerClientEvent('fdb-inventory:client:giveAnim', source)
+    TriggerClientEvent('fdb-inventory:client:ItemBox', source, itemInfo, 'remove', amount)
+    TriggerClientEvent('fdb-inventory:client:giveAnim', target)
+    TriggerClientEvent('fdb-inventory:client:ItemBox', target, itemInfo, 'add', amount)
 
     -- Update the target's inventory if they are marked as busy
     if Player(target).state.inv_busy then
-        TriggerClientEvent('rsg-inventory:client:updateInventory', target)
+        TriggerClientEvent('fdb-inventory:client:updateInventory', target)
     end
 
     -- Return true to indicate success

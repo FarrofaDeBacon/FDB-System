@@ -73,7 +73,7 @@ RegisterCommand('trade', function()
     if not input or not input[1] then return end
     local targetId = tonumber(input[1])
     if targetId then
-        TriggerServerEvent('rsg-inventory:server:initiateTrade', targetId)
+        TriggerServerEvent('fdb-inventory:server:initiateTrade', targetId)
     end
 end, false)
 

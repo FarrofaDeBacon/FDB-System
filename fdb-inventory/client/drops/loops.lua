@@ -56,7 +56,7 @@ CreateThread(function()
                     FreezeEntityPosition(bagObject, true)
 
                     --- Update the server with the new drop location
-                    local success = lib.callback.await('rsg-inventory:updateDrop', false, LocalPlayer.state.heldDrop, dropCoords)
+                    local success = lib.callback.await('fdb-inventory:updateDrop', false, LocalPlayer.state.heldDrop, dropCoords)
                     if not success then
                         lib.notify({
                             title       = locale('error.Error'),

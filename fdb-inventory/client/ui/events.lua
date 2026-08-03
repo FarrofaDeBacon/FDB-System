@@ -33,7 +33,7 @@ local function hydrateEquipmentSlots(eqSlots)
 end
 
 -- @param items: table of items to display on the hotbar
-RegisterNetEvent('rsg-inventory:client:hotbar', function(items, activeSlots)
+RegisterNetEvent('fdb-inventory:client:hotbar', function(items, activeSlots)
     local token = exports['rsg-core']:GenerateCSRFToken() -- CSRF token for NUI security
     local invToken = GenerateInventoryCbToken()
     LocalPlayer.state.hotbarShown = not LocalPlayer.state.hotbarShown -- toggle state
@@ -48,7 +48,7 @@ RegisterNetEvent('rsg-inventory:client:hotbar', function(items, activeSlots)
 end)
 
 -- Close the inventory UI
-RegisterNetEvent('rsg-inventory:client:closeInv', function()
+RegisterNetEvent('fdb-inventory:client:closeInv', function()
     SetNuiFocus(false, false) -- always release cursor on server-forced close
     local invToken = GenerateInventoryCbToken()
     SendNUIMessage({
@@ -58,7 +58,7 @@ RegisterNetEvent('rsg-inventory:client:closeInv', function()
 end)
 
 -- Update the player's inventory UI with current items
-RegisterNetEvent('rsg-inventory:client:updateInventory', function()
+RegisterNetEvent('fdb-inventory:client:updateInventory', function()
 
     local token = exports['rsg-core']:GenerateCSRFToken()
     local invToken = GenerateInventoryCbToken()
@@ -77,7 +77,7 @@ end)
 -- @param itemData: table with item info
 -- @param type: string, type of update ('add', 'remove', 'info', etc.)
 -- @param amount: number of items affected
-RegisterNetEvent('rsg-inventory:client:ItemBox', function(itemData, type, amount)
+RegisterNetEvent('fdb-inventory:client:ItemBox', function(itemData, type, amount)
 
     local function sendItemBox()
         local invToken = GenerateInventoryCbToken()
@@ -92,7 +92,7 @@ RegisterNetEvent('rsg-inventory:client:ItemBox', function(itemData, type, amount
 
         -- Update server hotbar if items were added or removed
         if type == 'remove' or type == 'add' then
-            TriggerServerEvent('rsg-inventory:server:updateHotbar')
+            TriggerServerEvent('fdb-inventory:server:updateHotbar')
         end
     end
 
@@ -117,7 +117,7 @@ end)
 
 -- Update hotbar UI with new items
 -- @param items: table of items to display
-RegisterNetEvent('rsg-inventory:client:updateHotbar', function(items, activeSlots)
+RegisterNetEvent('fdb-inventory:client:updateHotbar', function(items, activeSlots)
 
     local token = exports['rsg-core']:GenerateCSRFToken()
     local invToken = GenerateInventoryCbToken()
@@ -174,7 +174,7 @@ local tempBackpackModel = nil
 -- Open the inventory UI with specified items and optional extra context
 -- @param items: table of inventory items
 -- @param other: optional table with extra info (trunk, stash, etc.)
-RegisterNetEvent('rsg-inventory:client:openInventory', function(items, other, serverSlots)
+RegisterNetEvent('fdb-inventory:client:openInventory', function(items, other, serverSlots)
     CreateThread(function()
         local token = exports['rsg-core']:GenerateCSRFToken()
         local invToken = GenerateInventoryCbToken()
@@ -208,7 +208,7 @@ RegisterNetEvent('rsg-inventory:client:openInventory', function(items, other, se
 
         if uid and model then
             print(("[rsg-inventory] Fetching backpack stash for uid: %s, model: %s"):format(uid, model))
-            backpackData = lib.callback.await('rsg-inventory:server:getBackpackStash', false, uid, model)
+            backpackData = lib.callback.await('fdb-inventory:server:getBackpackStash', false, uid, model)
             if backpackData then
                 backpackData.autoOpen = autoOpenBackpack
                 backpackData.isEquipped = isEquipped
@@ -246,8 +246,8 @@ RegisterNetEvent('rsg-inventory:client:openInventory', function(items, other, se
     end)
 end)
 
-RegisterNetEvent("rsg-inventory:client:openBackpackDrawer")
-AddEventHandler("rsg-inventory:client:openBackpackDrawer", function(backpackUid, backpackModel)
+RegisterNetEvent("fdb-inventory:client:openBackpackDrawer")
+AddEventHandler("fdb-inventory:client:openBackpackDrawer", function(backpackUid, backpackModel)
     print(("[rsg-inventory] openBackpackDrawer event triggered. backpackUid: %s, backpackModel: %s"):format(tostring(backpackUid), tostring(backpackModel)))
     autoOpenBackpack = true
     tempBackpackUid = backpackUid

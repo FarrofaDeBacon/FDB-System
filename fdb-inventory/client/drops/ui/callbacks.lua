@@ -5,7 +5,7 @@ RegisterNUICallback('DropItem', function(data, cb)
         return
     end
     -- Request the server to create a dropped item entity and get its network ID
-    local dropId = lib.callback.await('rsg-inventory:server:createDrop', false, data)
+    local dropId = lib.callback.await('fdb-inventory:server:createDrop', false, data)
 
     -- If the drop creation failed, return false to the UI
     if not dropId then

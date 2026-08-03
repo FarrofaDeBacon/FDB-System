@@ -1,6 +1,6 @@
 local RSGCore = exports['rsg-core']:GetCoreObject()
 -- Callback to get all current item drops
-lib.callback.register('rsg-inventory:server:GetCurrentDrops', function(source)
+lib.callback.register('fdb-inventory:server:GetCurrentDrops', function(source)
     return Drops -- return the table containing all active drops
 end)
 
@@ -103,7 +103,7 @@ local function CreateItemDrop(coords, itemData, shouldRemoveFromInventory, sourc
         }
 
         -- Setup client target
-        TriggerClientEvent('rsg-inventory:client:setupDropTarget', -1, networkId)
+        TriggerClientEvent('fdb-inventory:client:setupDropTarget', -1, networkId)
     else
         -- Add to existing drop
         table.insert(Drops[newDropId].items, itemData)
@@ -118,7 +118,7 @@ Helpers.CreateItemDrop = CreateItemDrop
 local dropCooldowns = {}
 
 -- Callback to create a new item drop
-lib.callback.register('rsg-inventory:server:createDrop', function(source, item)
+lib.callback.register('fdb-inventory:server:createDrop', function(source, item)
     local Player = RSGCore.Functions.GetPlayer(source)
     if not Player then return false end
 

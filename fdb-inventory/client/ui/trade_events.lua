@@ -1,6 +1,6 @@
 local RSGCore = exports['rsg-core']:GetCoreObject()
 
-RegisterNetEvent('rsg-inventory:client:tradeRequest', function(initiatorId, initiatorName)
+RegisterNetEvent('fdb-inventory:client:tradeRequest', function(initiatorId, initiatorName)
     lib.registerContext({
         id = 'trade_request',
         title = 'Trade Request',
@@ -8,13 +8,13 @@ RegisterNetEvent('rsg-inventory:client:tradeRequest', function(initiatorId, init
             {
                 title = 'Accept trade from ' .. initiatorName,
                 onSelect = function()
-                    TriggerServerEvent('rsg-inventory:server:acceptTradeRequest', initiatorId)
+                    TriggerServerEvent('fdb-inventory:server:acceptTradeRequest', initiatorId)
                 end
             },
             {
                 title = 'Decline trade from ' .. initiatorName,
                 onSelect = function()
-                    TriggerServerEvent('rsg-inventory:server:declineTradeRequest', initiatorId)
+                    TriggerServerEvent('fdb-inventory:server:declineTradeRequest', initiatorId)
                 end
             }
         }
@@ -22,12 +22,12 @@ RegisterNetEvent('rsg-inventory:client:tradeRequest', function(initiatorId, init
     lib.showContext('trade_request')
 end)
 
-RegisterNetEvent('rsg-inventory:client:tradeRequestCancelled', function()
+RegisterNetEvent('fdb-inventory:client:tradeRequestCancelled', function()
 
     lib.hideContext()
 end)
 
-RegisterNetEvent('rsg-inventory:client:openTrade', function(tradeId, partnerId, partnerName, items, partnerData)
+RegisterNetEvent('fdb-inventory:client:openTrade', function(tradeId, partnerId, partnerName, items, partnerData)
 
     local token = exports['rsg-core']:GenerateCSRFToken()
     local invToken = GenerateInventoryCbToken()
@@ -59,7 +59,7 @@ RegisterNetEvent('rsg-inventory:client:openTrade', function(tradeId, partnerId, 
     })
 end)
 
-RegisterNetEvent('rsg-inventory:client:updateTrade', function(tradeData)
+RegisterNetEvent('fdb-inventory:client:updateTrade', function(tradeData)
 
     local token = exports['rsg-core']:GenerateCSRFToken()
     local invToken = GenerateInventoryCbToken()
@@ -71,7 +71,7 @@ RegisterNetEvent('rsg-inventory:client:updateTrade', function(tradeData)
     })
 end)
 
-RegisterNetEvent('rsg-inventory:client:cancelTrade', function()
+RegisterNetEvent('fdb-inventory:client:cancelTrade', function()
 
     local token = exports['rsg-core']:GenerateCSRFToken()
     local invToken = GenerateInventoryCbToken()
@@ -82,7 +82,7 @@ RegisterNetEvent('rsg-inventory:client:cancelTrade', function()
     })
 end)
 
-RegisterNetEvent('rsg-inventory:client:completeTrade', function()
+RegisterNetEvent('fdb-inventory:client:completeTrade', function()
 
     local token = exports['rsg-core']:GenerateCSRFToken()
     local invToken = GenerateInventoryCbToken()

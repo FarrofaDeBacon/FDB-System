@@ -17,7 +17,7 @@ CreateThread(function()
                     local playerIndex = NetworkGetPlayerIndexFromPed(entity)
                     local serverId = GetPlayerServerId(playerIndex)
                     if serverId then
-                        TriggerServerEvent('rsg-inventory:server:initiateTrade', serverId)
+                        TriggerServerEvent('fdb-inventory:server:initiateTrade', serverId)
                     end
                 end
             end,

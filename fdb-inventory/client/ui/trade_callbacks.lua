@@ -3,7 +3,7 @@ RegisterNUICallback('AddTradeItem', function(data, cb)
         cb('ok')
         return
     end
-    TriggerServerEvent('rsg-inventory:server:addTradeItem', data.tradeId, data.item, data.amount)
+    TriggerServerEvent('fdb-inventory:server:addTradeItem', data.tradeId, data.item, data.amount)
     cb('ok')
 end)
 
@@ -12,7 +12,7 @@ RegisterNUICallback('RemoveTradeItem', function(data, cb)
         cb('ok')
         return
     end
-    TriggerServerEvent('rsg-inventory:server:removeTradeItem', data.tradeId, data.tradeSlot)
+    TriggerServerEvent('fdb-inventory:server:removeTradeItem', data.tradeId, data.tradeSlot)
     cb('ok')
 end)
 
@@ -21,7 +21,7 @@ RegisterNUICallback('ConfirmTrade', function(data, cb)
         cb('ok')
         return
     end
-    TriggerServerEvent('rsg-inventory:server:confirmTrade', data.tradeId)
+    TriggerServerEvent('fdb-inventory:server:confirmTrade', data.tradeId)
     cb('ok')
 end)
 
@@ -30,7 +30,7 @@ RegisterNUICallback('CancelTrade', function(data, cb)
         cb('ok')
         return
     end
-    TriggerServerEvent('rsg-inventory:server:cancelTrade', data.tradeId)
+    TriggerServerEvent('fdb-inventory:server:cancelTrade', data.tradeId)
     cb('ok')
 end)
 
@@ -39,6 +39,6 @@ RegisterNUICallback('InitiateTrade', function(data, cb)
         cb('ok')
         return
     end
-    TriggerServerEvent('rsg-inventory:server:initiateTrade', data.targetId)
+    TriggerServerEvent('fdb-inventory:server:initiateTrade', data.targetId)
     cb('ok')
 end)
