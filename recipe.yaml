@@ -61,7 +61,7 @@ tasks:
       endpoint_add_udp "0.0.0.0:30120"
 
       # --- Conexão MySQL ---
-      set mysql_connection_string "mysql://{{dbUsername}}:{{dbPassword}}@{{dbHost}}/{{dbName}}?charset=utf8mb4"
+      set mysql_connection_string "{{dbConnectionString}}"
 
       # --- Ordem de Inicialização dos Recursos ---
       ensure oxmysql
