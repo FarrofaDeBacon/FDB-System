@@ -35,7 +35,7 @@ server_scripts {
 }
 
 dependencies {
-    'rsg-core',
+    'fdb-core',
     'ox_lib',
 }
 

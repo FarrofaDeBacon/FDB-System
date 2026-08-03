@@ -6,14 +6,20 @@ author: FarrofaDeBacon
 description: Receita txAdmin automatizada para deploy completo da base FDB-System (RedM) com fdb-core, fdb-spawn, fdb-multicharacter, fdb-inventory e fdb-horses.
 
 tasks:
-  # 1. Dependências Oficiais Overextended
-  - action: download_github
-    src: overextended/oxmysql
-    dest: ./resources/[core]/oxmysql
+  # 1. Dependências Oficiais Overextended (Release ZIP)
+  - action: download_file
+    path: ./tmp/files/oxmysql.zip
+    url: https://github.com/overextended/oxmysql/releases/latest/download/oxmysql.zip
+  - action: unzip
+    dest: ./resources/[core]
+    src: ./tmp/files/oxmysql.zip
 
-  - action: download_github
-    src: overextended/ox_lib
-    dest: ./resources/[core]/ox_lib
+  - action: download_file
+    path: ./tmp/files/ox_lib.zip
+    url: https://github.com/overextended/ox_lib/releases/latest/download/ox_lib.zip
+  - action: unzip
+    dest: ./resources/[core]
+    src: ./tmp/files/ox_lib.zip
 
   # 2. Framework Core FDB-System
   - action: download_github
@@ -58,6 +64,9 @@ tasks:
       # ================================================
       #          FDB-System Base Configuration
       # ================================================
+
+      # --- Identificação do Jogo (RedM) ---
+      set gamename rdr3
 
       endpoint_add_tcp "0.0.0.0:30120"
       endpoint_add_udp "0.0.0.0:30120"
