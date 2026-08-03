@@ -29,11 +29,12 @@ Este documento registra todas as alterações estruturais, correções de segura
   - Adicionada restrição `RSGCore.Functions.HasPermission(src, 'admin')` para invocações de rede por clientes sem nível admin.
 
 ### 1.5 Módulo Companheiro de Inventário (`rsg-inventory` ➔ `fdb-inventory`)
-- **Status**: 🔄 **EM EXECUÇÃO** (Abertura: `0acfb5fc4edd832c49ca438d1df73d7870a63b0e`) — Checklist formal aberto:
-  - [ ] **Rebrand Literal**: Renomear pasta e manifests (`rsg-inventory` ➔ `fdb-inventory`), exports (`exports['rsg-core']` ➔ `exports['fdb-core']`) e net events (`rsg-inventory:...` ➔ `fdb-inventory:...`).
-  - [ ] **Lock de Concorrência e Antidupe (Bloqueante)**: Substituição do rate-limit simples por temporizador (`setInventoryCooldowns < 100ms`) em `SetInventoryData` por um lock autoritativo real (`inv_busy`), impedindo a leitura simultânea de inventário antes do encerramento da gravação.
-  - [ ] **Validação de Distância Server-Side**: Garantir que a validação de distância para baús, drops e trocas seja realizada estritamente no servidor (`#(GetEntityCoords(srcPed) - GetEntityCoords(targetPed)) <= MAX_DIST`) via `GetPlayerPed(src)`.
-  - [ ] **StateBags Compartilhados (Bloqueante)**: Sincronização unificada da flag `Player(src).state.inv_busy` entre `fdb-inventory` e `fdb-core/server/moneyitems.lua`.
+- **Status**: 🔄 **EM EXECUÇÃO** (Abertura: `0acfb5fc4edd832c49ca438d1df73d7870a63b0e`) — Checklist formal expandido:
+  - [x] **Rebrand Literal de Recursos e Exports**: Renomeação da pasta `rsg-inventory` ➔ `fdb-inventory`, manifest (`description 'fdb-inventory'`) e substituição de `exports['rsg-core']` por `exports['fdb-core']`. (Commit: `30e71edd18873d25a02641417e6b03bf694e874b`).
+  - [ ] **Padronização de Eventos de Rede**: Renomear todos os net events server/client de `rsg-inventory:...` ➔ `fdb-inventory:...` em todo o código Lua e chamadas NUI/JS.
+  - [ ] **Lock de Concorrência e Antidupe Unificado (Bloqueante)**: Substituição do rate-limit simples por temporizador em `SetInventoryData`, `giveItem`, `createDrop` e `addTradeItem` por trava autoritativa estrita `inv_busy`, impedindo corridas de mutação de estado.
+  - [ ] **Validação de Distância Server-Side (Bloqueante)**: Garantir validação server-side de coordenadas em trocas, drops, vasculhamento de players e abertura de baús (`openStash` / `SetInventoryData`).
+  - [ ] **StateBags Compartilhados**: Sincronização e unicidade da flag `Player(src).state.inv_busy` entre `fdb-inventory` e `fdb-core/server/moneyitems.lua`.
   - [ ] **Banco de Dados & Índices**: Criação de índice na coluna `identifier` da tabela `inventories` e validação da chave `citizenid` na tabela `player_weapons`.
 
 ### 2. Camada de Banco de Dados (`FDB-Core/database/` & `FDB-Core/server/`)
