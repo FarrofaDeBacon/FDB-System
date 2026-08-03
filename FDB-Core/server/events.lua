@@ -43,9 +43,17 @@ if readyFunction ~= nil then
         if not columnsExist["weight"] or not columnsExist["slots"] then
             local defaultWeight = tonumber(FDBCore.Config.Player.PlayerDefaults.weight) or 100000
             local defaultSlots = tonumber(FDBCore.Config.Player.PlayerDefaults.slots) or 40
-            MySQL.query.await(string.format('ALTER TABLE players ADD COLUMN weight INT DEFAULT %d;', defaultWeight))
-            MySQL.query.await(string.format('ALTER TABLE players ADD COLUMN slots INT DEFAULT %d;', defaultSlots))
-            FDBCore.ShowSuccess(GetCurrentResourceName(), 'Added weight and slots columns to players table')
+            -- Check if players table exists before altering
+            local tableCheck = MySQL.query.await('SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = "players";', {DatabaseInfo.database})
+            if tableCheck and tableCheck[1] then
+                if not columnsExist["weight"] then
+                    pcall(function() MySQL.query.await(string.format('ALTER TABLE players ADD COLUMN weight INT DEFAULT %d;', defaultWeight)) end)
+                end
+                if not columnsExist["slots"] then
+                    pcall(function() MySQL.query.await(string.format('ALTER TABLE players ADD COLUMN slots INT DEFAULT %d;', defaultSlots)) end)
+                end
+                FDBCore.ShowSuccess(GetCurrentResourceName(), 'Ensured weight and slots columns exist in players table')
+            end
         end
     end)
 end

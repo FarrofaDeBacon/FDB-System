@@ -1,125 +1,120 @@
 $engine: 3
 $onesync: on
-name: FDB-System-Base
+name: FDB-System RedM Build
 version: 1.0.0
-author: FarrofaDeBacon
-description: Receita txAdmin automatizada e 100% autossuficiente para deploy completo da base FDB-System (RedM).
+author: Farrofa De Bacon
+description: FDB-System RedM Server Build
 
 tasks:
-  # 1. Driver MySQL (Release Oficial Overextended)
+  # Download all FDB-System files from our repository
+  - action: download_github
+    src: https://github.com/FarrofaDeBacon/FDB-System
+    ref: fix/companion-inventory-audit
+    dest: ./tmp/FDBSystem
+
+  # Setup server config
+  - action: move_path
+    src: ./tmp/FDBSystem/server.cfg
+    dest: ./server.cfg
+
+  # Prepare Database
+  - action: connect_database
+  - action: query_database
+    file: ./tmp/FDBSystem/fdbcore.sql
+
+  # ================================================
+  #  External Standalone Resources
+  # ================================================
+
+  # Base FXServer resources
+  - action: download_github
+    src: https://github.com/citizenfx/cfx-server-data
+    subpath: resources
+    dest: ./resources/[cfx-default]
+
+  # oxmysql (database driver)
   - action: download_file
     path: ./tmp/files/oxmysql.zip
-    url: https://github.com/overextended/oxmysql/releases/latest/download/oxmysql.zip
+    url: https://github.com/CommunityOx/oxmysql/releases/latest/download/oxmysql.zip
   - action: unzip
-    dest: ./resources/[core]
+    dest: ./resources/[standalone]
     src: ./tmp/files/oxmysql.zip
 
-  # 2. Bibliotecas e Dependências Standalone (Direct FDB-System)
+  # pma-voice (voice chat)
   - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: ox_lib
-    dest: ./resources/[core]/ox_lib
+    dest: ./resources/[standalone]/pma-voice
+    ref: main
+    src: https://github.com/AvarianKnight/pma-voice
 
+  # redm-female-fix
   - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: progressbar
-    dest: ./resources/[core]/progressbar
+    dest: ./resources/[standalone]/redm-female-fix
+    ref: main
+    src: https://github.com/Popisek/redm-female-fix
 
-  - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: weathersync
-    dest: ./resources/[core]/weathersync
+  - action: waste_time
+    seconds: 10
 
-  - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: PolyZone
-    dest: ./resources/[core]/PolyZone
+  # ================================================
+  #  FDB Standalone Resources (from our repo)
+  # ================================================
 
-  - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: rNotify
-    dest: ./resources/[core]/rNotify
+  - action: move_path
+    src: ./tmp/FDBSystem/ox_lib
+    dest: ./resources/[standalone]/ox_lib
 
-  - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: interact-sound
-    dest: ./resources/[core]/interact-sound
+  - action: move_path
+    src: ./tmp/FDBSystem/progressbar
+    dest: ./resources/[standalone]/progressbar
 
-  # 3. Framework Core FDB-System
-  - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: FDB-Core
-    dest: ./resources/[fdb]/fdb-core
+  - action: move_path
+    src: ./tmp/FDBSystem/PolyZone
+    dest: ./resources/[standalone]/PolyZone
 
-  # 4. Recursos Companheiros FDB-System
-  - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: fdb-spawn
-    dest: ./resources/[fdb]/fdb-spawn
+  - action: move_path
+    src: ./tmp/FDBSystem/weathersync
+    dest: ./resources/[standalone]/weathersync
 
-  - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: fdb-multicharacter
-    dest: ./resources/[fdb]/fdb-multicharacter
+  - action: move_path
+    src: ./tmp/FDBSystem/interact-sound
+    dest: ./resources/[standalone]/interact-sound
 
-  - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: fdb-inventory
-    dest: ./resources/[fdb]/fdb-inventory
+  - action: move_path
+    src: ./tmp/FDBSystem/rNotify
+    dest: ./resources/[standalone]/rNotify
 
-  - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: fdb-horses
-    dest: ./resources/[fdb]/fdb-horses
+  # ================================================
+  #  FDB Framework Resources (from our repo)
+  # ================================================
 
-  # 5. Conexão e Criação do Banco de Dados MySQL
-  - action: connect_database
+  - action: move_path
+    src: ./tmp/FDBSystem/FDB-Core
+    dest: ./resources/[framework]/fdb-core
 
-  # 6. Geração do server.cfg
-  - action: write_file
-    file: ./server.cfg
-    append: true
-    data: |
-      # ================================================
-      #          FDB-System Base Configuration
-      # ================================================
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-inventory
+    dest: ./resources/[framework]/fdb-inventory
 
-      # --- Identificação do Jogo (RedM) ---
-      set gamename rdr3
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-multicharacter
+    dest: ./resources/[framework]/fdb-multicharacter
 
-      endpoint_add_tcp "0.0.0.0:30120"
-      endpoint_add_udp "0.0.0.0:30120"
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-spawn
+    dest: ./resources/[framework]/fdb-spawn
 
-      # --- Conexão MySQL ---
-      set mysql_connection_string "{{dbConnectionString}}"
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-horses
+    dest: ./resources/[framework]/fdb-horses
 
-      # --- Ordem de Inicialização dos Recursos ---
-      ensure oxmysql
-      ensure ox_lib
-      ensure progressbar
-      ensure weathersync
-      ensure PolyZone
-      ensure rNotify
-      ensure interact-sound
-      ensure fdb-core
-      ensure fdb-spawn
-      ensure fdb-multicharacter
-      ensure fdb-inventory
-      ensure fdb-horses
+  # ================================================
+  #  Cleanup
+  # ================================================
 
-      # --- Configurações Gerais do Servidor RedM ---
-      sv_scriptHookAllowed 0
-      sv_maxclients 48
-      set sv_licenseKey "{{svLicense}}"
-      set steam_webApiKey "{{steamApiKey}}"
+  # Remove old chat (conflicts with RedM)
+  - action: remove_path
+    path: ./resources/[cfx-default]/[gameplay]/chat
+
+  # Clean up temp files
+  - action: remove_path
+    path: ./tmp
