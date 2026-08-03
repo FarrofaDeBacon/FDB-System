@@ -1,0 +1,23 @@
+name: CI - Lua Lint & Syntax Check
+
+on:
+  push:
+    branches: [ main, 'fix/*', 'refactor/*', 'audit/*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lua-syntax-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Lua
+        uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: "5.4"
+
+      - name: Syntax Check (.lua files)
+        run: |
+          find . -name "*.lua" -not -path "*/.git/*" -exec luac -p {} +
