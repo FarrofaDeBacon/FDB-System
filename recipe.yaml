@@ -1,3 +1,5 @@
+$engine: 3
+$onesync: on
 name: FDB-System-Base
 version: 1.0.0
 author: FarrofaDeBacon
