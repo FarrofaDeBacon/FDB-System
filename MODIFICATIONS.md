@@ -31,7 +31,7 @@ Este documento registra todas as alterações estruturais, correções de segura
 ### 1.5 Módulo Companheiro de Inventário (`rsg-inventory` ➔ `fdb-inventory`)
 - **Status**: 🔄 **EM EXECUÇÃO** (Abertura: `0acfb5fc4edd832c49ca438d1df73d7870a63b0e`) — Checklist formal expandido:
   - [x] **Rebrand Literal de Recursos e Exports**: Renomeação da pasta `rsg-inventory` ➔ `fdb-inventory`, manifest (`description 'fdb-inventory'`) e substituição de `exports['rsg-core']` por `exports['fdb-core']`. (Commit: `30e71edd18873d25a02641417e6b03bf694e874b`).
-  - [ ] **Padronização de Eventos de Rede**: Renomear todos os net events server/client de `rsg-inventory:...` ➔ `fdb-inventory:...` em todo o código Lua e chamadas NUI/JS.
+  - [x] **Padronização de Eventos de Rede**: Renomeados todos os net events server/client de `rsg-inventory:...` ➔ `fdb-inventory:...` em 27 arquivos Lua e chamadas NUI/JS (`https://fdb-core/validateCSRF`). (Commit: `925d82c72c418e5b4a2754f9da419d69abc37263`).
   - [ ] **Lock de Concorrência e Antidupe Unificado (Bloqueante)**: Substituição do rate-limit simples por temporizador em `SetInventoryData`, `giveItem`, `createDrop` e `addTradeItem` por trava autoritativa estrita `inv_busy`, impedindo corridas de mutação de estado.
   - [ ] **Validação de Distância Server-Side (Bloqueante)**: Garantir validação server-side de coordenadas em trocas, drops, vasculhamento de players e abertura de baús (`openStash` / `SetInventoryData`).
   - [ ] **StateBags Compartilhados**: Sincronização e unicidade da flag `Player(src).state.inv_busy` entre `fdb-inventory` e `fdb-core/server/moneyitems.lua`.
