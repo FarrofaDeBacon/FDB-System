@@ -3,10 +3,10 @@ $onesync: on
 name: FDB-System-Base
 version: 1.0.0
 author: FarrofaDeBacon
-description: Receita txAdmin automatizada para deploy completo da base FDB-System (RedM) com fdb-core, fdb-spawn, fdb-multicharacter, fdb-inventory e fdb-horses.
+description: Receita txAdmin automatizada e 100% autossuficiente para deploy completo da base FDB-System (RedM).
 
 tasks:
-  # 1. Dependências Oficiais Overextended (Release ZIP)
+  # 1. Driver MySQL (Release Oficial Overextended)
   - action: download_file
     path: ./tmp/files/oxmysql.zip
     url: https://github.com/overextended/oxmysql/releases/latest/download/oxmysql.zip
@@ -14,21 +14,51 @@ tasks:
     dest: ./resources/[core]
     src: ./tmp/files/oxmysql.zip
 
-  - action: download_file
-    path: ./tmp/files/ox_lib.zip
-    url: https://github.com/overextended/ox_lib/releases/latest/download/ox_lib.zip
-  - action: unzip
-    dest: ./resources/[core]
-    src: ./tmp/files/ox_lib.zip
+  # 2. Bibliotecas e Dependências Standalone (Direct FDB-System)
+  - action: download_github
+    src: FarrofaDeBacon/FDB-System
+    ref: fix/companion-inventory-audit
+    subpath: ox_lib
+    dest: ./resources/[core]/ox_lib
 
-  # 2. Framework Core FDB-System
+  - action: download_github
+    src: FarrofaDeBacon/FDB-System
+    ref: fix/companion-inventory-audit
+    subpath: progressbar
+    dest: ./resources/[core]/progressbar
+
+  - action: download_github
+    src: FarrofaDeBacon/FDB-System
+    ref: fix/companion-inventory-audit
+    subpath: weathersync
+    dest: ./resources/[core]/weathersync
+
+  - action: download_github
+    src: FarrofaDeBacon/FDB-System
+    ref: fix/companion-inventory-audit
+    subpath: PolyZone
+    dest: ./resources/[core]/PolyZone
+
+  - action: download_github
+    src: FarrofaDeBacon/FDB-System
+    ref: fix/companion-inventory-audit
+    subpath: rNotify
+    dest: ./resources/[core]/rNotify
+
+  - action: download_github
+    src: FarrofaDeBacon/FDB-System
+    ref: fix/companion-inventory-audit
+    subpath: interact-sound
+    dest: ./resources/[core]/interact-sound
+
+  # 3. Framework Core FDB-System
   - action: download_github
     src: FarrofaDeBacon/FDB-System
     ref: fix/companion-inventory-audit
     subpath: FDB-Core
     dest: ./resources/[fdb]/fdb-core
 
-  # 3. Recursos Companheiros FDB-System
+  # 4. Recursos Companheiros FDB-System
   - action: download_github
     src: FarrofaDeBacon/FDB-System
     ref: fix/companion-inventory-audit
@@ -53,10 +83,10 @@ tasks:
     subpath: fdb-horses
     dest: ./resources/[fdb]/fdb-horses
 
-  # 4. Conexão e Criação do Banco de Dados MySQL
+  # 5. Conexão e Criação do Banco de Dados MySQL
   - action: connect_database
 
-  # 5. Geração do server.cfg
+  # 6. Geração do server.cfg
   - action: write_file
     file: ./server.cfg
     append: true
@@ -77,6 +107,11 @@ tasks:
       # --- Ordem de Inicialização dos Recursos ---
       ensure oxmysql
       ensure ox_lib
+      ensure progressbar
+      ensure weathersync
+      ensure PolyZone
+      ensure rNotify
+      ensure interact-sound
       ensure fdb-core
       ensure fdb-spawn
       ensure fdb-multicharacter
