@@ -3,12 +3,6 @@ version: 1.0.0
 author: FarrofaDeBacon
 description: Receita txAdmin automatizada para deploy completo da base FDB-System (RedM) com fdb-core, fdb-spawn, fdb-multicharacter, fdb-inventory e fdb-horses.
 
-variables:
-  dbHost: localhost
-  dbUsername: root
-  dbPassword: ""
-  dbName: fdb_system
-
 tasks:
   # 1. Dependências Oficiais Overextended
   - action: download_github
