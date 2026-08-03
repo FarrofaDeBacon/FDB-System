@@ -1,12 +1,12 @@
 -- Triggered when the player has fully loaded into the server
 -- Sets the 'inv_busy' state to false, meaning the inventory is not busy
-RegisterNetEvent('RSGCore:Client:OnPlayerLoaded', function()
+RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', function()
     LocalPlayer.state:set('inv_busy', false, true)
 end)
 
 -- Triggered when the player unloads (disconnects, dies, or leaves)
 -- Sets the 'inv_busy' state to true to prevent inventory interactions
-RegisterNetEvent('RSGCore:Client:OnPlayerUnload', function()
+RegisterNetEvent('FDBCore:Client:OnPlayerUnload', function()
     LocalPlayer.state:set('inv_busy', true, true)
 end)
 

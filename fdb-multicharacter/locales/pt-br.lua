@@ -19,7 +19,7 @@ commands = {
 },
 
 misc = {
-    ["droppedplayer"] = "Você desconectou do RSGCore"
+    ["droppedplayer"] = "Você desconectou do FDBCore"
 },
 
 ui = {

@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 local config = require 'shared.config'
 Inventory = {}
 
@@ -18,7 +18,7 @@ end
 ---This prevents opening while dead or handcuffed.
 ---@return boolean canUseInventory
 function Inventory.CanPlayerUseInventory()
-    local player = RSGCore.Functions.GetPlayerData()
+    local player = FDBCore.Functions.GetPlayerData()
     if not player or not player.metadata then return false end
     local meta = player.metadata
     return not meta.isdead and not meta.ishandcuffed
@@ -39,7 +39,7 @@ function Inventory.UseHotbarItem(slot)
 
     LocalPlayer.state.hotbarLastUsed = currentTime
 
-    local playerData = RSGCore.Functions.GetPlayerData()
+    local playerData = FDBCore.Functions.GetPlayerData()
     local itemData   = playerData.items and playerData.items[slot]
     if not itemData then return end
 

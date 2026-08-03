@@ -1,7 +1,7 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 lib.callback.register('fdb-inventory:server:getPlayerName', function(source, targetId)
-    local Player = RSGCore.Functions.GetPlayer(targetId)
+    local Player = FDBCore.Functions.GetPlayer(targetId)
     if not Player then return GetPlayerName(targetId) end
     local char = Player.PlayerData.charinfo
     if char and char.firstname then
@@ -13,14 +13,14 @@ end)
 -- Register a server callback for giving an item from one player to another
 lib.callback.register('fdb-inventory:server:giveItem', function(source, target, item, amount, slot, info, fromInventory)
     -- Get the player object for the source (the giver)
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     -- Check if the source player exists and is not dead, in last stand, or handcuffed
     if not player or player.PlayerData.metadata.isdead or player.PlayerData.metadata.inlaststand or player.PlayerData.metadata.ishandcuffed then
         return false
     end
 
     -- Get the player object for the target (the receiver)
-    local Target = RSGCore.Functions.GetPlayer(target)
+    local Target = FDBCore.Functions.GetPlayer(target)
     -- Check if the target player exists and is not dead, in last stand, or handcuffed
     if not Target or Target.PlayerData.metadata.isdead or Target.PlayerData.metadata.inlaststand or Target.PlayerData.metadata.ishandcuffed then
         return false
@@ -32,7 +32,7 @@ lib.callback.register('fdb-inventory:server:giveItem', function(source, target, 
     end
 
     -- Get item information from the shared items list
-    local itemInfo = RSGCore.Shared.Items[item:lower()]
+    local itemInfo = FDBCore.Shared.Items[item:lower()]
     if not itemInfo then
         return false
     end
@@ -41,7 +41,7 @@ lib.callback.register('fdb-inventory:server:giveItem', function(source, target, 
     local invItem
     if fromInventory and fromInventory ~= 'player' then
         if fromInventory == 'equipment' then
-            local Player = RSGCore.Functions.GetPlayer(source)
+            local Player = FDBCore.Functions.GetPlayer(source)
             invItem = Player.PlayerData.metadata.equipmentSlots and Player.PlayerData.metadata.equipmentSlots[slot]
         else
             invItem = Inventory.GetItem(fromInventory, source, slot)

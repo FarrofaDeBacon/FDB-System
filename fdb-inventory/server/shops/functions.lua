@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 Shops = Shops or {}
 
 Shops.SetupShopItems = function(shopItems, shopData)
@@ -6,7 +6,7 @@ Shops.SetupShopItems = function(shopItems, shopData)
     local slot = 1
     if shopItems and next(shopItems) then
         for _, item in pairs(shopItems) do
-            local itemInfo = RSGCore.Shared.Items[item.name:lower()]
+            local itemInfo = FDBCore.Shared.Items[item.name:lower()]
             if itemInfo then
                 if item.amount then
                     if shopData.persistentStock then

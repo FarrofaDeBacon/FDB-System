@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 --- Thread to handle player dropping a loot bag using a prompt.
 --- This continuously checks if the player is holding a bag and handles placing it on the ground.
 CreateThread(function()
@@ -16,7 +16,7 @@ CreateThread(function()
     --- Register a UI prompt for dropping the bag
     ---@type number prompt handle
     local dropBagPrompt = UiPromptRegisterBegin()
-    PromptSetControlAction(dropBagPrompt, RSGCore.Shared.Keybinds['G']) --- Keybind G to drop bag
+    PromptSetControlAction(dropBagPrompt, FDBCore.Shared.Keybinds['G']) --- Keybind G to drop bag
     PromptSetText(dropBagPrompt, dropBagPromptTitle)
     PromptSetEnabled(dropBagPrompt, true)
     PromptSetVisible(dropBagPrompt, true)

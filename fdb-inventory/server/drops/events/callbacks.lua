@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 -- Callback to get all current item drops
 lib.callback.register('fdb-inventory:server:GetCurrentDrops', function(source)
     return Drops -- return the table containing all active drops
@@ -119,7 +119,7 @@ local dropCooldowns = {}
 
 -- Callback to create a new item drop
 lib.callback.register('fdb-inventory:server:createDrop', function(source, item)
-    local Player = RSGCore.Functions.GetPlayer(source)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return false end
 
     -- Rate limit

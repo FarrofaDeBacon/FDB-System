@@ -55,8 +55,8 @@ exports('CreateShop', Shops.CreateShop)
 --- @param name string The identifier of the inventory to open.
 Shops.OpenShop = function(source, name)
     if not name then return end
-    local RSGCore = exports['rsg-core']:GetCoreObject()
-    local player = RSGCore.Functions.GetPlayer(source)
+    local FDBCore = exports['fdb-core']:GetCoreObject()
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return end
     if not RegisteredShops[name] then return end
     local playerPed = GetPlayerPed(source)

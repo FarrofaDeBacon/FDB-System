@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 -------------------
 local entities = {}
 local horseComps = {}
@@ -128,7 +128,7 @@ local function SetupHorseTarget()
                 icon = 'fa-solid fa-lightbulb',
                 label = locale('cl_action_lantern'),
                 onSelect = function()
-                    local hasItem = RSGCore.Functions.HasItem('horse_lantern', 1)
+                    local hasItem = FDBCore.Functions.HasItem('horse_lantern', 1)
                     if not hasItem then
                         lib.notify({ title = locale('cl_error_no_lantern'), type = 'error', duration = 7000 })
                         return
@@ -446,9 +446,9 @@ end)
 -- trade horse
 ------------------------------------
 local function TradeHorse()
-    RSGCore.Functions.TriggerCallback('fdb-horses:server:GetActiveHorse', function(data, newnames)
+    FDBCore.Functions.TriggerCallback('fdb-horses:server:GetActiveHorse', function(data, newnames)
         if horsePed ~= 0 then
-            local player, distance = RSGCore.Functions.GetClosestPlayer()
+            local player, distance = FDBCore.Functions.GetClosestPlayer()
             if player ~= -1 and distance < 1.5 then
                 local playerId = GetPlayerServerId(player)
                 local horseId = data.horseid
@@ -503,7 +503,7 @@ end
 -- spawn horse
 ------------------------------------
 local function SpawnHorse()
-    RSGCore.Functions.TriggerCallback('fdb-horses:server:GetActiveHorse', function(data)
+    FDBCore.Functions.TriggerCallback('fdb-horses:server:GetActiveHorse', function(data)
         if (data) then
             local player = PlayerId()
             local model = GetHashKey(data.horse)
@@ -991,7 +991,7 @@ RegisterNetEvent('fdb-horses:client:storehorse', function(data)
 end)
 
 RegisterNetEvent("fdb-horses:client:tradehorse", function(data)
-    RSGCore.Functions.TriggerCallback('fdb-horses:server:GetActiveHorse', function(data, newnames)
+    FDBCore.Functions.TriggerCallback('fdb-horses:server:GetActiveHorse', function(data, newnames)
         if (horsePed ~= 0) then
             TradeHorse()
             Flee()
@@ -1243,7 +1243,7 @@ CreateThread(function()
                 
                 if IsEntityDead(horsePed) then
                     -- horse is permanently dead
-                    RSGCore.Functions.TriggerCallback('fdb-horses:server:GetActiveHorse', function(data)
+                    FDBCore.Functions.TriggerCallback('fdb-horses:server:GetActiveHorse', function(data)
                         if data then
                             lib.notify({ title = locale('cl_error_horse_died'), type = 'error', duration = 7000 })
                             TriggerServerEvent('fdb-horses:server:HorseDied', data.horseid, data.name)
@@ -1273,8 +1273,8 @@ CreateThread(function()
     while true do
         Wait(0)
 
-        if Citizen.InvokeNative(0x91AEF906BCA88877, 0, RSGCore.Shared.Keybinds['H']) then -- call horse
-            RSGCore.Functions.GetPlayerData(function(PlayerData)
+        if Citizen.InvokeNative(0x91AEF906BCA88877, 0, FDBCore.Shared.Keybinds['H']) then -- call horse
+            FDBCore.Functions.GetPlayerData(function(PlayerData)
                 if PlayerData.metadata["injail"] == 0 and not PlayerData.metadata["isdead"] then
                     local coords = GetEntityCoords(cache.ped)
                     local horseCoords = GetEntityCoords(horsePed)
@@ -1367,7 +1367,7 @@ RegisterNetEvent('fdb-horses:client:inventoryHorse', function()
         return
     end
 
-    RSGCore.Functions.TriggerCallback('fdb-horses:server:GetActiveHorse', function(data)
+    FDBCore.Functions.TriggerCallback('fdb-horses:server:GetActiveHorse', function(data)
         if horsePed == 0 then
             lib.notify({ title = locale('cl_error_no_horse_out'), type = 'error', duration = 7000 })
             return
@@ -1382,7 +1382,7 @@ end)
 ------------------------------------
 RegisterNetEvent('fdb-horses:client:equipHorseLantern')
 AddEventHandler('fdb-horses:client:equipHorseLantern', function()
-    local hasItem = RSGCore.Functions.HasItem('horse_lantern', 1)
+    local hasItem = FDBCore.Functions.HasItem('horse_lantern', 1)
 
     if not hasItem then
         lib.notify({ title = locale('cl_error_no_lantern'), type = 'error', duration = 7000 })
@@ -1498,7 +1498,7 @@ AddEventHandler('fdb-horses:client:playerfeedhorse', function(itemName)
 
             PlaySoundFrontend("Core_Fill_Up", "Consumption_Sounds", true, 0)
             
-            RSGCore.Functions.TriggerCallback('fdb-horses:server:GetActiveHorse', function(data)
+            FDBCore.Functions.TriggerCallback('fdb-horses:server:GetActiveHorse', function(data)
                 if data then
                     lib.notify({
                         title = locale('cl_horse_fed_title'),
@@ -1664,7 +1664,7 @@ end)
 ------------------------------------
 RegisterNetEvent('fdb-horses:client:gethorselocation', function()
 
-    RSGCore.Functions.TriggerCallback('fdb-horses:server:GetAllHorses', function(results)
+    FDBCore.Functions.TriggerCallback('fdb-horses:server:GetAllHorses', function(results)
         if results ~= nil then
             local options = {}
             for i = 1, #results do

@@ -25,13 +25,13 @@ end
 Inventory.GetItem = function(inventoryId, src, slot)
     local items = {}
     if inventoryId == 'player' then
-        local Player = RSGCore.Functions.GetPlayer(src)
+        local Player = FDBCore.Functions.GetPlayer(src)
         if Player and Player.PlayerData.items then
             items = Player.PlayerData.items
         end
     elseif inventoryId:find('otherplayer-') then
         local targetId = tonumber(inventoryId:match('otherplayer%-(.+)'))
-        local targetPlayer = RSGCore.Functions.GetPlayer(targetId)
+        local targetPlayer = FDBCore.Functions.GetPlayer(targetId)
         if targetPlayer and targetPlayer.PlayerData.items then
             items = targetPlayer.PlayerData.items
         end
@@ -87,7 +87,7 @@ Inventory.CheckWeapon = function(source, item)
 
     local ped = GetPlayerPed(source)
     local weapon = GetSelectedPedWeapon(ped)
-    local weaponInfo = RSGCore.Shared.Weapons[weapon]
+    local weaponInfo = FDBCore.Shared.Weapons[weapon]
     if weaponInfo and weaponInfo.name == currentWeaponName then
         RemoveWeaponFromPed(ped, weapon)
         if serial then
@@ -117,14 +117,14 @@ end
 
 
 --- @param item table The item table.
---- @param itemInfo table|nil Optional item definition from RSGCore.Shared.Items.
+--- @param itemInfo table|nil Optional item definition from FDBCore.Shared.Items.
 --- @param currentTime number|nil Optional timestamp (defaults to os.time()).
 --- @param decayRateModifier number|nil Optional modifier for configured decay rate
 --- @return boolean shouldUpdate Whether the item metadata was updated.
 --- @return number|nil newQuality The new quality of the item after decay.
 --- @return boolean shouldDelete Whether the item should be deleted when quality reaches 0.
 Inventory.CheckItemDecay = function(item, itemInfo, currentTime, decayRateModifier)
-    itemInfo = itemInfo or RSGCore.Shared.Items[item.name:lower()]
+    itemInfo = itemInfo or FDBCore.Shared.Items[item.name:lower()]
     currentTime = currentTime or os.time()
 
     if not itemInfo or not itemInfo.decay then return false, nil, false end
@@ -176,7 +176,7 @@ Inventory.CheckPlayerItemsDecay = function(player)
     if needsUpdate then
         player.Functions.SetPlayerData('items', player.PlayerData.items)
         for _, item in pairs(removedItems) do 
-            TriggerClientEvent('fdb-inventory:client:ItemBox', player.PlayerData.source, RSGCore.Shared.Items[item.name], 'remove', item.amount)
+            TriggerClientEvent('fdb-inventory:client:ItemBox', player.PlayerData.source, FDBCore.Shared.Items[item.name], 'remove', item.amount)
         end
     end
 end
@@ -189,7 +189,7 @@ Inventory.CheckPlayerItemDecay = function(player, item)
     if updated then
         if delete and quality <= 0 then
             player.PlayerData.items[item.slot] = nil
-            TriggerClientEvent('fdb-inventory:client:ItemBox', player.PlayerData.source, RSGCore.Shared.Items[item.name], 'remove', item.amount)
+            TriggerClientEvent('fdb-inventory:client:ItemBox', player.PlayerData.source, FDBCore.Shared.Items[item.name], 'remove', item.amount)
         end
         
         player.Functions.SetPlayerData('items', player.PlayerData.items)

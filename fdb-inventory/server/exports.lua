@@ -13,7 +13,7 @@ Inventory.LoadInventory = function(source, citizenid)
 
     for _, item in pairs(inventory) do
         if item and item.name then
-            local itemInfo = RSGCore.Shared.Items[item.name:lower()]
+            local itemInfo = FDBCore.Shared.Items[item.name:lower()]
             local updated, quality, delete = Inventory.CheckItemDecay(item, itemInfo, currentTime, config.ItemsDecayWhileOffline and 1 or 0)
             local check = not (updated and delete and quality <= 0)
 
@@ -53,7 +53,7 @@ Inventory.SaveInventory = function(source, offline)
     if offline then
         PlayerData = source
     else
-        local Player = RSGCore.Functions.GetPlayer(source)
+        local Player = FDBCore.Functions.GetPlayer(source)
         if not Player then return end
         PlayerData = Player.PlayerData
     end
@@ -85,7 +85,7 @@ exports('SaveInventory', Inventory.SaveInventory)
 --- @param source number The player's server ID.
 --- @param items table The items to set in the player's inventory.
 Inventory.SetInventory = function(source, items)
-    local Player = RSGCore.Functions.GetPlayer(source)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return end
     Player.Functions.SetPlayerData('items', items)
     if not Player.Offline then
@@ -104,7 +104,7 @@ exports('SetInventory', Inventory.SetInventory)
 --- @return boolean|nil - Returns true if the value was set successfully, false otherwise.
 Inventory.SetItemData = function(source, itemName, key, val)
     if not itemName or not key then return false end
-    local Player = RSGCore.Functions.GetPlayer(source)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return end
     local item = Inventory.GetItemByName(source, itemName)
     if not item then return false end
@@ -121,7 +121,7 @@ exports('SetItemData', Inventory.SetItemData)
 --- @return number|nil - The weight of the item, or nil if the item doesn't exist.
 Inventory.GetItemWeight = function(itemName)
     itemName = itemName:lower()
-    local itemInfo = RSGCore.Shared.Items[itemName]
+    local itemInfo = FDBCore.Shared.Items[itemName]
     if itemInfo then
         return itemInfo.weight
     else
@@ -132,7 +132,7 @@ end
 exports('GetItemWeight', Inventory.GetItemWeight)
 
 Inventory.UseItem = function(itemName, ...)
-    local itemData = RSGCore.Functions.CanUseItem(itemName)
+    local itemData = FDBCore.Functions.CanUseItem(itemName)
     local callback = type(itemData) == 'table' and (rawget(itemData, '__cfx_functionReference') and itemData or itemData.cb or itemData.callback) or type(itemData) == 'function' and itemData
     if not callback then return end
     callback(...)
@@ -178,7 +178,7 @@ exports('GetFirstSlotByItem', Inventory.GetFirstSlotByItem)
 --- @param slot number The slot number of the item.
 --- @return table|nil - item data if found, or nil if not found.
 Inventory.GetItemBySlot = function(source, slot)
-    local Player = RSGCore.Functions.GetPlayer(source)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return end
     local item = Player.PlayerData.items[tonumber(slot)]
     if not item then return end
@@ -203,7 +203,7 @@ exports('GetTotalWeight', Inventory.GetTotalWeight)
 --- @param item string - The name of the item to retrieve.
 --- @return table|nil - item data if found, nil otherwise.
 Inventory.GetItemByName = function(source, item)
-    local Player = RSGCore.Functions.GetPlayer(source)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return end
     local items = Player.PlayerData.items
     local slot = Inventory.GetFirstSlotByItem(items, tostring(item):lower())
@@ -217,7 +217,7 @@ exports('GetItemByName', Inventory.GetItemByName)
 --- @param item string The name of the item to search for.
 --- @return table|nil - containing the items with the specified name.
 Inventory.GetItemsByName = function(source, item)
-    local Player = RSGCore.Functions.GetPlayer(source)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return end
     local PlayerItems = Player.PlayerData.items
     item = tostring(item):lower()
@@ -237,7 +237,7 @@ exports('GetItemsByName', Inventory.GetItemsByName)
 --- @return number, number - The total count of used slots and the total count of free slots. If no inventory is found, returns 0 and the maximum slots.
 Inventory.GetSlots = function(identifier)
     local inventory, maxSlots
-    local player = RSGCore.Functions.GetPlayer(identifier)
+    local player = FDBCore.Functions.GetPlayer(identifier)
     if player then
         inventory = player.PlayerData.items
         maxSlots = player.PlayerData.slots
@@ -266,7 +266,7 @@ exports('GetSlots', Inventory.GetSlots)
 --- @param items table|string The items to count. Can be either a table of item names or a single item name.
 --- @return number|nil - The total count of the specified items.
 Inventory.GetItemCount = function(source, items)
-    local Player = RSGCore.Functions.GetPlayer(source)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return end
     Inventory.CheckPlayerItemsDecay(Player)
     local isTable = type(items) == 'table'
@@ -294,9 +294,9 @@ exports('GetItemCount', Inventory.GetItemCount)
 --- @return boolean - Returns true if the item can be added, false otherwise.
 --- @return string|nil - Returns a string indicating the reason why the item cannot be added (e.g., 'weight' or 'slots'), or nil if it can be added.
 Inventory.CanAddItem = function(source, item, amount)
-    local Player = RSGCore.Functions.GetPlayer(source)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if Player then
-        local itemData = RSGCore.Shared.Items[item:lower()]
+        local itemData = FDBCore.Shared.Items[item:lower()]
         if not itemData then return false end
 
         local weight = itemData.weight * amount
@@ -323,7 +323,7 @@ Inventory.CanAddItem = function(source, item, amount)
         local inventory = Inventories[source].items
         local inventoryWeight = Inventories[source].maxweight or 250000
         local inventorySlots = Inventories[source].slots or 100
-        local itemData = RSGCore.Shared.Items[item:lower()]
+        local itemData = FDBCore.Shared.Items[item:lower()]
         
         if not itemData then return false end
         
@@ -358,7 +358,7 @@ Inventory.GetFreeWeight = function(source)
         warn('Source was not passed into GetFreeWeight')
         return 0
     end
-    local Player = RSGCore.Functions.GetPlayer(source)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return 0 end
 
     local totalWeight = Inventory.GetTotalWeight(Player.PlayerData.items)
@@ -369,7 +369,7 @@ end
 exports('GetFreeWeight', Inventory.GetFreeWeight)
 
 Inventory.ClearInventory = function(source, filterItems)
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     local savedItemData = {}
     if filterItems then
         if type(filterItems) == 'string' then
@@ -403,7 +403,7 @@ exports('ClearInventory', Inventory.ClearInventory)
 --- @param amount number (optional) The minimum amount required for each item.
 --- @return boolean - Returns true if the player has the item(s) with the specified amount, false otherwise.
 Inventory.HasItem = function(source, items, amount)
-    local Player = RSGCore.Functions.GetPlayer(source)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return false end
     Inventory.CheckPlayerItemsDecay(Player)
 
@@ -456,8 +456,8 @@ exports('CloseInventory', Inventory.CloseInventory)
 --- @param source number - The player's server ID.
 --- @param targetId number - The ID of the player whose inventory will be opened.
 Inventory.OpenInventoryById = function(source, targetId)
-    local RSGPlayer = RSGCore.Functions.GetPlayer(source)
-    local TargetPlayer = RSGCore.Functions.GetPlayer(tonumber(targetId))
+    local RSGPlayer = FDBCore.Functions.GetPlayer(source)
+    local TargetPlayer = FDBCore.Functions.GetPlayer(tonumber(targetId))
     if not RSGPlayer or not TargetPlayer then return end
     if Player(targetId).state.inv_busy then Inventory.CloseInventory(targetId) end
     Inventory.CheckPlayerItemsDecay(RSGPlayer)
@@ -510,7 +510,7 @@ exports("SaveStash", Inventory.SaveStash)
 --- @param data table|nil Additional data for initializing the inventory.
 Inventory.OpenInventory = function (source, identifier, data)
     if Player(source).state.inv_busy then return end
-    local RSGPlayer = RSGCore.Functions.GetPlayer(source)
+    local RSGPlayer = FDBCore.Functions.GetPlayer(source)
     if not RSGPlayer then return end
 
     if not identifier then
@@ -581,14 +581,14 @@ exports('OpenInventory', Inventory.OpenInventory)
 
 -- Force drop function for when inventory is full (uses shared drop creation)
 Inventory.ForceDropItem = function(source, item, amount, info, reason)
-    local Player = RSGCore.Functions.GetPlayer(source)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return false end
 
     local ped = GetPlayerPed(source)
     local coords = GetEntityCoords(ped)
 
     -- Get item info
-    local itemInfo = RSGCore.Shared.Items[item:lower()]
+    local itemInfo = FDBCore.Shared.Items[item:lower()]
     if not itemInfo then return false end
 
     -- Create item data
@@ -653,13 +653,13 @@ Inventory.AddItem = function(identifier, item, amount, slot, info, reason)
         return false
     end
 
-    local itemInfo = RSGCore.Shared.Items[item:lower()]
+    local itemInfo = FDBCore.Shared.Items[item:lower()]
     if not itemInfo then
         return false
     end
 
     local inventory, inventoryWeight, inventorySlots
-    local player = RSGCore.Functions.GetPlayer(identifier)
+    local player = FDBCore.Functions.GetPlayer(identifier)
 
     if player then
         inventory = player.PlayerData.items
@@ -748,12 +748,12 @@ Inventory.AddItem = function(identifier, item, amount, slot, info, reason)
         if itemInfo.type == 'weapon' then
             if not inventory[slot].info.serie then
                 inventory[slot].info.serie = tostring(
-                    RSGCore.Shared.RandomInt(2) .. 
-                    RSGCore.Shared.RandomStr(3) .. 
-                    RSGCore.Shared.RandomInt(1) .. 
-                    RSGCore.Shared.RandomStr(2) .. 
-                    RSGCore.Shared.RandomInt(3) .. 
-                    RSGCore.Shared.RandomStr(4)
+                    FDBCore.Shared.RandomInt(2) .. 
+                    FDBCore.Shared.RandomStr(3) .. 
+                    FDBCore.Shared.RandomInt(1) .. 
+                    FDBCore.Shared.RandomStr(2) .. 
+                    FDBCore.Shared.RandomInt(3) .. 
+                    FDBCore.Shared.RandomStr(4)
                 )
             end
             if not inventory[slot].info.quality then
@@ -794,12 +794,12 @@ exports('AddItem', Inventory.AddItem)
 --- @param reason string - The reason for removing the item. Defaults to 'No reason specified' if not provided.
 --- @return boolean - Returns true if the item was successfully removed, false otherwise.
 Inventory.RemoveItem = function(identifier, item, amount, slot, reason, isMove)
-    if not RSGCore.Shared.Items[item:lower()] then
+    if not FDBCore.Shared.Items[item:lower()] then
         return false
     end
 
     local inventory
-    local player = RSGCore.Functions.GetPlayer(identifier)
+    local player = FDBCore.Functions.GetPlayer(identifier)
     local inventoryItem = nil
 
     if player then

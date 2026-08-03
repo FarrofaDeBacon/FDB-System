@@ -1,11 +1,11 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 local spawnedPeds = {}
 lib.locale()
 
 CreateThread(function()
     for k,v in pairs(Config.StableSettings) do
         if not Config.EnableTarget then
-            exports['rsg-core']:createPrompt(v.stableid, v.coords, RSGCore.Shared.Keybinds[Config.KeyBind], locale('cl_menu'), {
+            exports['fdb-core']:createPrompt(v.stableid, v.coords, FDBCore.Shared.Keybinds[Config.KeyBind], locale('cl_menu'), {
                 type = 'client',
                 event = 'fdb-horses:client:stablemenu',
                 args = v.stableid

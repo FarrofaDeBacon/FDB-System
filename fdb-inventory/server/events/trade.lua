@@ -1,9 +1,9 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 Trades = Trades or {}
 local pendingRequests = {}
 
 local function getCharName(source)
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return GetPlayerName(source) end
     local char = player.PlayerData.charinfo
     if char and char.firstname then
@@ -25,14 +25,14 @@ RegisterNetEvent('fdb-inventory:server:initiateTrade', function(targetId)
     local src = source
     if isOnCooldown(src) then return end
 
-    local player = RSGCore.Functions.GetPlayer(src)
+    local player = FDBCore.Functions.GetPlayer(src)
     if not player then return end
     if player.PlayerData.metadata.isdead or player.PlayerData.metadata.inlaststand or player.PlayerData.metadata.ishandcuffed then
         TriggerClientEvent('ox_lib:notify', src, { title = locale('error.error'), description = locale('error.error'), type = 'error', duration = 5000 })
         return
     end
 
-    local Target = RSGCore.Functions.GetPlayer(targetId)
+    local Target = FDBCore.Functions.GetPlayer(targetId)
     if not Target then
         TriggerClientEvent('ox_lib:notify', src, { title = locale('error.error'), description = locale('error.no_player_nearby'), type = 'error', duration = 5000 })
         return
@@ -74,8 +74,8 @@ RegisterNetEvent('fdb-inventory:server:acceptTradeRequest', function(initiatorId
     if isOnCooldown(src) then return end
     if pendingRequests[initiatorId] ~= src then return end
 
-    local player = RSGCore.Functions.GetPlayer(src)
-    local initiator = RSGCore.Functions.GetPlayer(initiatorId)
+    local player = FDBCore.Functions.GetPlayer(src)
+    local initiator = FDBCore.Functions.GetPlayer(initiatorId)
     if not player or not initiator then return end
 
     if #(GetEntityCoords(GetPlayerPed(src)) - GetEntityCoords(GetPlayerPed(initiatorId))) > Inventory.MAX_DIST then
@@ -125,7 +125,7 @@ RegisterNetEvent('fdb-inventory:server:addTradeItem', function(tradeId, item, am
 
     if trade[side .. 'Accepted'] then return end
 
-    local player = RSGCore.Functions.GetPlayer(src)
+    local player = FDBCore.Functions.GetPlayer(src)
     if not player then return end
 
     local invItem = Inventory.GetItemBySlot(src, item.slot)
@@ -236,8 +236,8 @@ RegisterNetEvent('fdb-inventory:server:confirmTrade', function(tradeId)
     TriggerClientEvent('fdb-inventory:client:updateTrade', trade.target, tradeData)
 
     if trade.initiatorAccepted and trade.targetAccepted then
-        local initiatorPlayer = RSGCore.Functions.GetPlayer(trade.initiator)
-        local targetPlayer = RSGCore.Functions.GetPlayer(trade.target)
+        local initiatorPlayer = FDBCore.Functions.GetPlayer(trade.initiator)
+        local targetPlayer = FDBCore.Functions.GetPlayer(trade.target)
         if not initiatorPlayer or not targetPlayer then
             TriggerClientEvent('fdb-inventory:client:cancelTrade', trade.initiator)
             TriggerClientEvent('fdb-inventory:client:cancelTrade', trade.target)
@@ -281,7 +281,7 @@ RegisterNetEvent('fdb-inventory:server:confirmTrade', function(tradeId)
             }
             TriggerClientEvent('fdb-inventory:client:updateTrade', trade.initiator, tradeData)
             TriggerClientEvent('fdb-inventory:client:updateTrade', trade.target, tradeData)
-            local itemLabel = errorItem and RSGCore.Shared.Items[errorItem] and RSGCore.Shared.Items[errorItem].label or 'item'
+            local itemLabel = errorItem and FDBCore.Shared.Items[errorItem] and FDBCore.Shared.Items[errorItem].label or 'item'
             TriggerClientEvent('ox_lib:notify', trade.initiator, { title = 'Trade', description = 'Trade failed - ' .. itemLabel .. ' could not be transferred', type = 'error', duration = 5000 })
             TriggerClientEvent('ox_lib:notify', trade.target, { title = 'Trade', description = 'Trade failed - ' .. itemLabel .. ' could not be transferred', type = 'error', duration = 5000 })
         end
@@ -311,8 +311,8 @@ RegisterNetEvent('fdb-inventory:server:cancelTrade', function(tradeId)
 end)
 
 function Inventory.ExecuteTrade(trade)
-    local initiatorPlayer = RSGCore.Functions.GetPlayer(trade.initiator)
-    local targetPlayer = RSGCore.Functions.GetPlayer(trade.target)
+    local initiatorPlayer = FDBCore.Functions.GetPlayer(trade.initiator)
+    local targetPlayer = FDBCore.Functions.GetPlayer(trade.target)
     if not initiatorPlayer or not targetPlayer then
         -- Items are in escrow, return them safely
         for _, item in pairs(trade.initiatorItems) do

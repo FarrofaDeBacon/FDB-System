@@ -1,6 +1,6 @@
 local FDBCore = exports['fdb-core']:GetCoreObject()
 local config = require 'shared.config'
-local items = RSGCore.Shared.Items
+local items = FDBCore.Shared.Items
 
 -- Helper function to notify players
 local function notify(source, messageKey, type)
@@ -9,7 +9,7 @@ end
 
 -- Helper function to get a valid player object
 local function getPlayer(source, notifyIfMissing)
-    local ply = RSGCore.Functions.GetPlayer(source)
+    local ply = FDBCore.Functions.GetPlayer(source)
     if not ply and notifyIfMissing then notify(source, 'error.pdne') end
     return ply
 end
@@ -66,12 +66,12 @@ lib.addCommand(config.CommandNames.GiveItem, {
         amount = 1
         info.serie = string.format(
             "%s%s%s%s%s%s",
-            RSGCore.Shared.RandomInt(2),
-            RSGCore.Shared.RandomStr(3),
-            RSGCore.Shared.RandomInt(1),
-            RSGCore.Shared.RandomStr(2),
-            RSGCore.Shared.RandomInt(3),
-            RSGCore.Shared.RandomStr(4)
+            FDBCore.Shared.RandomInt(2),
+            FDBCore.Shared.RandomStr(3),
+            FDBCore.Shared.RandomInt(1),
+            FDBCore.Shared.RandomStr(2),
+            FDBCore.Shared.RandomInt(3),
+            FDBCore.Shared.RandomStr(4)
         )
         info.quality = 100
     end
@@ -112,7 +112,7 @@ lib.addCommand(config.CommandNames.RandomItems, {
 
         if emptySlot then
             addItemToInventory(source, randItem, amount, false, 'random items command')
-            playerInventory = RSGCore.Functions.GetPlayer(source).PlayerData.items
+            playerInventory = FDBCore.Functions.GetPlayer(source).PlayerData.items
         end
 
         Wait(1000)
@@ -170,7 +170,7 @@ end, false)
 
 -- /checkslots command (temporary debug)
 RegisterCommand('checkslots', function(source)
-    local ply = RSGCore.Functions.GetPlayer(source)
+    local ply = FDBCore.Functions.GetPlayer(source)
     if not ply then return end
     print(string.format('[rsg-inventory] Player %s has %d slots configured in PlayerData.', GetPlayerName(source), ply.PlayerData.slots))
     TriggerClientEvent('ox_lib:notify', source, { title = 'Slots', description = 'You have ' .. tostring(ply.PlayerData.slots) .. ' slots in pocket', type = 'info', duration = 5000 })
@@ -178,7 +178,7 @@ end, false)
 
 -- /setslots command (fix for old characters — atualiza direto no banco)
 RegisterCommand('setslots', function(source, args)
-    local ply = RSGCore.Functions.GetPlayer(source)
+    local ply = FDBCore.Functions.GetPlayer(source)
     if not ply then return end
     local newSlots = tonumber(args[1]) or 12
     local citizenid = ply.PlayerData.citizenid

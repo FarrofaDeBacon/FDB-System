@@ -1,10 +1,10 @@
 local config  = require 'shared.config'
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 -- Helper to always retrieve the latest player metadata from RSG Core
 -- Avoids stale data if the player's state changes mid-session (e.g., death, cuffs)
 local function getMeta()
-    local data = RSGCore.Functions.GetPlayerData()
+    local data = FDBCore.Functions.GetPlayerData()
     return data and data.metadata or {}
 end
 

@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 local HorseSettings = lib.load('shared.horse_settings')
 local HorseComp = lib.load('shared.horse_comp')
 lib.locale()
@@ -34,12 +34,12 @@ end
 ----------------------------------
 -- commands
 ----------------------------------
-RSGCore.Commands.Add('findhorse', locale('sv_command_find'), {}, false, function(source)
+FDBCore.Commands.Add('findhorse', locale('sv_command_find'), {}, false, function(source)
     local src = source
     TriggerClientEvent('fdb-horses:client:gethorselocation', src)
 end)
 
-RSGCore.Commands.Add('accepttrade', locale('sv_command_accept_trade'), {}, false, function(source)
+FDBCore.Commands.Add('accepttrade', locale('sv_command_accept_trade'), {}, false, function(source)
     local src = source
     local trade = tradeRequests[src]
     
@@ -54,9 +54,9 @@ end)
 ----------------------------------
 -- get all horses
 ----------------------------------
-RSGCore.Functions.CreateCallback('fdb-horses:server:GetAllHorses', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-horses:server:GetAllHorses', function(source, cb)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     local horses = MySQL.query.await('SELECT * FROM fdb_horses WHERE citizenid=@citizenid', { ['@citizenid'] = Player.PlayerData.citizenid })    
     if horses[1] ~= nil then
         cb(horses)
@@ -69,13 +69,13 @@ end)
 -- horse use items
 ----------------------------------
 -- brush horse: servidor remove item, calcula limpeza, persiste, notifica client
-RSGCore.Functions.CreateUseableItem('horse_brush', function(source, item)
+FDBCore.Functions.CreateUseableItem('horse_brush', function(source, item)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     if Player.Functions.RemoveItem(item.name, 1, item.slot) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[item.name], 'remove', 1)
+        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
 
         local activehorse = MySQL.scalar.await('SELECT id FROM fdb_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
         if not activehorse then
@@ -97,31 +97,31 @@ RSGCore.Functions.CreateUseableItem('horse_brush', function(source, item)
 end)
 
 -- player horselantern
-RSGCore.Functions.CreateUseableItem('horse_lantern', function(source, item)
-    local Player = RSGCore.Functions.GetPlayer(source)
+FDBCore.Functions.CreateUseableItem('horse_lantern', function(source, item)
+    local Player = FDBCore.Functions.GetPlayer(source)
     TriggerClientEvent('fdb-horses:client:equipHorseLantern', source, item.name)
 end)
 
  -- horse stimulant
-RSGCore.Functions.CreateUseableItem('horse_stimulant', function(source, item)
+FDBCore.Functions.CreateUseableItem('horse_stimulant', function(source, item)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     if Player.Functions.RemoveItem(item.name, 1, item.slot) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[item.name], 'remove', 1)
+        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
         -- Estimulante restaura vida/stamina core nativos; não altera metadata de sobrevivência
         TriggerClientEvent('fdb-horses:client:playerfeedhorse', src, item.name)
     end
 end)
 
 -- horse medicine (cura illness + poison): registrar item antes de usar
-if RSGCore.Shared.Items['horse_medicine'] then
-    RSGCore.Functions.CreateUseableItem('horse_medicine', function(source, item)
+if FDBCore.Shared.Items['horse_medicine'] then
+    FDBCore.Functions.CreateUseableItem('horse_medicine', function(source, item)
         local src = source
-        local Player = RSGCore.Functions.GetPlayer(src)
+        local Player = FDBCore.Functions.GetPlayer(src)
         if not Player then return end
         if Player.Functions.RemoveItem(item.name, 1, item.slot) then
-            TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[item.name], 'remove', 1)
+            TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
 
             local activehorse = MySQL.scalar.await('SELECT id FROM fdb_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
             if not activehorse then return end
@@ -142,12 +142,12 @@ if RSGCore.Shared.Items['horse_medicine'] then
 end
 
 -- carrot: servidor lê Config.HorseFeed, calcula, persiste, envia ao client
-RSGCore.Functions.CreateUseableItem('horse_carrot', function(source, item)
+FDBCore.Functions.CreateUseableItem('horse_carrot', function(source, item)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     if Player.Functions.RemoveItem(item.name, 1, item.slot) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[item.name], 'remove', 1)
+        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
 
         local activehorse = MySQL.scalar.await('SELECT id FROM fdb_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
         if not activehorse then return end
@@ -168,12 +168,12 @@ RSGCore.Functions.CreateUseableItem('horse_carrot', function(source, item)
 end)
 
 -- apple: mesmo padrão que carrot
-RSGCore.Functions.CreateUseableItem('horse_apple', function(source, item)
+FDBCore.Functions.CreateUseableItem('horse_apple', function(source, item)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     if Player.Functions.RemoveItem(item.name, 1, item.slot) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[item.name], 'remove', 1)
+        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
 
         local activehorse = MySQL.scalar.await('SELECT id FROM fdb_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
         if not activehorse then return end
@@ -194,24 +194,24 @@ RSGCore.Functions.CreateUseableItem('horse_apple', function(source, item)
 end)
 
 -- feed horse sugarcube
-RSGCore.Functions.CreateUseableItem('sugarcube', function(source, item)
-    local Player = RSGCore.Functions.GetPlayer(source)
+FDBCore.Functions.CreateUseableItem('sugarcube', function(source, item)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if Player.Functions.RemoveItem(item.name, 1, item.slot) then
         TriggerClientEvent('fdb-horses:client:playerfeedhorse', source, item.name)
     end
 end)
 
 -- feed horse haysnack
-RSGCore.Functions.CreateUseableItem('haysnack', function(source, item)
-    local Player = RSGCore.Functions.GetPlayer(source)
+FDBCore.Functions.CreateUseableItem('haysnack', function(source, item)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if Player.Functions.RemoveItem(item.name, 1, item.slot) then
         TriggerClientEvent('fdb-horses:client:playerfeedhorse', source, item.name)
     end
 end)
 
 -- feed horse horsemeal
-RSGCore.Functions.CreateUseableItem('horsemeal', function(source, item)
-    local Player = RSGCore.Functions.GetPlayer(source)
+FDBCore.Functions.CreateUseableItem('horsemeal', function(source, item)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if Player.Functions.RemoveItem(item.name, 1, item.slot) then
         TriggerClientEvent('fdb-horses:client:playerfeedhorse', source, item.name)
     end
@@ -220,9 +220,9 @@ end)
 ----------------------------------
 -- horse reviver
 ----------------------------------
-RSGCore.Functions.CreateUseableItem('horse_reviver', function(source, item)
+FDBCore.Functions.CreateUseableItem('horse_reviver', function(source, item)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
 
     if not Player then return end
 
@@ -236,7 +236,7 @@ RSGCore.Functions.CreateUseableItem('horse_reviver', function(source, item)
 
     -- remove item first (server-authoritative), then trigger revive
     if Player.Functions.RemoveItem(item.name, 1, item.slot) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[item.name], 'remove', 1)
+        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
         TriggerClientEvent('fdb-horses:client:revivehorse', src, item, result[1])
     end
 end)
@@ -246,7 +246,7 @@ end)
 ----------------------------------
 RegisterServerEvent('fdb-horses:server:BuyHorse', function(model, stable, horsename, gender)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     -- SECURITY: Validate horse name
@@ -302,7 +302,7 @@ end)
 -----------------------------------
 RegisterServerEvent('fdb-horses:server:SetHoresActive', function(id)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     
     local owned = MySQL.scalar.await('SELECT COUNT(*) FROM fdb_horses WHERE id = ? AND citizenid = ?', {id, Player.PlayerData.citizenid})
@@ -323,7 +323,7 @@ end)
 -----------------------------------
 RegisterServerEvent('fdb-horses:server:SetHoresUnActive', function(id, stableid)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     
     local owned = MySQL.scalar.await('SELECT COUNT(*) FROM fdb_horses WHERE id = ? AND citizenid = ?', {id, Player.PlayerData.citizenid})
@@ -341,7 +341,7 @@ end)
 -----------------------------------
 RegisterServerEvent('fdb-horses:server:fleeStoreHorse', function(stableid)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     local activehorse = MySQL.scalar.await('SELECT id FROM fdb_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, 1})
     if not activehorse then return end
@@ -354,7 +354,7 @@ end)
 -----------------------------------
 RegisterServerEvent('fdb-horses:renameHorse', function(name)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     
     if not Player then return end
     
@@ -387,7 +387,7 @@ end)
 ----------------------------------
 RegisterServerEvent('fdb-horses:server:HorseDied', function(horseid, horsename)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     local cid = Player.PlayerData.citizenid
@@ -421,7 +421,7 @@ end)
 ----------------------------------
 RegisterServerEvent('fdb-horses:server:deletehorse', function(data)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     
     local horseid = data.horseid
@@ -466,7 +466,7 @@ end)
 -----------------------------------
 lib.callback.register('fdb-horses:server:GetHorse', function(source, stable)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return {} end
     local Result = {}
     if stable and stable ~= '' then
@@ -480,9 +480,9 @@ end)
 -----------------------------------
 -- get active horse
 -----------------------------------
-RSGCore.Functions.CreateCallback('fdb-horses:server:GetActiveHorse', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-horses:server:GetActiveHorse', function(source, cb)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     local cid = Player.PlayerData.citizenid
     local result = MySQL.query.await('SELECT * FROM fdb_horses WHERE citizenid=@citizenid AND active=@active', { ['@citizenid'] = cid, ['@active'] = 1 })
@@ -497,9 +497,9 @@ end)
 -- horse customization
 ----------------------------------
 -- get active horse components callback
-RSGCore.Functions.CreateCallback('fdb-horses:server:CheckComponents', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-horses:server:CheckComponents', function(source, cb)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     local Playercid = Player.PlayerData.citizenid
     local result = MySQL.query.await('SELECT * FROM fdb_horses WHERE citizenid=@citizenid AND active=@active', {
@@ -518,7 +518,7 @@ end)
 -----------------------------------
 RegisterNetEvent('fdb-horses:server:SaveComponents', function(newComponents, horseid)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     -- SECURITY: Validate components
@@ -555,8 +555,8 @@ end)
 -----------------------------------
 RegisterNetEvent('fdb-horses:server:TradeHorse', function(playerId, horseId)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
-    local Target = RSGCore.Functions.GetPlayer(playerId)
+    local Player = FDBCore.Functions.GetPlayer(src)
+    local Target = FDBCore.Functions.GetPlayer(playerId)
     
     if not Player or not Target then return end
     
@@ -626,8 +626,8 @@ RegisterNetEvent('fdb-horses:server:AcceptTrade', function(fromId)
         return
     end
     
-    local Target = RSGCore.Functions.GetPlayer(src)
-    local Sender = RSGCore.Functions.GetPlayer(fromId)
+    local Target = FDBCore.Functions.GetPlayer(src)
+    local Sender = FDBCore.Functions.GetPlayer(fromId)
     
     if not Target or not Sender then
         tradeRequests[src] = nil
@@ -671,7 +671,7 @@ end)
 -----------------------------------
 RegisterServerEvent('fdb-horses:server:MoveHorse', function(horseId, newStableId)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     local citizenid = Player.PlayerData.citizenid
@@ -757,7 +757,7 @@ function GenerateHorseid()
     local UniqueFound = false
     local horseid = nil
     while not UniqueFound do
-        horseid = tostring(RSGCore.Shared.RandomStr(3) .. RSGCore.Shared.RandomInt(3)):upper()
+        horseid = tostring(FDBCore.Shared.RandomStr(3) .. FDBCore.Shared.RandomInt(3)):upper()
         local result = MySQL.prepare.await('SELECT COUNT(*) as count FROM fdb_horses WHERE horseid = ?', { horseid })
         if result == 0 then
             UniqueFound = true
@@ -772,7 +772,7 @@ end
 -- Check if Player has horsebrush before brush the horse
 RegisterServerEvent('fdb-horses:server:brushhorse', function(item)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(source)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if Player.Functions.GetItemByName(item) then
         TriggerClientEvent('fdb-horses:client:playerbrushhorse', source, item)
     else
@@ -785,7 +785,7 @@ end)
 -----------------------------------
 RegisterServerEvent('fdb-horses:server:sethorseAttributes', function(dirt)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     dirt = tonumber(dirt)
@@ -798,11 +798,11 @@ end)
 
 RegisterServerEvent('fdb-horses:server:SetPlayerBucket', function(random, ped)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     if not ped or type(ped) ~= "number" or ped <= 0 then return end
     if random then
-        local BucketID = RSGCore.Shared.RandomInt(1000, 9999)
+        local BucketID = FDBCore.Shared.RandomInt(1000, 9999)
         SetRoutingBucketPopulationEnabled(BucketID, false)
         SetPlayerRoutingBucket(source, BucketID)
         SetPlayerRoutingBucket(ped, BucketID)
@@ -817,7 +817,7 @@ end)
 ---------------------------------
 RegisterNetEvent('fdb-horses:server:openhorseinventory', function(horseid)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     -- verify ownership
@@ -897,7 +897,7 @@ end)
 --------------------------------------
 RegisterNetEvent('fdb-horses:server:openShop', function()
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     -- verify player is near a stable
@@ -1033,7 +1033,7 @@ local activeHorseNetIds = {}  -- [citizenid] = networkId
 
 RegisterNetEvent('fdb-horses:server:RegisterHorseNet', function(netId)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     if type(netId) ~= 'number' then return end
 
@@ -1061,7 +1061,7 @@ end)
 
 RegisterNetEvent('fdb-horses:server:UnregisterHorseNet', function()
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     activeHorseNetIds[Player.PlayerData.citizenid] = nil
 end)
@@ -1141,9 +1141,9 @@ CreateThread(function()
             )
 
             -- Encontra o src do dono do cavalo (se estiver online)
-            local players = RSGCore.Functions.GetPlayers()
+            local players = FDBCore.Functions.GetPlayers()
             for _, src in ipairs(players) do
-                local Player = RSGCore.Functions.GetPlayer(src)
+                local Player = FDBCore.Functions.GetPlayer(src)
                 if Player and Player.PlayerData.citizenid == citizenid then
                     -- Envia campos atualizados ao client — client só lê, nunca calcula dreno
                     TriggerClientEvent('fdb-horses:client:stateChanged', src, {
@@ -1198,12 +1198,12 @@ end)
 -- /testhorse rear   → cavalo empina (native TASK_PLAY_ANIM_ON_MOUNT)
 -- /testhorse eject  → jogador é ejetado do cavalo
 -- /testhorse agit   → força agitação máxima no metadata (sem native, valida o loop)
-RSGCore.Commands.Add('testhorse', 'Fase D: testa natives de agitação do cavalo (admin)',
+FDBCore.Commands.Add('testhorse', 'Fase D: testa natives de agitação do cavalo (admin)',
     {{ name = 'acao', help = 'rear | eject | agit' }},
     false,
     function(source, args)
         local src = source
-        local Player = RSGCore.Functions.GetPlayer(src)
+        local Player = FDBCore.Functions.GetPlayer(src)
         if not Player then return end
 
         local action = args[1] and string.lower(args[1]) or 'rear'

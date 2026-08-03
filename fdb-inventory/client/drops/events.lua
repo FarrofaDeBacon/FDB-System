@@ -8,7 +8,7 @@ end)
 
 ---Triggered when the player successfully loads into the server.
 ---Resets drop state and fetches current world drops.
-RegisterNetEvent('RSGCore:Client:OnPlayerLoaded', function()
+RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', function()
     Drops.ResetPlayerState()
     Drops.GetDrops()
 end)

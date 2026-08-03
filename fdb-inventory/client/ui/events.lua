@@ -1,5 +1,5 @@
 -- Toggle the hotbar UI with given items
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 local function hydrateEquipmentSlots(eqSlots)
     if type(eqSlots) ~= 'table' then return {} end
@@ -8,7 +8,7 @@ local function hydrateEquipmentSlots(eqSlots)
         if type(data) == 'table' then
             local itemName = data.itemName or data.name
             if itemName then
-                local sharedItem = RSGCore.Shared.Items[itemName:lower()]
+                local sharedItem = FDBCore.Shared.Items[itemName:lower()]
                 if sharedItem then
                     local newData = {}
                     for k, v in pairs(data) do newData[k] = v end
@@ -34,7 +34,7 @@ end
 
 -- @param items: table of items to display on the hotbar
 RegisterNetEvent('fdb-inventory:client:hotbar', function(items, activeSlots)
-    local token = exports['rsg-core']:GenerateCSRFToken() -- CSRF token for NUI security
+    local token = exports['fdb-core']:GenerateCSRFToken() -- CSRF token for NUI security
     local invToken = GenerateInventoryCbToken()
     LocalPlayer.state.hotbarShown = not LocalPlayer.state.hotbarShown -- toggle state
     SendNUIMessage({
@@ -60,9 +60,9 @@ end)
 -- Update the player's inventory UI with current items
 RegisterNetEvent('fdb-inventory:client:updateInventory', function()
 
-    local token = exports['rsg-core']:GenerateCSRFToken()
+    local token = exports['fdb-core']:GenerateCSRFToken()
     local invToken = GenerateInventoryCbToken()
-    local playerData = RSGCore.Functions.GetPlayerData() -- fetch current player data
+    local playerData = FDBCore.Functions.GetPlayerData() -- fetch current player data
     SendNUIMessage({
         action = 'update',
         inventory = playerData.items,
@@ -119,7 +119,7 @@ end)
 -- @param items: table of items to display
 RegisterNetEvent('fdb-inventory:client:updateHotbar', function(items, activeSlots)
 
-    local token = exports['rsg-core']:GenerateCSRFToken()
+    local token = exports['fdb-core']:GenerateCSRFToken()
     local invToken = GenerateInventoryCbToken()
     SendNUIMessage({
         action = 'updateHotbar',
@@ -176,9 +176,9 @@ local tempBackpackModel = nil
 -- @param other: optional table with extra info (trunk, stash, etc.)
 RegisterNetEvent('fdb-inventory:client:openInventory', function(items, other, serverSlots)
     CreateThread(function()
-        local token = exports['rsg-core']:GenerateCSRFToken()
+        local token = exports['fdb-core']:GenerateCSRFToken()
         local invToken = GenerateInventoryCbToken()
-        local Player = RSGCore.Functions.GetPlayerData()
+        local Player = FDBCore.Functions.GetPlayerData()
         -- Use server-authoritative slot count when provided (overrides stale client cache)
         if serverSlots then Player.slots = serverSlots end
         local config = require 'shared.config'
@@ -193,7 +193,7 @@ RegisterNetEvent('fdb-inventory:client:openInventory', function(items, other, se
         local isEquipped = (tempBackpackUid == nil)
 
         if not uid then
-            local PlayerData = RSGCore.Functions.GetPlayerData()
+            local PlayerData = FDBCore.Functions.GetPlayerData()
             local eqBackpack = PlayerData.metadata and PlayerData.metadata.equippedBackpack
             if eqBackpack and eqBackpack.stashId then
                 uid = eqBackpack.stashId

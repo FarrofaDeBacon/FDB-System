@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 -- Rate limiting
 local purchaseCooldowns = {}
@@ -25,7 +25,7 @@ lib.callback.register('fdb-inventory:server:attemptPurchase', function(source, d
     -- Unique items can only be purchased in quantity 1
     if itemInfo.unique and amount > 1 then amount = 1 end
 
-    local Player = RSGCore.Functions.GetPlayer(source)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return false end
 
     local shopInfo = RegisteredShops[shopName]
@@ -72,7 +72,7 @@ lib.callback.register('fdb-inventory:server:attemptPurchase', function(source, d
                 -- Server-side weapon deequip (CheckWeapon) before removing from inventory
                 -- This is authoritative and does not depend on the client receiving any event.
                 -- isMove=true below is kept as a redundant client-side fallback.
-                local itemDef = RSGCore.Shared.Items[itemInfo.name:lower()]
+                local itemDef = FDBCore.Shared.Items[itemInfo.name:lower()]
                 if itemDef and itemDef['type'] == 'weapon' then
                     Inventory.CheckWeapon(source, realItem)
                 end

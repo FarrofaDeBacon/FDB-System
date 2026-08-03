@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 RegisterNetEvent('fdb-inventory:client:tradeRequest', function(initiatorId, initiatorName)
     lib.registerContext({
@@ -29,9 +29,9 @@ end)
 
 RegisterNetEvent('fdb-inventory:client:openTrade', function(tradeId, partnerId, partnerName, items, partnerData)
 
-    local token = exports['rsg-core']:GenerateCSRFToken()
+    local token = exports['fdb-core']:GenerateCSRFToken()
     local invToken = GenerateInventoryCbToken()
-    local Player = RSGCore.Functions.GetPlayerData()
+    local Player = FDBCore.Functions.GetPlayerData()
     local config = require 'shared.config'
 
     if not IsNuiFocused() then
@@ -61,7 +61,7 @@ end)
 
 RegisterNetEvent('fdb-inventory:client:updateTrade', function(tradeData)
 
-    local token = exports['rsg-core']:GenerateCSRFToken()
+    local token = exports['fdb-core']:GenerateCSRFToken()
     local invToken = GenerateInventoryCbToken()
     SendNUIMessage({
         action = 'updateTrade',
@@ -73,7 +73,7 @@ end)
 
 RegisterNetEvent('fdb-inventory:client:cancelTrade', function()
 
-    local token = exports['rsg-core']:GenerateCSRFToken()
+    local token = exports['fdb-core']:GenerateCSRFToken()
     local invToken = GenerateInventoryCbToken()
     SendNUIMessage({
         action = 'cancelTrade',
@@ -84,7 +84,7 @@ end)
 
 RegisterNetEvent('fdb-inventory:client:completeTrade', function()
 
-    local token = exports['rsg-core']:GenerateCSRFToken()
+    local token = exports['fdb-core']:GenerateCSRFToken()
     local invToken = GenerateInventoryCbToken()
     SendNUIMessage({
         action = 'completeTrade',

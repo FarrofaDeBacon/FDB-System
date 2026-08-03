@@ -40,7 +40,7 @@ local isPropTwo = false
 local prop_net = nil
 local propTwo_net = nil
 local runProgThread = false
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 RegisterNetEvent('progressbar:client:ToggleBusyness')
 AddEventHandler('progressbar:client:ToggleBusyness', function(bool)
@@ -89,7 +89,7 @@ function Process(action, start, tick, finish)
                     if tick ~= nil then
                         tick()
                     end
-                    if IsControlJustPressed(0, RSGCore.Shared.Keybinds['ESC']) and Action.canCancel then
+                    if IsControlJustPressed(0, FDBCore.Shared.Keybinds['ESC']) and Action.canCancel then
                         TriggerEvent("progressbar:client:cancel")
                     end
 
@@ -102,10 +102,10 @@ function Process(action, start, tick, finish)
                 end
             end)
         else
-            TriggerEvent("RSGCore:Notify", "You are already doing something!", "error")
+            TriggerEvent("FDBCore:Notify", "You are already doing something!", "error")
         end
     else
-        TriggerEvent("RSGCore:Notify", "Cant do that action!", "error")
+        TriggerEvent("FDBCore:Notify", "Cant do that action!", "error")
     end
 end
 

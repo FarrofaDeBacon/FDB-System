@@ -12,7 +12,7 @@ end)
 
 RegisterNetEvent('fdb-inventory:server:closeInventory', function(inventory)
     local src = source
-    local RSGPlayer = RSGCore.Functions.GetPlayer(src)
+    local RSGPlayer = FDBCore.Functions.GetPlayer(src)
     if not RSGPlayer then return end
 
     -- Mark player's inventory as no longer busy
@@ -64,7 +64,7 @@ end)
 --]]
 RegisterNetEvent('fdb-inventory:server:useItem', function(item)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return false end
     
     local itemData
@@ -95,7 +95,7 @@ RegisterNetEvent('fdb-inventory:server:useItem', function(item)
     end
     
     if not itemData then return end
-    local itemInfo = RSGCore.Shared.Items[itemData.name]
+    local itemInfo = FDBCore.Shared.Items[itemData.name]
     local allowedDuringMelee = {
         weapon = true,
         weapon_thrown = true,
@@ -159,14 +159,14 @@ end)
 
 RegisterNetEvent('fdb-inventory:server:UseHotbarSlot', function(slot)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     local hotbarItems, _ = Inventory.GetHotbarItems(Player)
     local itemData = hotbarItems[slot]
     print(("[rsg-inventory DEBUG] UseHotbarSlot triggered. Slot: %s, ItemData: %s"):format(tostring(slot), json.encode(itemData)))
     if not itemData then return end
 
-    local itemInfo = RSGCore.Shared.Items[itemData.name]
+    local itemInfo = FDBCore.Shared.Items[itemData.name]
     
     local inMelee = lib.callback.await('fdb-inventory:client:isInMelee', src)
     if inMelee and not (itemData.type == 'weapon' or itemData.type == 'weapon_thrown') then
@@ -215,7 +215,7 @@ end)
 --]]
 RegisterNetEvent('fdb-inventory:server:updateHotbar', function()
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     local items, activeSlots = Inventory.GetHotbarItems(Player)
@@ -242,7 +242,7 @@ lib.callback.register('fdb-inventory:server:SetInventoryData', function(source, 
     if toInventory:find('shop-') then return false, 'shop' end
     if not fromInventory or not toInventory or not fromSlot or not toSlot or not fromAmount or not toAmount then return false, 'invalid_args' end
 
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return false, 'no_player' end
 
     local isMove = false
@@ -256,7 +256,7 @@ lib.callback.register('fdb-inventory:server:SetInventoryData', function(source, 
     end
     local targetId = getOtherPlayerId(fromInventory) or getOtherPlayerId(toInventory)
     if targetId then
-        local Target = RSGCore.Functions.GetPlayer(targetId)
+        local Target = FDBCore.Functions.GetPlayer(targetId)
         if not Target then
             Inventory.CloseInventory(src, fromInventory)
             Inventory.CloseInventory(src, toInventory)
@@ -276,7 +276,7 @@ lib.callback.register('fdb-inventory:server:SetInventoryData', function(source, 
             TriggerClientEvent('ox_lib:notify', src, { title = 'Error', description = locale('error.target_needs_restrained'), type = 'error', duration = 5000 })
             return false, 'target_not_restrained'
         end
-        local hasPerm = RSGCore.Functions.HasPermission(src, 'police') or Player.PlayerData.job.name == 'police' or Player.PlayerData.job.name == 'marshal'
+        local hasPerm = FDBCore.Functions.HasPermission(src, 'police') or Player.PlayerData.job.name == 'police' or Player.PlayerData.job.name == 'marshal'
         if not hasPerm and not targetMeta.isdead then
             Inventory.CloseInventory(src, fromInventory)
             Inventory.CloseInventory(src, toInventory)
@@ -292,12 +292,12 @@ lib.callback.register('fdb-inventory:server:SetInventoryData', function(source, 
                 local stashType = pattern:gsub('[%-^]', ''):gsub('%-', '')
                 local hasAccess = false
                 if stashType == 'police' or stashType == 'marshal' then
-                    hasAccess = RSGCore.Functions.HasPermission(src, 'police') or Player.PlayerData.job.name == 'police' or Player.PlayerData.job.name == 'marshal'
+                    hasAccess = FDBCore.Functions.HasPermission(src, 'police') or Player.PlayerData.job.name == 'police' or Player.PlayerData.job.name == 'marshal'
                 elseif stashType == 'gang' then
                     local gangName = invName:match('gang%-(.+)%-')
                     hasAccess = Player.PlayerData.gang and Player.PlayerData.gang.name == gangName
                 else
-                    hasAccess = RSGCore.Functions.HasPermission(src, 'admin')
+                    hasAccess = FDBCore.Functions.HasPermission(src, 'admin')
                 end
                 if not hasAccess then
                     Inventory.CloseInventory(src, invName)
@@ -313,7 +313,7 @@ lib.callback.register('fdb-inventory:server:SetInventoryData', function(source, 
     if fromId ~= toId then isMove = true end
 
     -- Distance check (except admin)
-    if not RSGCore.Functions.HasPermission(src, 'admin') then
+    if not FDBCore.Functions.HasPermission(src, 'admin') then
         local srcCoords = GetEntityCoords(GetPlayerPed(src))
         local maxDist = Inventory.MAX_DIST
         local isInventoryTooFar = function(inventoryCoords)
@@ -531,8 +531,8 @@ lib.callback.register('fdb-inventory:server:SetInventoryData', function(source, 
 end)
 RegisterNetEvent('fdb-inventory:server:openPlayerInventory', function(targetId)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
-    local Target = RSGCore.Functions.GetPlayer(targetId)
+    local Player = FDBCore.Functions.GetPlayer(src)
+    local Target = FDBCore.Functions.GetPlayer(targetId)
 
     if not Player or not Target then return end
 
@@ -567,7 +567,7 @@ RegisterNetEvent('fdb-inventory:server:openPlayerInventory', function(targetId)
     end
 
     -- Additional permission check for law enforcement
-    local hasPermission = RSGCore.Functions.HasPermission(src, 'police') or
+    local hasPermission = FDBCore.Functions.HasPermission(src, 'police') or
                          Player.PlayerData.job.name == 'police' or
                          Player.PlayerData.job.name == 'marshal'
 
@@ -586,7 +586,7 @@ end)
 
 RegisterNetEvent('fdb-inventory:server:openStash', function(stashId)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
 
     if not Player then return end
 
@@ -625,7 +625,7 @@ RegisterNetEvent('fdb-inventory:server:openStash', function(stashId)
 
         -- Check specific permissions based on stash type
         if stashType == 'police' or stashType == 'marshal' then
-            hasAccess = RSGCore.Functions.HasPermission(src, 'police') or
+            hasAccess = FDBCore.Functions.HasPermission(src, 'police') or
                        Player.PlayerData.job.name == 'police' or
                        Player.PlayerData.job.name == 'marshal'
         elseif stashType == 'gang' then
@@ -633,7 +633,7 @@ RegisterNetEvent('fdb-inventory:server:openStash', function(stashId)
             local gangName = stashId:match('gang%-(.+)%-')
             hasAccess = Player.PlayerData.gang and Player.PlayerData.gang.name == gangName
         elseif stashType == 'admin' or stashType == 'evidence' then
-            hasAccess = RSGCore.Functions.HasPermission(src, 'admin')
+            hasAccess = FDBCore.Functions.HasPermission(src, 'admin')
         end
 
         if not hasAccess then

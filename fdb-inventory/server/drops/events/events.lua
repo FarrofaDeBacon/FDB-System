@@ -1,8 +1,8 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 -- Open drops
 RegisterNetEvent('fdb-inventory:server:openDrop', function(dropId)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     -- Get player position

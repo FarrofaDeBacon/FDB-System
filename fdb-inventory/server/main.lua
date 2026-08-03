@@ -40,7 +40,7 @@ end)
 
 RegisterNetEvent('fdb-inventory:server:EquipItem', function(slot, equipmentType)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     local slotNum = tonumber(slot)
@@ -75,7 +75,7 @@ RegisterNetEvent('fdb-inventory:server:EquipItem', function(slot, equipmentType)
     end
 
     if not isValid then
-        TriggerClientEvent('RSGCore:Notify', src, "Este item nao cabe neste slot!", "error")
+        TriggerClientEvent('FDBCore:Notify', src, "Este item nao cabe neste slot!", "error")
         TriggerClientEvent('fdb-inventory:client:updateInventory', src)
         return
     end
@@ -114,7 +114,7 @@ end)
 
 RegisterNetEvent('fdb-inventory:server:UnequipItem', function(equipmentType, targetSlot)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     local metadata = Player.PlayerData.metadata
@@ -151,7 +151,7 @@ RegisterNetEvent('fdb-inventory:server:UnequipItem', function(equipmentType, tar
     end
 
     if not firstFreeSlot then
-        TriggerClientEvent('RSGCore:Notify', src, "Seu bolso esta cheio!", "error")
+        TriggerClientEvent('FDBCore:Notify', src, "Seu bolso esta cheio!", "error")
         TriggerClientEvent('fdb-inventory:client:updateInventory', src)
         return
     end
@@ -164,7 +164,7 @@ end)
 
 RegisterNetEvent('fdb-inventory:server:DropEquipmentItem', function(equipmentType)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     local metadata = Player.PlayerData.metadata
@@ -179,13 +179,13 @@ RegisterNetEvent('fdb-inventory:server:DropEquipmentItem', function(equipmentTyp
     end
 end)
 
-RSGCore.Commands.Add("clearequip", "Limpar slots de equipamentos corrompidos", {}, false, function(source, args)
-    local Player = RSGCore.Functions.GetPlayer(source)
+FDBCore.Commands.Add("clearequip", "Limpar slots de equipamentos corrompidos", {}, false, function(source, args)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if Player then
         local metadata = Player.PlayerData.metadata
         metadata.equipmentSlots = { backpack = nil, satchel = nil, wallet = nil, holster = nil }
         Player.Functions.SetMetaData('equipmentSlots', metadata.equipmentSlots)
         TriggerClientEvent('fdb-inventory:client:updateInventory', source)
-        TriggerClientEvent('RSGCore:Notify', source, "Slots de equipamento limpos!", "success")
+        TriggerClientEvent('FDBCore:Notify', source, "Slots de equipamento limpos!", "success")
     end
 end)

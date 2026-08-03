@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 --- @param items string|table - The item(s) to check for. Can be a table of items or a single item as a string.
 --- @param amount number [optional] - The minimum amount required for each item. If not provided, any amount greater than 0 will be considered.
 --- @return boolean - Returns true if the player has the item(s) with the specified amount, false otherwise.
@@ -14,7 +14,7 @@ function HasItem(items, amount)
         return n == #t
     end
 
-    local playerData = RSGCore.Functions.GetPlayerData()
+    local playerData = FDBCore.Functions.GetPlayerData()
     local inv = playerData and playerData.items
     if not inv then return false end
 

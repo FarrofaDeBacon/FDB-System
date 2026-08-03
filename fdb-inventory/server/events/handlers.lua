@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 -- Player Disconnect Handler
 AddEventHandler('playerDropped', function()
     for invId, inv in pairs(Inventories) do
@@ -23,7 +23,7 @@ AddEventHandler('txAdmin:events:serverShuttingDown', function()
 end)
 
 
-AddEventHandler('RSGCore:Server:PlayerLoaded', function(Player)
+AddEventHandler('FDBCore:Server:PlayerLoaded', function(Player)
     local src = Player.PlayerData.source
 
     -- Migrate legacy metadata
@@ -167,7 +167,7 @@ AddEventHandler('RSGCore:Server:PlayerLoaded', function(Player)
         end,
         RemoveItem = function(item, amount, slot, reason)
             -- Server-side authoritative deequip for weapons; isMove=true is a client-side fallback.
-            local itemDef = RSGCore.Shared.Items[item:lower()]
+            local itemDef = FDBCore.Shared.Items[item:lower()]
             if itemDef and itemDef['type'] == 'weapon' then
                 local invItem = Inventory.GetItemBySlot(src, slot) or Inventory.GetItemByName(src, item)
                 Inventory.CheckWeapon(src, invItem or item)
@@ -192,7 +192,7 @@ AddEventHandler('RSGCore:Server:PlayerLoaded', function(Player)
     }
 
     for methodName, methodFunc in pairs(methods) do
-        RSGCore.Functions.AddPlayerMethod(src, methodName, methodFunc)
+        FDBCore.Functions.AddPlayerMethod(src, methodName, methodFunc)
     end
 end)
 
@@ -200,7 +200,7 @@ end)
 AddEventHandler('onResourceStart', function(resourceName)
     if resourceName ~= GetCurrentResourceName() then return end
 
-    local Players = RSGCore.Functions.GetRSGPlayers()
+    local Players = FDBCore.Functions.GetRSGPlayers()
     for k in pairs(Players) do
         local methods = {
             AddItem = function(item, amount, slot, info)
@@ -208,7 +208,7 @@ AddEventHandler('onResourceStart', function(resourceName)
             end,
             RemoveItem = function(item, amount, slot)
                 -- Server-side authoritative deequip for weapons; isMove=true is a client-side fallback.
-                local itemDef = RSGCore.Shared.Items[item:lower()]
+                local itemDef = FDBCore.Shared.Items[item:lower()]
                 if itemDef and itemDef['type'] == 'weapon' then
                     local invItem = Inventory.GetItemBySlot(k, slot) or Inventory.GetItemByName(k, item)
                     Inventory.CheckWeapon(k, invItem or item)
@@ -233,11 +233,11 @@ AddEventHandler('onResourceStart', function(resourceName)
         }
 
         for methodName, methodFunc in pairs(methods) do
-            RSGCore.Functions.AddPlayerMethod(k, methodName, methodFunc)
+            FDBCore.Functions.AddPlayerMethod(k, methodName, methodFunc)
         end
 
         -- Update slots dynamically on resource restart
-        local ply = RSGCore.Functions.GetPlayer(k)
+        local ply = FDBCore.Functions.GetPlayer(k)
         if ply then
             ply.Functions.SetPlayerData('slots', 12)
         end
