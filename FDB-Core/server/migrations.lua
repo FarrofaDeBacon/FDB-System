@@ -45,7 +45,9 @@ local function RunDatabaseMigrations()
                     return
                 end
 
-                -- Split migration by semicolon to safely support multi-statement files
+                -- Split migration by semicolon to safely support multi-statement files.
+                -- NOTE/LIMITATION: Migration SQL files should avoid embedded semicolons inside string literals
+                -- or complex CREATE TRIGGER/PROCEDURE blocks to ensure reliable statement splitting.
                 local statements = {}
                 for statement in fileContent:gmatch('[^;]+') do
                     local trimmed = statement:match('^%s*(.-)%s*$')
