@@ -1,33 +1,33 @@
--- Add or change (a) method(s) in the RSGCore.Functions table
+-- Add or change (a) method(s) in the FDBCore.Functions table
 local function SetMethod(methodName, handler)
     if type(methodName) ~= 'string' then
         return false, 'invalid_method_name'
     end
 
-    RSGCore.Functions[methodName] = handler
+    FDBCore.Functions[methodName] = handler
 
-    TriggerEvent('RSGCore:Server:UpdateObject')
+    TriggerEvent('FDBCore:Server:UpdateObject')
 
     return true, 'success'
 end
 
-RSGCore.Functions.SetMethod = SetMethod
+FDBCore.Functions.SetMethod = SetMethod
 exports('SetMethod', SetMethod)
 
--- Add or change (a) field(s) in the RSGCore table
+-- Add or change (a) field(s) in the FDBCore table
 local function SetField(fieldName, data)
     if type(fieldName) ~= 'string' then
         return false, 'invalid_field_name'
     end
 
-    RSGCore[fieldName] = data
+    FDBCore[fieldName] = data
 
-    TriggerEvent('RSGCore:Server:UpdateObject')
+    TriggerEvent('FDBCore:Server:UpdateObject')
 
     return true, 'success'
 end
 
-RSGCore.Functions.SetField = SetField
+FDBCore.Functions.SetField = SetField
 exports('SetField', SetField)
 
 -- Single add job function which should only be used if you planning on adding a single job
@@ -36,18 +36,18 @@ local function AddJob(jobName, job)
         return false, 'invalid_job_name'
     end
 
-    if RSGCore.Shared.Jobs[jobName] then
+    if FDBCore.Shared.Jobs[jobName] then
         return false, 'job_exists'
     end
 
-    RSGCore.Shared.Jobs[jobName] = job
+    FDBCore.Shared.Jobs[jobName] = job
 
-    TriggerClientEvent('RSGCore:Client:OnSharedUpdate', -1, 'Jobs', jobName, job)
-    TriggerEvent('RSGCore:Server:UpdateObject')
+    TriggerClientEvent('FDBCore:Client:OnSharedUpdate', -1, 'Jobs', jobName, job)
+    TriggerEvent('FDBCore:Server:UpdateObject')
     return true, 'success'
 end
 
-RSGCore.Functions.AddJob = AddJob
+FDBCore.Functions.AddJob = AddJob
 exports('AddJob', AddJob)
 
 -- Multiple Add Jobs
@@ -64,23 +64,23 @@ local function AddJobs(jobs)
             break
         end
 
-        if RSGCore.Shared.Jobs[key] then
+        if FDBCore.Shared.Jobs[key] then
             message = 'job_exists'
             shouldContinue = false
             errorItem = jobs[key]
             break
         end
 
-        RSGCore.Shared.Jobs[key] = value
+        FDBCore.Shared.Jobs[key] = value
     end
 
     if not shouldContinue then return false, message, errorItem end
-    TriggerClientEvent('RSGCore:Client:OnSharedUpdateMultiple', -1, 'Jobs', jobs)
-    TriggerEvent('RSGCore:Server:UpdateObject')
+    TriggerClientEvent('FDBCore:Client:OnSharedUpdateMultiple', -1, 'Jobs', jobs)
+    TriggerEvent('FDBCore:Server:UpdateObject')
     return true, message, nil
 end
 
-RSGCore.Functions.AddJobs = AddJobs
+FDBCore.Functions.AddJobs = AddJobs
 exports('AddJobs', AddJobs)
 
 -- Single Remove Job
@@ -89,18 +89,18 @@ local function RemoveJob(jobName)
         return false, 'invalid_job_name'
     end
 
-    if not RSGCore.Shared.Jobs[jobName] then
+    if not FDBCore.Shared.Jobs[jobName] then
         return false, 'job_not_exists'
     end
 
-    RSGCore.Shared.Jobs[jobName] = nil
+    FDBCore.Shared.Jobs[jobName] = nil
 
-    TriggerClientEvent('RSGCore:Client:OnSharedUpdate', -1, 'Jobs', jobName, nil)
-    TriggerEvent('RSGCore:Server:UpdateObject')
+    TriggerClientEvent('FDBCore:Client:OnSharedUpdate', -1, 'Jobs', jobName, nil)
+    TriggerEvent('FDBCore:Server:UpdateObject')
     return true, 'success'
 end
 
-RSGCore.Functions.RemoveJob = RemoveJob
+FDBCore.Functions.RemoveJob = RemoveJob
 exports('RemoveJob', RemoveJob)
 
 -- Single Update Job
@@ -109,18 +109,18 @@ local function UpdateJob(jobName, job)
         return false, 'invalid_job_name'
     end
 
-    if not RSGCore.Shared.Jobs[jobName] then
+    if not FDBCore.Shared.Jobs[jobName] then
         return false, 'job_not_exists'
     end
 
-    RSGCore.Shared.Jobs[jobName] = job
+    FDBCore.Shared.Jobs[jobName] = job
 
-    TriggerClientEvent('RSGCore:Client:OnSharedUpdate', -1, 'Jobs', jobName, job)
-    TriggerEvent('RSGCore:Server:UpdateObject')
+    TriggerClientEvent('FDBCore:Client:OnSharedUpdate', -1, 'Jobs', jobName, job)
+    TriggerEvent('FDBCore:Server:UpdateObject')
     return true, 'success'
 end
 
-RSGCore.Functions.UpdateJob = UpdateJob
+FDBCore.Functions.UpdateJob = UpdateJob
 exports('UpdateJob', UpdateJob)
 
 -- Single add item
@@ -129,18 +129,18 @@ local function AddItem(itemName, item)
         return false, 'invalid_item_name'
     end
 
-    if RSGCore.Shared.Items[itemName] then
+    if FDBCore.Shared.Items[itemName] then
         return false, 'item_exists'
     end
 
-    RSGCore.Shared.Items[itemName] = item
+    FDBCore.Shared.Items[itemName] = item
 
-    TriggerClientEvent('RSGCore:Client:OnSharedUpdate', -1, 'Items', itemName, item)
-    TriggerEvent('RSGCore:Server:UpdateObject')
+    TriggerClientEvent('FDBCore:Client:OnSharedUpdate', -1, 'Items', itemName, item)
+    TriggerEvent('FDBCore:Server:UpdateObject')
     return true, 'success'
 end
 
-RSGCore.Functions.AddItem = AddItem
+FDBCore.Functions.AddItem = AddItem
 exports('AddItem', AddItem)
 
 -- Single update item
@@ -148,16 +148,16 @@ local function UpdateItem(itemName, item)
     if type(itemName) ~= 'string' then
         return false, 'invalid_item_name'
     end
-    if not RSGCore.Shared.Items[itemName] then
+    if not FDBCore.Shared.Items[itemName] then
         return false, 'item_not_exists'
     end
-    RSGCore.Shared.Items[itemName] = item
-    TriggerClientEvent('RSGCore:Client:OnSharedUpdate', -1, 'Items', itemName, item)
-    TriggerEvent('RSGCore:Server:UpdateObject')
+    FDBCore.Shared.Items[itemName] = item
+    TriggerClientEvent('FDBCore:Client:OnSharedUpdate', -1, 'Items', itemName, item)
+    TriggerEvent('FDBCore:Server:UpdateObject')
     return true, 'success'
 end
 
-RSGCore.Functions.UpdateItem = UpdateItem
+FDBCore.Functions.UpdateItem = UpdateItem
 exports('UpdateItem', UpdateItem)
 
 -- Multiple Add Items
@@ -174,23 +174,23 @@ local function AddItems(items)
             break
         end
 
-        if RSGCore.Shared.Items[key] then
+        if FDBCore.Shared.Items[key] then
             message = 'item_exists'
             shouldContinue = false
             errorItem = items[key]
             break
         end
 
-        RSGCore.Shared.Items[key] = value
+        FDBCore.Shared.Items[key] = value
     end
 
     if not shouldContinue then return false, message, errorItem end
-    TriggerClientEvent('RSGCore:Client:OnSharedUpdateMultiple', -1, 'Items', items)
-    TriggerEvent('RSGCore:Server:UpdateObject')
+    TriggerClientEvent('FDBCore:Client:OnSharedUpdateMultiple', -1, 'Items', items)
+    TriggerEvent('FDBCore:Server:UpdateObject')
     return true, message, nil
 end
 
-RSGCore.Functions.AddItems = AddItems
+FDBCore.Functions.AddItems = AddItems
 exports('AddItems', AddItems)
 
 -- Single Remove Item
@@ -199,18 +199,18 @@ local function RemoveItem(itemName)
         return false, 'invalid_item_name'
     end
 
-    if not RSGCore.Shared.Items[itemName] then
+    if not FDBCore.Shared.Items[itemName] then
         return false, 'item_not_exists'
     end
 
-    RSGCore.Shared.Items[itemName] = nil
+    FDBCore.Shared.Items[itemName] = nil
 
-    TriggerClientEvent('RSGCore:Client:OnSharedUpdate', -1, 'Items', itemName, nil)
-    TriggerEvent('RSGCore:Server:UpdateObject')
+    TriggerClientEvent('FDBCore:Client:OnSharedUpdate', -1, 'Items', itemName, nil)
+    TriggerEvent('FDBCore:Server:UpdateObject')
     return true, 'success'
 end
 
-RSGCore.Functions.RemoveItem = RemoveItem
+FDBCore.Functions.RemoveItem = RemoveItem
 exports('RemoveItem', RemoveItem)
 
 -- Single Add Gang
@@ -219,18 +219,18 @@ local function AddGang(gangName, gang)
         return false, 'invalid_gang_name'
     end
 
-    if RSGCore.Shared.Gangs[gangName] then
+    if FDBCore.Shared.Gangs[gangName] then
         return false, 'gang_exists'
     end
 
-    RSGCore.Shared.Gangs[gangName] = gang
+    FDBCore.Shared.Gangs[gangName] = gang
 
-    TriggerClientEvent('RSGCore:Client:OnSharedUpdate', -1, 'Gangs', gangName, gang)
-    TriggerEvent('RSGCore:Server:UpdateObject')
+    TriggerClientEvent('FDBCore:Client:OnSharedUpdate', -1, 'Gangs', gangName, gang)
+    TriggerEvent('FDBCore:Server:UpdateObject')
     return true, 'success'
 end
 
-RSGCore.Functions.AddGang = AddGang
+FDBCore.Functions.AddGang = AddGang
 exports('AddGang', AddGang)
 
 -- Multiple Add Gangs
@@ -247,23 +247,23 @@ local function AddGangs(gangs)
             break
         end
 
-        if RSGCore.Shared.Gangs[key] then
+        if FDBCore.Shared.Gangs[key] then
             message = 'gang_exists'
             shouldContinue = false
             errorItem = gangs[key]
             break
         end
 
-        RSGCore.Shared.Gangs[key] = value
+        FDBCore.Shared.Gangs[key] = value
     end
 
     if not shouldContinue then return false, message, errorItem end
-    TriggerClientEvent('RSGCore:Client:OnSharedUpdateMultiple', -1, 'Gangs', gangs)
-    TriggerEvent('RSGCore:Server:UpdateObject')
+    TriggerClientEvent('FDBCore:Client:OnSharedUpdateMultiple', -1, 'Gangs', gangs)
+    TriggerEvent('FDBCore:Server:UpdateObject')
     return true, message, nil
 end
 
-RSGCore.Functions.AddGangs = AddGangs
+FDBCore.Functions.AddGangs = AddGangs
 exports('AddGangs', AddGangs)
 
 -- Single Remove Gang
@@ -272,18 +272,18 @@ local function RemoveGang(gangName)
         return false, 'invalid_gang_name'
     end
 
-    if not RSGCore.Shared.Gangs[gangName] then
+    if not FDBCore.Shared.Gangs[gangName] then
         return false, 'gang_not_exists'
     end
 
-    RSGCore.Shared.Gangs[gangName] = nil
+    FDBCore.Shared.Gangs[gangName] = nil
 
-    TriggerClientEvent('RSGCore:Client:OnSharedUpdate', -1, 'Gangs', gangName, nil)
-    TriggerEvent('RSGCore:Server:UpdateObject')
+    TriggerClientEvent('FDBCore:Client:OnSharedUpdate', -1, 'Gangs', gangName, nil)
+    TriggerEvent('FDBCore:Server:UpdateObject')
     return true, 'success'
 end
 
-RSGCore.Functions.RemoveGang = RemoveGang
+FDBCore.Functions.RemoveGang = RemoveGang
 exports('RemoveGang', RemoveGang)
 
 -- Single Update Gang
@@ -292,45 +292,45 @@ local function UpdateGang(gangName, gang)
         return false, 'invalid_gang_name'
     end
 
-    if not RSGCore.Shared.Gangs[gangName] then
+    if not FDBCore.Shared.Gangs[gangName] then
         return false, 'gang_not_exists'
     end
 
-    RSGCore.Shared.Gangs[gangName] = gang
+    FDBCore.Shared.Gangs[gangName] = gang
 
-    TriggerClientEvent('RSGCore:Client:OnSharedUpdate', -1, 'Gangs', gangName, gang)
-    TriggerEvent('RSGCore:Server:UpdateObject')
+    TriggerClientEvent('FDBCore:Client:OnSharedUpdate', -1, 'Gangs', gangName, gang)
+    TriggerEvent('FDBCore:Server:UpdateObject')
     return true, 'success'
 end
 
-RSGCore.Functions.UpdateGang = UpdateGang
+FDBCore.Functions.UpdateGang = UpdateGang
 exports('UpdateGang', UpdateGang)
 
 local resourceName = GetCurrentResourceName()
 local function GetCoreVersion(InvokingResource)
     local resourceVersion = GetResourceMetadata(resourceName, 'version')
     if InvokingResource and InvokingResource ~= '' then
-        print(('%s called rsgcore version check: %s'):format(InvokingResource or 'Unknown Resource', resourceVersion))
+        print(('%s called fdbcore version check: %s'):format(InvokingResource or 'Unknown Resource', resourceVersion))
     end
     return resourceVersion
 end
 
-RSGCore.Functions.GetCoreVersion = GetCoreVersion
+FDBCore.Functions.GetCoreVersion = GetCoreVersion
 exports('GetCoreVersion', GetCoreVersion)
 
 local function ExploitBan(playerId, origin)
     local name = GetPlayerName(playerId)
     MySQL.insert('INSERT INTO bans (name, license, discord, ip, reason, expire, bannedby) VALUES (?, ?, ?, ?, ?, ?, ?)', {
         name,
-        RSGCore.Functions.GetIdentifier(playerId, 'license'),
-        RSGCore.Functions.GetIdentifier(playerId, 'discord'),
-        RSGCore.Functions.GetIdentifier(playerId, 'ip'),
+        FDBCore.Functions.GetIdentifier(playerId, 'license'),
+        FDBCore.Functions.GetIdentifier(playerId, 'discord'),
+        FDBCore.Functions.GetIdentifier(playerId, 'ip'),
         origin,
         2147483647,
         'Anti Cheat'
     })
-    DropPlayer(playerId, Lang:t('info.exploit_banned', { discord = RSGCore.Config.Server.Discord }))
-    TriggerEvent('rsg-log:server:CreateLog', 'anticheat', 'Anti-Cheat', 'red', name .. ' has been banned for exploiting ' .. origin, true)
+    DropPlayer(playerId, Lang:t('info.exploit_banned', { discord = FDBCore.Config.Server.Discord }))
+    TriggerEvent('fdb-log:server:CreateLog', 'anticheat', 'Anti-Cheat', 'red', name .. ' has been banned for exploiting ' .. origin, true)
 end
 
 exports('ExploitBan', ExploitBan)

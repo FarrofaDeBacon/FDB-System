@@ -1,5 +1,5 @@
-RSGShared = RSGShared or {}
-RSGShared.Gangs = {
+FDBShared = FDBShared or {}
+FDBShared.Gangs = {
     none = {
         label = 'No Gang',
         grades = {

@@ -18,7 +18,7 @@ local function createPrompt(name, coords, key, text, options)
         Prompts[name].options = options
         Prompts[name].prompt = nil
     else
-        print('[rsg-core]  Prompt with name ' .. name .. ' already exists!')
+        print('[fdb-core]  Prompt with name ' .. name .. ' already exists!')
     end
 end
 
@@ -31,7 +31,7 @@ local function createPromptGroup(group, label, coords, prompts)
         PromptGroups[group].created = false
         PromptGroups[group].prompts = prompts
     else
-        print('[rsg-core]  Prompt with name ' .. group .. ' already exists!')
+        print('[fdb-core]  Prompt with name ' .. group .. ' already exists!')
     end
 end
 
@@ -127,7 +127,7 @@ CreateThread(function()
             local coords = GetEntityCoords(cache.ped, true)
             for k,v in pairs(Prompts) do
                 local distance = distanceBetween(coords, v.coords)
-                if (distance < RSGConfig.PromptDistance) then
+                if (distance < FDBConfig.PromptDistance) then
                     sleep = 1
                     if (Prompts[k].prompt == nil) then
                         setupPrompt(Prompts[k])
@@ -161,7 +161,7 @@ CreateThread(function()
             for k,v in pairs(PromptGroups) do
                 local distance = distanceBetween(coords, v.coords)
                 local promptGroup = PromptGroups[k].group
-                if (distance < RSGConfig.PromptDistance) then
+                if (distance < FDBConfig.PromptDistance) then
                     sleep = 1
                     if (PromptGroups[k].created == false) then
                         setupPromptGroup(PromptGroups[k])

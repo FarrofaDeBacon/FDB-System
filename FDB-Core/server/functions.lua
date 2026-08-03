@@ -1,17 +1,17 @@
-RSGCore.Functions = {}
-RSGCore.Player_Buckets = {}
-RSGCore.Entity_Buckets = {}
-RSGCore.UsableItems = {}
+FDBCore.Functions = {}
+FDBCore.Player_Buckets = {}
+FDBCore.Entity_Buckets = {}
+FDBCore.UsableItems = {}
 
 -- Getters
 -- Get your player first and then trigger a function on them
--- ex: local player = RSGCore.Functions.GetPlayer(source)
+-- ex: local player = FDBCore.Functions.GetPlayer(source)
 -- ex: local example = player.Functions.functionname(parameter)
 
 ---Gets the coordinates of an entity
 ---@param entity number
 ---@return vector4
-function RSGCore.Functions.GetCoords(entity)
+function FDBCore.Functions.GetCoords(entity)
     local coords = GetEntityCoords(entity, false)
     local heading = GetEntityHeading(entity)
     return vector4(coords.x, coords.y, coords.z, heading)
@@ -21,15 +21,15 @@ end
 ---@param source any
 ---@param idtype string
 ---@return string?
-function RSGCore.Functions.GetIdentifier(source, idtype)
+function FDBCore.Functions.GetIdentifier(source, idtype)
     return GetPlayerIdentifierByType(source, idtype or 'license')
 end
 
 ---Gets a players server id (source). Returns 0 if no player is found.
 ---@param identifier string
 ---@return number
-function RSGCore.Functions.GetSource(identifier)
-    for src, _ in pairs(RSGCore.Players) do
+function FDBCore.Functions.GetSource(identifier)
+    for src, _ in pairs(FDBCore.Players) do
         local idens = GetPlayerIdentifiers(src)
         for _, id in pairs(idens) do
             if identifier == id then
@@ -43,21 +43,21 @@ end
 ---Get player with given server id (source)
 ---@param source any
 ---@return table
-function RSGCore.Functions.GetPlayer(source)
+function FDBCore.Functions.GetPlayer(source)
     if type(source) == 'number' then
-        return RSGCore.Players[source]
+        return FDBCore.Players[source]
     else
-        return RSGCore.Players[RSGCore.Functions.GetSource(source)]
+        return FDBCore.Players[FDBCore.Functions.GetSource(source)]
     end
 end
 
 ---Get player by citizen id
 ---@param citizenid string
 ---@return table?
-function RSGCore.Functions.GetPlayerByCitizenId(citizenid)
-    for src in pairs(RSGCore.Players) do
-        if RSGCore.Players[src].PlayerData.citizenid == citizenid then
-            return RSGCore.Players[src]
+function FDBCore.Functions.GetPlayerByCitizenId(citizenid)
+    for src in pairs(FDBCore.Players) do
+        if FDBCore.Players[src].PlayerData.citizenid == citizenid then
+            return FDBCore.Players[src]
         end
     end
     return nil
@@ -66,24 +66,24 @@ end
 ---Get offline player by citizen id
 ---@param citizenid string
 ---@return table?
-function RSGCore.Functions.GetOfflinePlayerByCitizenId(citizenid)
-    return RSGCore.Player.GetOfflinePlayer(citizenid)
+function FDBCore.Functions.GetOfflinePlayerByCitizenId(citizenid)
+    return FDBCore.Player.GetOfflinePlayer(citizenid)
 end
 
 ---Get player by license
 ---@param license string
 ---@return table?
-function RSGCore.Functions.GetPlayerByLicense(license)
-    return RSGCore.Player.GetPlayerByLicense(license)
+function FDBCore.Functions.GetPlayerByLicense(license)
+    return FDBCore.Player.GetPlayerByLicense(license)
 end
 
 ---Get player by account id
 ---@param account string
 ---@return table?
-function RSGCore.Functions.GetPlayerByAccount(account)
-    for src in pairs(RSGCore.Players) do
-        if RSGCore.Players[src].PlayerData.charinfo.account == account then
-            return RSGCore.Players[src]
+function FDBCore.Functions.GetPlayerByAccount(account)
+    for src in pairs(FDBCore.Players) do
+        if FDBCore.Players[src].PlayerData.charinfo.account == account then
+            return FDBCore.Players[src]
         end
     end
     return nil
@@ -93,11 +93,11 @@ end
 ---@param property string
 ---@param value string
 ---@return table?
-function RSGCore.Functions.GetPlayerByCharInfo(property, value)
-    for src in pairs(RSGCore.Players) do
-        local charinfo = RSGCore.Players[src].PlayerData.charinfo
+function FDBCore.Functions.GetPlayerByCharInfo(property, value)
+    for src in pairs(FDBCore.Players) do
+        local charinfo = FDBCore.Players[src].PlayerData.charinfo
         if charinfo[property] ~= nil and charinfo[property] == value then
-            return RSGCore.Players[src]
+            return FDBCore.Players[src]
         end
     end
     return nil
@@ -105,28 +105,28 @@ end
 
 ---Get all players. Returns the server ids of all players.
 ---@return table
-function RSGCore.Functions.GetPlayers()
+function FDBCore.Functions.GetPlayers()
     local sources = {}
-    for k in pairs(RSGCore.Players) do
+    for k in pairs(FDBCore.Players) do
         sources[#sources + 1] = k
     end
     return sources
 end
 
----Will return an array of RSG Player class instances
+---Will return an array of FDB Player class instances
 ---unlike the GetPlayers() wrapper which only returns IDs
 ---@return table
-function RSGCore.Functions.GetRSGPlayers()
-    return RSGCore.Players
+function FDBCore.Functions.GetFDBPlayers()
+    return FDBCore.Players
 end
 
 ---Gets a list of all on duty players of a specified job and the number
 ---@param job string
 ---@return table, number
-function RSGCore.Functions.GetPlayersOnDuty(job)
+function FDBCore.Functions.GetPlayersOnDuty(job)
     local players = {}
     local count = 0
-    for src, Player in pairs(RSGCore.Players) do
+    for src, Player in pairs(FDBCore.Players) do
         if Player.PlayerData.job.name == job then
             if Player.PlayerData.job.onduty then
                 players[#players + 1] = src
@@ -140,9 +140,9 @@ end
 ---Returns only the amount of players on duty for the specified job
 ---@param job string
 ---@return number
-function RSGCore.Functions.GetDutyCount(job)
+function FDBCore.Functions.GetDutyCount(job)
     local count = 0
-    for _, Player in pairs(RSGCore.Players) do
+    for _, Player in pairs(FDBCore.Players) do
         if Player.PlayerData.job.name == job then
             if Player.PlayerData.job.onduty then
                 count += 1
@@ -156,7 +156,7 @@ end
 --- @param coords vector The coordinates to calculate the distance from. Can be a table with x, y, z fields or a vector3. If not provided, the source player's Ped's coordinates are used.
 --- @return string closestPlayer - The Player that is closest to the source player (or the provided coordinates). Returns -1 if no Players are found.
 --- @return number closestDistance - The distance to the closest Player. Returns -1 if no Players are found.
-function RSGCore.Functions.GetClosestPlayer(source, coords)
+function FDBCore.Functions.GetClosestPlayer(source, coords)
     local ped = GetPlayerPed(source)
     local players = GetPlayers()
     local closestDistance, closestPlayer = -1, -1
@@ -181,7 +181,7 @@ end
 --- @param coords vector The coordinates to calculate the distance from. Can be a table with x, y, z fields or a vector3. If not provided, the source player's Ped's coordinates are used.
 --- @return number closestObject - The Object that is closest to the source player (or the provided coordinates). Returns -1 if no Objects are found.
 --- @return number closestDistance - The distance to the closest Object. Returns -1 if no Objects are found.
-function RSGCore.Functions.GetClosestObject(source, coords)
+function FDBCore.Functions.GetClosestObject(source, coords)
     local ped = GetPlayerPed(source)
     local objects = GetAllObjects()
     local closestDistance, closestObject = -1, -1
@@ -202,7 +202,7 @@ end
 --- @param coords vector The coordinates to calculate the distance from. Can be a table with x, y, z fields or a vector3. If not provided, the source player's Ped's coordinates are used.
 --- @return number closestVehicle - The Vehicle that is closest to the source player (or the provided coordinates). Returns -1 if no Vehicles are found.
 --- @return number closestDistance - The distance to the closest Vehicle. Returns -1 if no Vehicles are found.
-function RSGCore.Functions.GetClosestVehicle(source, coords)
+function FDBCore.Functions.GetClosestVehicle(source, coords)
     local ped = GetPlayerPed(source)
     local vehicles = GetAllVehicles()
     local closestDistance, closestVehicle = -1, -1
@@ -223,7 +223,7 @@ end
 --- @param coords vector The coordinates to calculate the distance from. Can be a table with x, y, z fields or a vector3. If not provided, the source player's Ped's coordinates are used.
 --- @return number closestPed - The Ped that is closest to the source player (or the provided coordinates). Returns -1 if no Peds are found.
 --- @return number closestDistance - The distance to the closest Ped. Returns -1 if no Peds are found.
-function RSGCore.Functions.GetClosestPed(source, coords)
+function FDBCore.Functions.GetClosestPed(source, coords)
     local ped = GetPlayerPed(source)
     local peds = GetAllPeds()
     local closestDistance, closestPed = -1, -1
@@ -246,20 +246,20 @@ end
 
 ---Returns the objects related to buckets, first returned value is the player buckets, second one is entity buckets
 ---@return table, table
-function RSGCore.Functions.GetBucketObjects()
-    return RSGCore.Player_Buckets, RSGCore.Entity_Buckets
+function FDBCore.Functions.GetBucketObjects()
+    return FDBCore.Player_Buckets, FDBCore.Entity_Buckets
 end
 
 ---Will set the provided player id / source into the provided bucket id
 ---@param source any
 ---@param bucket any
 ---@return boolean
-function RSGCore.Functions.SetPlayerBucket(source, bucket)
+function FDBCore.Functions.SetPlayerBucket(source, bucket)
     if source and bucket then
-        local plicense = RSGCore.Functions.GetIdentifier(source, 'license')
+        local plicense = FDBCore.Functions.GetIdentifier(source, 'license')
         Player(source).state:set('instance', bucket, true)
         SetPlayerRoutingBucket(source, bucket)
-        RSGCore.Player_Buckets[plicense] = { id = source, bucket = bucket }
+        FDBCore.Player_Buckets[plicense] = { id = source, bucket = bucket }
         return true
     else
         return false
@@ -270,10 +270,10 @@ end
 ---@param entity number
 ---@param bucket number
 ---@return boolean
-function RSGCore.Functions.SetEntityBucket(entity, bucket)
+function FDBCore.Functions.SetEntityBucket(entity, bucket)
     if entity and bucket then
         SetEntityRoutingBucket(entity, bucket)
-        RSGCore.Entity_Buckets[entity] = { id = entity, bucket = bucket }
+        FDBCore.Entity_Buckets[entity] = { id = entity, bucket = bucket }
         return true
     else
         return false
@@ -283,10 +283,10 @@ end
 ---Will return an array of all the player ids inside the current bucket
 ---@param bucket number
 ---@return table|boolean
-function RSGCore.Functions.GetPlayersInBucket(bucket)
+function FDBCore.Functions.GetPlayersInBucket(bucket)
     local curr_bucket_pool = {}
-    if RSGCore.Player_Buckets and next(RSGCore.Player_Buckets) then
-        for _, v in pairs(RSGCore.Player_Buckets) do
+    if FDBCore.Player_Buckets and next(FDBCore.Player_Buckets) then
+        for _, v in pairs(FDBCore.Player_Buckets) do
             if v.bucket == bucket then
                 curr_bucket_pool[#curr_bucket_pool + 1] = v.id
             end
@@ -301,10 +301,10 @@ end
 ---(not for player entities, use GetPlayersInBucket for that)
 ---@param bucket number
 ---@return table|boolean
-function RSGCore.Functions.GetEntitiesInBucket(bucket)
+function FDBCore.Functions.GetEntitiesInBucket(bucket)
     local curr_bucket_pool = {}
-    if RSGCore.Entity_Buckets and next(RSGCore.Entity_Buckets) then
-        for _, v in pairs(RSGCore.Entity_Buckets) do
+    if FDBCore.Entity_Buckets and next(FDBCore.Entity_Buckets) then
+        for _, v in pairs(FDBCore.Entity_Buckets) do
             if v.bucket == bucket then
                 curr_bucket_pool[#curr_bucket_pool + 1] = v.id
             end
@@ -322,7 +322,7 @@ end
 ---@param coords vector
 ---@param warp boolean
 ---@return number
-function RSGCore.Functions.SpawnVehicle(source, model, coords, warp)
+function FDBCore.Functions.SpawnVehicle(source, model, coords, warp)
     local ped = GetPlayerPed(source)
     model = type(model) == 'string' and joaat(model) or model
     if not coords then coords = GetEntityCoords(ped) end
@@ -350,7 +350,7 @@ end
 ---@param coords vector
 ---@param warp boolean
 ---@return number
-function RSGCore.Functions.CreateVehicle(source, model, vehtype, coords, warp)
+function FDBCore.Functions.CreateVehicle(source, model, vehtype, coords, warp)
     model = type(model) == 'string' and joaat(model) or model
     vehtype = type(vehtype) == 'string' and tostring(vehtype) or vehtype
     if not coords then coords = GetEntityCoords(GetPlayerPed(source)) end
@@ -363,20 +363,20 @@ end
 
 ---Paychecks (standalone - don't touch)
 function PaycheckInterval()
-    if next(RSGCore.Players) then
-        for _, Player in pairs(RSGCore.Players) do
+    if next(FDBCore.Players) then
+        for _, Player in pairs(FDBCore.Players) do
             if Player then
-                local payment = RSGShared.Jobs[Player.PlayerData.job.name]['grades'][tostring(Player.PlayerData.job.grade.level)].payment
+                local payment = FDBShared.Jobs[Player.PlayerData.job.name]['grades'][tostring(Player.PlayerData.job.grade.level)].payment
                 if not payment then payment = Player.PlayerData.job.payment end
-                if Player.PlayerData.job and payment > 0 and (RSGShared.Jobs[Player.PlayerData.job.name].offDutyPay or Player.PlayerData.job.onduty) then
-                    if RSGCore.Config.Money.PayCheckSociety then
-                        local account = exports['rsg-banking']:GetAccountBalance(Player.PlayerData.job.name)
+                if Player.PlayerData.job and payment > 0 and (FDBShared.Jobs[Player.PlayerData.job.name].offDutyPay or Player.PlayerData.job.onduty) then
+                    if FDBCore.Config.Money.PayCheckSociety then
+                        local account = exports['fdb-banking']:GetAccountBalance(Player.PlayerData.job.name)
                         if account ~= 0 then          -- Checks if player is employed by a society
                             if account < payment then -- Checks if company has enough money to pay society
                                 TriggerClientEvent('ox_lib:notify', Player.PlayerData.source, {title = Lang:t('error.company_too_poor'), type = 'error', duration = 5000 })
                             else
                                 Player.Functions.AddMoney('bank', payment, 'paycheck')
-                                exports['rsg-banking']:RemoveMoney(Player.PlayerData.job.name, payment, 'Employee Paycheck')
+                                exports['fdb-banking']:RemoveMoney(Player.PlayerData.job.name, payment, 'Employee Paycheck')
                                 TriggerClientEvent('ox_lib:notify', Player.PlayerData.source, {title = Lang:t('info.received_paycheck', { value = payment }), type = 'info', duration = 5000 })
                             end
                         else
@@ -391,7 +391,7 @@ function PaycheckInterval()
             end
         end
     end
-    SetTimeout(RSGCore.Config.Money.PayCheckTimeOut * (60 * 1000), PaycheckInterval)
+    SetTimeout(FDBCore.Config.Money.PayCheckTimeOut * (60 * 1000), PaycheckInterval)
 end
 
 -- Callback Functions --
@@ -401,16 +401,16 @@ end
 ---@param source any
 ---@param cb function
 ---@param ... any
-function RSGCore.Functions.TriggerClientCallback(name, source, cb, ...)
-    RSGCore.ClientCallbacks[name] = cb
-    TriggerClientEvent('RSGCore:Client:TriggerClientCallback', source, name, ...)
+function FDBCore.Functions.TriggerClientCallback(name, source, cb, ...)
+    FDBCore.ClientCallbacks[name] = cb
+    TriggerClientEvent('FDBCore:Client:TriggerClientCallback', source, name, ...)
 end
 
 ---Create Server Callback
 ---@param name string
 ---@param cb function
-function RSGCore.Functions.CreateCallback(name, cb)
-    RSGCore.ServerCallbacks[name] = cb
+function FDBCore.Functions.CreateCallback(name, cb)
+    FDBCore.ServerCallbacks[name] = cb
 end
 
 ---Trigger Serv er Callback
@@ -418,9 +418,9 @@ end
 ---@param source any
 ---@param cb function
 ---@param ... any
-function RSGCore.Functions.TriggerCallback(name, source, cb, ...)
-    if not RSGCore.ServerCallbacks[name] then return end
-    RSGCore.ServerCallbacks[name](source, cb, ...)
+function FDBCore.Functions.TriggerCallback(name, source, cb, ...)
+    if not FDBCore.ServerCallbacks[name] then return end
+    FDBCore.ServerCallbacks[name](source, cb, ...)
 end
 
 -- Items
@@ -428,23 +428,23 @@ end
 ---Create a usable item
 ---@param item string
 ---@param data function
-function RSGCore.Functions.CreateUseableItem(item, data)
-    RSGCore.UsableItems[item] = data
+function FDBCore.Functions.CreateUseableItem(item, data)
+    FDBCore.UsableItems[item] = data
 end
 
 ---Checks if the given item is usable
 ---@param item string
 ---@return any
-function RSGCore.Functions.CanUseItem(item)
-    return RSGCore.UsableItems[item]
+function FDBCore.Functions.CanUseItem(item)
+    return FDBCore.UsableItems[item]
 end
 
 ---Use item
 ---@param source any
 ---@param item string
-function RSGCore.Functions.UseItem(source, item)
-    if GetResourceState('rsg-inventory') == 'missing' then return end
-    exports['rsg-inventory']:UseItem(source, item)
+function FDBCore.Functions.UseItem(source, item)
+    if GetResourceState('fdb-inventory') == 'missing' then return end
+    exports['fdb-inventory']:UseItem(source, item)
 end
 
 ---Kick Player
@@ -452,8 +452,8 @@ end
 ---@param reason string
 ---@param setKickReason boolean
 ---@param deferrals boolean
-function RSGCore.Functions.Kick(source, reason, setKickReason, deferrals)
-    reason = '\n' .. reason .. '\n🔸 Check our Discord for further information: ' .. RSGCore.Config.Server.Discord
+function FDBCore.Functions.Kick(source, reason, setKickReason, deferrals)
+    reason = '\n' .. reason .. '\n🔸 Check our Discord for further information: ' .. FDBCore.Config.Server.Discord
     if setKickReason then
         setKickReason(reason)
     end
@@ -485,9 +485,9 @@ end
 ---Check if player is whitelisted, kept like this for backwards compatibility or future plans
 ---@param source any
 ---@return boolean
-function RSGCore.Functions.IsWhitelisted(source)
-    if not RSGCore.Config.Server.Whitelist then return true end
-    if RSGCore.Functions.HasPermission(source, RSGCore.Config.Server.WhitelistPermission) then return true end
+function FDBCore.Functions.IsWhitelisted(source)
+    if not FDBCore.Config.Server.Whitelist then return true end
+    if FDBCore.Functions.HasPermission(source, FDBCore.Config.Server.WhitelistPermission) then return true end
     return false
 end
 
@@ -496,27 +496,27 @@ end
 ---Add permission for player
 ---@param source any
 ---@param permission string
-function RSGCore.Functions.AddPermission(source, permission)
+function FDBCore.Functions.AddPermission(source, permission)
     if not IsPlayerAceAllowed(source, permission) then
-        ExecuteCommand(('add_principal player.%s rsgcore.%s'):format(source, permission))
-        RSGCore.Commands.Refresh(source)
+        ExecuteCommand(('add_principal player.%s fdbcore.%s'):format(source, permission))
+        FDBCore.Commands.Refresh(source)
     end
 end
 
 ---Remove permission from player
 ---@param source any
 ---@param permission string
-function RSGCore.Functions.RemovePermission(source, permission)
+function FDBCore.Functions.RemovePermission(source, permission)
     if permission then
         if IsPlayerAceAllowed(source, permission) then
-            ExecuteCommand(('remove_principal player.%s rsgcore.%s'):format(source, permission))
-            RSGCore.Commands.Refresh(source)
+            ExecuteCommand(('remove_principal player.%s fdbcore.%s'):format(source, permission))
+            FDBCore.Commands.Refresh(source)
         end
     else
-        for _, v in pairs(RSGCore.Config.Server.Permissions) do
+        for _, v in pairs(FDBCore.Config.Server.Permissions) do
             if IsPlayerAceAllowed(source, v) then
-                ExecuteCommand(('remove_principal player.%s rsgcore.%s'):format(source, v))
-                RSGCore.Commands.Refresh(source)
+                ExecuteCommand(('remove_principal player.%s fdbcore.%s'):format(source, v))
+                FDBCore.Commands.Refresh(source)
             end
         end
     end
@@ -528,7 +528,7 @@ end
 ---@param source any
 ---@param permission string
 ---@return boolean
-function RSGCore.Functions.HasPermission(source, permission)
+function FDBCore.Functions.HasPermission(source, permission)
     if type(permission) == 'string' then
         if IsPlayerAceAllowed(source, permission) then return true end
     elseif type(permission) == 'table' then
@@ -543,10 +543,10 @@ end
 ---Get the players permissions
 ---@param source any
 ---@return table
-function RSGCore.Functions.GetPermission(source)
+function FDBCore.Functions.GetPermission(source)
     local src = source
     local perms = {}
-    for _, v in pairs(RSGCore.Config.Server.Permissions) do
+    for _, v in pairs(FDBCore.Config.Server.Permissions) do
         if IsPlayerAceAllowed(src, v) then
             perms[v] = true
         end
@@ -557,19 +557,19 @@ end
 ---Get admin messages opt-in state for player
 ---@param source any
 ---@return boolean
-function RSGCore.Functions.IsOptin(source)
-    local license = RSGCore.Functions.GetIdentifier(source, 'license')
-    if not license or not RSGCore.Functions.HasPermission(source, 'admin') then return false end
-    local Player = RSGCore.Functions.GetPlayer(source)
+function FDBCore.Functions.IsOptin(source)
+    local license = FDBCore.Functions.GetIdentifier(source, 'license')
+    if not license or not FDBCore.Functions.HasPermission(source, 'admin') then return false end
+    local Player = FDBCore.Functions.GetPlayer(source)
     return Player.PlayerData.optin
 end
 
 ---Toggle opt-in to admin messages
 ---@param source any
-function RSGCore.Functions.ToggleOptin(source)
-    local license = RSGCore.Functions.GetIdentifier(source, 'license')
-    if not license or not RSGCore.Functions.HasPermission(source, 'admin') then return end
-    local Player = RSGCore.Functions.GetPlayer(source)
+function FDBCore.Functions.ToggleOptin(source)
+    local license = FDBCore.Functions.GetIdentifier(source, 'license')
+    if not license or not FDBCore.Functions.HasPermission(source, 'admin') then return end
+    local Player = FDBCore.Functions.GetPlayer(source)
     Player.PlayerData.optin = not Player.PlayerData.optin
     Player.Functions.SetPlayerData('optin', Player.PlayerData.optin)
 end
@@ -577,8 +577,8 @@ end
 ---Check if player is banned
 ---@param source any
 ---@return boolean, string?
-function RSGCore.Functions.IsPlayerBanned(source)
-    local plicense = RSGCore.Functions.GetIdentifier(source, 'license')
+function FDBCore.Functions.IsPlayerBanned(source)
+    local plicense = FDBCore.Functions.GetIdentifier(source, 'license')
     local result = MySQL.single.await('SELECT id, reason, expire FROM bans WHERE license = ?', { plicense })
     if not result then return false end
     if os.time() < result.expire then
@@ -592,7 +592,7 @@ end
 
 -- Retrieves information about the database connection.
 --- @return table; A table containing the database information.
-function RSGCore.Functions.GetDatabaseInfo()
+function FDBCore.Functions.GetDatabaseInfo()
     local details = {
         exists = false,
         database = "",
@@ -623,10 +623,10 @@ end
 ---Check for duplicate license
 ---@param license any
 ---@return boolean
-function RSGCore.Functions.IsLicenseInUse(license)
+function FDBCore.Functions.IsLicenseInUse(license)
     local players = GetPlayers()
     for _, player in pairs(players) do
-        local playerLicense = RSGCore.Functions.GetIdentifier(player, 'license')
+        local playerLicense = FDBCore.Functions.GetIdentifier(player, 'license')
         if playerLicense == license then return true end
     end
     return false
@@ -639,9 +639,9 @@ end
 ---@param items table|string
 ---@param amount number
 ---@return boolean
-function RSGCore.Functions.HasItem(source, items, amount)
-    if GetResourceState('rsg-inventory') == 'missing' then return end
-    return exports['rsg-inventory']:HasItem(source, items, amount)
+function FDBCore.Functions.HasItem(source, items, amount)
+    if GetResourceState('fdb-inventory') == 'missing' then return end
+    return exports['fdb-inventory']:HasItem(source, items, amount)
 end
 
 ---???? ... ok
@@ -649,13 +649,13 @@ end
 ---@param data any
 ---@param pattern any
 ---@return boolean
-function RSGCore.Functions.PrepForSQL(source, data, pattern)
+function FDBCore.Functions.PrepForSQL(source, data, pattern)
     data = tostring(data)
     local src = source
-    local player = RSGCore.Functions.GetPlayer(src)
+    local player = FDBCore.Functions.GetPlayer(src)
     local result = string.match(data, pattern)
     if not result or string.len(result) ~= string.len(data) then
-        TriggerEvent('rsg-log:server:CreateLog', 'anticheat', 'SQL Exploit Attempted', 'red', string.format('%s attempted to exploit SQL!', player.PlayerData.license))
+        TriggerEvent('fdb-log:server:CreateLog', 'anticheat', 'SQL Exploit Attempted', 'red', string.format('%s attempted to exploit SQL!', player.PlayerData.license))
         return false
     end
     return true
@@ -665,8 +665,8 @@ end
 ---@param source any
 ---@param weight number
 ---@return boolean
-function RSGCore.Functions.ChangeWeight(source, weight)
-    local Player = RSGCore.Functions.GetPlayer(source)
+function FDBCore.Functions.ChangeWeight(source, weight)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return end
 
     Player.Functions.SetPlayerData('weight', weight)
@@ -676,8 +676,8 @@ end
 ---@param source any
 ---@param slots number
 ---@return boolean
-function RSGCore.Functions.ChangeSlots(source, slots)
-    local Player = RSGCore.Functions.GetPlayer(source)
+function FDBCore.Functions.ChangeSlots(source, slots)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return end
 
     Player.Functions.SetPlayerData('slots', slots)
@@ -688,17 +688,17 @@ end
 -- @param item string - The name of the item
 -- @param amount number - The quantity of the item to check
 -- @return boolean - True if the player can carry it, false if they cannot
-RSGCore.Functions.CanCarryItem = function(source, item, amount)
-    local Player = RSGCore.Functions.GetPlayer(source)
+FDBCore.Functions.CanCarryItem = function(source, item, amount)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return false end
 
     -- Fallback to 1 if amount isn't provided
     amount = tonumber(amount) or 1
 
     -- Fetch item data from the framework's shared config to get its weight
-    local itemData = RSGCore.Shared.Items[item:lower()]
+    local itemData = FDBCore.Shared.Items[item:lower()]
     if not itemData then 
-        print(("^1[RSG-Core] Error:^7 Item '%s' does not exist in shared items."):format(item))
+        print(("^1[FDB-Core] Error:^7 Item '%s' does not exist in shared items."):format(item))
         return false 
     end
 
@@ -707,8 +707,8 @@ RSGCore.Functions.CanCarryItem = function(source, item, amount)
     local incomingWeight = itemWeight * amount
 
     -- Get the player's current total inventory weight and max capacity
-    -- Note: Depending on your specific rsg-inventory version, this might also be accessed via exports
-    local currentWeight = exports['rsg-inventory']:GetTotalWeight(Player.PlayerData.items) or 0
+    -- Note: Depending on your specific fdb-inventory version, this might also be accessed via exports
+    local currentWeight = exports['fdb-inventory']:GetTotalWeight(Player.PlayerData.items) or 0
     local maxWeight = Player.PlayerData.MaxWeight or 120000 -- Fallback default weight if not set
 
     -- Check if the new total exceeds the limit

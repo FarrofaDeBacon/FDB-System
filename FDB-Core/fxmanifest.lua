@@ -4,7 +4,7 @@ game 'rdr3'
 
 lua54 'yes'
 
-description 'rsg-core'
+description 'fdb-core'
 version '2.3.11'
 
 shared_scripts {

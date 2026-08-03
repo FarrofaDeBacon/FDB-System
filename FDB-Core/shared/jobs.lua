@@ -1,6 +1,6 @@
-RSGShared = RSGShared or {}
-RSGShared.ForceJobDefaultDutyAtLogin = true -- true: Force duty state to jobdefaultDuty | false: set duty state from database last saved
-RSGShared.Jobs = {
+FDBShared = FDBShared or {}
+FDBShared.ForceJobDefaultDutyAtLogin = true -- true: Force duty state to jobdefaultDuty | false: set duty state from database last saved
+FDBShared.Jobs = {
 
     unemployed = {
         name = 'unemployed',

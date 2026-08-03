@@ -1,5 +1,5 @@
-RSGShared = RSGShared or {}
-RSGShared.Vehicles = RSGShared.Vehicles or {}
+FDBShared = FDBShared or {}
+FDBShared.Vehicles = FDBShared.Vehicles or {}
 
 local Vehicles = {
 
@@ -151,7 +151,7 @@ local Vehicles = {
 }
 
 for _, v in pairs(Vehicles) do
-    RSGShared.Vehicles[v.model] = {
+    FDBShared.Vehicles[v.model] = {
         spawncode = v.model,
         name = v.name,
         brand = v.brand,

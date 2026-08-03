@@ -1,4 +1,4 @@
-# ARCHITECTURE.md — RSG-Core Premium Fork Architecture & Engineering Standards
+# ARCHITECTURE.md — FDB-Core Premium Fork Architecture & Engineering Standards
 
 ## 1. Vision & Core Philosophy
 
@@ -9,12 +9,12 @@ It serves as the open-source foundation for custom scripts, jobs, and enterprise
 
 1. **Server-Authoritative Design**:
    - The client MUST NEVER be trusted for sensitive operations (currency, inventory, permissions, job levels).
-   - The client sends intent (`RSG:Server:RequestPurchase`), the server verifies distance, inventory capacity, balance, permissions, and executes the transaction server-side.
+   - The client sends intent (`FDB:Server:RequestPurchase`), the server verifies distance, inventory capacity, balance, permissions, and executes the transaction server-side.
 
 2. **Standardized Naming Conventions**:
-   - **Server/Client Net Events**: `RSG:<Module>:<Action>` (e.g., `RSG:Money:AddCash`, `RSG:Inventory:ItemUsed`).
-   - **Exports / Functions**: `RSG.<Module>.<Action>` (e.g., `RSG.Player.GetMoney`, `RSG.Functions.GetPlayer`).
-   - Legacy RSG/QBCore naming styles MUST be systematically audited and refactored.
+   - **Server/Client Net Events**: `FDB:<Module>:<Action>` (e.g., `FDB:Money:AddCash`, `FDB:Inventory:ItemUsed`).
+   - **Exports / Functions**: `FDB.<Module>.<Action>` (e.g., `FDB.Player.GetMoney`, `FDB.Functions.GetPlayer`).
+   - Legacy FDB/QBCore naming styles MUST be systematically audited and refactored.
 
 3. **Client Responsibilities**:
    - UI Rendering (NUI/Svelte/HTML).

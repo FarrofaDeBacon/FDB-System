@@ -29,19 +29,19 @@ local function keyPressed()
     lib.hideTextUI()
 end
 
-RegisterNetEvent('rsg-core:client:DrawText', function(text, pos)
+RegisterNetEvent('fdb-core:client:DrawText', function(text, pos)
     showText(text, pos)
 end)
 
-RegisterNetEvent('rsg-core:client:ChangeText', function(text, pos)
+RegisterNetEvent('fdb-core:client:ChangeText', function(text, pos)
     updateText(text, pos)
 end)
 
-RegisterNetEvent('rsg-core:client:HideText', function()
+RegisterNetEvent('fdb-core:client:HideText', function()
     hideText()
 end)
 
-RegisterNetEvent('rsg-core:client:KeyPressed', function()
+RegisterNetEvent('fdb-core:client:KeyPressed', function()
     keyPressed()
 end)
 
