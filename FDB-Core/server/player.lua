@@ -172,6 +172,8 @@ function FDBCore.Player.CreatePlayer(PlayerData, Offline)
     self.Functions = {}
     self.PlayerData = PlayerData
     self.Offline = Offline
+    self.saveInProgress = false
+    self.savePending = false
 
     function self.Functions.UpdatePlayerData()
         if self.Offline then return end
@@ -297,14 +299,16 @@ function FDBCore.Player.CreatePlayer(PlayerData, Offline)
     function self.Functions.AddRep(rep, amount)
         if not rep or not amount then return end
         local addAmount = tonumber(amount)
+        if not addAmount or addAmount ~= addAmount or addAmount == math.huge or addAmount == -math.huge or addAmount < 0 then return end
         local currentRep = self.PlayerData.metadata['rep'][rep] or 0
-        self.PlayerData.metadata['rep'][rep] = currentRep + addAmount
+        self.PlayerData.metadata['rep'][rep] = math.max(0, currentRep + addAmount)
         self.Functions.UpdatePlayerData()
     end
 
     function self.Functions.RemoveRep(rep, amount)
         if not rep or not amount then return end
         local removeAmount = tonumber(amount)
+        if not removeAmount or removeAmount ~= removeAmount or removeAmount == math.huge or removeAmount == -math.huge or removeAmount < 0 then return end
         local currentRep = self.PlayerData.metadata['rep'][rep] or 0
         if currentRep - removeAmount < 0 then
             self.PlayerData.metadata['rep'][rep] = 0
@@ -323,8 +327,7 @@ function FDBCore.Player.CreatePlayer(PlayerData, Offline)
         reason = reason or 'unknown'
         moneytype = moneytype:lower()
         amount = tonumber(amount)
-        if not amount then return false end
-        if amount < 0 then return end
+        if not amount or amount ~= amount or amount == math.huge or amount == -math.huge or amount < 0 then return false end
         if moneytype == 'gold' and amount % 1 ~= 0 then return false end
         if not self.PlayerData.money[moneytype] then return false end
         self.PlayerData.money[moneytype] = self.PlayerData.money[moneytype] + amount
@@ -351,8 +354,7 @@ function FDBCore.Player.CreatePlayer(PlayerData, Offline)
         reason = reason or 'unknown'
         moneytype = moneytype:lower()
         amount = tonumber(amount)
-        if not amount then return false end
-        if amount < 0 then return end
+        if not amount or amount ~= amount or amount == math.huge or amount == -math.huge or amount < 0 then return false end
         if moneytype == 'gold' and amount % 1 ~= 0 then return false end
         if not self.PlayerData.money[moneytype] then return false end
         for _, mtype in pairs(FDBCore.Config.Money.DontAllowMinus) do
@@ -386,8 +388,7 @@ function FDBCore.Player.CreatePlayer(PlayerData, Offline)
         reason = reason or 'unknown'
         moneytype = moneytype:lower()
         amount = tonumber(amount)
-        if not amount then return false end
-        if amount < 0 then return false end
+        if not amount or amount ~= amount or amount == math.huge or amount == -math.huge or amount < 0 then return false end
         if moneytype == 'gold' and amount % 1 ~= 0 then return false end
         if not self.PlayerData.money[moneytype] then return false end
         local difference = amount - self.PlayerData.money[moneytype]
@@ -532,29 +533,52 @@ end
 -- Save player info to database (make sure citizenid is the primary key in your database)
 
 function FDBCore.Player.Save(source)
+    local Player = FDBCore.Players[source]
+    if not Player or not Player.PlayerData then
+        FDBCore.ShowError(GetCurrentResourceName(), 'ERROR FDBCore.PLAYER.SAVE - PLAYERDATA IS EMPTY!')
+        return
+    end
+
+    if Player.saveInProgress then
+        Player.savePending = true
+        return
+    end
+
+    Player.saveInProgress = true
+    Player.savePending = false
+
     local ped = GetPlayerPed(source)
     local pcoords = GetEntityCoords(ped)
-    local PlayerData = FDBCore.Players[source].PlayerData
-    if PlayerData then
-        MySQL.insert('INSERT INTO players (citizenid, cid, license, name, money, charinfo, job, gang, position, metadata, weight, slots) VALUES (:citizenid, :cid, :license, :name, :money, :charinfo, :job, :gang, :position, :metadata, :weight, :slots) ON DUPLICATE KEY UPDATE cid = :cid, name = :name, money = :money, charinfo = :charinfo, job = :job, gang = :gang, position = :position, metadata = :metadata, weight = :weight, slots = :slots', {
-            citizenid = PlayerData.citizenid,
-            cid = tonumber(PlayerData.cid),
-            license = PlayerData.license,
-            name = PlayerData.name,
-            money = json.encode(PlayerData.money),
-            charinfo = json.encode(PlayerData.charinfo),
-            job = json.encode(PlayerData.job),
-            gang = json.encode(PlayerData.gang),
-            position = json.encode(pcoords),
-            metadata = json.encode(PlayerData.metadata),
-            weight = PlayerData.weight,
-            slots = PlayerData.slots,
-        })
+    local PlayerData = Player.PlayerData
+
+    MySQL.insert('INSERT INTO players (citizenid, cid, license, name, money, charinfo, job, gang, position, metadata, weight, slots) VALUES (:citizenid, :cid, :license, :name, :money, :charinfo, :job, :gang, :position, :metadata, :weight, :slots) ON DUPLICATE KEY UPDATE cid = :cid, name = :name, money = :money, charinfo = :charinfo, job = :job, gang = :gang, position = :position, metadata = :metadata, weight = :weight, slots = :slots', {
+        citizenid = PlayerData.citizenid,
+        cid = tonumber(PlayerData.cid),
+        license = PlayerData.license,
+        name = PlayerData.name,
+        money = json.encode(PlayerData.money),
+        charinfo = json.encode(PlayerData.charinfo),
+        job = json.encode(PlayerData.job),
+        gang = json.encode(PlayerData.gang),
+        position = json.encode(pcoords),
+        metadata = json.encode(PlayerData.metadata),
+        weight = PlayerData.weight,
+        slots = PlayerData.slots,
+    }, function(result)
+        local CurrentPlayer = FDBCore.Players[source]
+        if not CurrentPlayer then
+            return
+        end
+
+        CurrentPlayer.saveInProgress = false
+        FDBCore.ShowSuccess(GetCurrentResourceName(), PlayerData.name .. ' PLAYER SAVED!')
         if GetResourceState('fdb-inventory') ~= 'missing' then exports['fdb-inventory']:SaveInventory(source) end
-        FDBCore.ShowSuccess(resourceName, PlayerData.name .. ' PLAYER SAVED!')
-    else
-        FDBCore.ShowError(resourceName, 'ERROR FDBCore.PLAYER.SAVE - PLAYERDATA IS EMPTY!')
-    end
+
+        if CurrentPlayer.savePending then
+            CurrentPlayer.savePending = false
+            FDBCore.Player.Save(source)
+        end
+    end)
 end
 
 function FDBCore.Player.SaveOffline(PlayerData)
