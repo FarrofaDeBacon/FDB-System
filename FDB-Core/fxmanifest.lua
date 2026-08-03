@@ -36,6 +36,7 @@ client_scripts {
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'server/main.lua',
+    'server/migrations.lua',
     'server/functions.lua',
     'server/moneyitems.lua',
     'server/player.lua',
@@ -44,6 +45,10 @@ server_scripts {
     'server/exports.lua',
     'server/debug.lua',
     'server/versionchecker.lua'
+}
+
+files {
+    'database/migrations/*.sql'
 }
 
 dependencies {
