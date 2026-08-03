@@ -15,7 +15,7 @@ Este documento registra todas as alterações estruturais, correções de segura
 | **Fase 4** | Inventário & Concorrência | ✅ APROVADA | Prevenção de duplicação/perda de estado, travas anti-NaN/infinito e lock coalescente de I/O em `Player.Save`. |
 | **Fase 5** | Jobs, Gangs & Permissões | ✅ APROVADA | Validação de target online, auditoria via `fdb-log`, permissão `'god'` para `addpermission`/`removepermission` e `'admin'` para `/setjob`/`/setgang`. (Commit: `30a6cb92d16d4eb381edbc652da4b10ef2936bfd`) |
 | **Fase 6** | Performance & StateBags | ✅ APROVADA | Eliminação de polling inativo no PVP, cache de handle em `ShowMe3D`, zero queries MySQL em tick e direcionamento estrito de broadcast. (Commit: `baf45263fbdbd69471a57587970585e4fa036a06`) |
-| **Fase 7** | Documentação Final & Wiki | ⏳ PRÓXIMA | READMEs por módulo e Wiki central de exports. |
+| **Fase 7** | Documentação Final & Wiki | ✅ APROVADA | Criação de `WIKI.md`, READMEs em `server/` e `client/` e consolidação final do estado do fork. |
 
 ---
 
@@ -78,11 +78,27 @@ Este documento registra todas as alterações estruturais, correções de segura
   - Confirmado que todas as alterações de StateBag pelo client (`isLoggedIn`) possuem parâmetro `replicated = false`.
   - Confirmado que zero queries MySQL executam em ticks/loops de repetição e que eventos de atualização de dados do jogador usam o `source` específico. (Commit hash: `baf45263fbdbd69471a57587970585e4fa036a06`).
 
+### 7. Documentação Final & Wiki (`FDB-Core/`)
+- **Central WIKI (`FDB-Core/WIKI.md`)**:
+  - Criada a documentação central da API de exports (Server & Client) e matriz de eventos de rede com payloads e restrições.
+- **READMEs por Módulo (`FDB-Core/server/README.md` & `FDB-Core/client/README.md`)**:
+  - Estrutura de arquivos, responsabilidade dos módulos e diretrizes de autoridade e performance registradas diretamente nas pastas.
+
 ---
 
 ## 🔒 Auditoria de Segurança — Resumo
 
 Toda a camada de rede do core (`FDB-Core/server/events.lua`) foi auditada no arquivo [`FDB-Core/AUDIT.md`](file:///d:/BASE%20NOVA/FDB-Core/AUDIT.md). Todos os 14 eventos de servidor estão classificados entre `✅ OK` e `✅ RESOLVED`.
+
+---
+
+## 🏛️ Estado Atual do Fork & Artefatos de Referência
+
+O **FDB-Core** encontra-se 100% estabilizado e auditado. Para consultar tópicos específicos da arquitetura:
+- 📖 **API de Exports & Eventos**: [`FDB-Core/WIKI.md`](file:///d:/BASE%20NOVA/FDB-Core/WIKI.md)
+- 🛡️ **Matriz de Auditoria de Rede**: [`FDB-Core/AUDIT.md`](file:///d:/BASE%20NOVA/FDB-Core/AUDIT.md)
+- 🗄️ **Banco de Dados & Migrações**: [`FDB-Core/DATABASE.md`](file:///d:/BASE%20NOVA/FDB-Core/DATABASE.md)
+- 📐 **Arquitetura Geral**: [`FDB-Core/ARCHITECTURE.md`](file:///d:/BASE%20NOVA/FDB-Core/ARCHITECTURE.md)
 
 ---
 
