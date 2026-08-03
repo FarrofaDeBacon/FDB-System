@@ -30,7 +30,13 @@ This document tracks the audit of all net events handling money, items, metadata
 
 ---
 
-## Next Steps for Phase 1 Fixes
+## 📌 Audit Scope Note & Roadmap
 
-1. Update `RSGCore:Server:SetMetaData` (`server/events.lua:156`) to whitelist allowed client-settable metadata fields.
-2. Secure debug event handler in `server/debug.lua:28`.
+> [!IMPORTANT]
+> **Core vs. Companion Resource Security Boundaries**:
+> The `FDB-Core` framework manages core player state, licensing, callbacks, and player objects. Actual item management, transactions, banking, and shop interactions are delegated to separate companion resources (e.g., `rsg-inventory`, `rsg-banking`, `rsg-shops`).
+> 
+> Auditing `FDB-Core` guarantees that the base core layer is secure against direct privilege escalation via core net events. However, complete end-to-end security requires auditing the companion resources.
+> 
+> **Roadmap Schedule**:
+> - **Phase 1.5 (Security Audit - Companion Resources)**: Dedicated security audit of `rsg-inventory`, `rsg-banking`, and shop resources for distance validation, duplicate transaction exploits, and server-side item verification.
