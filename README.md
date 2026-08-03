@@ -1,27 +1,44 @@
-![Logo](https://rsgcore.com/logo_new.png)
+# RSG-Core Premium Fork
 
-Documentation https://rsgcore.com/docs
+[![CI](https://github.com/Rexshack-RedM/rsg-core/actions/workflows/ci.yml/badge.svg)](https://github.com/Rexshack-RedM/rsg-core/actions)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
+An enterprise-grade, server-authoritative RedM framework derived from RSG-Core, focused on extreme code quality, strict security validation, optimized database execution, and comprehensive documentation.
 
+---
 
-# rsg-core
+## Key Features & Architecture Standards
 
-	Thanks to Kakarot and the QB Team for the original work https://discord.gg/qbcore
+- **Server-Authoritative**: All currency, inventory, job, and permission mutations are strictly validated on the server.
+- **Async Database Layer**: Exclusively utilizes `oxmysql` with non-blocking promises and callbacks.
+- **Standardized Conventions**: Events use `RSG:<Module>:<Action>` and exports use `RSG.<Module>.<Action>`.
+- **Automated CI**: Built-in syntax and lint validation on every push and pull request.
 
-# License
+---
 
-    RSG RedM Framework
-    Copyright (C) 2015-2022 ESX (Jérémie N'gadi), Joshua Eger
+## Installation
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+1. Clone this repository into your server's `resources/[framework]/rsg-core` folder:
+   ```bash
+   git clone <YOUR_FORK_URL> rsg-core
+   ```
+2. Ensure `oxmysql` is started prior to `rsg-core` in your `server.cfg`:
+   ```cfg
+   ensure oxmysql
+   ensure rsg-core
+   ```
+3. Import the required database schema into MySQL.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+---
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>
+## Documentation
+
+- Refer to [ARCHITECTURE.md](file:///d:/BASE%20NOVA/ARCHITECTURE.md) for architectural guidelines, coding standards, and conventions.
+- Refer to [AUDIT.md](file:///d:/BASE%20NOVA/AUDIT.md) for the security audit matrix and server event status.
+- Refer to [CHANGELOG.md](file:///d:/BASE%20NOVA/CHANGELOG.md) for release notes.
+
+---
+
+## License
+
+This project is licensed under the **GNU General Public License v3.0** - see the [LICENSE](file:///d:/BASE%20NOVA/LICENSE) file for details.
