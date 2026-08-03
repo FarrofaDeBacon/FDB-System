@@ -25,7 +25,7 @@ Migrations are stored in `FDB-Core/database/migrations/` in ascending numeric or
 
 - **`pcall` Error Isolation**: Every migration step is wrapped in `pcall`. If a statement fails, an explicit `[MIGRATION ERROR]` is printed, and execution stops immediately before recording the version.
 - **Missing File Protection**: If a migration file is missing or empty, an explicit error is logged and migration halts safely.
-- **Multi-Statement SQL Parsing**: SQL files containing multiple statements (separated by `;`) are parsed and executed iteratively.
+- **Multi-Statement SQL Parsing**: SQL files containing multiple statements (separated by `;`) are parsed and executed iteratively. *Note*: Avoid embedded semicolons within string literals or multi-statement triggers in `.sql` migration files.
 - **DDL Idempotency Requirement**: Because DDL statements trigger auto-commits in MySQL, ALL DDL statements in migration files MUST be written idempotently (`CREATE TABLE IF NOT EXISTS`, `DROP TABLE IF EXISTS`). For index creation in standard MySQL (where `ALTER TABLE ... ADD INDEX IF NOT EXISTS` is non-standard), the runner catches duplicate key errors (`1061 / ER_DUP_KEYNAME`) via `pcall` as non-fatal warnings.
 
 ---
