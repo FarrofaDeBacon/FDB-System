@@ -61,9 +61,15 @@ local function RunDatabaseMigrations()
                     end)
 
                     if not stmtOk then
-                        RSGCore.ShowError(resourceName, ('[MIGRATION ERROR] Failed applying %s (statement %d): %s'):format(mig.name, idx, tostring(stmtErr)))
-                        migrationSuccess = false
-                        break
+                        local errStr = tostring(stmtErr)
+                        -- Ignore duplicate index / duplicate key name errors (MySQL 1061 ER_DUP_KEYNAME) for DDL idempotency
+                        if errStr:find('1061') or errStr:find('Duplicate key name') or errStr:find('already exists') then
+                            RSGCore.ShowSuccess(resourceName, ('[MIGRATION NOTICE] Skipped existing index/table in %s (statement %d)'):format(mig.name, idx))
+                        else
+                            RSGCore.ShowError(resourceName, ('[MIGRATION ERROR] Failed applying %s (statement %d): %s'):format(mig.name, idx, errStr))
+                            migrationSuccess = false
+                            break
+                        end
                     end
                 end
 
