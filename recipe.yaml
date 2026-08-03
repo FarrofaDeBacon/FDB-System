@@ -14,84 +14,71 @@ tasks:
     dest: ./resources/[core]
     src: ./tmp/files/oxmysql.zip
 
-  # 2. Bibliotecas e Dependências Standalone (Direct FDB-System)
+  # 2. Download da Base Completa FDB-System
   - action: download_github
-    src: FarrofaDeBacon/FDB-System
+    src: https://github.com/FarrofaDeBacon/FDB-System
     ref: fix/companion-inventory-audit
-    subpath: ox_lib
+    dest: ./tmp/FDBSystem
+
+  # 3. Mover Standalone Resources
+  - action: move_path
+    src: ./tmp/FDBSystem/ox_lib
     dest: ./resources/[core]/ox_lib
 
-  - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: progressbar
+  - action: move_path
+    src: ./tmp/FDBSystem/progressbar
     dest: ./resources/[core]/progressbar
 
-  - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: weathersync
+  - action: move_path
+    src: ./tmp/FDBSystem/weathersync
     dest: ./resources/[core]/weathersync
 
-  - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: PolyZone
+  - action: move_path
+    src: ./tmp/FDBSystem/PolyZone
     dest: ./resources/[core]/PolyZone
 
-  - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: rNotify
+  - action: move_path
+    src: ./tmp/FDBSystem/rNotify
     dest: ./resources/[core]/rNotify
 
-  - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: interact-sound
+  - action: move_path
+    src: ./tmp/FDBSystem/interact-sound
     dest: ./resources/[core]/interact-sound
 
-  # 3. Framework Core FDB-System
-  - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: FDB-Core
+  # 4. Mover Core e Recursos FDB
+  - action: move_path
+    src: ./tmp/FDBSystem/FDB-Core
     dest: ./resources/[fdb]/fdb-core
 
-  # 4. Recursos Companheiros FDB-System
-  - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: fdb-spawn
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-spawn
     dest: ./resources/[fdb]/fdb-spawn
 
-  - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: fdb-multicharacter
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-multicharacter
     dest: ./resources/[fdb]/fdb-multicharacter
 
-  - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: fdb-inventory
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-inventory
     dest: ./resources/[fdb]/fdb-inventory
 
-  - action: download_github
-    src: FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
-    subpath: fdb-horses
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-horses
     dest: ./resources/[fdb]/fdb-horses
 
-  # 5. Conexão e Criação do Banco de Dados MySQL
+  # 5. Conexão e Importação do Banco de Dados SQL
   - action: connect_database
-  - action: download_file
-    path: ./tmp/fdbcore.sql
-    url: https://raw.githubusercontent.com/FarrofaDeBacon/FDB-System/fix/companion-inventory-audit/fdbcore.sql
+  - action: move_path
+    src: ./tmp/FDBSystem/fdbcore.sql
+    dest: ./tmp/fdbcore.sql
   - action: query_database
     file: ./tmp/fdbcore.sql
 
-  # 6. Geração do server.cfg
+  # 6. Limpeza do Diretorio Temporário
+  - action: remove_path
+    path: ./tmp/FDBSystem
+
+  # 7. Geração do server.cfg
   - action: write_file
     file: ./server.cfg
     append: true
