@@ -153,9 +153,15 @@ RegisterNetEvent('RSGCore:UpdatePlayer', function()
     Player.Functions.Save()
 end)
 
+-- Whitelisted metadata keys allowed to be updated directly by client request
+local AllowedClientMetaData = {
+    hunger = true,
+    thirst = true,
+}
+
 RegisterNetEvent('RSGCore:Server:SetMetaData', function(meta, data)
     local src = source
-    if not meta then return end
+    if not meta or not AllowedClientMetaData[meta] then return end
     local Player = RSGCore.Functions.GetPlayer(src)
     if not Player then return end
     Player.Functions.SetMetaData(meta, data)
