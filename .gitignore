@@ -1,0 +1,7 @@
+SERVIDOR/
+*.dmp
+*.dll
+*.exe
+node_modules/
+.vscode/
+tmp/
