@@ -26,7 +26,11 @@ local function tPrint(tbl, indent)
 end
 
 RegisterServerEvent('RSGCore:DebugSomething', function(tbl, indent, resource)
-    print(('\x1b[4m\x1b[36m[ %s : DEBUG]\x1b[0m'):format(resource))
+    local src = source
+    if src and src ~= 0 then
+        if not RSGCore.Functions.HasPermission(src, 'admin') then return end
+    end
+    print(('\x1b[4m\x1b[36m[ %s : DEBUG]\x1b[0m'):format(resource or 'RSGCore'))
     tPrint(tbl, indent)
     print('\x1b[4m\x1b[36m[ END DEBUG ]\x1b[0m')
 end)
