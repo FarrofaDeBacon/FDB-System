@@ -39,15 +39,17 @@ It serves as the open-source foundation for custom scripts, jobs, and enterprise
 d:/BASE NOVA/
 ├── .github/
 │   └── workflows/          # CI Workflows (Lua Syntax & Linting)
-├── client/                 # Client-side scripts (UI, Animations, Input)
-├── server/                 # Server-side authoritative logic (DB, Auth, Economy)
-├── shared/                 # Shared data structures, items, jobs, locales
-├── locale/                 # Multi-language translation dictionaries
-├── ARCHITECTURE.md         # Architecture standards and guidelines
-├── AUDIT.md                # Phase 1 Security audit matrix
-├── CHANGELOG.md            # Version change history
-├── LICENSE                 # GNU General Public License v3.0
-└── README.md               # Installation & usage instructions
+├── README.md               # Root ecosystem README
+└── FDB-Core/               # Core framework resource
+    ├── client/             # Client-side scripts (UI, Animations, Input)
+    ├── server/             # Server-side authoritative logic (DB, Auth, Economy)
+    ├── shared/             # Shared data structures, items, jobs, locales
+    ├── locale/             # Multi-language translation dictionaries
+    ├── ARCHITECTURE.md     # Architecture standards and guidelines
+    ├── AUDIT.md            # Phase 1 Security audit matrix
+    ├── CHANGELOG.md        # Version change history
+    ├── LICENSE             # GNU General Public License v3.0
+    └── README.md           # Installation & usage instructions
 ```
 
 ---
