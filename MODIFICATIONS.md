@@ -14,8 +14,8 @@ Este documento registra todas as alterações estruturais, correções de segura
 | **Fase 3** | Eventos, Exports & Rebrand | ✅ APROVADA | Rebrand literal RSG→FDB em todo o repo. Exports nativos preservados. |
 | **Fase 4** | Inventário & Concorrência | ✅ APROVADA | Prevenção de duplicação/perda de estado, travas anti-NaN/infinito e lock coalescente de I/O em `Player.Save`. |
 | **Fase 5** | Jobs, Gangs & Permissões | ✅ APROVADA | Validação de target online, auditoria via `fdb-log`, permissão `'god'` para `addpermission`/`removepermission` e `'admin'` para `/setjob`/`/setgang`. (Commit: `30a6cb92d16d4eb381edbc652da4b10ef2936bfd`) |
-| **Fase 6** | Performance & StateBags | ⏳ PRÓXIMA | Redução de broadcast e otimização de loops `Citizen.Wait`. |
-| **Fase 7** | Documentação Final & Wiki | ⏳ PENDENTE | READMEs por módulo e Wiki central de exports. |
+| **Fase 6** | Performance & StateBags | ✅ APROVADA | Eliminação de polling inativo no PVP, cache de handle em `ShowMe3D`, zero queries MySQL em tick e direcionamento estrito de broadcast. (Commit: `baf45263fbdbd69471a57587970585e4fa036a06`) |
+| **Fase 7** | Documentação Final & Wiki | ⏳ PRÓXIMA | READMEs por módulo e Wiki central de exports. |
 
 ---
 
@@ -68,6 +68,15 @@ Este documento registra todas as alterações estruturais, correções de segura
   - Validação de existência de Job/Gangue (`FDBCore.Shared.Jobs[job]` / `FDBCore.Shared.Gangs[gang]`).
   - Fallback automático seguro para `level = 0` ('No Grades') em `Player.Functions.SetJob`/`SetGang` caso a grade informada não exista no dicionário.
   - *Nota de Arquitetura*: Os comandos `/setjob` e `/setgang` utilizam permissão genérica de administração (`'admin'`), sem hierarquia por facção individual no core. O gerenciamento de hierarquias de chefia e contratações in-game (ex.: chefe de polícia promovendo subordinados) é intencionalmente delegado aos recursos companheiros de bossmenu. (Commit hash: `30a6cb92d16d4eb381edbc652da4b10ef2936bfd`).
+
+### 6. Otimização de Performance & StateBags (`FDB-Core/client/`)
+- **Otimização do Loop de PVP (`FDB-Core/client/pvp.lua:8-10`)**:
+  - Corrigido o consumo inútil de CPU por tick (`Wait(0)`) quando o PVP do servidor está desativado. Quando `FDBCore.Config.Server.PVP` for `false`, o thread entra em repouso com `Wait(1000)`.
+- **Cache de Handle de Entidade no `/me` 3D (`FDB-Core/client/events.lua:186-193`)**:
+  - Movida a resolução do ped `targetPed = GetPlayerPed(sender)` para fora da estrutura de repetição do renderizador 3D, reduzindo 1 chamada nativa por frame durante os 10 segundos de exibição do texto 3D.
+- **Validação de StateBags & Broadcast**:
+  - Confirmado que todas as alterações de StateBag pelo client (`isLoggedIn`) possuem parâmetro `replicated = false`.
+  - Confirmado que zero queries MySQL executam em ticks/loops de repetição e que eventos de atualização de dados do jogador usam o `source` específico. (Commit hash: `baf45263fbdbd69471a57587970585e4fa036a06`).
 
 ---
 
