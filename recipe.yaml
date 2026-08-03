@@ -1,0 +1,80 @@
+name: FDB-System-Base
+version: 1.0.0
+author: FarrofaDeBacon
+description: Receita txAdmin para deploy completo da base FDB-System (RedM) com fdb-core, fdb-spawn, fdb-multicharacter, fdb-inventory e fdb-horses.
+
+variables:
+  dbHost: localhost
+  dbUsername: root
+  dbPassword: ""
+  dbName: fdb_system
+
+tasks:
+  # 1. Dependências Oficiais Overextended
+  - action: download_github
+    src: overextended/oxmysql
+    dest: ./resources/[core]/oxmysql
+
+  - action: download_github
+    src: overextended/ox_lib
+    dest: ./resources/[core]/ox_lib
+
+  # 2. Framework Core FDB-System
+  - action: download_github
+    src: FarrofaDeBacon/FDB-System
+    subpath: FDB-Core
+    dest: ./resources/[fdb]/fdb-core
+
+  # 3. Recursos Companheiros FDB-System
+  - action: download_github
+    src: FarrofaDeBacon/FDB-System
+    subpath: fdb-spawn
+    dest: ./resources/[fdb]/fdb-spawn
+
+  - action: download_github
+    src: FarrofaDeBacon/FDB-System
+    subpath: fdb-multicharacter
+    dest: ./resources/[fdb]/fdb-multicharacter
+
+  - action: download_github
+    src: FarrofaDeBacon/FDB-System
+    subpath: fdb-inventory
+    dest: ./resources/[fdb]/fdb-inventory
+
+  - action: download_github
+    src: FarrofaDeBacon/FDB-System
+    subpath: fdb-horses
+    dest: ./resources/[fdb]/fdb-horses
+
+  # 4. Conexão ao Banco de Dados MySQL
+  - action: connect_database
+
+  # 5. Geração do server.cfg
+  - action: write_file
+    file: ./server.cfg
+    append: true
+    data: |
+      # ================================================
+      #          FDB-System Base Configuration
+      # ================================================
+
+      endpoint_add_tcp "0.0.0.0:30120"
+      endpoint_add_udp "0.0.0.0:30120"
+
+      # --- Conexão MySQL ---
+      set mysql_connection_string "mysql://{{dbUsername}}:{{dbPassword}}@{{dbHost}}/{{dbName}}?charset=utf8mb4"
+
+      # --- Ordem de Inicialização dos Recursos ---
+      ensure oxmysql
+      ensure ox_lib
+      ensure fdb-core
+      ensure fdb-spawn
+      ensure fdb-multicharacter
+      ensure fdb-inventory
+      ensure fdb-horses
+
+      # --- Configurações Gerais do Servidor ---
+      sv_scriptHookAllowed 0
+      sv_maxclients 48
+      set sv_licenseKey "{{svLicense}}"
+      set steam_webApiKey "{{steamApiKey}}"
