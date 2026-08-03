@@ -2,7 +2,7 @@
     Server Event: Close a player's inventory
     Handles regular inventories, other player inventories, shops, and dropped items.
 --]]
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 -- Releases the inv_busy lock when player closes their own pocket inventory
 RegisterNetEvent('rsg-inventory:server:releaseBusy', function()

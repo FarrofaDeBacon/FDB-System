@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 Inventory = Inventory or {}
 local config = require 'shared.config'
 Inventory.LoadInventory = function(source, citizenid)
@@ -906,8 +906,8 @@ Inventory.RemoveItem = function(identifier, item, amount, slot, reason, isMove)
         slot = 'Multiple'
     end
 
-    if RSGCore.Shared.Items[item:lower()]['type'] == 'weapon' and player and isMove then
-        TriggerClientEvent('rsg-core:client:RemoveWeaponFromTab', identifier, item)
+    if FDBCore.Shared.Items[item:lower()]['type'] == 'weapon' and player and isMove then
+        TriggerClientEvent('fdb-core:client:RemoveWeaponFromTab', identifier, item)
     end
 
     if player then 
