@@ -162,6 +162,7 @@ local AllowedClientMetaData = {
 RegisterNetEvent('RSGCore:Server:SetMetaData', function(meta, data)
     local src = source
     if not meta or not AllowedClientMetaData[meta] then return end
+    if type(data) ~= 'number' or data < 0 or data > 100 then return end
     local Player = RSGCore.Functions.GetPlayer(src)
     if not Player then return end
     Player.Functions.SetMetaData(meta, data)
