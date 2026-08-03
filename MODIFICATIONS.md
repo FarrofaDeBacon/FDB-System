@@ -9,7 +9,7 @@ Este documento registra todas as alterações estruturais, correções de segura
 | Fase | Descrição | Status | Detalhes / PR |
 | :--- | :--- | :--- | :--- |
 | **Fase 1** | Segurança & Auditoria Base | ✅ APROVADA | Remediação de privilégios em `SetMetaData` e `DebugSomething`. Matriz em `AUDIT.md`. |
-| **Fase 1.5** | Auditoria de Recursos Companheiros (`fdb-inventory`) | 🔄 EM EXECUÇÃO | Checklist formal aberto. Nenhuma alteração aprovada sem evidência de código real. |
+| **Fase 1.5** | Auditoria de Recursos Companheiros (`fdb-inventory`) | 🔄 EM EXECUÇÃO | Checklist formal aberto. Nenhuma alteração aprovada sem evidência de código real. (Commit: `0acfb5fc4edd832c49ca438d1df73d7870a63b0e`) |
 | **Fase 2** | Camada de Banco de Dados (`oxmysql`) | ✅ APROVADA | Runner de migração com `pcall`, DDL idempotente, índices em `players`. |
 | **Fase 3** | Eventos, Exports & Rebrand | ✅ APROVADA | Rebrand literal RSG→FDB em todo o repo. Exports nativos preservados. |
 | **Fase 4** | Inventário & Concorrência | ✅ APROVADA | Prevenção de duplicação/perda de estado, travas anti-NaN/infinito e lock coalescente de I/O em `Player.Save`. |
@@ -29,7 +29,7 @@ Este documento registra todas as alterações estruturais, correções de segura
   - Adicionada restrição `RSGCore.Functions.HasPermission(src, 'admin')` para invocações de rede por clientes sem nível admin.
 
 ### 1.5 Módulo Companheiro de Inventário (`rsg-inventory` ➔ `fdb-inventory`)
-- **Status**: 🔄 **EM EXECUÇÃO** — Checklist formal aberto:
+- **Status**: 🔄 **EM EXECUÇÃO** (Abertura: `0acfb5fc4edd832c49ca438d1df73d7870a63b0e`) — Checklist formal aberto:
   - [ ] **Rebrand Literal**: Renomear pasta e manifests (`rsg-inventory` ➔ `fdb-inventory`), exports (`exports['rsg-core']` ➔ `exports['fdb-core']`) e net events (`rsg-inventory:...` ➔ `fdb-inventory:...`).
   - [ ] **Lock de Concorrência e Antidupe (Bloqueante)**: Substituição do rate-limit simples por temporizador (`setInventoryCooldowns < 100ms`) em `SetInventoryData` por um lock autoritativo real (`inv_busy`), impedindo a leitura simultânea de inventário antes do encerramento da gravação.
   - [ ] **Validação de Distância Server-Side**: Garantir que a validação de distância para baús, drops e trocas seja realizada estritamente no servidor (`#(GetEntityCoords(srcPed) - GetEntityCoords(targetPed)) <= MAX_DIST`) via `GetPlayerPed(src)`.
