@@ -107,7 +107,7 @@ RegisterNetEvent('fdb-survival:client:PeeTarget', function(isOuthouse)
             local dist = #(coords - GetEntityCoords(targetPed))
             if dist < privacyRadius then
                 if GetEntityModel(targetPed) == `mp_female` then
-                    exports['ox_lib']:notify({ title = 'Indecência', description = 'Você não pode fazer isso na frente de uma dama!', type = 'error', duration = 5000 })
+                    exports['ox_lib']:notify({ title = locale('notify_indecency_title'), description = locale('notify_indecency_desc'), type = 'error', duration = 5000 })
                     return
                 end
             end
@@ -118,7 +118,7 @@ RegisterNetEvent('fdb-survival:client:PeeTarget', function(isOuthouse)
     if not isOuthouse and Config.BladderSystem.BlockedTowns then
         local townHash = Citizen.InvokeNative(0x43AD8FC02B429D33, coords, 1)
         if townHash and townHash ~= 0 and Config.BladderSystem.BlockedTowns[townHash] then
-            exports['ox_lib']:notify({ title = 'Multa Evitada', description = 'Você não pode mijar numa árvore dentro da cidade. Procure uma fossa (casinha).', type = 'error', duration = 5000 })
+            exports['ox_lib']:notify({ title = locale('notify_fine_avoided_title'), description = locale('notify_fine_avoided_desc'), type = 'error', duration = 5000 })
             return
         end
     end

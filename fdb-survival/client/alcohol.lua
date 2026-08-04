@@ -74,7 +74,7 @@ RegisterNetEvent('fdb-survival:client:stateChanged', function(data)
                         
                         if math.random(1, 100) <= tripChance then
                             SetPedToRagdoll(p, 3000, 3000, 0, false, false, false)
-                            lib.notify({title = '😵 Oops!', description = 'Você tentou correr bêbado e tropeçou!', type = 'error'})
+                            lib.notify({title = locale('notify_trip_title'), description = locale('notify_trip_desc'), type = 'error'})
                             Wait(4000)
                         end
                     end
@@ -92,7 +92,7 @@ RegisterNetEvent('fdb-survival:client:stateChanged', function(data)
             -- ResetPedMovementClipset removido; movement.lua cuida disso
             
             ShakeGameplayCam("DRUNK_SHAKE", 0.0)
-            lib.notify({title = '💧 Sóbrio', description = 'O efeito do álcool passou.', type = 'success'})
+            lib.notify({title = locale('notify_sober_title'), description = locale('notify_sober_desc'), type = 'success'})
         end
     end
 end)

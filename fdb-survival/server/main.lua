@@ -303,7 +303,7 @@ FDBCore.Commands.Add('cleardrunk', 'Remove toda a embriaguez', {}, false, functi
     local Player = FDBCore.Functions.GetPlayer(src)
     if Player then
         exports['fdb-survival']:AddAlcohol(src, -100)
-        TriggerClientEvent('ox_lib:notify', src, {title = 'Curado', description = 'Seu álcool foi zerado pelo admin.', type = 'success'})
+        TriggerClientEvent('ox_lib:notify', src, {title = locale('notify_cured_title'), description = locale('notify_cured_desc'), type = 'success'})
     end
 end, 'admin')
 
@@ -314,7 +314,7 @@ FDBCore.Commands.Add('dirtyme', 'Debug de Sujeira', {{name = 'nivel', help = '0 
     if Player then
         Player.Functions.SetMetaData("cleanliness", val)
         TriggerClientEvent('fdb-survival:client:stateChanged', src, { field = 'cleanliness', value = val })
-        TriggerClientEvent('ox_lib:notify', src, {title = 'Teste de Sujeira', description = 'Higiene forçada para '..val, type = 'inform'})
+        TriggerClientEvent('ox_lib:notify', src, {title = locale('notify_dirt_test_title'), description = string.format(locale('notify_dirt_test_desc'), val), type = 'inform'})
     end
 end, 'admin')
 
@@ -325,7 +325,7 @@ FDBCore.Commands.Add('sickme', 'Debug de Doença', {{name = 'nivel', help = '0 a
     if Player then
         Player.Functions.SetMetaData("illness", val)
         TriggerClientEvent('fdb-survival:client:stateChanged', src, { field = 'illness', value = val })
-        TriggerClientEvent('ox_lib:notify', src, {title = 'Teste de Doença', description = 'Doença forçada para '..val, type = 'error'})
+        TriggerClientEvent('ox_lib:notify', src, {title = locale('notify_illness_test_title'), description = string.format(locale('notify_illness_test_desc'), val), type = 'error'})
     end
 end, 'admin')
 
@@ -336,7 +336,7 @@ FDBCore.Commands.Add('poisonme', 'Debug de Veneno', {{name = 'nivel', help = '0 
     if Player then
         Player.Functions.SetMetaData("poison", val)
         TriggerClientEvent('fdb-survival:client:stateChanged', src, { field = 'poison', value = val })
-        TriggerClientEvent('ox_lib:notify', src, {title = 'Teste de Veneno', description = 'Envenenamento forçado para '..val, type = 'warning'})
+        TriggerClientEvent('ox_lib:notify', src, {title = locale('notify_poison_test_title'), description = string.format(locale('notify_poison_test_desc'), val), type = 'warning'})
     end
 end, 'admin')
 
@@ -348,7 +348,7 @@ FDBCore.Commands.Add('sethunger', 'Define o nivel de fome de um jogador (Admin)'
     if Player then
         Player.Functions.SetMetaData("hunger", val)
         TriggerClientEvent('fdb-survival:client:stateChanged', target, { field = 'food', value = val })
-        TriggerClientEvent('ox_lib:notify', source, {title = 'Admin', description = 'Fome de ' .. target .. ' definida para ' .. val, type = 'success'})
+        TriggerClientEvent('ox_lib:notify', source, {title = locale('notify_admin_title'), description = string.format(locale('notify_admin_hunger_desc'), target, val), type = 'success'})
     end
 end, 'admin')
 
@@ -360,7 +360,7 @@ FDBCore.Commands.Add('setthirst', 'Define o nivel de sede de um jogador (Admin)'
     if Player then
         Player.Functions.SetMetaData("thirst", val)
         TriggerClientEvent('fdb-survival:client:stateChanged', target, { field = 'water', value = val })
-        TriggerClientEvent('ox_lib:notify', source, {title = 'Admin', description = 'Sede de ' .. target .. ' definida para ' .. val, type = 'success'})
+        TriggerClientEvent('ox_lib:notify', source, {title = locale('notify_admin_title'), description = string.format(locale('notify_admin_thirst_desc'), target, val), type = 'success'})
     end
 end, 'admin')
 
