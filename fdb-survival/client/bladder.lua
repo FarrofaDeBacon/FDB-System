@@ -135,35 +135,9 @@ RegisterNetEvent('fdb-survival:client:PeeTarget', function()
 end)
 
 CreateThread(function()
-    -- Lista inicial de árvores e fossas
-    local validModels = {
-        -- Árvores
-        `p_tree_pine01x`,
-        `p_tree_pine02x`,
-        `p_tree_pine03x`,
-        `p_tree_pine04x`,
-        `p_tree_pine05x`,
-        `p_tree_pine06x`,
-        `p_tree_oak01x`,
-        `p_tree_oak02x`,
-        `p_tree_oak03x`,
-        `p_tree_birch01x`,
-        `p_tree_birch02x`,
-        `p_tree_birch03x`,
-        `p_tree_birch04x`,
-        `p_tree_cypress01x`,
-        `p_tree_palm01x`,
-        -- Fossas (Outhouses)
-        `p_outhouse01x`,
-        `p_outhouse02x`,
-        `p_privy01x`,
-        `p_privy02x`,
-        `p_toilet01x`,
-        `p_toilet02x`,
-        `p_cs_outhouse01x`
-    }
+    if not Config.PeeModels or #Config.PeeModels == 0 then return end
 
-    exports.ox_target:addModel(validModels, {
+    exports.ox_target:addModel(Config.PeeModels, {
         {
             name = 'pee_action_target',
             label = 'Mijar',
