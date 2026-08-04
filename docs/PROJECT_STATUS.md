@@ -30,14 +30,23 @@ Durante a renomeação global (substituindo textos de `rsg` para `fdb` via Power
   - O usuário relatou que a interface do `fdb-multicharacter` continuava "sem fundo". Foi descoberto que as texturas de papel, pergaminho e enfeites (`inkroller_1a.png`, `menu_header_1a.png`, etc.) dentro da pasta `html/assets/` também haviam sido corrompidas pelo script de texto agressivo.
   - **Solução:** Baixamos a pasta `assets` intacta do repositório original do `rsg-multicharacter`, enviamos para o GitHub, e injetamos as imagens restauradas diretamente no servidor em tempo real, corrigindo completamente o visual.
 
-## 4. Próximos Passos (Integração do Ecossistema Customizado)
-- **Integração do `fdb-survival` e `fdb-consume`:** (PRIORIDADE) Os módulos avançados de sobrevivência, consumo e sistema médico que criamos anteriormente ainda NÃO estão neste repositório. O próximo grande passo é trazer esse ecossistema customizado para dentro da base e fazê-los se comunicar perfeitamente com o `fdb-core` que acabamos de auditar e corrigir.
-- **Validação de Interface Completa:** Garantir que todos os outros scripts que possuem NUI (como `fdb-inventory`, `fdb-hud`, `fdb-banking`, etc.) não tiveram suas imagens, ícones ou fontes corrompidos durante o processo de conversão global.
-- **Estabilidade do `fdb-horses`:** Agora que a coluna `metadata` existe e o script aponta para a tabela `player_horses`, precisamos testar a funcionalidade in-game: o sistema de metabolismo e a criação de cavalos iniciais.
+## 5. Integração do Ecossistema Customizado e Migração
 
-> **ATENÇÃO - Nota Importante para o Claude:** 
-> Lembre-se que o repositório `FDB-System` atual contém, em sua imensa maioria, apenas recursos originais do RSG que foram **renomeados**. O ÚNICO recurso que foi profundamente modificado, estruturado e auditado até agora foi o `fdb-core` (que serviu como nosso ponto de partida).
-> 
-> O objetivo de todo esse esforço inicial (renomear tudo, corrigir fontes/NUIs, consertar banco de dados) foi **criar uma receita txAdmin que funcione do zero e faça a base ligar com estabilidade**. 
-> 
-> Agora que a base liga e funciona perfeitamente, o nosso foco principal é **incluir o ecossistema customizado (`fdb-survival`, `fdb-consume`, sistema médico) fazendo com que eles falem nativamente com o `fdb-core` corrigido.** Estamos com o ambiente de testes principal rodando na máquina local (`D:\SERVIDOR\server`).
+Nesta nova fase (04/08/2026), iniciamos a integração da base visual e estrutural que vai dar suporte ao sistema médico avançado. 
+
+### 5.1 O Que Já Foi Feito (Fase 1 + Correções Emergenciais)
+- ✅ **Inventário (`fdb-inventory`):** Substituído pela versão imaculada da source original (`STEEL`). A versão anterior estava com imagens corrompidas e arquivos Javascript deletados devido a um script de renomeação agressivo. Renomeamos as variáveis e dependências de forma cirúrgica, blindando os binários e arquivos web, além de fixarmos um bug crítico no `GetFDBPlayers`.
+- ✅ **Mochilas (`fdb-backpacks`):** Adicionado ao ecossistema para resolver um gargalo do inventário que causava congelamento da interface quando tentava se conectar a esse recurso faltante.
+- ✅ **Infraestrutura Transversal (`fdb-configui`):** Adicionado com sucesso. Este é o motor de KVP genérico que o ecossistema precisa. 
+- ✅ **Permissões Base (`server.cfg`):** As permissões do Core foram devidamente renomeadas de `rsgcore.*` para `fdbcore.*` no servidor ao vivo, permitindo que administradores tenham acesso ao painel do `configui` in-game, e incluindo também os comandos de debug do sistema médico (`/addtreatment`, `/forceinfection`, etc.).
+
+### 5.2 Próximos Passos (Fase 2 Revisada)
+Antes de colocarmos o gigantesco sistema médico (`fdb-medic` + `fdb-medical-core`), validamos que ele quebraria sem suas duas âncoras fundamentais de mecânica:
+1. **`fdb-hudpremium`:** Será adicionado primeiro, substituindo o antigo `fdb-hud`, pois é ele quem exibe os ícones vitais de sangramento e infecção.
+2. **`fdb-consume`:** Será substituído pela sua build real de mais de 2.000 linhas, já que o sistema médico depende dele para aplicar ataduras e tônicos de saúde corretamente.
+
+Após essas duas fundações visuais e de consumo estarem operantes, finalmente acoplaremos a joia da coroa: o ecossistema médico.
+
+---
+**ATENÇÃO - Nota Importante para o Claude:**
+O repositório `FDB-System` não é apenas um "RSG renomeado". O FDB-Core foi substancialmente reescrito seguindo o documento de arquitetura inegociável, e agora os principais módulos (Inventário, ConfigUI, Backpacks) também já foram adaptados e unificados sob a flag `fdb`. Estamos no meio da migração estrutural para suportar o novo sistema médico! Sempre consulte os `fxmanifest.lua` mais recentes. (`D:\SERVIDOR\server`).
