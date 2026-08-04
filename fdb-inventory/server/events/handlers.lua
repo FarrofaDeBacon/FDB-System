@@ -57,7 +57,7 @@ end)
 AddEventHandler('onResourceStart', function(resourceName)
     if resourceName ~= GetCurrentResourceName() then return end
 
-    local Players = FDBCore.Functions.GetRSGPlayers()
+    local Players = FDBCore.Functions.GetFDBPlayers()
     for k in pairs(Players) do
         local methods = {
             AddItem = function(item, amount, slot, info)
