@@ -117,11 +117,13 @@ CreateThread(function()
             end
 
             -- Aumento de Bexiga
-            local bladderDrain = Config.DrainRates.Bladder
-            local oldBladder = FDB.Survival.bladder
-            FDB.Survival.bladder = math.min(100, FDB.Survival.bladder + bladderDrain)
-            if math.floor(FDB.Survival.bladder) ~= math.floor(oldBladder) then
-                FDB.BroadcastState('bladder', math.floor(FDB.Survival.bladder))
+            if Config.BladderSystem and Config.BladderSystem.Enabled then
+                local bladderDrain = Config.DrainRates.Bladder
+                local oldBladder = FDB.Survival.bladder
+                FDB.Survival.bladder = math.min(100, FDB.Survival.bladder + bladderDrain)
+                if math.floor(FDB.Survival.bladder) ~= math.floor(oldBladder) then
+                    FDB.BroadcastState('bladder', math.floor(FDB.Survival.bladder))
+                end
             end
 
             -- Dano por Veneno de Cobra Contínuo (Nativo)

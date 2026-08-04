@@ -2,6 +2,7 @@ local isHoldingPee = false
 local peeAccidentTimer = 0
 
 CreateThread(function()
+    if not Config.BladderSystem or not Config.BladderSystem.Enabled then return end
     while true do
         Wait(1000)
         if FDB.IsLoggedIn then
@@ -76,6 +77,8 @@ end)
 -- Thread de bloqueio de corrida movida para movement.lua (Maestro)
 
 RegisterNetEvent('fdb-survival:client:PeeTarget', function()
+    if not Config.BladderSystem or not Config.BladderSystem.Enabled then return end
+    
     local ped = PlayerPedId()
     if IsPedOnMount(ped) or IsPedInAnyVehicle(ped, false) then
         exports['ox_lib']:notify({ title = locale('notify_pee_error_title'), description = locale('notify_pee_mount_error'), type = 'error' })
@@ -135,6 +138,7 @@ RegisterNetEvent('fdb-survival:client:PeeTarget', function()
 end)
 
 CreateThread(function()
+    if not Config.BladderSystem or not Config.BladderSystem.Enabled then return end
     if not Config.PeeModels or #Config.PeeModels == 0 then return end
 
     -- Esperar um pouco para garantir que o player spawnou e o modelo foi carregado
@@ -142,7 +146,7 @@ CreateThread(function()
     
     local ped = PlayerPedId()
     local isFemale = GetEntityModel(ped) == `mp_female`
-    local targetLabel = isFemale and (locale('target_pee_female') or 'Fazer Xixi') or (locale('target_pee_male') or 'Mijar')
+    local targetLabel = isFemale and (Config.BladderSystem.LabelFemale or 'Fazer Xixi') or (Config.BladderSystem.LabelMale or 'Mijar')
 
     exports.ox_target:addModel(Config.PeeModels, {
         {

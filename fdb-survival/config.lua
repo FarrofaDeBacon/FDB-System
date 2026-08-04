@@ -85,6 +85,15 @@ Config.Buffs = {
 }
 
 -- ==========================================
+-- SISTEMA DE BEXIGA (MIJAR/XIXI)
+-- ==========================================
+Config.BladderSystem = {
+    Enabled = true,                -- Se 'false', o jogador não terá necessidade de urinar
+    LabelMale = "Mijar",           -- Termo do Target para homens
+    LabelFemale = "Fazer Xixi"     -- Termo do Target para mulheres
+}
+
+-- ==========================================
 -- CONFIGURAÇÕES DE INTERAÇÃO (TARGET)
 -- ==========================================
 Config.PeeModels = {
