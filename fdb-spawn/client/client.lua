@@ -23,7 +23,6 @@ RegisterNetEvent('fdb-spawn:client:existingplayer', function()
     Wait(10000)
 
     DoScreenFadeOut(1000)
-    -- FDB-TODO: fdb-appearance integration pending audit (line 26)
     exports['fdb-appearance']:ApplySkin()
 
     -- set player health
@@ -35,9 +34,10 @@ RegisterNetEvent('fdb-spawn:client:existingplayer', function()
     FreezeEntityPosition(playerPed, false)
     SetEntityVisible(playerPed, true)
 
-    -- [fdb-weapons] AutoDualWield: chamada removida.
-    -- O evento 'fdb-weapons:client:AutoDualWield' nunca teve handler no fdb-weapons
-    -- original nem no fdb-weapons. Feature não implementada — decisão pendente.
+    if Config.AutoDualWield then
+        Wait(2000)
+        TriggerEvent('fdb-weapons:client:AutoDualWield')
+    end
 
     ShutdownLoadingScreen()
     DoScreenFadeIn(1000)
@@ -65,7 +65,6 @@ local function SpawnChar(coords)
     Wait(10000)
     DoScreenFadeOut(1000)
 
-    -- FDB-TODO: fdb-appearance integration pending audit (line 68)
     exports['fdb-appearance']:ApplySkin()
     local ped = PlayerPedId()
 
@@ -74,9 +73,10 @@ local function SpawnChar(coords)
     FreezeEntityPosition(ped, false)
     FreezeEntityPosition(ped, false)
     SetEntityVisible(ped, true)
-    -- [fdb-weapons] AutoDualWield: chamada removida.
-    -- O evento 'fdb-weapons:client:AutoDualWield' nunca teve handler no fdb-weapons
-    -- original nem no fdb-weapons. Feature não implementada — decisão pendente.
+    if Config.AutoDualWield then
+        Wait(2000)
+        TriggerEvent('fdb-weapons:client:AutoDualWield')
+    end
     ShutdownLoadingScreen()
     ExecuteCommand('revive')
     DoScreenFadeIn(1000)
