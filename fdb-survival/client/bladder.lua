@@ -188,7 +188,7 @@ CreateThread(function()
             label = targetLabel,
             icon = 'fa-solid fa-droplet',
             onSelect = function() TriggerEvent('fdb-survival:client:PeeTarget', false) end,
-            distance = 2.0
+            distance = 4.0
         }
     })
     
@@ -199,7 +199,27 @@ CreateThread(function()
             label = targetLabel,
             icon = 'fa-solid fa-toilet',
             onSelect = function() TriggerEvent('fdb-survival:client:PeeTarget', true) end,
-            distance = 2.0
+            distance = 4.0
         }
     })
 end)
+
+-- Comando temporário para debug de modelos
+RegisterCommand('pee_debug', function()
+    local ped = PlayerPedId()
+    local coords = GetEntityCoords(ped)
+    local forward = GetEntityForwardVector(ped)
+    local targetCoords = coords + (forward * 5.0)
+    
+    -- 16 = Testar contra objetos/cenário
+    local rayHandle = StartShapeTestRay(coords.x, coords.y, coords.z, targetCoords.x, targetCoords.y, targetCoords.z, 16, ped, 0)
+    local _, hit, endCoords, surfaceNormal, entityHit = GetShapeTestResult(rayHandle)
+    
+    if hit == 1 and entityHit ~= 0 then
+        local model = GetEntityModel(entityHit)
+        print("FDB-SURVIVAL: Looking at entity with model hash: " .. tostring(model))
+        exports['ox_lib']:notify({ title = 'Debug de Modelo', description = 'Hash do Objeto: ' .. tostring(model), type = 'info', duration = 8000 })
+    else
+        exports['ox_lib']:notify({ title = 'Debug de Modelo', description = 'Nenhum objeto detectado na sua frente.', type = 'error' })
+    end
+end, false)
