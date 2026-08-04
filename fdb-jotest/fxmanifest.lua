@@ -7,6 +7,8 @@ shared_scripts {
     '@jo_libs/init.lua'
 }
 
+ui_page 'nui://jo_libs/nui/index.html'
+
 jo_libs {
     'menu',
 }

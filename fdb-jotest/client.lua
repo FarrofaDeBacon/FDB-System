@@ -1,5 +1,5 @@
 RegisterCommand('jotest', function()
-    print('Framework detectado:', jo.framework:getName())
+    print('Framework detectado:', jo.framework:getFrameworkDetected())
 
     local menu = jo.menu.create("jotest_menu", { title = "Teste FDB", subtitle = "Slider" })
     menu:addItem({
