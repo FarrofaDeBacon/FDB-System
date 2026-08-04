@@ -140,3 +140,15 @@ AddEventHandler('fdb-canteen:server:refillcanteen', function(fromItem)
 
     RefillCanteen(src, fromItem)
 end)
+
+------------------------
+-- Add Thirst via fdb-survival
+------------------------
+RegisterServerEvent('fdb-canteen:server:addThirst')
+AddEventHandler('fdb-canteen:server:addThirst', function(amount)
+    local src = source
+    local safeAmount = tonumber(amount) or 0
+    if safeAmount > 0 then
+        exports['fdb-survival']:AddThirst(src, safeAmount)
+    end
+end)

@@ -83,7 +83,7 @@ RegisterNetEvent('fdb-canteen:client:drink', function(amount, item)
     local shouldDegrade = not refillable or not inWater
 
     if shouldRefill then
-        TriggerServerEvent("FDBCore:Server:SetMetaData", "thirst", FDBCore.Functions.GetPlayerData().metadata["thirst"] + 100)
+        TriggerServerEvent("fdb-canteen:server:addThirst", 100)
 
         if item == 'canteen0' then
             TriggerServerEvent('fdb-canteen:server:givefullcanteen')
@@ -95,11 +95,11 @@ RegisterNetEvent('fdb-canteen:client:drink', function(amount, item)
             TriggerServerEvent('fdb-canteen:server:givefullcanteen75')
         end
 
-        TriggerEvent('hud:client:UpdateThirst', LocalPlayer.state.thirst + amount)
+        TriggerServerEvent('fdb-canteen:server:addThirst', amount)
 
     elseif shouldDegrade then
         TriggerServerEvent('fdb-canteen:server:degradecanteen', item)
-        TriggerEvent('hud:client:UpdateThirst', LocalPlayer.state.thirst + amount)
+        TriggerServerEvent('fdb-canteen:server:addThirst', amount)
 
     else
         -- This case: refillable canteen, not in water, no degrade
