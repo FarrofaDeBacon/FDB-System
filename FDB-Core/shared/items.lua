@@ -240,4 +240,7 @@ FDBShared.Items = {
     ammo_box_varmint                     = { name = 'ammo_box_varmint',                     label = 'Ammo Box Varmint Rifle (N)',        weight = 100, type = 'item', image = 'ammo_box_rifle.png',                       unique = false, useable = true, shouldClose = true, description = 'Varmint Rifle Ammo Box' },
     ammo_box_varmint_tranquilizer        = { name = 'ammo_box_varmint_tranquilizer',        label = 'Ammo Box Varmint Tranquilizer (N)', weight = 100, type = 'item', image = 'ammo_box_rifle.png',                       unique = false, useable = true, shouldClose = true, description = 'Varmint Rifle Tranquilizer Ammo Box' },
 
+    empty_bottle                         = { name = 'empty_bottle',                         label = 'Empty Bottle',                      weight = 100, type = 'item', image = 'empty_bottle.png',                       unique = false, useable = false, shouldClose = true, description = 'An empty bottle.' },
+    empty_mug                            = { name = 'empty_mug',                            label = 'Empty Mug',                         weight = 100, type = 'item', image = 'empty_mug.png',                          unique = false, useable = false, shouldClose = true, description = 'An empty mug.' },
+
 }
