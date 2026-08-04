@@ -280,6 +280,10 @@ RegisterNetEvent('fdb-appearance:client:OpenCreator', function(data, empty)
 
 end)
 
+RegisterCommand('creator', function(source, args, raw)
+    TriggerEvent('fdb-appearance:client:OpenCreator', nil, true)
+end, false)
+
 RegisterCommand('loadskin', function(source, args, raw)
     if LocalPlayer.state.invincible then return end
     LocalPlayer.state.invincible = true
