@@ -351,6 +351,7 @@ function FirstMenu()
             title = locale('creator.clothing.label'),
             description = locale('creator.clothing.desc'),
             onClick = function()
+                jo.menu.show(false)
                 OpenClothingMenu()
             end
         })
@@ -498,6 +499,7 @@ function MainMenu()
     menu:addItem({
         title = RSG.Texts.Body,
         onClick = function()
+            jo.menu.show(false)
             OpenBodyMenu()
         end
     })
@@ -505,6 +507,7 @@ function MainMenu()
     menu:addItem({
         title = RSG.Texts.Face,
         onClick = function()
+            jo.menu.show(false)
             OpenFaceMenu()
         end
     })
@@ -512,6 +515,7 @@ function MainMenu()
     menu:addItem({
         title = RSG.Texts.Hair_beard,
         onClick = function()
+            jo.menu.show(false)
             OpenHairMenu()
         end
     })
@@ -519,6 +523,7 @@ function MainMenu()
     menu:addItem({
         title = RSG.Texts.Makeup,
         onClick = function()
+            jo.menu.show(false)
             OpenMakeupMenu()
         end
     })
