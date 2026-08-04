@@ -36,3 +36,10 @@ Abaixo estão os links diretos para cada documento no GitHub e a explicação do
   * O plano de rebranding, a receita do txAdmin e os desafios resolvidos durante a migração (como o "Incidente dos Arquivos Binários" que afetou interfaces NUI e fontes).
   * Os próximos passos para testes in-game.
 * **Propósito:** É um **Snapshot/Fotografia** atual. Excelente para contextualizar novos desenvolvedores (ou IAs como o Claude) sobre em que pé o servidor se encontra no momento exato de hoje.
+
+### 5. [Plano de Migração de Ecossistema (PLANO_MIGRACAO.md)](./PLANO_MIGRACAO.md)
+* **O que é:** O roteiro exato de integração do ecossistema médico/customizado para dentro da base FDB-System.
+* **O que contém:**
+  * Diagnóstico completo de recursos (fdb-medic, fdb-survival, fdb-consume, etc).
+  * Cronograma dividido em Fases de substituição e testes.
+* **Propósito:** É o **Mapa da Mina** que o Claude deverá seguir rigorosamente na próxima etapa para importar os módulos customizados para o novo namespace `fdb-core` sem quebrar o que já estabilizamos.
