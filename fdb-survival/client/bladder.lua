@@ -76,7 +76,7 @@ end)
 
 -- Thread de bloqueio de corrida movida para movement.lua (Maestro)
 
-RegisterNetEvent('fdb-survival:client:PeeTarget', function()
+RegisterNetEvent('fdb-survival:client:PeeTarget', function(isOuthouse)
     if not Config.BladderSystem or not Config.BladderSystem.Enabled then return end
     
     local ped = PlayerPedId()
@@ -88,12 +88,13 @@ RegisterNetEvent('fdb-survival:client:PeeTarget', function()
     local coords = GetEntityCoords(ped)
 
     -- 1. Regra de Etiqueta (RP): Não mijar na frente de damas
+    local privacyRadius = Config.BladderSystem.PrivacyRadius or 15.0
     local players = GetActivePlayers()
     for _, player in ipairs(players) do
         local targetPed = GetPlayerPed(player)
         if targetPed ~= ped then
             local dist = #(coords - GetEntityCoords(targetPed))
-            if dist < 15.0 then
+            if dist < privacyRadius then
                 if GetEntityModel(targetPed) == `mp_female` then
                     exports['ox_lib']:notify({ title = 'Indecência', description = 'Você não pode fazer isso na frente de uma dama!', type = 'error', duration = 5000 })
                     return
@@ -102,12 +103,24 @@ RegisterNetEvent('fdb-survival:client:PeeTarget', function()
         end
     end
     
+    -- 2. Regra de Cidades: Bloqueado em cidades se NÃO for uma fossa
+    if not isOuthouse and Config.BladderSystem.BlockedTowns then
+        local townHash = Citizen.InvokeNative(0x43AD8FC02B429D33, coords, 1)
+        if townHash and townHash ~= 0 and Config.BladderSystem.BlockedTowns[townHash] then
+            exports['ox_lib']:notify({ title = 'Multa Evitada', description = 'Você não pode mijar numa árvore dentro da cidade. Procure uma fossa (casinha).', type = 'error', duration = 5000 })
+            return
+        end
+    end
+    
     ClearPedTasks(ped)
-    TaskStartScenarioInPlace(ped, joaat('WORLD_HUMAN_PEE'), -1, true, false, false, false)
-    Wait(4000)
+    local animDict = Config.BladderSystem.AnimationDict or "core"
+    local animName = Config.BladderSystem.AnimationName or "WORLD_HUMAN_PEE"
+    
+    TaskStartScenarioInPlace(ped, joaat(animName), -1, true, false, false, false)
+    Wait(Config.BladderSystem.AnimWaitBefore or 4000)
 
-    local assetName = "core"
-    local ptfxName = "ent_anim_dog_peeing"
+    local assetName = Config.BladderSystem.ParticleDict or "core"
+    local ptfxName = Config.BladderSystem.ParticleName or "ent_anim_dog_peeing"
     
     RequestNamedPtfxAsset(assetName)
     while not HasNamedPtfxAssetLoaded(assetName) do
@@ -126,10 +139,10 @@ RegisterNetEvent('fdb-survival:client:PeeTarget', function()
     )
     SetParticleFxLoopedColour(peeParticle, 1.0, 1.0, 0.0, 0)
 
-    Wait(6000)
+    Wait(Config.BladderSystem.AnimDuration or 6000)
     StopParticleFxLooped(peeParticle, false)
     RemoveNamedPtfxAsset(assetName)
-    Wait(3500)
+    Wait(Config.BladderSystem.AnimWaitAfter or 3500)
     ClearPedTasks(ped)
     
     FDB.Survival.bladder = 0
@@ -139,21 +152,34 @@ end)
 
 CreateThread(function()
     if not Config.BladderSystem or not Config.BladderSystem.Enabled then return end
-    if not Config.PeeModels or #Config.PeeModels == 0 then return end
 
-    -- Esperar um pouco para garantir que o player spawnou e o modelo foi carregado
     Wait(2000)
-    
     local ped = PlayerPedId()
     local isFemale = GetEntityModel(ped) == `mp_female`
     local targetLabel = isFemale and (Config.BladderSystem.LabelFemale or 'Fazer Xixi') or (Config.BladderSystem.LabelMale or 'Mijar')
 
-    exports.ox_target:addModel(Config.PeeModels, {
+    -- Modelos de Árvores e Fossas puxados do Config
+    local treeModels = Config.BladderSystem.TreeModels or {}
+    local outhouseModels = Config.BladderSystem.OuthouseModels or {}
+
+    -- Target para Árvores (bloqueado em cidades)
+    exports.ox_target:addModel(treeModels, {
         {
-            name = 'pee_action_target',
+            name = 'pee_action_tree',
             label = targetLabel,
             icon = 'fa-solid fa-droplet',
-            onSelect = function() TriggerEvent('fdb-survival:client:PeeTarget') end,
+            onSelect = function() TriggerEvent('fdb-survival:client:PeeTarget', false) end,
+            distance = 2.0
+        }
+    })
+    
+    -- Target para Fossas (permitido em cidades)
+    exports.ox_target:addModel(outhouseModels, {
+        {
+            name = 'pee_action_outhouse',
+            label = targetLabel,
+            icon = 'fa-solid fa-toilet',
+            onSelect = function() TriggerEvent('fdb-survival:client:PeeTarget', true) end,
             distance = 2.0
         }
     })

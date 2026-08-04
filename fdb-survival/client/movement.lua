@@ -13,22 +13,22 @@ local function ResolveClipset()
     local bladder = FDB.Survival.bladder or 0
     local illness = FDB.Survival.illness or 0
     local poison = FDB.Survival.poison or 0
-    if drunkenness >= 80 then
-        return 'move_m@drunk@verydrunk'
-    elseif drunkenness >= 50 then
-        return 'move_m@drunk@moderatedrunk'
+    if drunkenness >= Config.Movement.DrunkLevel3 then
+        return Config.Movement.DrunkClipset3
+    elseif drunkenness >= Config.Movement.DrunkLevel2 then
+        return Config.Movement.DrunkClipset2
     elseif drunkenness >= Config.Alcohol.DrunkThreshold then
-        return 'move_m@drunk@a'
+        return Config.Movement.DrunkClipset1
     elseif poison >= Config.Biological.ModerateThreshold then
-        return 'move_m@drunk@moderatedrunk'
+        return Config.Movement.PoisonModerateClipset
     elseif illness >= Config.Biological.SevereThreshold then
-        return 'move_m@fatigue'
+        return Config.Movement.IllnessSevereClipset
     elseif illness >= Config.Biological.ModerateThreshold then
-        return 'move_m@drunk@slightlydrunk'
-    elseif bladder >= 80 then
-        return 'war_veteran'
+        return Config.Movement.IllnessModerateClipset
+    elseif bladder >= Config.Movement.BladderThreshold then
+        return Config.Movement.BladderClipset
     elseif FDB.Survival.inMud then
-        return 'move_m@mud_wade'
+        return Config.Movement.MudClipset
     end
     return baseClipset -- volta ao estilo preferido pelo jogador ou nil (padrão do jogo)
 end
