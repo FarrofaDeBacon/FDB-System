@@ -175,15 +175,21 @@ Config.BladderSystem = {
     LabelMale = "Mijar",           -- Termo do Target para homens
     LabelFemale = "Fazer Xixi",    -- Termo do Target para mulheres
     
-    -- Animações e Tempos
-    AnimationDict = "core",
+    -- Animações e Tempos (Mijar Voluntário)
+    UseScenario = true,            -- Se true, usa AnimationName como cenário. Se false, usa AnimationDict e AnimationName como TaskPlayAnim.
+    AnimationDict = "amb_misc@world_human_pee@male_a@idle_b",
     AnimationName = "WORLD_HUMAN_PEE",
     ParticleDict = "core",
     ParticleName = "ent_anim_dog_peeing",
     AnimWaitBefore = 4000,         -- Tempo antes de começar o jato (ms)
     AnimDuration = 6000,           -- Tempo do jato (ms)
     AnimWaitAfter = 3500,          -- Tempo guardando antes de destravar o personagem (ms)
-    AccidentAnimation = "WORLD_HUMAN_VOMIT", -- Animação de vergonha/dor ao urinar nas calças
+    
+    -- Animação de Acidente (Mijar nas calças)
+    AccidentUseScenario = true,    -- Se true, usa AccidentAnimation como cenário.
+    AccidentAnimDict = "amb_misc@world_human_vomit@male_a@idle_b",
+    AccidentAnimation = "WORLD_HUMAN_VOMIT",
+    AccidentAnimDuration = 4000,   -- Tempo preso na animação do acidente (ms)
     
     -- Etiqueta / RP
     PrivacyRadius = 15.0,          -- Distância (em metros) para verificar se há mulheres perto

@@ -39,9 +39,19 @@ CreateThread(function()
                         -- Play a small embarrassment animation if not in vehicle
                         if not IsPedInAnyVehicle(ped, false) and not IsPedOnMount(ped) then
                             ClearPedTasks(ped)
+                            local useScenario = Config.BladderSystem.AccidentUseScenario
                             local accidentAnim = Config.BladderSystem.AccidentAnimation or 'WORLD_HUMAN_VOMIT'
-                            TaskStartScenarioInPlace(ped, joaat(accidentAnim), -1, true, false, false, false)
-                            Wait(4000)
+                            
+                            if useScenario == false then
+                                local dict = Config.BladderSystem.AccidentAnimDict or "amb_misc@world_human_vomit@male_a@idle_b"
+                                RequestAnimDict(dict)
+                                while not HasAnimDictLoaded(dict) do Wait(10) end
+                                TaskPlayAnim(ped, dict, accidentAnim, 1.0, -1.0, -1, 1, 0, false, false, false)
+                            else
+                                TaskStartScenarioInPlace(ped, joaat(accidentAnim), -1, true, false, false, false)
+                            end
+                            
+                            Wait(Config.BladderSystem.AccidentAnimDuration or 4000)
                             ClearPedTasks(ped)
                         end
                     end
@@ -114,10 +124,18 @@ RegisterNetEvent('fdb-survival:client:PeeTarget', function(isOuthouse)
     end
     
     ClearPedTasks(ped)
-    local animDict = Config.BladderSystem.AnimationDict or "core"
+    local useScenario = Config.BladderSystem.UseScenario
     local animName = Config.BladderSystem.AnimationName or "WORLD_HUMAN_PEE"
     
-    TaskStartScenarioInPlace(ped, joaat(animName), -1, true, false, false, false)
+    if useScenario == false then
+        local animDict = Config.BladderSystem.AnimationDict or "amb_misc@world_human_pee@male_a@idle_b"
+        RequestAnimDict(animDict)
+        while not HasAnimDictLoaded(animDict) do Wait(10) end
+        TaskPlayAnim(ped, animDict, animName, 1.0, -1.0, -1, 1, 0, false, false, false)
+    else
+        TaskStartScenarioInPlace(ped, joaat(animName), -1, true, false, false, false)
+    end
+    
     Wait(Config.BladderSystem.AnimWaitBefore or 4000)
 
     local assetName = Config.BladderSystem.ParticleDict or "core"
