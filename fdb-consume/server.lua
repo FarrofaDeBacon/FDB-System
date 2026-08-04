@@ -97,7 +97,9 @@ RegisterNetEvent('fdb-consume:server:takeBite', function()
             end
         end
         activeConsumptions[src] = nil
-        TriggerClientEvent('fdb-consume:client:StopInteractiveConsumable', src)
+        SetTimeout(2000, function()
+            TriggerClientEvent('fdb-consume:client:StopInteractiveConsumable', src)
+        end)
     end
 end)
 

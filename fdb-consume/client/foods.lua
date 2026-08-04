@@ -31,7 +31,7 @@ RegisterNetEvent('fdb-consume:client:ConsumeFood', function(propModel, animType,
     local ped = PlayerPedId()
 
     if isHoldingFood then
-        TriggerEvent('fdb-consume:client:StopFood')
+        TriggerEvent('fdb-consume:client:StopInteractiveConsumable')
     end
 
     isHoldingFood = true
@@ -57,7 +57,7 @@ RegisterNetEvent('fdb-consume:client:ConsumeFood', function(propModel, animType,
         if itemName then
             TriggerServerEvent('fdb-consume:server:giveReturnItem', itemName)
         end
-        TriggerEvent('fdb-consume:client:StopFood')
+        TriggerEvent('fdb-consume:client:StopInteractiveConsumable')
         return
     end
 
@@ -112,7 +112,7 @@ RegisterNetEvent('fdb-consume:client:ConsumeFood', function(propModel, animType,
             
             if IsControlJustReleased(0, Config.Prompts.DropKey) then
                 TriggerServerEvent('fdb-consume:server:cancelConsume')
-                TriggerEvent('fdb-consume:client:StopFood')
+                TriggerEvent('fdb-consume:client:StopInteractiveConsumable')
             end
 
             -- MODO 1: Clique Rápido (Mordida Unica)
@@ -174,7 +174,7 @@ RegisterNetEvent('fdb-consume:client:ConsumeFood', function(propModel, animType,
     end)
 end)
 
-RegisterNetEvent('fdb-consume:client:StopFood', function()
+RegisterNetEvent('fdb-consume:client:StopInteractiveConsumable', function()
     if isHoldingFood then
         isHoldingFood = false
         if consumePrompt then PromptDelete(consumePrompt); consumePrompt = nil end
