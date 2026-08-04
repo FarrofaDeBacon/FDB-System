@@ -7,10 +7,13 @@ description 'fdb-appearance'
 version '2.5.4'
 
 shared_scripts {
+    '@jo_libs/init.lua',
     '@ox_lib/init.lua',
     'config.lua',
     'shared/functions.lua',
 }
+
+ui_page 'nui://jo_libs/nui/index.html'
 
 client_scripts {
     'client/*.lua',
@@ -38,5 +41,6 @@ ox_libs {
 dependencies {
     'fdb-core',
     'ox_lib',
-    'fdb-menubase'
+    'fdb-menubase',
+    'jo_libs'
 }

@@ -59,3 +59,14 @@ d:/BASE NOVA/
 - **Branching Model**: Features and fixes MUST be developed on dedicated topic branches (`fix/security-inventory`, `refactor/db-layer`, `audit/security-pass`).
 - **Direct Commits**: Direct commits to `main` are strictly forbidden.
 - **Code Review**: Every PR is evaluated against the 4 pillars: **Security → Performance → Architecture → Documentation**.
+
+---
+
+## 4. Mandatory External Dependencies
+
+- **oxmysql**: Asynchronous database interaction.
+- **ox_lib**: Core library for UI components (context menus, input dialogs, notifications).
+- **jo_libs**: Mandatory foundational UI library for visual menus (character creator, barbershop, etc).
+  - License: LGPL-3.0
+  - Repository: `https://github.com/Jump-On-Studios/RedM-jo_libs`
+  - Purpose: Provides standardized, RedM-native styled NUI menus for all FDB scripts, replacing the legacy `fdb-menubase`.

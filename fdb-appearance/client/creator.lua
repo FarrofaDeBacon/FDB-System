@@ -329,9 +329,10 @@ function StartCreator()
 end
 
 function FirstMenu()
-    MenuData.CloseAll()
-
-    local elements = {}
+    local menu = jo.menu.create('FirstMenu', { 
+        title = RSG.Texts.Creator, 
+        subtitle = RSG.Texts.Options 
+    })
 
     if Skinkosong then
         Labelsave = RSG.Texts.firsmenu.Start
@@ -339,74 +340,28 @@ function FirstMenu()
     end
 
     if (IsInCharCreation or Skinkosong) then
-        elements[#elements + 1] = {
-            label = locale('creator.appearance.label'),
-            value = "appearance",
-            desc = locale('creator.appearance.desc'),
-        }
-        elements[#elements + 1] = {
-            label = locale('creator.clothing.label'),
-            value = "clothes",
-            desc = locale('creator.clothing.desc'),
-        }
+        menu:addItem({
+            title = locale('creator.appearance.label'),
+            description = locale('creator.appearance.desc'),
+            onClick = function()
+                MainMenu()
+            end
+        })
+        menu:addItem({
+            title = locale('creator.clothing.label'),
+            description = locale('creator.clothing.desc'),
+            onClick = function()
+                OpenClothingMenu()
+            end
+        })
     end
 
     if IsInCharCreation and not Skinkosong then
-        elements[#elements + 1] = {
-            label = Firstname or RSG.Texts.firsmenu.label_firstname .. "<br><span style='opacity:0.6;'>" .. RSG.Texts.firsmenu.none .. "</span>",
-            value = "firstname",
-            desc = locale('creator.firstname.desc'),
-        }
-        elements[#elements + 1] = {
-            label = Lastname or
-                RSG.Texts.firsmenu.label_lastname ..
-                "<br><span style='opacity:0.6;'>" .. "" .. RSG.Texts.firsmenu.none .. "" .. "</span>",
-            value = "lastname",
-            desc = locale('creator.lastname.desc')
-        }
-        elements[#elements + 1] = {
-            label = Nationality or
-                RSG.Texts.firsmenu.Nationality ..
-                "<br><span style='opacity:0.6;'>" .. "" .. RSG.Texts.firsmenu.none .. "" .. "</span>",
-            value = "nationality",
-            desc = locale('creator.nationality.desc')
-
-        }
-
-        elements[#elements + 1] = {
-            label = Birthdate or
-                RSG.Texts.firsmenu.Birthdate ..
-                "<br><span style='opacity:0.6;'>" .. "" .. RSG.Texts.firsmenu.none .. "" .. "</span>",
-            value = "birthdate",
-            desc = locale('creator.birthdate.desc')
-        }
-    end
-
-    elements[#elements + 1] = {
-        label = Labelsave or ("<span style='color: Grey;'>" .. RSG.Texts.firsmenu.Start .. "<br>" .. RSG.Texts.firsmenu.empty .. "" .. "</span>"),
-        value = Valuesave or 'not',
-        desc = ""
-    }
-    MenuData.Open('default', GetCurrentResourceName(), 'FirstMenu',
-        {
-            title = RSG.Texts.Creator,
-            subtext = RSG.Texts.Options,
-            align = RSG.Texts.align,
-            elements = elements,
-            itemHeight = "4vh"
-        }, function(data, menu)
-            if (data.current.value == 'appearance') then
-                return MainMenu()
-            end
-
-            if (data.current.value == 'clothes') then
-                return OpenClothingMenu()
-            end
-
-            if (data.current.value == 'firstname') then
-
-                :: noMatch ::
-
+        menu:addItem({
+            title = Firstname or RSG.Texts.firsmenu.label_firstname,
+            textRight = Firstname and "" or RSG.Texts.firsmenu.none,
+            description = locale('creator.firstname.desc'),
+            onClick = function()
                 local dialog = lib.inputDialog(locale('creator.firstname.input.header'), {
                     {
                         type = 'input',
@@ -416,21 +371,18 @@ function FirstMenu()
                         placeholder = locale('creator.firstname.input.placeholder')
                     },
                 })
-                if not dialog then return false end
-                local firstName = dialog[1]
-                if not checkStrings(firstName) then
-                    goto noMatch
+                if dialog and checkStrings(dialog[1]) then
+                    Firstname = dialog[1]
+                    FirstMenu() -- Re-render menu
                 end
-
-                Firstname = firstName
-                menu.setElement(3, "label", Firstname)
-                menu.setElement(3, "itemHeight", "4vh")
-                menu.refresh()
             end
-            if (data.current.value == 'lastname') then
-
-                :: noMatch ::
-
+        })
+        
+        menu:addItem({
+            title = Lastname or RSG.Texts.firsmenu.label_lastname,
+            textRight = Lastname and "" or RSG.Texts.firsmenu.none,
+            description = locale('creator.lastname.desc'),
+            onClick = function()
                 local dialog = lib.inputDialog(locale('creator.lastname.input.header'), {
                     {
                         type = 'input',
@@ -440,21 +392,18 @@ function FirstMenu()
                         placeholder = locale('creator.lastname.input.placeholder')
                     },
                 })
-                if not dialog then return false end
-                local lastname = dialog[1]
-                if not checkStrings(lastname) then
-                    goto noMatch
+                if dialog and checkStrings(dialog[1]) then
+                    Lastname = dialog[1]
+                    FirstMenu()
                 end
-                Lastname = lastname
-                menu.setElement(4, "label", Lastname)
-                menu.setElement(4, "itemHeight", "4vh")
-                menu.refresh()
             end
+        })
 
-            if (data.current.value == 'nationality') then
-
-                :: noMatch ::
-
+        menu:addItem({
+            title = Nationality or RSG.Texts.firsmenu.Nationality,
+            textRight = Nationality and "" or RSG.Texts.firsmenu.none,
+            description = locale('creator.nationality.desc'),
+            onClick = function()
                 local dialog = lib.inputDialog(locale('creator.nationality.input.header'), {
                     {
                         type = 'input',
@@ -464,19 +413,18 @@ function FirstMenu()
                         placeholder = locale('creator.nationality.input.placeholder')
                     },
                 })
-                if not dialog then return false end
-                local national = dialog[1]
-                if not checkStrings(national) then
-                    goto noMatch
+                if dialog and checkStrings(dialog[1]) then
+                    Nationality = dialog[1]
+                    FirstMenu()
                 end
-                Nationality = national
-                menu.setElement(5, "label", Nationality)
-                menu.setElement(5, "itemHeight", "4vh")
-                menu.refresh()
             end
+        })
 
-            if (data.current.value == 'birthdate') then
-
+        menu:addItem({
+            title = Birthdate or RSG.Texts.firsmenu.Birthdate,
+            textRight = Birthdate and "" or RSG.Texts.firsmenu.none,
+            description = locale('creator.birthdate.desc'),
+            onClick = function()
                 local dialog = lib.inputDialog(locale('creator.birthdate.input.header'), {
                     {
                         type = 'date',
@@ -485,35 +433,36 @@ function FirstMenu()
                         label = locale('creator.birthdate.input.label'),
                         format = 'YYYY-MM-DD',
                         returnString = true,
-                        min = '1750-01-01', -- Has to be in the same in the same format as the format argument
-                        max = '1900-01-01', -- Has to be in the same in the same format as the format argument
+                        min = '1750-01-01',
+                        max = '1900-01-01',
                         default = '1870-01-01'
                     }
                 })
-                if not dialog then return false end
-                Birthdate = dialog[1]
-                Labelsave = RSG.Texts.firsmenu.Start
-                Valuesave = 'save'
-                menu.setElement(6, "label", Birthdate)
-                menu.setElement(6, "itemHeight", "4vh")
-                menu.removeElementByIndex(7)
-                menu.addNewElement({
-                    label = RSG.Texts.firsmenu.Start,
-                    value = Valuesave,
-                    desc = ""
-                })
-                menu.refresh()
+                if dialog then
+                    Birthdate = dialog[1]
+                    Labelsave = RSG.Texts.firsmenu.Start
+                    Valuesave = 'save'
+                    FirstMenu()
+                end
             end
-            if data.current.value == 'save' then
+        })
+    end
+
+    menu:addItem({
+        title = Labelsave or RSG.Texts.firsmenu.Start,
+        textRight = (not Labelsave) and RSG.Texts.firsmenu.empty or "",
+        disabled = (not Valuesave),
+        onClick = function()
+            if Valuesave == 'save' then
                 LoadedComponents = CreatorCache
                 if Skinkosong then
-                    MenuData.CloseAll()
+                    jo.menu.show(false)
                     Skinkosong = false
                     Firstname = FDBCore.Functions.GetPlayerData().charinfo.firstname
                     Lastname = FDBCore.Functions.GetPlayerData().charinfo.lastname
                     FotoMugshots()
                 elseif Firstname and Lastname and Nationality and Selectedsex and Birthdate and Cid then
-                    MenuData.CloseAll()
+                    jo.menu.show(false)
                     local newData = {
                         firstname = Firstname,
                         lastname = Lastname,
@@ -529,24 +478,54 @@ function FirstMenu()
                     lib.notify({ title = locale('missing_character_info.title'), description = locale('missing_character_info.description'), type = 'error', duration = 7000 })
                 end
             end
-        end, function(data, menu)
-        end)
+        end
+    })
+
+    jo.menu.send('FirstMenu')
+    jo.menu.setCurrentMenu('FirstMenu')
+    jo.menu.show(true, true) -- true for keepInput so we can test camera rotation
 end
 
 function MainMenu()
-    MenuData.CloseAll()
-    local elements = {
-        {label = RSG.Texts.Body,       value = 'body',   desc = ""},
-        {label = RSG.Texts.Face,       value = 'face',   desc = ""},
-        {label = RSG.Texts.Hair_beard, value = 'hair',   desc = ""},
-        {label = RSG.Texts.Makeup,     value = 'makeup', desc = ""},
-    }
-    MenuData.Open('default', GetCurrentResourceName(), 'main_character_creator_menu',
-        {title = RSG.Texts.Appearance, subtext = RSG.Texts.Options, align = RSG.Texts.align, elements = elements, itemHeight = "4vh"}, function(data, menu)
-        MainMenus[data.current.value]()
-    end, function(data, menu)
-        FirstMenu()
-    end)
+    local menu = jo.menu.create('main_character_creator_menu', { 
+        title = RSG.Texts.Appearance, 
+        subtitle = RSG.Texts.Options,
+        onBack = function()
+            FirstMenu()
+        end
+    })
+
+    menu:addItem({
+        title = RSG.Texts.Body,
+        onClick = function()
+            OpenBodyMenu()
+        end
+    })
+    
+    menu:addItem({
+        title = RSG.Texts.Face,
+        onClick = function()
+            OpenFaceMenu()
+        end
+    })
+
+    menu:addItem({
+        title = RSG.Texts.Hair_beard,
+        onClick = function()
+            OpenHairMenu()
+        end
+    })
+
+    menu:addItem({
+        title = RSG.Texts.Makeup,
+        onClick = function()
+            OpenMakeupMenu()
+        end
+    })
+
+    jo.menu.send('main_character_creator_menu')
+    jo.menu.setCurrentMenu('main_character_creator_menu')
+    jo.menu.show(true, true) -- keepInput=true for testing camera
 end
 
 function OpenBodyMenu()
