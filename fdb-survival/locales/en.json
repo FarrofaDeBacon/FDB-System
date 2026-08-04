@@ -1,0 +1,12 @@
+{
+  "notify_bladder_full_title": "Full Bladder!",
+  "notify_bladder_full_desc": "You need to relieve yourself urgently (/mijar).",
+  "notify_pee_error_title": "Error",
+  "notify_pee_mount_error": "Dismount before relieving yourself!",
+  "notify_blackout_title": "💥 Passed Out",
+  "notify_blackout_desc": "You drank too much and passed out!",
+  "notify_hangover_title": "🤕 Hangover",
+  "notify_hangover_desc": "You woke up, but you are still very drunk.",
+  "notify_drunk_title": "🍻 Drunk",
+  "notify_drunk_desc": "You are starting to see things spinning..."
+}

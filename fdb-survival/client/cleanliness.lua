@@ -1,0 +1,1 @@
+-- Os comandos de debug foram movidos para server/main.lua (admin-only)

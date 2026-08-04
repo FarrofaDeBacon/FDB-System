@@ -1,0 +1,12 @@
+{
+  "notify_bladder_full_title": "Bexiga Cheia!",
+  "notify_bladder_full_desc": "Você precisa se aliviar urgente (/mijar).",
+  "notify_pee_error_title": "Erro",
+  "notify_pee_mount_error": "Desça antes de se aliviar!",
+  "notify_blackout_title": "💥 Coma Alcoólico",
+  "notify_blackout_desc": "Você bebeu demais e apagou!",
+  "notify_hangover_title": "🤕 Ressaca",
+  "notify_hangover_desc": "Você acordou, mas ainda está muito bêbado.",
+  "notify_drunk_title": "🍻 Bêbado",
+  "notify_drunk_desc": "Você está começando a ver as coisas girando..."
+}
