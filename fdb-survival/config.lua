@@ -183,6 +183,7 @@ Config.BladderSystem = {
     AnimWaitBefore = 4000,         -- Tempo antes de começar o jato (ms)
     AnimDuration = 6000,           -- Tempo do jato (ms)
     AnimWaitAfter = 3500,          -- Tempo guardando antes de destravar o personagem (ms)
+    AccidentAnimation = "WORLD_HUMAN_VOMIT", -- Animação de vergonha/dor ao urinar nas calças
     
     -- Etiqueta / RP
     PrivacyRadius = 15.0,          -- Distância (em metros) para verificar se há mulheres perto

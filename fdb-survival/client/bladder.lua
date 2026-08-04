@@ -39,7 +39,8 @@ CreateThread(function()
                         -- Play a small embarrassment animation if not in vehicle
                         if not IsPedInAnyVehicle(ped, false) and not IsPedOnMount(ped) then
                             ClearPedTasks(ped)
-                            TaskStartScenarioInPlace(ped, joaat('WORLD_HUMAN_VOMIT'), -1, true, false, false, false)
+                            local accidentAnim = Config.BladderSystem.AccidentAnimation or 'WORLD_HUMAN_VOMIT'
+                            TaskStartScenarioInPlace(ped, joaat(accidentAnim), -1, true, false, false, false)
                             Wait(4000)
                             ClearPedTasks(ped)
                         end
