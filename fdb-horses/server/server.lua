@@ -9,7 +9,7 @@ lib.locale()
 local tradeRequests = {} -- Store pending trade requests
 
 local function VerifyHorseOwnership(citizenid, horseid)
-    local result = MySQL.scalar.await('SELECT COUNT(*) FROM fdb_horses WHERE citizenid = ? AND horseid = ?', {citizenid, horseid})
+    local result = MySQL.scalar.await('SELECT COUNT(*) FROM player_horses WHERE citizenid = ? AND horseid = ?', {citizenid, horseid})
     return result and result > 0
 end
 
@@ -57,7 +57,7 @@ end)
 FDBCore.Functions.CreateCallback('fdb-horses:server:GetAllHorses', function(source, cb)
     local src = source
     local Player = FDBCore.Functions.GetPlayer(src)
-    local horses = MySQL.query.await('SELECT * FROM fdb_horses WHERE citizenid=@citizenid', { ['@citizenid'] = Player.PlayerData.citizenid })    
+    local horses = MySQL.query.await('SELECT * FROM player_horses WHERE citizenid=@citizenid', { ['@citizenid'] = Player.PlayerData.citizenid })    
     if horses[1] ~= nil then
         cb(horses)
     else
@@ -77,18 +77,18 @@ FDBCore.Functions.CreateUseableItem('horse_brush', function(source, item)
     if Player.Functions.RemoveItem(item.name, 1, item.slot) then
         TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
 
-        local activehorse = MySQL.scalar.await('SELECT id FROM fdb_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
+        local activehorse = MySQL.scalar.await('SELECT id FROM player_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
         if not activehorse then
             TriggerClientEvent('ox_lib:notify', src, { title = locale('cl_error_no_horse_out'), type = 'error', duration = 5000 })
             return
         end
 
         -- Lê metadata atual, aplica limpeza, persiste
-        local row = MySQL.query.await('SELECT metadata FROM fdb_horses WHERE id = ?', {activehorse})
+        local row = MySQL.query.await('SELECT metadata FROM player_horses WHERE id = ?', {activehorse})
         local meta = (row and row[1] and row[1].metadata and json.decode(row[1].metadata)) or {}
         meta.dirt = 0
 
-        MySQL.update('UPDATE fdb_horses SET dirt = 0, metadata = ? WHERE id = ?', { json.encode(meta), activehorse })
+        MySQL.update('UPDATE player_horses SET dirt = 0, metadata = ? WHERE id = ?', { json.encode(meta), activehorse })
 
         -- Notifica client com o campo calculado pelo servidor
         TriggerClientEvent('fdb-horses:client:stateChanged', src, { dirt = 0 })
@@ -123,16 +123,16 @@ if FDBCore.Shared.Items['horse_medicine'] then
         if Player.Functions.RemoveItem(item.name, 1, item.slot) then
             TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
 
-            local activehorse = MySQL.scalar.await('SELECT id FROM fdb_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
+            local activehorse = MySQL.scalar.await('SELECT id FROM player_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
             if not activehorse then return end
 
-            local row = MySQL.query.await('SELECT metadata FROM fdb_horses WHERE id = ?', {activehorse})
+            local row = MySQL.query.await('SELECT metadata FROM player_horses WHERE id = ?', {activehorse})
             local meta = (row and row[1] and row[1].metadata and json.decode(row[1].metadata)) or {}
             local feedData = Config.HorseFeed[item.name]
             meta.illness = 0
             meta.poison  = 0
 
-            MySQL.update('UPDATE fdb_horses SET metadata = ? WHERE id = ?', { json.encode(meta), activehorse })
+            MySQL.update('UPDATE player_horses SET metadata = ? WHERE id = ?', { json.encode(meta), activehorse })
 
             -- Envia de volta ao client apenas os campos alterados
             TriggerClientEvent('fdb-horses:client:stateChanged', src, { illness = 0, poison = 0 })
@@ -149,10 +149,10 @@ FDBCore.Functions.CreateUseableItem('horse_carrot', function(source, item)
     if Player.Functions.RemoveItem(item.name, 1, item.slot) then
         TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
 
-        local activehorse = MySQL.scalar.await('SELECT id FROM fdb_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
+        local activehorse = MySQL.scalar.await('SELECT id FROM player_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
         if not activehorse then return end
 
-        local row = MySQL.query.await('SELECT metadata FROM fdb_horses WHERE id = ?', {activehorse})
+        local row = MySQL.query.await('SELECT metadata FROM player_horses WHERE id = ?', {activehorse})
         local meta = (row and row[1] and row[1].metadata and json.decode(row[1].metadata)) or {}
         local feedData = Config.HorseFeed[item.name]
 
@@ -160,7 +160,7 @@ FDBCore.Functions.CreateUseableItem('horse_carrot', function(source, item)
         meta.thirst = math.min(100, (meta.thirst or 100) + (feedData.thirst or 0))
         meta.agitation = math.max(0, (meta.agitation or 0) - 20)
 
-        MySQL.update('UPDATE fdb_horses SET metadata = ? WHERE id = ?', { json.encode(meta), activehorse })
+        MySQL.update('UPDATE player_horses SET metadata = ? WHERE id = ?', { json.encode(meta), activehorse })
 
         TriggerClientEvent('fdb-horses:client:stateChanged', src, { hunger = meta.hunger, thirst = meta.thirst, agitation = meta.agitation })
         TriggerClientEvent('fdb-horses:client:playerfeedhorse', src, item.name)
@@ -175,10 +175,10 @@ FDBCore.Functions.CreateUseableItem('horse_apple', function(source, item)
     if Player.Functions.RemoveItem(item.name, 1, item.slot) then
         TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
 
-        local activehorse = MySQL.scalar.await('SELECT id FROM fdb_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
+        local activehorse = MySQL.scalar.await('SELECT id FROM player_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
         if not activehorse then return end
 
-        local row = MySQL.query.await('SELECT metadata FROM fdb_horses WHERE id = ?', {activehorse})
+        local row = MySQL.query.await('SELECT metadata FROM player_horses WHERE id = ?', {activehorse})
         local meta = (row and row[1] and row[1].metadata and json.decode(row[1].metadata)) or {}
         local feedData = Config.HorseFeed[item.name]
 
@@ -186,7 +186,7 @@ FDBCore.Functions.CreateUseableItem('horse_apple', function(source, item)
         meta.thirst = math.min(100, (meta.thirst or 100) + (feedData.thirst or 0))
         meta.agitation = math.max(0, (meta.agitation or 0) - 20)
 
-        MySQL.update('UPDATE fdb_horses SET metadata = ? WHERE id = ?', { json.encode(meta), activehorse })
+        MySQL.update('UPDATE player_horses SET metadata = ? WHERE id = ?', { json.encode(meta), activehorse })
 
         TriggerClientEvent('fdb-horses:client:stateChanged', src, { hunger = meta.hunger, thirst = meta.thirst, agitation = meta.agitation })
         TriggerClientEvent('fdb-horses:client:playerfeedhorse', src, item.name)
@@ -227,7 +227,7 @@ FDBCore.Functions.CreateUseableItem('horse_reviver', function(source, item)
     if not Player then return end
 
     local cid = Player.PlayerData.citizenid
-    local result = MySQL.query.await('SELECT * FROM fdb_horses WHERE citizenid=@citizenid AND active=@active', { ['@citizenid'] = cid, ['@active'] = 1 })
+    local result = MySQL.query.await('SELECT * FROM player_horses WHERE citizenid=@citizenid AND active=@active', { ['@citizenid'] = cid, ['@active'] = 1 })
 
     if not result[1] then
         TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_error_no_active_horse'), type = 'error', duration = 5000 })
@@ -283,7 +283,7 @@ RegisterServerEvent('fdb-horses:server:BuyHorse', function(model, stable, horsen
     
     -- Money removed successfully, now safe to create horse
     local horseid = GenerateHorseid()
-    MySQL.insert('INSERT INTO fdb_horses(stable, citizenid, horseid, name, horse, gender, active, born) VALUES(@stable, @citizenid, @horseid, @name, @horse, @gender, @active, @born)', {
+    MySQL.insert('INSERT INTO player_horses(stable, citizenid, horseid, name, horse, gender, active, born) VALUES(@stable, @citizenid, @horseid, @name, @horse, @gender, @active, @born)', {
         ['@stable'] = stable,
         ['@citizenid'] = Player.PlayerData.citizenid,
         ['@horseid'] = horseid,
@@ -305,17 +305,17 @@ RegisterServerEvent('fdb-horses:server:SetHoresActive', function(id)
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     
-    local owned = MySQL.scalar.await('SELECT COUNT(*) FROM fdb_horses WHERE id = ? AND citizenid = ?', {id, Player.PlayerData.citizenid})
+    local owned = MySQL.scalar.await('SELECT COUNT(*) FROM player_horses WHERE id = ? AND citizenid = ?', {id, Player.PlayerData.citizenid})
     if not owned or owned == 0 then
         TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_error_not_own_horse'), type = 'error', duration = 5000 })
         return
     end
     
-    local activehorse = MySQL.scalar.await('SELECT id FROM fdb_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
+    local activehorse = MySQL.scalar.await('SELECT id FROM player_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
     if activehorse then
-        MySQL.update('UPDATE fdb_horses SET active = ? WHERE id = ? AND citizenid = ?', { false, activehorse, Player.PlayerData.citizenid })
+        MySQL.update('UPDATE player_horses SET active = ? WHERE id = ? AND citizenid = ?', { false, activehorse, Player.PlayerData.citizenid })
     end
-    MySQL.update('UPDATE fdb_horses SET active = ? WHERE id = ? AND citizenid = ?', { true, id, Player.PlayerData.citizenid })
+    MySQL.update('UPDATE player_horses SET active = ? WHERE id = ? AND citizenid = ?', { true, id, Player.PlayerData.citizenid })
 end)
 
 -----------------------------------
@@ -326,14 +326,14 @@ RegisterServerEvent('fdb-horses:server:SetHoresUnActive', function(id, stableid)
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     
-    local owned = MySQL.scalar.await('SELECT COUNT(*) FROM fdb_horses WHERE id = ? AND citizenid = ?', {id, Player.PlayerData.citizenid})
+    local owned = MySQL.scalar.await('SELECT COUNT(*) FROM player_horses WHERE id = ? AND citizenid = ?', {id, Player.PlayerData.citizenid})
     if not owned or owned == 0 then
         TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_error_not_own_horse'), type = 'error', duration = 5000 })
         return
     end
     
-    MySQL.update('UPDATE fdb_horses SET active = ? WHERE citizenid = ? AND active = ?', { false, Player.PlayerData.citizenid, true })
-    MySQL.update('UPDATE fdb_horses SET stable = ? WHERE id = ? AND citizenid = ?', { stableid, id, Player.PlayerData.citizenid })
+    MySQL.update('UPDATE player_horses SET active = ? WHERE citizenid = ? AND active = ?', { false, Player.PlayerData.citizenid, true })
+    MySQL.update('UPDATE player_horses SET stable = ? WHERE id = ? AND citizenid = ?', { stableid, id, Player.PlayerData.citizenid })
 end)
 
 -----------------------------------
@@ -343,10 +343,10 @@ RegisterServerEvent('fdb-horses:server:fleeStoreHorse', function(stableid)
     local src = source
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
-    local activehorse = MySQL.scalar.await('SELECT id FROM fdb_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, 1})
+    local activehorse = MySQL.scalar.await('SELECT id FROM player_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, 1})
     if not activehorse then return end
-    MySQL.update('UPDATE fdb_horses SET active = ? WHERE id = ? AND citizenid = ?', { 0, activehorse, Player.PlayerData.citizenid })
-    MySQL.update('UPDATE fdb_horses SET stable = ? WHERE id = ? AND citizenid = ?', { stableid, activehorse, Player.PlayerData.citizenid })
+    MySQL.update('UPDATE player_horses SET active = ? WHERE id = ? AND citizenid = ?', { 0, activehorse, Player.PlayerData.citizenid })
+    MySQL.update('UPDATE player_horses SET stable = ? WHERE id = ? AND citizenid = ?', { stableid, activehorse, Player.PlayerData.citizenid })
 end)
 
 -----------------------------------
@@ -372,7 +372,7 @@ RegisterServerEvent('fdb-horses:renameHorse', function(name)
         return
     end
     
-    local newName = MySQL.query.await('UPDATE fdb_horses SET name = ? WHERE citizenid = ? AND active = ?' , {name, Player.PlayerData.citizenid, 1})
+    local newName = MySQL.query.await('UPDATE player_horses SET name = ? WHERE citizenid = ? AND active = ?' , {name, Player.PlayerData.citizenid, 1})
 
     if newName == nil then
         TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_error_name_change_failed'), type = 'error', duration = 5000 })
@@ -393,7 +393,7 @@ RegisterServerEvent('fdb-horses:server:HorseDied', function(horseid, horsename)
     local cid = Player.PlayerData.citizenid
     
     -- Get horse data (must be active/spawned to die)
-    local horse = MySQL.query.await('SELECT * FROM fdb_horses WHERE citizenid = @citizenid AND horseid = @horseid AND active = @active', {
+    local horse = MySQL.query.await('SELECT * FROM player_horses WHERE citizenid = @citizenid AND horseid = @horseid AND active = @active', {
         ['@citizenid'] = cid,
         ['@horseid'] = horseid,
         ['@active'] = 1
@@ -407,7 +407,7 @@ RegisterServerEvent('fdb-horses:server:HorseDied', function(horseid, horsename)
         MySQL.update('DELETE FROM inventories WHERE identifier = ?', {horsestash})
         
         -- Remove horse from database
-        MySQL.update('DELETE FROM fdb_horses WHERE citizenid = ? AND horseid = ?', {cid, horseid})
+        MySQL.update('DELETE FROM player_horses WHERE citizenid = ? AND horseid = ?', {cid, horseid})
         
         -- Log the death
         TriggerEvent('fdb-log:server:CreateLog', 'horsetrainer', locale('sv_log_horse_trainer'), 'red', horsename .. ' ' .. locale('sv_log_horse_belong') .. ' ' .. cid .. ' ' .. locale('sv_log_horse_dead'))
@@ -427,27 +427,27 @@ RegisterServerEvent('fdb-horses:server:deletehorse', function(data)
     local horseid = data.horseid
     
     -- SECURITY: Verify ownership before selling
-    local fdb_horses = MySQL.query.await('SELECT * FROM fdb_horses WHERE id = @id AND `citizenid` = @citizenid', {
+    local player_horses = MySQL.query.await('SELECT * FROM player_horses WHERE id = @id AND `citizenid` = @citizenid', {
         ['@id'] = horseid,
         ['@citizenid'] = Player.PlayerData.citizenid
     })
     
-    if not fdb_horses or #fdb_horses == 0 then
+    if not player_horses or #player_horses == 0 then
         TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_error_not_own_horse'), type = 'error', duration = 5000 })
         return
     end
     
     local modelHorse = nil
-    for i = 1, #fdb_horses do
-        if tonumber(fdb_horses[i].id) == tonumber(horseid) then
-            modelHorse = fdb_horses[i].horse
+    for i = 1, #player_horses do
+        if tonumber(player_horses[i].id) == tonumber(horseid) then
+            modelHorse = player_horses[i].horse
             
             -- Delete horse inventory
-            local horsestash = fdb_horses[i].name .. ' ' .. fdb_horses[i].horseid
+            local horsestash = player_horses[i].name .. ' ' .. player_horses[i].horseid
             MySQL.update('DELETE FROM inventories WHERE identifier = ?', {horsestash})
             
             -- Delete horse
-            MySQL.update('DELETE FROM fdb_horses WHERE id = ? AND citizenid = ?', { data.horseid, Player.PlayerData.citizenid })
+            MySQL.update('DELETE FROM player_horses WHERE id = ? AND citizenid = ?', { data.horseid, Player.PlayerData.citizenid })
         end
     end
     
@@ -470,9 +470,9 @@ lib.callback.register('fdb-horses:server:GetHorse', function(source, stable)
     if not Player then return {} end
     local Result = {}
     if stable and stable ~= '' then
-        Result = MySQL.query.await('SELECT * FROM fdb_horses WHERE citizenid = ? AND stable = ?', { Player.PlayerData.citizenid, stable })
+        Result = MySQL.query.await('SELECT * FROM player_horses WHERE citizenid = ? AND stable = ?', { Player.PlayerData.citizenid, stable })
     else
-        Result = MySQL.query.await('SELECT * FROM fdb_horses WHERE citizenid = ?', { Player.PlayerData.citizenid })
+        Result = MySQL.query.await('SELECT * FROM player_horses WHERE citizenid = ?', { Player.PlayerData.citizenid })
     end
     return Result or {}
 end)
@@ -485,7 +485,7 @@ FDBCore.Functions.CreateCallback('fdb-horses:server:GetActiveHorse', function(so
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     local cid = Player.PlayerData.citizenid
-    local result = MySQL.query.await('SELECT * FROM fdb_horses WHERE citizenid=@citizenid AND active=@active', { ['@citizenid'] = cid, ['@active'] = 1 })
+    local result = MySQL.query.await('SELECT * FROM player_horses WHERE citizenid=@citizenid AND active=@active', { ['@citizenid'] = cid, ['@active'] = 1 })
     if (result[1] ~= nil) then
         cb(result[1])
     else
@@ -502,7 +502,7 @@ FDBCore.Functions.CreateCallback('fdb-horses:server:CheckComponents', function(s
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     local Playercid = Player.PlayerData.citizenid
-    local result = MySQL.query.await('SELECT * FROM fdb_horses WHERE citizenid=@citizenid AND active=@active', {
+    local result = MySQL.query.await('SELECT * FROM player_horses WHERE citizenid=@citizenid AND active=@active', {
         ['@citizenid'] = Playercid,
         ['@active'] = 1
     })
@@ -531,7 +531,7 @@ RegisterNetEvent('fdb-horses:server:SaveComponents', function(newComponents, hor
     local citizenid = Player.PlayerData.citizenid
     
     -- SECURITY: Verify ownership
-    local result = MySQL.query.await('SELECT * FROM fdb_horses WHERE citizenid=@citizenid AND horseid=@horseid', { ['@citizenid'] = citizenid, ['@horseid'] = horseid })
+    local result = MySQL.query.await('SELECT * FROM player_horses WHERE citizenid=@citizenid AND horseid=@horseid', { ['@citizenid'] = citizenid, ['@horseid'] = horseid })
     local horseData = result[1]
     
     if not horseData then
@@ -543,7 +543,7 @@ RegisterNetEvent('fdb-horses:server:SaveComponents', function(newComponents, hor
     local price = CalculatePrice(newComponents, currentComponents)
 
     if Player.Functions.RemoveMoney('cash', price) then
-        MySQL.update('UPDATE fdb_horses SET components = @components WHERE id = @id', {['@components'] = json.encode(newComponents), ['@id'] = horseData.id})
+        MySQL.update('UPDATE player_horses SET components = @components WHERE id = @id', {['@components'] = json.encode(newComponents), ['@id'] = horseData.id})
         TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_success_component_saved') .. price, type = 'success', duration = 5000 })
     else
         TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_error_no_cash'), type = 'error', duration = 5000 })
@@ -561,7 +561,7 @@ RegisterNetEvent('fdb-horses:server:TradeHorse', function(playerId, horseId)
     if not Player or not Target then return end
     
     -- SECURITY: Verify ownership
-    local horse = MySQL.query.await('SELECT * FROM fdb_horses WHERE horseid = ? AND citizenid = ? AND active = ?', 
+    local horse = MySQL.query.await('SELECT * FROM player_horses WHERE horseid = ? AND citizenid = ? AND active = ?', 
         {horseId, Player.PlayerData.citizenid, 1})
     
     if not horse or not horse[1] then
@@ -635,7 +635,7 @@ RegisterNetEvent('fdb-horses:server:AcceptTrade', function(fromId)
     end
     
     -- Verify horse still exists and is owned by sender
-    local horse = MySQL.query.await('SELECT * FROM fdb_horses WHERE horseid = ? AND citizenid = ?', 
+    local horse = MySQL.query.await('SELECT * FROM player_horses WHERE horseid = ? AND citizenid = ?', 
         {trade.horseId, Sender.PlayerData.citizenid})
     
     if not horse or not horse[1] then
@@ -646,10 +646,10 @@ RegisterNetEvent('fdb-horses:server:AcceptTrade', function(fromId)
     end
     
     -- Proceed with trade
-    MySQL.update('UPDATE fdb_horses SET citizenid = ?, active = ? WHERE horseid = ?', {Target.PlayerData.citizenid, 0, trade.horseId})
+    MySQL.update('UPDATE player_horses SET citizenid = ?, active = ? WHERE horseid = ?', {Target.PlayerData.citizenid, 0, trade.horseId})
     
     -- Deactivate target's current active horse if they have one
-    MySQL.update('UPDATE fdb_horses SET active = ? WHERE citizenid = ? AND active = ?', {0, Target.PlayerData.citizenid, 1})
+    MySQL.update('UPDATE player_horses SET active = ? WHERE citizenid = ? AND active = ?', {0, Target.PlayerData.citizenid, 1})
     
     TriggerClientEvent('ox_lib:notify', src, {
         title = string.format(locale('sv_trade_received'), trade.horseName), 
@@ -691,7 +691,7 @@ RegisterServerEvent('fdb-horses:server:MoveHorse', function(horseId, newStableId
         return
     end
 
-    local horse = MySQL.query.await('SELECT * FROM fdb_horses WHERE id = ? AND citizenid = ?', {horseId, citizenid})
+    local horse = MySQL.query.await('SELECT * FROM player_horses WHERE id = ? AND citizenid = ?', {horseId, citizenid})
     
     if not horse or not horse[1] then
         TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_error_not_own_horse'), type = 'error', duration = 5000 })
@@ -740,7 +740,7 @@ RegisterServerEvent('fdb-horses:server:MoveHorse', function(horseId, newStableId
         return
     end
 
-    MySQL.update('UPDATE fdb_horses SET stable = ? WHERE id = ? AND citizenid = ?', {newStableId, horseId, citizenid})
+    MySQL.update('UPDATE player_horses SET stable = ? WHERE id = ? AND citizenid = ?', {newStableId, horseId, citizenid})
 
     TriggerClientEvent('ox_lib:notify', src, {
         title = locale('sv_success_horse_moved'),
@@ -758,7 +758,7 @@ function GenerateHorseid()
     local horseid = nil
     while not UniqueFound do
         horseid = tostring(FDBCore.Shared.RandomStr(3) .. FDBCore.Shared.RandomInt(3)):upper()
-        local result = MySQL.prepare.await('SELECT COUNT(*) as count FROM fdb_horses WHERE horseid = ?', { horseid })
+        local result = MySQL.prepare.await('SELECT COUNT(*) as count FROM player_horses WHERE horseid = ?', { horseid })
         if result == 0 then
             UniqueFound = true
         end
@@ -791,9 +791,9 @@ RegisterServerEvent('fdb-horses:server:sethorseAttributes', function(dirt)
     dirt = tonumber(dirt)
     if not dirt or dirt < 0 or dirt > 100 then return end
 
-    local activehorse = MySQL.scalar.await('SELECT id FROM fdb_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
+    local activehorse = MySQL.scalar.await('SELECT id FROM player_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
     if not activehorse then return end
-    MySQL.update('UPDATE fdb_horses SET dirt = ? WHERE id = ? AND citizenid = ?', { dirt, activehorse, Player.PlayerData.citizenid })
+    MySQL.update('UPDATE player_horses SET dirt = ? WHERE id = ? AND citizenid = ?', { dirt, activehorse, Player.PlayerData.citizenid })
 end)
 
 RegisterServerEvent('fdb-horses:server:SetPlayerBucket', function(random, ped)
@@ -821,7 +821,7 @@ RegisterNetEvent('fdb-horses:server:openhorseinventory', function(horseid)
     if not Player then return end
 
     -- verify ownership
-    local horse = MySQL.query.await('SELECT * FROM fdb_horses WHERE horseid = ? AND citizenid = ?', {horseid, Player.PlayerData.citizenid})
+    local horse = MySQL.query.await('SELECT * FROM player_horses WHERE horseid = ? AND citizenid = ?', {horseid, Player.PlayerData.citizenid})
     if not horse[1] then
         TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_error_not_own_horse'), type = 'error', duration = 5000 })
         return
@@ -931,7 +931,7 @@ end)
 ----------------------------------
 UpkeepInterval = function()
 
-    local result = MySQL.query.await('SELECT * FROM fdb_horses')
+    local result = MySQL.query.await('SELECT * FROM player_horses')
 
     if not result then return end
 
@@ -949,7 +949,7 @@ UpkeepInterval = function()
         if horsetype == 'a_c_horse_mp_mangy_backup' and daysPassed >= Config.StarterHorseDieAge then
             
             -- Get horseid for inventory cleanup
-            local horsedata = MySQL.query.await('SELECT horseid FROM fdb_horses WHERE id = ?', {id})
+            local horsedata = MySQL.query.await('SELECT horseid FROM player_horses WHERE id = ?', {id})
             if horsedata[1] then
                 local horsestash = horsename .. ' ' .. horsedata[1].horseid
                 
@@ -958,7 +958,7 @@ UpkeepInterval = function()
             end
 
             -- delete horse
-            MySQL.update('DELETE FROM fdb_horses WHERE id = ?', {id})
+            MySQL.update('DELETE FROM player_horses WHERE id = ?', {id})
             TriggerEvent('fdb-log:server:CreateLog', 'horsetrainer', locale('sv_log_horse_trainer'), 'red', horsename..' '..locale('sv_log_horse_belong')..' '..ownercid..' '..locale('sv_log_horse_dead'))
 
             -- telegram message to the horse owner
@@ -978,7 +978,7 @@ UpkeepInterval = function()
         if daysPassed >= Config.HorseDieAge then
             
             -- Get horseid for inventory cleanup
-            local horsedata = MySQL.query.await('SELECT horseid FROM fdb_horses WHERE id = ?', {id})
+            local horsedata = MySQL.query.await('SELECT horseid FROM player_horses WHERE id = ?', {id})
             if horsedata[1] then
                 local horsestash = horsename .. ' ' .. horsedata[1].horseid
                 
@@ -993,7 +993,7 @@ UpkeepInterval = function()
             end
 
             -- delete horse
-            MySQL.update('DELETE FROM fdb_horses WHERE id = ?', {id})
+            MySQL.update('DELETE FROM player_horses WHERE id = ?', {id})
             TriggerEvent('fdb-log:server:CreateLog', 'horsetrainer', locale('sv_log_horse_trainer'), 'red', horsename..' '..locale('sv_log_horse_belong')..' '..ownercid..' '..locale('sv_log_horse_dead'))
 
             -- telegram message to the horse owner
@@ -1045,7 +1045,7 @@ RegisterNetEvent('fdb-horses:server:RegisterHorseNet', function(netId)
     -- Cruza com o banco: confirma que o modelo da entidade bate com o cavalo
     -- ativo deste jogador. Impede que client registre netId de entidade arbitrária.
     local row = MySQL.query.await(
-        'SELECT horse FROM fdb_horses WHERE citizenid = ? AND active = 1',
+        'SELECT horse FROM player_horses WHERE citizenid = ? AND active = 1',
         { Player.PlayerData.citizenid }
     )
     if not row or not row[1] or not row[1].horse then return end
@@ -1093,7 +1093,7 @@ CreateThread(function()
 
         -- Busca todos os cavalos ativos no momento
         local activeHorses = MySQL.query.await(
-            'SELECT id, citizenid, metadata, dirt FROM fdb_horses WHERE active = 1'
+            'SELECT id, citizenid, metadata, dirt FROM player_horses WHERE active = 1'
         )
         if not activeHorses or #activeHorses == 0 then goto continue_metabolism end
 
@@ -1136,7 +1136,7 @@ CreateThread(function()
             meta.agitation = math.floor(newAgitation)
 
             MySQL.update(
-                'UPDATE fdb_horses SET metadata = ?, dirt = ? WHERE id = ?',
+                'UPDATE player_horses SET metadata = ?, dirt = ? WHERE id = ?',
                 { json.encode(meta), math.floor(newDirt), horseId }
             )
 
@@ -1215,17 +1215,17 @@ FDBCore.Commands.Add('testhorse', 'Fase D: testa natives de agitação do cavalo
         elseif action == 'agit' then
             -- Força agitação máxima no banco — valida o loop de broadcast sem native
             local activehorse = MySQL.scalar.await(
-                'SELECT id FROM fdb_horses WHERE citizenid = ? AND active = 1',
+                'SELECT id FROM player_horses WHERE citizenid = ? AND active = 1',
                 { Player.PlayerData.citizenid }
             )
             if not activehorse then
                 TriggerClientEvent('ox_lib:notify', src, { title = '[D] Nenhum cavalo ativo.', type = 'error', duration = 4000 })
                 return
             end
-            local row = MySQL.query.await('SELECT metadata FROM fdb_horses WHERE id = ?', { activehorse })
+            local row = MySQL.query.await('SELECT metadata FROM player_horses WHERE id = ?', { activehorse })
             local meta = (row and row[1] and row[1].metadata and json.decode(row[1].metadata)) or {}
             meta.agitation = 100
-            MySQL.update('UPDATE fdb_horses SET metadata = ? WHERE id = ?', { json.encode(meta), activehorse })
+            MySQL.update('UPDATE player_horses SET metadata = ? WHERE id = ?', { json.encode(meta), activehorse })
             TriggerClientEvent('fdb-horses:client:stateChanged', src, { agitation = 100 })
             TriggerClientEvent('ox_lib:notify', src, {
                 title = '[Fase D] Agitação forçada para 100',

@@ -102,7 +102,7 @@ mysql -u username -p database_name < installation/fdb-horses.sql
 
 Or manually execute:
 ```sql
-CREATE TABLE IF NOT EXISTS `fdb_horses` (
+CREATE TABLE IF NOT EXISTS `player_horses` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `stable` varchar(50) NOT NULL,
   `citizenid` varchar(50) NOT NULL,
@@ -297,7 +297,7 @@ Defines all customization components (saddles, blankets, etc.). Each entry has:
 
 ## Database Schema
 
-### `fdb_horses` Table
+### `player_horses` Table
 
 | Column | Type | Description |
 |--------|------|-------------|
@@ -675,7 +675,7 @@ sequenceDiagram
     Server->>Player B: Notify trade request (30s timer)
     Player B->>Server: /accepttrade
     Server->>Server: Validate trade not expired
-    Server->>Database: UPDATE fdb_horses SET citizenid = playerB
+    Server->>Database: UPDATE player_horses SET citizenid = playerB
     Server->>Player A: Notify trade success
     Server->>Player B: Notify received horse
 ```
@@ -883,10 +883,10 @@ locale('sv_success_horse_owned')      -- Server
 **Solution:**
 ```lua
 -- Check active horse in database
-SELECT * FROM fdb_horses WHERE citizenid='CITIZEN_ID' AND active=1;
+SELECT * FROM player_horses WHERE citizenid='CITIZEN_ID' AND active=1;
 
 -- Set a horse active
-UPDATE fdb_horses SET active=1 WHERE id=HORSE_ID;
+UPDATE player_horses SET active=1 WHERE id=HORSE_ID;
 ```
 
 #### Components Not Saving
@@ -930,11 +930,11 @@ print(horse) -- Should not be 0
 -- Check horse age
 SELECT name, FROM_UNIXTIME(born) as birth_date, 
        TIMESTAMPDIFF(DAY, FROM_UNIXTIME(born), NOW()) as age_days
-FROM fdb_horses 
+FROM player_horses 
 WHERE citizenid='CITIZEN_ID';
 
 -- Reset age
-UPDATE fdb_horses SET born=UNIX_TIMESTAMP() WHERE id=HORSE_ID;
+UPDATE player_horses SET born=UNIX_TIMESTAMP() WHERE id=HORSE_ID;
 ```
 
 #### Trade Not Working
@@ -960,19 +960,19 @@ Config.Debug = true
 
 ```sql
 -- View all horses
-SELECT * FROM fdb_horses;
+SELECT * FROM player_horses;
 
 -- Find horses by player
-SELECT * FROM fdb_horses WHERE citizenid='ABC123';
+SELECT * FROM player_horses WHERE citizenid='ABC123';
 
 -- Delete old horses
-DELETE FROM fdb_horses WHERE born < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 365 DAY));
+DELETE FROM player_horses WHERE born < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 365 DAY));
 
 -- Reset all horses to level 1
-UPDATE fdb_horses SET horsexp=0;
+UPDATE player_horses SET horsexp=0;
 
 -- Make all horses clean
-UPDATE fdb_horses SET dirt=0;
+UPDATE player_horses SET dirt=0;
 ```
 
 ---
