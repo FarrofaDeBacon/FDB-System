@@ -26,7 +26,6 @@ client_scripts {
     'client/ui/trade_target.lua',
     'client/drops/ui/callbacks.lua',
     'client/main.lua',
-    'client/hotbar_keys.lua',
     'client/drops/loops.lua',
 }
 
@@ -42,15 +41,19 @@ server_scripts {
     'server/shops/events/*.lua',
     'server/commands.lua',
     'server/versionchecker.lua',
-    'server/wipe_equipment_data.lua',
 }
 
-ui_page 'ui/dist/index.html'
+ui_page 'html/index.html'
 
 files {
-    'ui/dist/index.html',
-    'ui/dist/assets/*',
-    'ui/dist/images/*',
+    'html/index.html',
+    'html/main.css',
+    'html/app.js',
+	'html/effects-config.js',
     "shared/*.lua", --- for lib.load
     'locales/*.json',
+    'html/images/*.png',
+	'html/effects/*.png',
+    'html/*.png',
+    'html/assets/*.*',
 }

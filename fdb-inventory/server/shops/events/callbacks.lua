@@ -1,4 +1,5 @@
 local FDBCore = exports['fdb-core']:GetCoreObject()
+local config = require 'shared.config'
 
 -- Rate limiting
 local purchaseCooldowns = {}
@@ -18,6 +19,7 @@ lib.callback.register('fdb-inventory:server:attemptPurchase', function(source, d
     local amount        = math.round(data.amount)
     local shopName      = string.gsub(data.shop, '^shop%-', '')
     local sourceInvType = data.sourceinvtype
+    --local targetSlot    = data.targetslot
 
     -- Prevent non-positive amount
     if amount <= 0 then return false end
@@ -30,6 +32,8 @@ lib.callback.register('fdb-inventory:server:attemptPurchase', function(source, d
 
     local shopInfo = RegisteredShops[shopName]
     if not shopInfo then return false end
+
+	if not checkShopMode(source, data, sourceInvType) then return false end
 
     -- Distance check if shop has coordinates
     if shopInfo.coords then
@@ -68,18 +72,12 @@ lib.callback.register('fdb-inventory:server:attemptPurchase', function(source, d
                 if shopItem.amount then shopItem.amount = shopItem.amount + amount end
                 local buyPrice = shopItem.buyPrice * amount * (realQuality / 100)
                 buyPrice = math.max(0.01, math.round(buyPrice, 2))
-
-                -- Server-side weapon deequip (CheckWeapon) before removing from inventory
-                -- This is authoritative and does not depend on the client receiving any event.
-                -- isMove=true below is kept as a redundant client-side fallback.
-                local itemDef = FDBCore.Shared.Items[itemInfo.name:lower()]
-                if itemDef and itemDef['type'] == 'weapon' then
-                    Inventory.CheckWeapon(source, realItem)
-                end
-                Inventory.RemoveItem(source, itemInfo.name, amount, itemInfo.slot, 'shop-sell', true)
-                Player.Functions.AddMoney('cash', buyPrice, 'shop-sell')
-                TriggerClientEvent('fdb-inventory:client:updateInventory', source)
-                return true
+				
+				Inventory.RemoveItem(source, itemInfo.name, amount, itemInfo.slot, 'shop-sell')
+				Player.Functions.AddMoney('cash', buyPrice, 'shop-sell')
+				--TriggerClientEvent('fdb-inventory:client:updateInventory', source)
+				TriggerClientEvent('fdb-inventory:client:updateShopInventory', source, shopInfo.items)
+				return true
             end
         end
 
@@ -112,7 +110,99 @@ lib.callback.register('fdb-inventory:server:attemptPurchase', function(source, d
     end
 
     Player.Functions.RemoveMoney('cash', price, 'shop-purchase')
+    --Inventory.AddItem(source, itemInfo.name, amount, targetSlot, itemInfo.info, 'shop-purchase')
     Inventory.AddItem(source, itemInfo.name, amount, false, shopSlot.info or {}, 'shop-purchase')
-    TriggerClientEvent('fdb-inventory:client:updateInventory', source)
+    --TriggerClientEvent('fdb-inventory:client:updateInventory', source)
+	TriggerClientEvent('fdb-inventory:client:updateShopInventory', source, shopInfo.items)
     return true
 end)
+
+lib.callback.register('fdb-inventory:server:checkPurchase', function(source, data)
+	local itemInfo 		= data.item
+	local amount        = 1 --проверяем хотябы для 1 единицы
+	local shop 			= string.gsub(data.shop, '^shop%-', '')
+    local sourceInvType = data.sourceinvtype
+    local targetSlot 	= data.targetslot
+	
+	local Player = FDBCore.Functions.GetPlayer(source)
+    if not Player then return false end
+	
+	local shopInfo = RegisteredShops[shop]
+    if not shopInfo then return false end
+	
+	if not checkShopMode(source, data, sourceInvType) then return false end
+	
+	-- Selling items to shop
+	if sourceInvType == 'player' then
+        for slot, shopItem in ipairs(shopInfo.items) do 
+            if itemInfo.name == shopItem.name and shopItem.buyPrice ~= nil then 
+				-- Quality check
+                if itemInfo.info.quality and itemInfo.info.quality < (shopItem.minQuality or 1) then
+					notifyPlayer(source, 'error.quality_too_low') return false
+                end
+				
+				-- Max stock check
+                if shopItem.maxStock and shopItem.maxStock < (shopItem.amount + amount) then
+                    notifyPlayer(source, 'error.shop_fully_stocked') return false
+                end
+
+                if Inventory.HasItem(source, itemInfo.name, amount) then
+                    return true
+                end
+				
+				-- Update shop stock and calculate buy price
+                if shopItem.amount then shopItem.amount = shopItem.amount + amount end
+                local buyPrice = shopItem.buyPrice * amount
+                if itemInfo.info.quality then
+                    buyPrice = buyPrice * (itemInfo.info.quality / 100)
+                end
+                buyPrice = math.round(buyPrice, 2)
+
+                if buyPrice < 0.01 then
+                    notifyPlayer(source, 'error.worthless_item') return false
+                end
+            end
+        end
+
+		notifyPlayer(source, 'error.shop_does_not_buy') return false
+    end
+	--TODO: Надо тут посидеть подумать чтобы если мы продаем в магазин почему не можем продать при перетаскивании.
+	-- Buying items from shop
+    local shopSlot = shopInfo.items[itemInfo.slot]
+    if not shopSlot or shopSlot.name ~= itemInfo.name then return false end
+
+    if shopSlot.amount and amount > shopSlot.amount then
+        notifyPlayer(source, 'error.cannot_purchase_more_than_stock') return false
+    end
+
+    if not Inventory.CanAddItem(source, itemInfo.name, amount) then
+        notifyPlayer(source, 'error.cannot_carry') return false
+    end
+
+    if not shopSlot.price then
+        notifyPlayer(source, 'info.no_price_or_not_for_sale') return false
+    end
+
+    local price = math.round(shopSlot.price * amount, 2)
+    if Player.PlayerData.money.cash < price then
+        notifyPlayer(source, 'error.not_enough_money') return false
+    end
+	
+	return true
+end)
+
+-- 🔹 Проверка режима
+function checkShopMode(source, data, sourceInvType)
+	-- 🔹 Проверка режима
+	if data.shopMode and not config.IgnoreShopCategory then
+		if sourceInvType == "player" and data.shopMode == "buy" then
+			notifyPlayer(source, 'error.shopmodebuy') return false
+		end
+	
+		if sourceInvType == "other" and data.shopMode == "sell" then
+			notifyPlayer(source, 'error.shopmodesell') return false
+		end
+	end
+	
+	return true
+end

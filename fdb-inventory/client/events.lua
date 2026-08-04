@@ -22,4 +22,3 @@ RegisterNetEvent('fdb-inventory:client:giveAnim', function()
     TaskPlayAnim(cache.ped, dict, 'small_fish_give_player', 8.0, 1.0, -1, 16, 0, false, false, false)
     RemoveAnimDict(dict) -- clean up animation dict from memory
 end)
-

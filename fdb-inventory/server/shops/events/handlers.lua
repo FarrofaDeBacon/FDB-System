@@ -1,4 +1,3 @@
-
 AddEventHandler('txAdmin:events:serverShuttingDown', function()
     Shops.SaveItemsInStock()
 end)

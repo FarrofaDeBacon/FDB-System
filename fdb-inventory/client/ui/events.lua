@@ -1,39 +1,8 @@
 -- Toggle the hotbar UI with given items
 local FDBCore = exports['fdb-core']:GetCoreObject()
 
-local function hydrateEquipmentSlots(eqSlots)
-    if type(eqSlots) ~= 'table' then return {} end
-    local hydrated = {}
-    for slot, data in pairs(eqSlots) do
-        if type(data) == 'table' then
-            local itemName = data.itemName or data.name
-            if itemName then
-                local sharedItem = FDBCore.Shared.Items[itemName:lower()]
-                if sharedItem then
-                    local newData = {}
-                    for k, v in pairs(data) do newData[k] = v end
-                    newData.image = sharedItem.image
-                    newData.label = sharedItem.label
-                    newData.inventory = "equipment"
-                    if not newData.name then newData.name = itemName end
-                    if not newData.amount then newData.amount = 1 end
-                    newData.slot = slot
-                    hydrated[slot] = newData
-                else
-                    hydrated[slot] = data
-                end
-            else
-                hydrated[slot] = data
-            end
-        else
-            hydrated[slot] = data
-        end
-    end
-    return hydrated
-end
-
 -- @param items: table of items to display on the hotbar
-RegisterNetEvent('fdb-inventory:client:hotbar', function(items, activeSlots)
+RegisterNetEvent('fdb-inventory:client:hotbar', function(items)
     local token = exports['fdb-core']:GenerateCSRFToken() -- CSRF token for NUI security
     local invToken = GenerateInventoryCbToken()
     LocalPlayer.state.hotbarShown = not LocalPlayer.state.hotbarShown -- toggle state
@@ -41,7 +10,6 @@ RegisterNetEvent('fdb-inventory:client:hotbar', function(items, activeSlots)
         action = 'toggleHotbar',
         open = LocalPlayer.state.hotbarShown,
         items = items,
-        activeSlots = activeSlots,
         token = token,
         invToken = invToken,
     })
@@ -49,7 +17,6 @@ end)
 
 -- Close the inventory UI
 RegisterNetEvent('fdb-inventory:client:closeInv', function()
-    SetNuiFocus(false, false) -- always release cursor on server-forced close
     local invToken = GenerateInventoryCbToken()
     SendNUIMessage({
         action = 'close',
@@ -59,7 +26,6 @@ end)
 
 -- Update the player's inventory UI with current items
 RegisterNetEvent('fdb-inventory:client:updateInventory', function()
-
     local token = exports['fdb-core']:GenerateCSRFToken()
     local invToken = GenerateInventoryCbToken()
     local playerData = FDBCore.Functions.GetPlayerData() -- fetch current player data
@@ -69,7 +35,47 @@ RegisterNetEvent('fdb-inventory:client:updateInventory', function()
         cash = playerData.money.cash,
         token = token,
         invToken = invToken,
-        equipmentSlots = hydrateEquipmentSlots(playerData.metadata and playerData.metadata.equipmentSlots or {})
+    })
+end)
+
+RegisterNetEvent('fdb-inventory:client:updateShopInventory', function(shopItems)
+    local FDBCore = exports['fdb-core']:GetCoreObject()
+    local token = exports['fdb-core']:GenerateCSRFToken()
+    local invToken = GenerateInventoryCbToken()
+    local playerData = FDBCore.Functions.GetPlayerData()
+    local playerItems = playerData.items
+    
+    -- ОПТИМИЗАЦИЯ: Карта цен
+    local shopPriceCache = {}
+    if shopItems then
+        for _, shopItem in pairs(shopItems) do
+            if shopItem and shopItem.name and shopItem.buyPrice then
+                shopPriceCache[shopItem.name] = shopItem.buyPrice
+            end
+        end
+    end
+
+    local EnrichedPlayerItems = {}
+    
+    if playerItems then
+        for _, playerItem in pairs(playerItems) do
+            local newItem = {}
+            for k, v in pairs(playerItem) do newItem[k] = v end
+
+            -- Быстрая подстановка
+            if playerItem.name and shopPriceCache[playerItem.name] then
+                newItem.buyPrice = shopPriceCache[playerItem.name]
+            end
+            
+            table.insert(EnrichedPlayerItems, newItem)
+        end
+    end
+
+    SendNUIMessage({
+        action = 'update',
+        inventory = EnrichedPlayerItems,
+        token = token,
+        invToken = invToken,
     })
 end)
 
@@ -78,22 +84,17 @@ end)
 -- @param type: string, type of update ('add', 'remove', 'info', etc.)
 -- @param amount: number of items affected
 RegisterNetEvent('fdb-inventory:client:ItemBox', function(itemData, type, amount)
-
     local function sendItemBox()
         local invToken = GenerateInventoryCbToken()
-        SendNUIMessage({
-            action = 'itemBox',
-            item = itemData,
-            type = type,
-            amount = amount,
-            labels = buildLabels(),
-            invToken = invToken,
-        })
 
-        -- Update server hotbar if items were added or removed
-        if type == 'remove' or type == 'add' then
-            TriggerServerEvent('fdb-inventory:server:updateHotbar')
-        end
+		SendNUIMessage({
+			action = 'itemBox',
+			item = itemData,
+			type = type,
+			amount = amount,
+			labels = buildLabels(),
+			invToken = invToken,
+		})
     end
 
     -- Throttle item box display to avoid spamming
@@ -117,14 +118,13 @@ end)
 
 -- Update hotbar UI with new items
 -- @param items: table of items to display
-RegisterNetEvent('fdb-inventory:client:updateHotbar', function(items, activeSlots)
-
+RegisterNetEvent('fdb-inventory:client:updateHotbar', function(items)
     local token = exports['fdb-core']:GenerateCSRFToken()
     local invToken = GenerateInventoryCbToken()
+	
     SendNUIMessage({
         action = 'updateHotbar',
         items = items,
-        activeSlots = activeSlots,
         token = token,
         invToken = invToken,
     })
@@ -149,13 +149,13 @@ function buildLabels()
         copy_serial = L('ui.copy_serial', 'Copy Serial'),
         sell    = L('ui.sell', 'Sell'),
         satchel = L('ui.satchel', 'Satchel'),
-        pocket  = L('ui.pocket', 'Pocket'),
         weight  = L('ui.weight', 'Weight'),
         id      = L('ui.id', 'ID'),
         cash    = L('ui.cash', 'Cash'),
         received = L('ui.received', 'Received'),
         used     = L('ui.used', 'Used'),
         removed  = L('ui.removed', 'Removed'),
+		
         trade    = L('ui.trade', 'Trade'),
         your_offer = L('ui.your_offer', 'Your Offer'),
         their_offer = L('ui.their_offer', 'Their Offer'),
@@ -163,94 +163,135 @@ function buildLabels()
         waiting  = L('ui.waiting', 'Waiting for other player...'),
         cancel   = L('ui.cancel', 'Cancel'),
         accepted = L('ui.accepted', 'Accepted'),
-        no_items_offered = L('ui.no_items_offered', 'No items offered')
+        no_items_offered = L('ui.no_items_offered', 'No items offered'),
+		trade_request = L('ui.trade_request', ' wants to trade with you3!'),
+		
+		
+		amount_start = L('ui.amount_start', 'Amount:'),
+		amount_end = L('ui.amount_end', ''),
+		quality = L('ui.quality', 'Quality:'),
+		quality_full = L('ui.quality_full', 'Quality:'),
+		serial = L('ui.serial', 'Serial Number:'),
+		buy_price = L('ui.buy_price', 'Buy Price'),
+		sell_price = L('ui.sell_price', 'Sell Price'),
+		buy = L('ui.buy', 'Buy'),
+		sellable = L('ui.sellable', 'Sellable'),
+		price = L('ui.price', 'Price'),
+		value = L('ui.value', 'Value'),
+		modifications = L('ui.modifications', 'Modifications'),
+		enter_ammount = L('ui.enter_ammount', 'Enter amount'),
+		confirm = L('ui.confirm', 'Confirm'),
+		cancel = L('ui.cancel', 'Cancel'),
+		equipped= L('ui.equipped', 'Equipped'),
+		
+		categories = {
+			all = L('ui.categories.all', 'All'),
+			clothes = L('ui.categories.clothes', 'Clothes'),
+			weapons = L('ui.categories.weapons', 'Weapons'),
+			provision = L('ui.categories.provision', 'Provision'),
+			remedies = L('ui.categories.remedies', 'Remedies'),
+			ingridient = L('ui.categories.ingridient', 'Ingridient'),
+			material = L('ui.categories.material', 'Material'),
+			kit = L('ui.categories.kit', 'Kit'),
+			valuable = L('ui.categories.valuable', 'Valuable'),
+			documents = L('ui.categories.documents', 'Documents'),
+			herbs = L('ui.categories.herbs', 'Herbs'),
+			animals = L('ui.categories.animals', 'Animals'),
+			collections = L('ui.categories.collections', 'Collections'),
+			horse = L('ui.categories.horse', 'Horse'),
+			sell = L('ui.categories.sell', 'Sell'),
+			misc = L('ui.categories.misc', 'Misc'),
+		}
     }
 end
-
-local autoOpenBackpack = false
-local tempBackpackUid = nil
-local tempBackpackModel = nil
 
 -- Open the inventory UI with specified items and optional extra context
 -- @param items: table of inventory items
 -- @param other: optional table with extra info (trunk, stash, etc.)
-RegisterNetEvent('fdb-inventory:client:openInventory', function(items, other, serverSlots)
-    CreateThread(function()
-        local token = exports['fdb-core']:GenerateCSRFToken()
-        local invToken = GenerateInventoryCbToken()
-        local Player = FDBCore.Functions.GetPlayerData()
-        -- Use server-authoritative slot count when provided (overrides stale client cache)
-        if serverSlots then Player.slots = serverSlots end
-        local config = require 'shared.config'
-        local function L(k, d) return locale(k) or d end
-        local labels = buildLabels()
-        SetNuiFocus(true, true) -- focus mouse and keyboard on NUI
-
-        -- Look for backpack in player equipped metadata or temp variables
-        local backpackData = nil
-        local uid = tempBackpackUid
-        local model = tempBackpackModel
-        local isEquipped = (tempBackpackUid == nil)
-
-        if not uid then
-            local PlayerData = FDBCore.Functions.GetPlayerData()
-            local eqBackpack = PlayerData.metadata and PlayerData.metadata.equippedBackpack
-            if eqBackpack and eqBackpack.stashId then
-                uid = eqBackpack.stashId
-                if eqBackpack.itemName == "backpack_large" then model = "p_ambpack01x"
-                elseif eqBackpack.itemName == "backpack_medium" then model = "p_ambpack02x"
-                elseif eqBackpack.itemName == "backpack_small" then model = "p_ambpack05x"
-                elseif eqBackpack.itemName == "backpack_tiny" then model = "p_ambpack04x"
-                elseif string.find(eqBackpack.itemName, "satchel") then model = eqBackpack.itemName
-                end
-            end
-        end
-
-        if uid and model then
-            print(("[fdb-inventory] Fetching backpack stash for uid: %s, model: %s"):format(uid, model))
-            backpackData = lib.callback.await('fdb-inventory:server:getBackpackStash', false, uid, model)
-            if backpackData then
-                backpackData.autoOpen = autoOpenBackpack
-                backpackData.isEquipped = isEquipped
-                print("[fdb-inventory] Backpack stash data retrieved successfully: " .. json.encode(backpackData))
-            else
-                print("[fdb-inventory] WARNING: getBackpackStash returned nil")
-            end
-        else
-            -- print("[fdb-inventory] No uid or model for backpack search. uid: " .. tostring(uid) .. ", model: " .. tostring(model))
-        end
-
-        autoOpenBackpack = false -- reset state
-        tempBackpackUid = nil
-        tempBackpackModel = nil
-
-        print("[fdb-inventory] Sending open NUI message with backpack data presence: " .. tostring(backpackData ~= nil))
-        SendNUIMessage({
-            action    = 'open',
-            inventory = items,
-            slots     = Player.slots,
-            maxweight = Player.weight,
-            playerId  = Player.source or Player.id or Player.citizenid,
-            playerName = (Player.charinfo and Player.charinfo.firstname)
-                and (Player.charinfo.firstname .. ' ' .. Player.charinfo.lastname)
-                or Player.source,
-            other     = other,
-            token     = token,
-            invToken  = invToken,
-            closeKey  = config.Keybinds.Close,
-            cash      = Player.money.cash,
-            labels    = labels,
-            backpack  = backpackData,
-            equipmentSlots = hydrateEquipmentSlots(Player.metadata and Player.metadata.equipmentSlots or {})
-        })
-    end)
+RegisterNetEvent('fdb-inventory:client:openInventory', function(items, other)
+    local token = exports['fdb-core']:GenerateCSRFToken()
+    local invToken = GenerateInventoryCbToken()
+    local Player = FDBCore.Functions.GetPlayerData()
+    local config = require 'shared.config'
+    local function L(k, d) return locale(k) or d end
+    local labels = buildLabels()
+    SetNuiFocus(true, true) -- focus mouse and keyboard on NUI
+	
+    SendNUIMessage({
+        action     = 'open',
+		categories = config.categories,
+        inventory  = items,
+        slots      = Player.slots,      -- max inventory slots
+        maxweight  = Player.weight,     -- max inventory weight
+        playerId   = Player.source or Player.id or Player.citizenid, -- unique player identifier
+        playerName = (Player.charinfo and Player.charinfo.firstname)
+            and (Player.charinfo.firstname .. ' ' .. Player.charinfo.lastname)
+            or Player.source,
+        other      = other,             -- context, e.g., trunk inventory
+        token      = token,
+        invToken   = invToken,
+        closeKey   = config.Keybinds.Close,
+        cash       = Player.money.cash,         -- player's money
+        labels     = labels,		
+    })
 end)
 
-RegisterNetEvent("fdb-inventory:client:openBackpackDrawer")
-AddEventHandler("fdb-inventory:client:openBackpackDrawer", function(backpackUid, backpackModel)
-    print(("[fdb-inventory] openBackpackDrawer event triggered. backpackUid: %s, backpackModel: %s"):format(tostring(backpackUid), tostring(backpackModel)))
-    autoOpenBackpack = true
-    tempBackpackUid = backpackUid
-    tempBackpackModel = backpackModel
-    ExecuteCommand("inventory")
+
+
+
+
+
+local function openInventoryNUI(items, payload)
+    local token  = exports['fdb-core']:GenerateCSRFToken()
+    local invToken = GenerateInventoryCbToken()
+    local Player = FDBCore.Functions.GetPlayerData()
+    local config = require 'shared.config'
+    local labels = buildLabels()
+
+    SetNuiFocus(true, true)
+
+    local data = {
+        action     = 'open',
+        categories = config.categories,
+        inventory  = items,
+        slots      = Player.slots,
+        maxweight  = Player.weight,
+        playerId   = Player.source or Player.id or Player.citizenid,
+        playerName = (Player.charinfo and Player.charinfo.firstname)
+            and (Player.charinfo.firstname .. ' ' .. Player.charinfo.lastname)
+            or Player.source,
+        token      = token,
+        invToken  = invToken,
+        closeKey   = config.Keybinds.Close,
+        cash       = Player.money.cash,
+        labels     = labels,
+    }
+
+    -- 👇 добавляем ТОЛЬКО нужный контекст
+    for k, v in pairs(payload or {}) do
+        data[k] = v
+    end
+
+    SendNUIMessage(data)
+end
+--[[
+RegisterNetEvent('fdb-inventory:client:openInventory', function(items, other)
+    openInventoryNUI(items, { other = other })
+end)
+
+RegisterNetEvent('fdb-inventory:client:openTradeInventory', function(items, trade)
+    openInventoryNUI(items, { trade = trade })
+end)
+--]]
+
+------------------------------------------------
+-- on money change
+------------------------------------------------
+RegisterNetEvent('hud:client:OnMoneyChange', function(type, amount, isMinus)
+	local Player = FDBCore.Functions.GetPlayerData()
+    
+	SendNUIMessage({
+        action = 'updateMoney',
+        cash      = Player.money.cash,         -- player's money
+    })
 end)

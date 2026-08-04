@@ -92,6 +92,13 @@ RegisterNUICallback('AttemptPurchase', function(data, cb)
     cb(ok)
 end)
 
+--- NUI callback to check a purchase
+RegisterNUICallback('CheckPurchase', function(data, cb)
+    if not validateToken(data and data.token) then cb(false) return end
+    local ok = lib.callback.await('fdb-inventory:server:checkPurchase', false, data)
+    cb(ok)
+end)
+
 --- NUI callback to close the inventory
 RegisterNUICallback('CloseInventory', function(data, cb)
     if not validateToken(data and data.token) then cb('ok') return end
@@ -104,20 +111,7 @@ RegisterNUICallback('CloseInventory', function(data, cb)
     elseif LocalPlayer.state.currentDrop then
         TriggerServerEvent('fdb-inventory:server:closeInventory', LocalPlayer.state.currentDrop)
         LocalPlayer.state.currentDrop = nil
-    else
-        -- Player closed their own pocket inventory — reset inv_busy on server
-        TriggerServerEvent('fdb-inventory:server:releaseBusy')
     end
-    cb('ok')
-end)
-
---- NUI callback to unequip backpack
-RegisterNUICallback('unequipBackpack', function(data, cb)
-    if not validateToken(data and data.token) then cb('ok') return end
-    -- Fecha o inventário imediatamente
-    SetNuiFocus(false, false)
-    SendNUIMessage({ action = 'close', invToken = _G.GenerateInventoryCbToken() })
-    TriggerServerEvent("fdb-backpacks:server:unequipBackpack")
     cb('ok')
 end)
 
@@ -132,17 +126,14 @@ end)
 
 --- NUI callback to move items between inventories
 RegisterNUICallback('SetInventoryData', function(data, cb)
-    if not validateToken(data and data.token) then cb({success = false}) return end
+    if not validateToken(data and data.token) then cb('ok') return end
     if data then
-        local success, reason = lib.callback.await('fdb-inventory:server:SetInventoryData', false,
+        TriggerServerEvent('fdb-inventory:server:SetInventoryData',
             data.fromInventory, data.toInventory,
             data.fromSlot, data.toSlot,
-            data.fromAmount, data.toAmount
-        )
-        cb({success = success, reason = reason})
-    else
-        cb({success = false})
+            data.fromAmount, data.toAmount)
     end
+    cb('ok')
 end)
 
 --- NUI callback to give an item to another player
@@ -170,7 +161,7 @@ RegisterNUICallback('GiveItem', function(data, cb)
         if pid ~= -1 and dist < 3.0 then
             local targetSid = GetPlayerServerId(pid)
             local success = lib.callback.await('fdb-inventory:server:giveItem', false,
-                targetSid, data.item.name, data.amount, data.slot, data.info, data.fromInventory
+                targetSid, data.item.name, data.amount, data.slot, data.info
             )
             cb(success)
         else
@@ -190,7 +181,7 @@ RegisterNUICallback('GiveItem', function(data, cb)
         local pid, dist = GetClosestPlayerWithin(3.0)
         if pid ~= -1 and dist < 3.0 and GetPlayerServerId(pid) == typedSid then
             local success = lib.callback.await('fdb-inventory:server:giveItem', false,
-                typedSid, data.item.name, data.amount, data.slot, data.info, data.fromInventory
+                typedSid, data.item.name, data.amount, data.slot, data.info
             )
             cb(success)
         else
@@ -216,7 +207,7 @@ RegisterNUICallback('GiveItem', function(data, cb)
         local dist = #(GetEntityCoords(GetPlayerPed(selectedPid)) - GetEntityCoords(cache.ped))
         if dist < 3.0 then
             local success = lib.callback.await('fdb-inventory:server:giveItem', false,
-                selectedSid, data.item.name, data.amount, data.slot, data.info, data.fromInventory
+                selectedSid, data.item.name, data.amount, data.slot, data.info
             )
             cb(success)
         else
@@ -241,39 +232,62 @@ RegisterNUICallback('GiveItemAmount', function(data, cb)
     end
 end)
 
-RegisterNUICallback('GetBackpackStashData', function(data, cb)
-    if not validateToken(data and data.token) then cb(false) return end
-    if data and data.uid then
-        local model = data.model or "p_ambpack02x"
-        local backpackData = lib.callback.await('fdb-inventory:server:getBackpackStash', false, data.uid, model)
-        cb(backpackData)
-    else
-        cb(false)
-    end
+-- =====================================================
+-- NUI CALLBACK: Вопроизведение звуков
+-- =====================================================
+RegisterNUICallback('playSound', function(data, cb)
+    local soundSet = data.soundSet or "HUD_SHOP_SOUNDSET"
+    local soundName = data.soundName or "INFO"
+	
+	if not Citizen.InvokeNative(0x714A0EA7DE1167BE, soundName, soundSet) then --HasSoundAudioNameFinished
+		Citizen.InvokeNative(0x0F2A2175734926D8, soundName, soundSet) --StopSoundWithName
+	end
+    -- Вызов натива для проигрывания звука
+    -- 0x67C540AA08E4A6F5 (PlaySoundFrontend)
+    Citizen.InvokeNative(0x67C540AA08E4A6F5, soundName, soundSet, true, 0)
+    
+    cb('ok')
 end)
 
-RegisterNUICallback('EquipItem', function(data, cb)
-    if not validateToken(data and data.token) then cb(false) return end
-    TriggerServerEvent('fdb-inventory:server:EquipItem', data.slot, data.equipmentType)
-    cb(true)
+--[[ RegisterNUICallback('GetWeaponData', function(cData, cb)
+    local data = {
+        WeaponData = FDBCore.Shared.Items[cData.weapon],
+        AttachmentData = Inventory.FormatWeaponAttachments(cData.ItemData),
+    }
+    cb(data)
 end)
 
-RegisterNUICallback('UnequipItem', function(data, cb)
-    if not validateToken(data and data.token) then cb(false) return end
-    TriggerServerEvent('fdb-inventory:server:UnequipItem', data.equipmentType, data.slot)
-    cb(true)
-end)
-
-RegisterNUICallback('DropEquipmentItem', function(data, cb)
-    if not validateToken(data and data.token) then cb(false) return end
-    -- Close inventory immediately so cursor disappears and player can move
-    SetNuiFocus(false, false)
-    SendNUIMessage({ action = 'close', invToken = _G.GenerateInventoryCbToken() })
-    TriggerServerEvent('fdb-inventory:server:DropEquipmentItem', data.equipmentType)
-    cb(true)
-end)
-
-RegisterNUICallback('LogDebug', function(data, cb)
-    print("^3[NUI JS LOG] " .. tostring(data.msg) .. "^0")
-    cb(true)
-end)
+RegisterNUICallback('RemoveAttachment', function(data, cb)
+    local ped = PlayerPedId()
+    local WeaponData = data.WeaponData
+    local allAttachments = exports['fdb-weapons']:getConfigWeaponAttachments()
+    local Attachment = allAttachments[data.AttachmentData.attachment][WeaponData.name]
+    local itemInfo = FDBCore.Shared.Items[data.AttachmentData.attachment]
+    FDBCore.Functions.TriggerCallback('fdb-weapons:server:RemoveAttachment', function(NewAttachments)
+        if NewAttachments ~= false then
+            local Attachies = {}
+            RemoveWeaponComponentFromPed(ped, joaat(WeaponData.name), joaat(Attachment))
+            for _, v in pairs(NewAttachments) do
+                for attachmentType, weapons in pairs(allAttachments) do
+                    local componentHash = weapons[WeaponData.name]
+                    if componentHash and v.component == componentHash then
+                        local label = itemInfo and itemInfo.label or 'Unknown'
+                        Attachies[#Attachies + 1] = {
+                            attachment = attachmentType,
+                            label = label,
+                        }
+                    end
+                end
+            end
+            local DJATA = {
+                Attachments = Attachies,
+                WeaponData = WeaponData,
+                itemInfo = itemInfo,
+            }
+            cb(DJATA)
+        else
+            RemoveWeaponComponentFromPed(ped, joaat(WeaponData.name), joaat(Attachment))
+            cb({})
+        end
+    end, data.AttachmentData, WeaponData)
+end) ]]

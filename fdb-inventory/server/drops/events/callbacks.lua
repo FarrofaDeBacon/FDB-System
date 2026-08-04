@@ -28,57 +28,34 @@ local function CreateItemDrop(coords, itemData, shouldRemoveFromInventory, sourc
 
     -- Remove item from inventory only after confirming the drop entity exists
     if shouldRemoveFromInventory and source then
-        local fromInv = itemData.fromInventory
-        if fromInv and fromInv ~= 'player' then
-            -- Item is from a stash (bolsa/mochila)
-            realItem = Inventory.GetItem(fromInv, source, itemData.fromSlot)
-            if not realItem or realItem.name:lower() ~= itemData.name:lower() or realItem.amount < itemData.amount then
-                DeleteEntity(bag)
-                return false
-            end
-
-            itemData.name   = realItem.name
-            itemData.amount = itemData.amount
-            itemData.info   = realItem.info or {}
-            itemData.type   = realItem.type
-            itemData.label  = realItem.label
-            itemData.weight = realItem.weight
-
-            local fromId = Inventory.GetIdentifier(fromInv, source)
-            if not Inventory.RemoveItem(fromId, realItem.name, itemData.amount, itemData.fromSlot, 'dropped item from stash', false) then
-                DeleteEntity(bag)
-                return false
-            end
-        else
-            -- Fetch the real item server-side by slot (don't trust client metadata)
-            realItem = Inventory.GetItemBySlot(source, itemData.fromSlot)
-            if not realItem or realItem.name:lower() ~= itemData.name:lower() or realItem.amount < itemData.amount then
-                DeleteEntity(bag)
-                return false
-            end
-
-            -- Use server-side item data for the drop payload
-            itemData.name   = realItem.name
-            itemData.amount = itemData.amount
-            itemData.info   = realItem.info or {}
-            itemData.type   = realItem.type
-            itemData.label  = realItem.label
-            itemData.weight = realItem.weight
-
-            local isMove = realItem.type == 'weapon'
-            if isMove then
-                Inventory.CheckWeapon(source, itemData)
-            end
-
-            if not Inventory.RemoveItem(source, realItem.name, itemData.amount, itemData.fromSlot, 'dropped item', isMove) then
-                DeleteEntity(bag)
-                return false
-            end
-
-            -- Play pickup animation
-            local playerPed = GetPlayerPed(source)
-            TaskPlayAnim(playerPed, 'pickup_object', 'pickup_low', 8.0, -8.0, 2000, 0, 0, false, false, false)
+        -- Fetch the real item server-side by slot (don't trust client metadata)
+        local realItem = Inventory.GetItemBySlot(source, itemData.fromSlot)
+        if not realItem or realItem.name:lower() ~= itemData.name:lower() or realItem.amount < itemData.amount then
+            DeleteEntity(bag)
+            return false
         end
+
+        -- Use server-side item data for the drop payload
+        itemData.name   = realItem.name
+        itemData.amount = itemData.amount
+        itemData.info   = realItem.info or {}
+        itemData.type   = realItem.type
+        itemData.label  = realItem.label
+        itemData.weight = realItem.weight
+
+        local isMove = realItem.type == 'weapon'
+        if isMove then
+            Inventory.CheckWeapon(source, itemData)
+        end
+
+        if not Inventory.RemoveItem(source, realItem.name, itemData.amount, itemData.fromSlot, 'dropped item', isMove) then
+            DeleteEntity(bag)
+            return false
+        end
+
+        -- Play pickup animation
+        local playerPed = GetPlayerPed(source)
+        TaskPlayAnim(playerPed, 'pickup_object', 'pickup_low', 8.0, -8.0, 2000, 0, 0, false, false, false)
     end
 
     -- Get network ID and create drop ID

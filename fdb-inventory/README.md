@@ -14,21 +14,21 @@
 ---
 
 ## 🛠️ Dependencies
-Make sure these resources are running before starting **fdb-inventory**:
+Make sure these resources are running before starting **rsg-inventory**:
 
 - [**ox_lib**](https://github.com/Rexshack-RedM/ox_lib) ⚙️  
 - [**ox_target**](https://github.com/Rexshack-RedM/ox_target) 👁️  
-- [**fdb-core**](https://github.com/Rexshack-RedM/fdb-core) 🤠  
-- [**fdb-weapons**](https://github.com/Rexshack-RedM/fdb-weapons) 🔫
+- [**rsg-core**](https://github.com/Rexshack-RedM/rsg-core) 🤠  
+- [**rsg-weapons**](https://github.com/Rexshack-RedM/rsg-weapons) 🔫
 
 ---
 
 ## ✨ Features
 - 🗄 **Stashes** — Personal and/or shared  
 - 🐎 **Vehicle Trunk & Glovebox** — Includes optional horse saddlebag support  
-- 🏪 **Shops** — Works great with [**fdb-shops**](https://github.com/Rexshack-RedM/fdb-shops) 🥐  
+- 🏪 **Shops** — Works great with [**rsg-shops**](https://github.com/Rexshack-RedM/rsg-shops) 🥐  
 - 🎒 **Item Drops** — Physical objects in the world  
-- 🔁 **Player Trading** — Right-click a player to send a trade request; secure item exchange with escrow system and full rollback on cancel/disconnect  
+- 🔁 **Player Trading** — Right-click a player to send a trade request; secure item exchange with escrow system and full rollback on cancel/disconnect
 - ⚖ **Configurable Limits** — Stash, and drop sizes  
 - 🚫 **Hotbar Spam Protection** — Adjustable timers and notifications  
 
@@ -56,14 +56,14 @@ return {
 
 ## 📂 Installation
 1. **Download** this resource and place it in your `resources` folder  
-2. **Install** and start `ox_lib` and `fdb-core` and  `fdb-shops` 
-3. Add `ensure fdb-inventory` to your `server.cfg`  
+2. **Install** and start `ox_lib` and `rsg-core` and  `rsg-shops` 
+3. Add `ensure rsg-inventory` to your `server.cfg`  
 4. Edit `shared/config.lua` to fit your server’s needs
 
 ```lua
 --- NOTES
 
---- player inventory max weight and slots are configured in fdb-core\config.lua (RSGConfig.Player.PlayerDefaults)
+--- player inventory max weight and slots are configured in rsg-core\config.lua (RSGConfig.Player.PlayerDefaults)
 --- if inventory items should decay at modified rate, add decay{PERCENTAGE} to stash name (i.e.: basement69-decay30, freezer111_decay0, composter333decay5000)
 ```
 ---
