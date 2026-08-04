@@ -58,5 +58,11 @@ return {
     name = "FRP Core",
     folder = "frp_core",
     matchResources = { "frp_core" }
+  },
+  {
+    id = "fdb",
+    name = "FDB System Core",
+    folder = "fdb-core",
+    matchResources = { "fdb-core" }
   }
 }

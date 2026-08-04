@@ -70,5 +70,11 @@ return {
     name = "GM Inventory",
     folder = "gm_inventory",
     matchResources = { "gm_inventory" }
+  },
+  {
+    id = "fdb",
+    name = "FDB Inventory",
+    folder = "fdb-inventory",
+    matchResources = { "fdb-inventory" }
   }
 }
