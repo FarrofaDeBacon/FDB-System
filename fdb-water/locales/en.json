@@ -1,0 +1,9 @@
+{
+  "cl_lang_1": "Empty",
+  "cl_lang_2": "You need to be in clean water to fill this.",
+  "prompt_bath": "Take a Bath ($%s)",
+  "prompt_scrub": "Scrub",
+  "prompt_leave": "Leave",
+  "notify_not_enough_money": "Not enough money.",
+  "notify_occupied": "This bath is already occupied."
+}

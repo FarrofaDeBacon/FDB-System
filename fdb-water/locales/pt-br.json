@@ -1,0 +1,9 @@
+{
+  "cl_lang_1": "Vazio",
+  "cl_lang_2": "Você precisa estar na água para encher isto.",
+  "prompt_bath": "Tomar Banho ($%s)",
+  "prompt_scrub": "Esfregar",
+  "prompt_leave": "Sair",
+  "notify_not_enough_money": "Dinheiro insuficiente.",
+  "notify_occupied": "Esta banheira já está ocupada."
+}

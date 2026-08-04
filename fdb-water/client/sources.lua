@@ -1,0 +1,2 @@
+-- Placeholder for shared water sources logic (rivers, lakes, etc)
+-- Will be expanded in Fase 2
