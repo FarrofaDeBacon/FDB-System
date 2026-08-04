@@ -11,5 +11,6 @@ RegisterCommand('jotest', function()
             print("Slider mudou pra:", currentData.item.sliders[1].value)
         end
     })
-    menu:open()
+    jo.menu.setCurrentMenu("jotest_menu")
+    jo.menu.show(true)
 end, false)
