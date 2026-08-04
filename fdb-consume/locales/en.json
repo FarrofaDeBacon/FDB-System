@@ -1,0 +1,11 @@
+{
+  "prompt_bite": "Take a Bite",
+  "prompt_drop": "Drop Item",
+  "prompt_chug": "Chug All",
+  "prompt_change_pose": "Change Pose",
+  "prompt_drink": "Drink",
+  "notify_busy": "You are already doing something!",
+  "notify_smoke_finished": "You smoked it all.",
+  "notify_drink_finished": "You drank it all.",
+  "notify_food_finished": "You ate it all."
+}

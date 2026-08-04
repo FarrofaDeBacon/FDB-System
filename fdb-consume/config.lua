@@ -1,121 +1,39 @@
-return {
+Config = {}
+lib.locale()
 
-    Consumables = {
-        Eat = { -- default food items
-            ['bread'] = {
-                item = 'bread',
-                hunger = 25,
-                thirst = 0,
-                stress = 5,
-                propname = 'p_bread_14_ab_s_a',
-                poison = 15,
-                poisonRate = 0.4,
-            },
-        },
-        Drink = { -- default drink items
-            ['water'] = {
-                item = 'water',
-                hunger = 0,
-                thirst = 25,
-                stress = 5,
-                alcohol = -5,
-                propname = 'p_bottlebeer01a'
-            },
-            ['beer'] = {
-                item = 'beer',
-                hunger = -3,
-                thirst = 0,
-                stress = -10,
-                alcohol = 25,
-                propname = 'p_bottlebeer01a'
-            },
-        },
-        Stew = { -- default stew items
-            ['stew'] = {
-                item = 'stew',
-                hunger = 50,
-                thirst = 25,
-                stress = 20,
-                alcohol = -10,
-                propname = 'p_bowl04x_stew'
-            },
-        },
-        Hotdrinks = { -- default hot drink items
-            ['coffee'] = {
-                item = 'coffee',
-                hunger = 0,
-                thirst = 25,
-                stress = 20,
-                alcohol = -15,
-                -- Fixed: Added a propname for the coffee item
-                propname = 'p_mug01_coffee'
-            },
-        },
-        Eatcanned = { -- canned food items
-            ['canned_apricots'] = {
-                item = 'canned_apricots',
-                hunger = 50,
-                thirst = 20,
-                stress = 10,
-                alcohol = -3,
-                propname = 's_canrigapricots01x',
-            },
-        },
-    },
+Config.Drop = locale('prompt_drop')
+Config.Smoke = locale('prompt_bite')
+Config.Chug = locale('prompt_chug')
+Config.Change = locale('prompt_change_pose')
 
-    -- AlcoholSystem Configuration
-    AlcoholSystem = {
-        DrunkThreshold = 50,      -- Threshold to be considered drunk
-        PassOutThreshold = 200,   -- Threshold to pass out
-        WakeUpLevel = 55,         -- Alcohol level upon waking up (just below the drunk threshold)
-        DecreaseAmount = 1,       -- Points removed per cycle
-        DecreaseInterval = 5000,  -- Decrement interval (in ms)
-        MaxAlcoholLevel = 500,    -- Maximum alcohol level (safety)
-    },
-
-    AlcoholEffects = {
-        -- Visual Effects Configuration
-        DrunkEffect = true,                      -- Enable or disable the drunk post-fx effect
-        DrunkEffectName = "PlayerDrunk01",       -- The name of the visual effect for being drunk
-        PassOutEffect = "PlayerDrunk01_PassOut", -- The name of the visual effect for passing out
-        WakeUpEffect = "PlayerWakeUpDrunk",      -- The name of the visual effect for waking up
-        GroggyEffectName = "PlayerHealthPoorCS", -- The visual effect for the hangover/groggy state
-
-        -- Timings & Durations (in milliseconds)
-        GroggyDuration = 15000,                  -- How long the hangover state lasts after waking up (ms)
-        VomitDuration = 10000,                   -- How long the vomit animation plays (ms)
-        SleepDuration = 20000,                   -- How long the character sleeps on the ground (ms)
-        FadeOutDuration = 10000,                 -- Duration of the screen fading to black (ms)
-        FadeInDuration = 10000,                  -- Duration of the screen fading back in (ms)
-
-        -- Notifications (Translated to English)
-        DrunkNotification = {
-            title = '🍺 Drunk',
-            description = 'You start feeling tipsy...',
-            type = 'inform',
-            duration = 3000,
-            position = 'top-right'
-        },
-        PassOutNotification = {
-            title = '💀 Feeling Unwell',
-            description = 'You don’t feel so good...',
-            type = 'error',
-            duration = 5000,
-            position = 'top-right'
-        },
-        WakeUpNotification = {
-            title = '🤕 Rough Awakening',
-            description = 'You wake up with a terrible headache...',
-            type = 'inform',
-            duration = 5000,
-            position = 'top-right'
-        },
-        SoberNotification = {
-            title = '✨ Recovered',
-            description = 'You feel clear-headed again.',
-            type = 'success',
-            duration = 2000,
-            position = 'top-right'
-        }
-    }
+Config.Prompts = {
+    DropKey = 0x27D1C284, -- R
+    SmokeKey = 0x07CE1E61, -- Clique Botão Esquerdo do Mouse
+    ChugKey = 0xF84FA74F,  -- Clique Botão Direito do Mouse (INPUT_INTERACT_LOCKON_POS / RIGHT MOUSE)
+    ChangeKey = 0xCC1075A7 -- Roda do Mouse para Baixo
 }
+
+-- Animações Padrão
+Config.Animations = {
+    Eat = { dict = "mech_inventory@eating@multi_bite@sphere_d8-2_sandwich", name = "quick_right_hand", prop = "s_inv_bread01x", time = 5000, uses = 3 },
+    Drink = { dict = "mech_inventory@drinking@bottle_cylinder_d1-3_h30-5_neck_a13_b2-5", name = "chug_a", prop = "p_bottleBeer01x", time = 5000, uses = 3 },
+    Stew = { dict = "mech_inventory@eating@multi_bite@stew", name = "quick_inv_eat_stew", prop = "p_bowl04x_stew", time = 8000, uses = 1 },
+    Coffee = { dict = "", name = "", prop = "p_mug01_coffee", time = 5000, uses = 3 }, -- Coffee usa Native Invoke
+    Canned = { dict = "mech_inventory@eating@canned_food@cylinder@d8-2_h10-5", name = "right_hand", prop = "s_canrigapricots01x", time = 8000, uses = 3 },
+    Medical = { dict = "mech_inventory@drinking@bottle_cylinder_d1-3_h30-5_neck_a13_b2-5", name = "chug_a", prop = "p_bottlejd01x", time = 4000, uses = 1 },
+    Drug = { dict = "mech_inventory@drinking@bottle_cylinder_d1-3_h30-5_neck_a13_b2-5", name = "chug_a", prop = "p_cs_bottle_moonshine", time = 4000, uses = 1 },
+    Smoke = { dict = "amb_rest@world_human_smoke_cigar@male_a@idle_a", name = "idle_a", prop = "p_cigar01x", time = 8000, uses = 999 }
+}
+
+-- Itens Consumíveis e seus Efeitos
+Config.Items = {}
+
+function Config.AddItems(newItems)
+    print("^3[fdb-consume] Config.AddItems chamado!^7")
+    local count = 0
+    for k, v in pairs(newItems) do
+        Config.Items[k] = v
+        count = count + 1
+    end
+    print("^3[fdb-consume] Adicionados " .. count .. " itens ao Config.Items^7")
+end

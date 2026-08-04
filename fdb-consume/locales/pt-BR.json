@@ -1,0 +1,11 @@
+{
+  "prompt_bite": "Dar Mordida",
+  "prompt_drop": "Jogar Fora",
+  "prompt_chug": "Beber Tudo de uma Vez",
+  "prompt_change_pose": "Mudar Pose",
+  "prompt_drink": "Beber",
+  "notify_busy": "Você já está fazendo algo!",
+  "notify_smoke_finished": "Você fumou até o fim.",
+  "notify_drink_finished": "Você bebeu tudo.",
+  "notify_food_finished": "Você comeu tudo."
+}
