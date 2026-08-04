@@ -82,6 +82,33 @@ RegisterCommand("mijar", function()
         return
     end
     
+    local coords = GetEntityCoords(ped)
+
+    -- 1. Regra de Etiqueta (RP): Não mijar na frente de damas
+    -- Nota: Verificamos se o próprio jogador é homem antes de aplicar a regra?
+    -- Se for mulher, a animação de mijar em pé nem faz sentido, mas vamos assumir que o sistema permite.
+    local players = GetActivePlayers()
+    for _, player in ipairs(players) do
+        local targetPed = GetPlayerPed(player)
+        if targetPed ~= ped then
+            local dist = #(coords - GetEntityCoords(targetPed))
+            if dist < 15.0 then
+                if GetEntityModel(targetPed) == `mp_female` then
+                    exports['ox_lib']:notify({ title = 'Indecência', description = 'Você não pode fazer isso na frente de uma dama!', type = 'error', duration = 5000 })
+                    return
+                end
+            end
+        end
+    end
+
+    -- 2. Regra de Civilidade: Não mijar nas cidades
+    -- 0x43AD8FC02B429D33 = GetTownName(hash)
+    local townHash = Citizen.InvokeNative(0x43AD8FC02B429D33, coords, 1)
+    if townHash ~= false and townHash ~= 0 then
+        exports['ox_lib']:notify({ title = 'Multa Evitada', description = 'Encontre um lugar mais discreto fora da cidade para se aliviar.', type = 'error', duration = 5000 })
+        return
+    end
+    
     ClearPedTasks(ped)
     TaskStartScenarioInPlace(ped, joaat('WORLD_HUMAN_PEE'), -1, true, false, false, false)
     Wait(4000)
