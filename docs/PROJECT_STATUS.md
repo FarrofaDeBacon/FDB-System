@@ -30,9 +30,14 @@ Durante a renomeação global (substituindo textos de `rsg` para `fdb` via Power
   - O usuário relatou que a interface do `fdb-multicharacter` continuava "sem fundo". Foi descoberto que as texturas de papel, pergaminho e enfeites (`inkroller_1a.png`, `menu_header_1a.png`, etc.) dentro da pasta `html/assets/` também haviam sido corrompidas pelo script de texto agressivo.
   - **Solução:** Baixamos a pasta `assets` intacta do repositório original do `rsg-multicharacter`, enviamos para o GitHub, e injetamos as imagens restauradas diretamente no servidor em tempo real, corrigindo completamente o visual.
 
-## 4. Próximos Passos (Para Análise do Claude)
-- **Validação de Interface Completa:** Garantir que todos os outros scripts que possuem NUI (como `fdb-inventory`, `fdb-hud`, `fdb-banking`, etc.) não tiveram suas imagens, ícones ou fontes corrompidos durante o processo de conversão global. (Pode ser necessário restaurar pastas `html/img` ou `html/assets` desses recursos).
+## 4. Próximos Passos (Integração do Ecossistema Customizado)
+- **Integração do `fdb-survival` e `fdb-consume`:** (PRIORIDADE) Os módulos avançados de sobrevivência, consumo e sistema médico que criamos anteriormente ainda NÃO estão neste repositório. O próximo grande passo é trazer esse ecossistema customizado para dentro da base e fazê-los se comunicar perfeitamente com o `fdb-core` que acabamos de auditar e corrigir.
+- **Validação de Interface Completa:** Garantir que todos os outros scripts que possuem NUI (como `fdb-inventory`, `fdb-hud`, `fdb-banking`, etc.) não tiveram suas imagens, ícones ou fontes corrompidos durante o processo de conversão global.
 - **Estabilidade do `fdb-horses`:** Agora que a coluna `metadata` existe e o script aponta para a tabela `player_horses`, precisamos testar a funcionalidade in-game: o sistema de metabolismo e a criação de cavalos iniciais.
-- **Sistema Médico e Inventário:** Retomar a adaptação e desenvolvimento dos módulos vitais (como itens usáveis, cura e efeitos visuais) para que funcionem perfeitamente dentro do ecossistema e namespace `fdb`.
 
-> **Nota para o Claude:** Estamos com o ambiente de testes principal rodando na máquina local (`D:\SERVIDOR\server`), utilizando um banco de dados MySQL chamado `fdb`. Todas as modificações estruturais que estabilizam os scripts estão sendo registradas via Git no branch `fix/companion-inventory-audit` do repositório principal `FDB-System`.
+> **ATENÇÃO - Nota Importante para o Claude:** 
+> Lembre-se que o repositório `FDB-System` atual contém, em sua imensa maioria, apenas recursos originais do RSG que foram **renomeados**. O ÚNICO recurso que foi profundamente modificado, estruturado e auditado até agora foi o `fdb-core` (que serviu como nosso ponto de partida).
+> 
+> O objetivo de todo esse esforço inicial (renomear tudo, corrigir fontes/NUIs, consertar banco de dados) foi **criar uma receita txAdmin que funcione do zero e faça a base ligar com estabilidade**. 
+> 
+> Agora que a base liga e funciona perfeitamente, o nosso foco principal é **incluir o ecossistema customizado (`fdb-survival`, `fdb-consume`, sistema médico) fazendo com que eles falem nativamente com o `fdb-core` corrigido.** Estamos com o ambiente de testes principal rodando na máquina local (`D:\SERVIDOR\server`).
