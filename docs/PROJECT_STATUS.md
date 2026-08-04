@@ -32,21 +32,29 @@ Durante a renomeação global (substituindo textos de `rsg` para `fdb` via Power
 
 ## 5. Integração do Ecossistema Customizado e Migração
 
-Nesta nova fase (04/08/2026), iniciamos a integração da base visual e estrutural que vai dar suporte ao sistema médico avançado. 
+Nesta nova fase (04/08/2026), iniciamos a integração da base visual e estrutural que vai dar suporte ao sistema médico avançado.
 
-### 5.1 O Que Já Foi Feito (Fase 1 + Correções Emergenciais)
-- ✅ **Inventário (`fdb-inventory`):** Substituído pela versão imaculada da source original (`STEEL`). A versão anterior estava com imagens corrompidas e arquivos Javascript deletados devido a um script de renomeação agressivo. Renomeamos as variáveis e dependências de forma cirúrgica, blindando os binários e arquivos web, além de fixarmos um bug crítico no `GetFDBPlayers`.
-- ✅ **Mochilas (`fdb-backpacks`):** Adicionado ao ecossistema para resolver um gargalo do inventário que causava congelamento da interface quando tentava se conectar a esse recurso faltante.
+### 5.1 O Que Já Foi Feito (Fase 1, 2A e 2B Concluídas)
 - ✅ **Infraestrutura Transversal (`fdb-configui`):** Adicionado com sucesso. Este é o motor de KVP genérico que o ecossistema precisa. 
-- ✅ **Permissões Base (`server.cfg`):** As permissões do Core foram devidamente renomeadas de `rsgcore.*` para `fdbcore.*` no servidor ao vivo, permitindo que administradores tenham acesso ao painel do `configui` in-game, e incluindo também os comandos de debug do sistema médico (`/addtreatment`, `/forceinfection`, etc.).
+- ✅ **Inventário & Mochilas (`fdb-inventory` / `fdb-backpacks`):** Restaurados pela versão imaculada da source original (`STEEL`). Bug crítico de `GetFDBPlayers` resolvido.
+- ✅ **Fundação Visual (`fdb-hudpremium`):** O antigo `fdb-hud` foi deletado do repositório e completamente substituído pelo novo `fdb-hudpremium`. O frontend construído em Vite+Svelte foi compilado com sucesso e os assets gerados para `ui/dist/`.
+- ✅ **Fundações de Consumo (`fdb-consume`):** A versão "stock" provisória foi deletada. Adicionamos a build real completa de 2.184 linhas (20 arquivos), com todas as referências residuais de `rsg` higienizadas.
+- ✅ **Sobrevivência (`fdb-survival`):** Migrado e injetado **antes** do sistema médico, por decisão arquitetural. Este é o Maestro que orquestra fome, sede, higiene e temperatura, enviando esses metadados silenciosamente (via `fdb-core`) para o HUD desenhar.
+- ✅ **Permissões Base (`server.cfg`):** As permissões do Core foram devidamente renomeadas de `rsgcore.*` para `fdbcore.*` no servidor ao vivo.
 
-### 5.2 Próximos Passos (Fase 2 Revisada)
-Antes de colocarmos o gigantesco sistema médico (`fdb-medic` + `fdb-medical-core`), validamos que ele quebraria sem suas duas âncoras fundamentais de mecânica:
-1. **`fdb-hudpremium`:** Será adicionado primeiro, substituindo o antigo `fdb-hud`, pois é ele quem exibe os ícones vitais de sangramento e infecção.
-2. **`fdb-consume`:** Será substituído pela sua build real de mais de 2.000 linhas, já que o sistema médico depende dele para aplicar ataduras e tônicos de saúde corretamente.
-
-Após essas duas fundações visuais e de consumo estarem operantes, finalmente acoplaremos a joia da coroa: o ecossistema médico.
+### 5.2 Próximos Passos (Fase 2C - PAUSADA)
+A próxima grande fase seria a integração da joia da coroa: **`fdb-medic` + `fdb-medical-core`**.
+⚠️ **Status atual:** Esta fase está **intencionalmente pausada** por decisão do usuário, aguardando validação do HUD e do Survival in-game. Não inicie a migração do sistema médico até receber autorização expressa.
 
 ---
-**ATENÇÃO - Nota Importante para o Claude:**
-O repositório `FDB-System` não é apenas um "RSG renomeado". O FDB-Core foi substancialmente reescrito seguindo o documento de arquitetura inegociável, e agora os principais módulos (Inventário, ConfigUI, Backpacks) também já foram adaptados e unificados sob a flag `fdb`. Estamos no meio da migração estrutural para suportar o novo sistema médico! Sempre consulte os `fxmanifest.lua` mais recentes. (`D:\SERVIDOR\server`).
+**ATENÇÃO - Nota Importante para o Claude / IAs Auxiliares:**
+O repositório `FDB-System` evoluiu massivamente. Não presuma mais que "apenas o fdb-core foi modificado". Neste momento, os seguintes módulos já são builds altamente customizadas, higienizadas e integradas nativamente à arquitetura do FDB-Core:
+- `fdb-core` (Fonte de verdade absoluta)
+- `fdb-inventory` e `fdb-backpacks`
+- `fdb-configui`
+- `fdb-hudpremium`
+- `fdb-consume`
+- `fdb-survival`
+- `fdb-horses` e `fdb-ammo`
+
+Sempre consulte os manifestos e códigos-fonte desses recursos antes de inferir o comportamento deles. O ecossistema está ganhando vida de forma estruturada.

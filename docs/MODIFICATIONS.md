@@ -38,6 +38,30 @@ Este documento registra todas as alterações estruturais, correções de segura
   - [ ] **StateBags Compartilhados**: Sincronização e unicidade da flag `Player(src).state.inv_busy` entre `fdb-inventory` e `fdb-core/server/moneyitems.lua`.
   - [ ] **Banco de Dados & Índices**: Criação de índice na coluna `identifier` da tabela `inventories` e validação da chave `citizenid` na tabela `player_weapons`.
 
+### 1.6 Integração do Ecossistema Customizado FDB (Fases 1, 2A e 2B)
+- **Status**: ✅ **APROVADA E CONCLUÍDA**
+- **Arquitetura Base**: Todo o ecossistema customizado migrado nestas fases foi unificado sob a arquitetura do `fdb-core` (Fonte Única de Verdade), eliminando a dependência do `rsg-core`. As permissões no `server.cfg` também refletem o novo prefixo `fdbcore.*`.
+- **fdb-configui (Infraestrutura Transversal)**:
+  - Adicionado para servir como motor de KVP Genérico para todo o ecossistema FDB.
+  - O Core foi ajustado para permitir a sincronização das configurações de UI entre clientes.
+- **fdb-inventory & fdb-backpacks**:
+  - Inventário corrompido por scripts de *text-replacement* no passado foi substituído pela versão intacta originária da base de desenvolvimento (`STEEL`).
+  - Imagens UI blindadas e o bug da chamada inválida de `GetRSGPlayers()` resolvido cirurgicamente para `GetFDBPlayers()`.
+  - Inclusão formal de `fdb-backpacks` para impedir congelamento de tela no inventário devido a recursos faltantes.
+- **fdb-hudpremium**:
+  - O antigo recurso `fdb-hud` foi permanentemente **deletado**.
+  - O `fdb-hudpremium` foi implementado em seu lugar (UI robusta compilada em Vite+Svelte).
+  - O hud opera inteiramente passivo, varrendo estados unificados (metadados como `thirst`, `hunger`) do `fdb-core`, sem necessidade de disparar *triggers* pesados via rede, otimizando performance.
+- **fdb-consume**:
+  - A versão "stock" de 7 arquivos (490 linhas) foi **deletada**.
+  - O ecossistema agora roda sobre a versão integral de `fdb-consume` (20 arquivos, 2.184 linhas), que suporta as lógicas avançadas que o sistema médico exigirá (ataduras e tônicos).
+  - Removidos e higienizados todos os antigos exports `rsg` remanescentes, trocando `RSGCore` por `FDBCore`.
+- **fdb-survival**:
+  - Adicionado e inserido estrategicamente *antes* do sistema médico (antiga Fase 3, puxado para Fase 2B) por decisão arquitetural do projeto: o Maestro de sobrevivência alimenta a Engine e o HUD, por isso devia ser estabelecido primeiro.
+  - Higienização de `rsg` executada rigorosamente.
+  - Dependência declarada (`dependencies { 'fdb-core' }`) fixada no `fxmanifest.lua`.
+- **Fase 2C (Sistema Médico - `fdb-medic` / `fdb-medical-core`)**: Intencionalmente pausada aguardando avaliação e testes in-game.
+
 ### 2. Camada de Banco de Dados (`FDB-Core/database/` & `FDB-Core/server/`)
 - **Automatic Migration Runner (`FDB-Core/server/migrations.lua`)**:
   - Criado runner automático que executa no `MySQL.ready`, cria/verifica a tabela `schema_migrations` e aplica sequencialmente arquivos em `database/migrations/`.
