@@ -1,13 +1,13 @@
-﻿Config = {}
+Config = {}
 lib.locale()
 
--- ConfiguraÃƒÂ§ÃƒÂµes Globais do ÃƒÂlcool
+-- ConfiguraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes Globais do ÃƒÆ’Ã‚Âlcool
 Config.Alcohol = {
-    DrunkThreshold = 15,      -- NÃƒÂ­vel para comeÃƒÂ§ar a ficar tonto
-    PassOutThreshold = 100,   -- NÃƒÂ­vel para desmaiar de bÃƒÂªbado
+    DrunkThreshold = 15,      -- NÃƒÆ’Ã‚Â­vel para comeÃƒÆ’Ã‚Â§ar a ficar tonto
+    PassOutThreshold = 100,   -- NÃƒÆ’Ã‚Â­vel para desmaiar de bÃƒÆ’Ã‚Âªbado
     DecreaseAmount = 1,       -- Quantidade que diminui por ciclo (1)
     DecreaseInterval = 45000,  -- Tempo do ciclo em ms (45 segundos) - efeito passa BEM mais devagar
-    MaxAlcoholLevel = 150,    -- Limite mÃƒÂ¡ximo (nÃƒÂ£o morre, mas passa mal)
+    MaxAlcoholLevel = 150,    -- Limite mÃƒÆ’Ã‚Â¡ximo (nÃƒÆ’Ã‚Â£o morre, mas passa mal)
     
     -- Efeitos
     VomitDuration = 10000,
@@ -21,97 +21,97 @@ Config.Metabolism = {
 }
 
 -- ==========================================
--- TAXAS DE DRENAGEM BÃƒÂSICAS (Por Tick de 4s)
+-- TAXAS DE DRENAGEM BÃƒÆ’Ã‚ÂSICAS (Por Tick de 4s)
 -- ==========================================
 Config.DrainRates = {
-    TickRate = 4000,           -- FrequÃƒÂªncia do loop de sobrevivÃƒÂªncia em milissegundos
+    TickRate = 4000,           -- FrequÃƒÆ’Ã‚Âªncia do loop de sobrevivÃƒÆ’Ã‚Âªncia em milissegundos
     Cleanliness = 0.1,         -- Higiene perdida por tick (clima limpo)
     Bladder = 0.2,             -- Aumento da vontade de urinar por tick
-    BladderAccidentTime = 60,  -- Segundos segurando a bexiga em 100% antes de mijar nas calÃƒÂ§as
+    BladderAccidentTime = 60,  -- Segundos segurando a bexiga em 100% antes de mijar nas calÃƒÆ’Ã‚Â§as
     
     -- Multiplicadores de Clima (aplicados sobre Cleanliness)
     WeatherMultipliers = {
         Rain = 2.0             -- Mais sujeira se estiver chovendo (GetRainLevel > 0.1)
     },
     
-    -- Ganhos de sujeira/limpeza por evento imediato (nÃƒÂ£o ÃƒÂ© decaimento passivo)
+    -- Ganhos de sujeira/limpeza por evento imediato (nÃƒÆ’Ã‚Â£o ÃƒÆ’Ã‚Â© decaimento passivo)
     HygieneEvents = {
         BloodDamage = 15.0,     -- Sujeira ganha ao tomar dano na vida (Sangue)
-        FallMud = 10.0,         -- Sujeira ganha ao cair no chÃƒÂ£o/rolar (Lama)
-        WashInWater = 25.0      -- Quantidade limpa por tick ao entrar na ÃƒÂ¡gua
+        FallMud = 10.0,         -- Sujeira ganha ao cair no chÃƒÆ’Ã‚Â£o/rolar (Lama)
+        WashInWater = 25.0      -- Quantidade limpa por tick ao entrar na ÃƒÆ’Ã‚Â¡gua
     }
 }
 
 -- ==========================================
--- DANOS CONTÃƒÂNUOS E DOENÃƒâ€¡AS
+-- DANOS CONTÃƒÆ’Ã‚ÂNUOS E DOENÃƒÆ’Ã¢â‚¬Â¡AS
 -- ==========================================
 Config.Hazards = {
-    PoisonDamage = 2,          -- Dano ÃƒÂ  vida por tick se envenenado (piso 0)
-    TemperatureDamage = 3,     -- Dano ÃƒÂ  vida por tick em clima extremo (piso 0)
+    PoisonDamage = 2,          -- Dano ÃƒÆ’Ã‚Â  vida por tick se envenenado (piso 0)
+    TemperatureDamage = 3,     -- Dano ÃƒÆ’Ã‚Â  vida por tick em clima extremo (piso 0)
     
     ExtremeColdThreshold = -2.0, -- Temperatura em Celsius para considerar muito frio
     ExtremeHeatThreshold = 37.0, -- Temperatura em Celsius para considerar muito calor
 
-    -- Chance de contrair doenÃƒÂ§a (Illness) no frio extremo
+    -- Chance de contrair doenÃƒÆ’Ã‚Â§a (Illness) no frio extremo
     IllnessChancePercent = 8,  -- 8% de chance a cada tick de frio
     IllnessGain = 10           -- Quanto de Illness ganha quando a chance acerta
 }
 
 -- ==========================================
--- EFEITOS BIOLÃƒâ€œGICOS (DoenÃƒÂ§a e Veneno AvanÃƒÂ§ados)
+-- EFEITOS BIOLÃƒÆ’Ã¢â‚¬Å“GICOS (DoenÃƒÆ’Ã‚Â§a e Veneno AvanÃƒÆ’Ã‚Â§ados)
 -- ==========================================
 Config.Biological = {
-    -- NÃƒÂ­veis CrÃƒÂ­ticos
-    SymptomThreshold = 10,  -- NÃƒÂ­vel para comeÃƒÂ§ar sintomas leves (tosse e nÃƒÂ¡usea visual)
-    ModerateThreshold = 50, -- NÃƒÂ­vel a partir do qual perde sprint
-    SevereThreshold = 80,   -- NÃƒÂ­vel a partir do qual perde run e os efeitos ficam agressivos
+    -- NÃƒÆ’Ã‚Â­veis CrÃƒÆ’Ã‚Â­ticos
+    SymptomThreshold = 10,  -- NÃƒÆ’Ã‚Â­vel para comeÃƒÆ’Ã‚Â§ar sintomas leves (tosse e nÃƒÆ’Ã‚Â¡usea visual)
+    ModerateThreshold = 50, -- NÃƒÆ’Ã‚Â­vel a partir do qual perde sprint
+    SevereThreshold = 80,   -- NÃƒÆ’Ã‚Â­vel a partir do qual perde run e os efeitos ficam agressivos
 
-    -- VÃƒÂ´mito (Veneno)
+    -- VÃƒÆ’Ã‚Â´mito (Veneno)
     VomitChanceModerate = 5,  -- 5% de chance por tick de 3s
     VomitChanceSevere = 15,   -- 15% de chance por tick de 3s
-    VomitDuration = 7000,     -- Tempo preso na animaÃƒÂ§ÃƒÂ£o (ms)
-    VomitCooldown = 5000,     -- Janela de imunidade apÃƒÂ³s o vÃƒÂ´mito (ms)
+    VomitDuration = 7000,     -- Tempo preso na animaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o (ms)
+    VomitCooldown = 5000,     -- Janela de imunidade apÃƒÆ’Ã‚Â³s o vÃƒÆ’Ã‚Â´mito (ms)
     
-    -- Dano FÃƒÂ­sico (HP Drain no NÃƒÂ­vel Severo)
-    IllnessHPDrain = 1,       -- Dreno de HP por tick na doenÃƒÂ§a severa
+    -- Dano FÃƒÆ’Ã‚Â­sico (HP Drain no NÃƒÆ’Ã‚Â­vel Severo)
+    IllnessHPDrain = 1,       -- Dreno de HP por tick na doenÃƒÆ’Ã‚Â§a severa
     PoisonHPDrain = 3         -- Dreno de HP por tick no veneno severo
 }
 
 -- ==========================================
--- EFEITOS DE BUFFS DE CONSUMÃƒÂVEIS
+-- EFEITOS DE BUFFS DE CONSUMÃƒÆ’Ã‚ÂVEIS
 -- ==========================================
 Config.Buffs = {
-    ThermalDuration = 180      -- DuraÃƒÂ§ÃƒÂ£o padrÃƒÂ£o em segundos para proteÃƒÂ§ÃƒÂ£o contra frio/calor (ex: hot_soup)
+    ThermalDuration = 180      -- DuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o padrÃƒÆ’Ã‚Â£o em segundos para proteÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o contra frio/calor (ex: hot_soup)
 }
 
 -- ==========================================
 -- SISTEMA DE BEXIGA (MIJAR/XIXI)
 -- ==========================================
 Config.BladderSystem = {
-    Enabled = true,                -- Se 'false', o jogador nÃ£o terÃ¡ necessidade de urinar
+    Enabled = true,                -- Se 'false', o jogador nÃƒÂ£o terÃƒÂ¡ necessidade de urinar
     LabelMale = "Mijar",           -- Termo do Target para homens
     LabelFemale = "Fazer Xixi",    -- Termo do Target para mulheres
     
-    -- AnimaÃ§Ãµes e Tempos (Mijar VoluntÃ¡rio)
-    UseScenario = true,            -- Se true, usa AnimationName como cenÃ¡rio. Se false, usa AnimationDict e AnimationName como TaskPlayAnim.
+    -- AnimaÃƒÂ§ÃƒÂµes e Tempos (Mijar VoluntÃƒÂ¡rio)
+    UseScenario = true,            -- Se true, usa AnimationName como cenÃƒÂ¡rio. Se false, usa AnimationDict e AnimationName como TaskPlayAnim.
     AnimationDict = "amb_misc@world_human_pee@male_a@idle_b",
     AnimationName = "WORLD_HUMAN_PEE",
     ParticleDict = "core",
     ParticleName = "ent_anim_dog_peeing",
-    AnimWaitBefore = 4000,         -- Tempo antes de comeÃ§ar o jato (ms)
+    AnimWaitBefore = 4000,         -- Tempo antes de comeÃƒÂ§ar o jato (ms)
     AnimDuration = 6000,           -- Tempo do jato (ms)
     AnimWaitAfter = 3500,          -- Tempo guardando antes de destravar o personagem (ms)
     
-    -- AnimaÃ§Ã£o de Acidente (Mijar nas calÃ§as)
-    AccidentUseScenario = true,    -- Se true, usa AccidentAnimation como cenÃ¡rio.
+    -- AnimaÃƒÂ§ÃƒÂ£o de Acidente (Mijar nas calÃƒÂ§as)
+    AccidentUseScenario = true,    -- Se true, usa AccidentAnimation como cenÃƒÂ¡rio.
     AccidentAnimDict = "amb_misc@world_human_vomit@male_a@idle_b",
     AccidentAnimation = "WORLD_HUMAN_VOMIT",
-    AccidentAnimDuration = 4000,   -- Tempo preso na animaÃ§Ã£o do acidente (ms)
+    AccidentAnimDuration = 4000,   -- Tempo preso na animaÃƒÂ§ÃƒÂ£o do acidente (ms)
     
     -- Etiqueta / RP
-    PrivacyRadius = 15.0,          -- DistÃ¢ncia (em metros) para verificar se hÃ¡ mulheres perto
+    PrivacyRadius = 15.0,          -- DistÃƒÂ¢ncia (em metros) para verificar se hÃƒÂ¡ mulheres perto
     
-    -- Controle por Cidades (Bloquear o uso do target em Ã¡rvores dentro dessas cidades)
+    -- Controle por Cidades (Bloquear o uso do target em ÃƒÂ¡rvores dentro dessas cidades)
     BlockedTowns = {
         [joaat('stdenis')] = true,
         [joaat('blackwater')] = true,
@@ -133,10 +133,10 @@ Config.BladderSystem = {
 }
 
 -- ==========================================
--- ANIMAÃ‡Ã•ES DE MOVIMENTO (WALK STYLES)
+-- ANIMAÃƒâ€¡Ãƒâ€¢ES DE MOVIMENTO (WALK STYLES)
 -- ==========================================
 Config.Movement = {
-    -- NÃ­veis de Ãlcool
+    -- NÃƒÂ­veis de ÃƒÂlcool
     DrunkLevel3 = 80, 
     DrunkClipset3 = 'move_m@drunk@verydrunk',
     
@@ -150,7 +150,7 @@ Config.Movement = {
     BladderThreshold = 80,
     BladderClipset = 'war_veteran',
     
-    -- DoenÃ§a e Veneno
+    -- DoenÃƒÂ§a e Veneno
     PoisonModerateClipset = 'move_m@drunk@moderatedrunk',
     IllnessSevereClipset = 'move_m@fatigue',
     IllnessModerateClipset = 'move_m@drunk@slightlydrunk',
