@@ -51,9 +51,9 @@ A ordem segue a cadeia de dependências: primeiro a infraestrutura transversal, 
 ### Fase 2B — Sobrevivência (CONCLUÍDO)
 - [x] Adicionar `fdb-survival` (Maestro / sistema de movimento) — **Nota:** A ordem original foi alterada. O Survival foi migrado ANTES do sistema médico por decisão arquitetural, pois o HUD e o Medical Core dependem do Maestro para orquestrar batimentos cardíacos, higiene e temperatura.
 
-### Fase 2C — Sistema Médico (EM ANDAMENTO)
+### Fase 2C — Sistema Médico (PAUSADA)
 - [ ] Remover `fdb-medic` (stock) → adicionar `fdb-medic` (build real, 8.910 linhas) **+** `fdb-medical-core` (novo, não existia antes)
-  - 🔄 **Status:** Validação in-game de dependências (HUD/Survival) concluída com sucesso. Iniciando migração do sistema médico.
+  - ⚠️ **Status:** PAUSADO aguardando autorização expressa do usuário.
 
 ### Fase 3 — Adições puras (não existiam antes)
 - [ ] Adicionar `fdb-water` (consumo de água)

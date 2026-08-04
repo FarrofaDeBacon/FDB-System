@@ -42,9 +42,9 @@ Nesta nova fase (04/08/2026), iniciamos a integração da base visual e estrutur
 - ✅ **Sobrevivência (`fdb-survival`):** Migrado e injetado antes do sistema médico. **Validação:** Descoberto e corrigido o "Hash" secreto das fossas para urinar, resolvido erro crítico de parsing (UTF-8 BOM), e chaves de tradução adicionadas em todos os notifies.
 - ✅ **Permissões Base (`server.cfg`):** As permissões do Core foram devidamente renomeadas de `rsgcore.*` para `fdbcore.*` no servidor ao vivo.
 
-### 5.2 Próximos Passos (Fase 2C - EM ANDAMENTO)
-A próxima grande fase é a integração da joia da coroa: **`fdb-medic` + `fdb-medical-core`**.
-Com a validação estrutural do HUD e do Survival concluída e bem-sucedida in-game, recebemos sinal verde para iniciar a migração e higienização do sistema médico.
+### 5.2 Próximos Passos (Fase 2C - PAUSADA)
+A próxima grande fase seria a integração da joia da coroa: **`fdb-medic` + `fdb-medical-core`**.
+⚠️ **Status atual:** Esta fase está **intencionalmente pausada** por decisão do usuário. Não iniciaremos a migração do sistema médico até recebermos autorização expressa.
 
 ---
 **ATENÇÃO - Nota Importante para o Claude / IAs Auxiliares:**
