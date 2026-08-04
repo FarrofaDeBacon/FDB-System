@@ -534,26 +534,41 @@ function MainMenu()
 end
 
 function OpenBodyMenu()
-    MenuData.CloseAll()
-    local elements = {
-        { label = RSG.Texts.Face,     value = CreatorCache["head"] or 1,       category = "head",       desc = "", type = "slider", min = 1,    max = 120,                         hop = 6 },
-        { label = RSG.Texts.Width,    value = CreatorCache["face_width"] or 0, category = "face_width", desc = "", type = "slider", min = -100, max = 100,                         hop = 5 },
-        { label = RSG.Texts.SkinTone, value = CreatorCache["skin_tone"] or 1,  category = "skin_tone",  desc = "", type = "slider", min = 1,    max = 6 },
-        { label = RSG.Texts.Size,     value = CreatorCache["body_size"] or 1,  category = "body_size",  desc = "", type = "slider", min = 1,    max = #Data.Appearance.body_size },
-        { label = RSG.Texts.Waist,    value = CreatorCache["body_waist"] or 1, category = "body_waist", desc = "", type = "slider", min = 1,    max = #Data.Appearance.body_waist },
-        { label = RSG.Texts.Chest,    value = CreatorCache["chest_size"] or 1, category = "chest_size", desc = "", type = "slider", min = 1,    max = #Data.Appearance.chest_size },
-        { label = RSG.Texts.Height,   value = CreatorCache["height"] or 100,   category = "height",     desc = "", type = "slider", min = 95,   max = 105 }
-    }
-    MenuData.Open('default', GetCurrentResourceName(), 'body_character_creator_menu',
-        {title = RSG.Texts.Appearance, subtext = RSG.Texts.Options, align = RSG.Texts.align, elements = elements, itemHeight = "4vh"}, function(data, menu)
-    end, function(data, menu)
-        MainMenu()
-    end, function(data, menu)
-        if CreatorCache[data.current.category] ~= data.current.value then
-            CreatorCache[data.current.category] = data.current.value
-            BodyFunctions[data.current.category](PlayerPedId(), CreatorCache)
+    local menu = jo.menu.create('body_character_creator_menu', { 
+        title = RSG.Texts.Appearance, 
+        subtitle = RSG.Texts.Body,
+        onBack = function()
+            MainMenu()
         end
-    end)
+    })
+
+    local function addBodySlider(title, category, min, max)
+        menu:addItem({
+            title = title,
+            sliders = {
+                { type = "grid", current = CreatorCache[category] or min, min = min, max = max }
+            },
+            onChange = function(currentData)
+                local val = currentData.item.sliders[1].current
+                if CreatorCache[category] ~= val then
+                    CreatorCache[category] = val
+                    BodyFunctions[category](PlayerPedId(), CreatorCache)
+                end
+            end
+        })
+    end
+
+    addBodySlider(RSG.Texts.Face, "head", 1, 120)
+    addBodySlider(RSG.Texts.Width, "face_width", -100, 100)
+    addBodySlider(RSG.Texts.SkinTone, "skin_tone", 1, 6)
+    addBodySlider(RSG.Texts.Size, "body_size", 1, #Data.Appearance.body_size)
+    addBodySlider(RSG.Texts.Waist, "body_waist", 1, #Data.Appearance.body_waist)
+    addBodySlider(RSG.Texts.Chest, "chest_size", 1, #Data.Appearance.chest_size)
+    addBodySlider(RSG.Texts.Height, "height", 95, 105)
+
+    jo.menu.send('body_character_creator_menu')
+    jo.menu.setCurrentMenu('body_character_creator_menu')
+    jo.menu.show(true, true)
 end
 
 function OpenFaceMenu()
