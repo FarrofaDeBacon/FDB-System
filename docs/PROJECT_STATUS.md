@@ -34,17 +34,17 @@ Durante a renomeação global (substituindo textos de `rsg` para `fdb` via Power
 
 Nesta nova fase (04/08/2026), iniciamos a integração da base visual e estrutural que vai dar suporte ao sistema médico avançado.
 
-### 5.1 O Que Já Foi Feito (Fase 1, 2A e 2B Concluídas)
-- ✅ **Infraestrutura Transversal (`fdb-configui`):** Adicionado com sucesso. Este é o motor de KVP genérico que o ecossistema precisa. 
+### 5.1 O Que Já Foi Feito (Fases 1, 2A e 2B Concluídas e Validadas)
+- ✅ **Infraestrutura Transversal (`fdb-configui`):** Adicionado com sucesso. Motor de KVP genérico que o ecossistema precisa. 
 - ✅ **Inventário & Mochilas (`fdb-inventory` / `fdb-backpacks`):** Restaurados pela versão imaculada da source original (`STEEL`). Bug crítico de `GetFDBPlayers` resolvido.
-- ✅ **Fundação Visual (`fdb-hudpremium`):** O antigo `fdb-hud` foi deletado do repositório e completamente substituído pelo novo `fdb-hudpremium`. O frontend construído em Vite+Svelte foi compilado com sucesso e os assets gerados para `ui/dist/`.
-- ✅ **Fundações de Consumo (`fdb-consume`):** A versão "stock" provisória foi deletada. Adicionamos a build real completa de 2.184 linhas (20 arquivos), com todas as referências residuais de `rsg` higienizadas.
-- ✅ **Sobrevivência (`fdb-survival`):** Migrado e injetado **antes** do sistema médico, por decisão arquitetural. Este é o Maestro que orquestra fome, sede, higiene e temperatura, enviando esses metadados silenciosamente (via `fdb-core`) para o HUD desenhar.
+- ✅ **Fundação Visual (`fdb-hudpremium`):** O antigo `fdb-hud` foi deletado do repositório e completamente substituído pelo novo `fdb-hudpremium`. Compilado com sucesso via Vite+Svelte.
+- ✅ **Fundações de Consumo (`fdb-consume` & `fdb-canteen`):** A versão provisória foi deletada. Build completa (2.184 linhas) adicionada. **Validação:** Corrigido bug de interrupção de animações (StopInteractiveConsumable) na última mordida/gole e refeito a ponte de sede do `fdb-canteen` para o novo motor.
+- ✅ **Sobrevivência (`fdb-survival`):** Migrado e injetado antes do sistema médico. **Validação:** Descoberto e corrigido o "Hash" secreto das fossas para urinar, resolvido erro crítico de parsing (UTF-8 BOM), e chaves de tradução adicionadas em todos os notifies.
 - ✅ **Permissões Base (`server.cfg`):** As permissões do Core foram devidamente renomeadas de `rsgcore.*` para `fdbcore.*` no servidor ao vivo.
 
-### 5.2 Próximos Passos (Fase 2C - PAUSADA)
-A próxima grande fase seria a integração da joia da coroa: **`fdb-medic` + `fdb-medical-core`**.
-⚠️ **Status atual:** Esta fase está **intencionalmente pausada** por decisão do usuário, aguardando validação do HUD e do Survival in-game. Não inicie a migração do sistema médico até receber autorização expressa.
+### 5.2 Próximos Passos (Fase 2C - EM ANDAMENTO)
+A próxima grande fase é a integração da joia da coroa: **`fdb-medic` + `fdb-medical-core`**.
+Com a validação estrutural do HUD e do Survival concluída e bem-sucedida in-game, recebemos sinal verde para iniciar a migração e higienização do sistema médico.
 
 ---
 **ATENÇÃO - Nota Importante para o Claude / IAs Auxiliares:**
@@ -53,8 +53,9 @@ O repositório `FDB-System` evoluiu massivamente. Não presuma mais que "apenas 
 - `fdb-inventory` e `fdb-backpacks`
 - `fdb-configui`
 - `fdb-hudpremium`
-- `fdb-consume`
-- `fdb-survival`
+- `fdb-consume` (Totalmente interativo)
+- `fdb-survival` (Motor base de atributos vitais)
 - `fdb-horses` e `fdb-ammo`
+- `fdb-canteen` (Integrado à sede)
 
 Sempre consulte os manifestos e códigos-fonte desses recursos antes de inferir o comportamento deles. O ecossistema está ganhando vida de forma estruturada.
