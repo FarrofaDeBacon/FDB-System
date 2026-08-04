@@ -35,7 +35,6 @@ local function GiveStarterItems(source)
         Player.Functions.AddItem(v.item, v.amount)
     end
     if Config.StarterHorse then
-        -- FDB-TODO: fdb-horses integration pending audit (line 38)
         local horseid = GenerateHorseid()
         local horsesex = {'male', 'female'}
         local randomSex = math.random(1, #horsesex)
@@ -55,7 +54,7 @@ end
 
 RegisterNetEvent('fdb-multicharacter:server:disconnect', function()
     local src = source
-    DropPlayer(src, "You have disconnected from FDB RedM")
+    DropPlayer(src, "You have disconnected from FDB System")
 end)
 
 RegisterNetEvent('fdb-multicharacter:server:loadUserData', function(cData, skindata)
@@ -70,7 +69,6 @@ RegisterNetEvent('fdb-multicharacter:server:loadUserData', function(cData, skind
         if not skindata then
             TriggerClientEvent('fdb-spawn:client:setupSpawnUI', src, cData, false)
         else
-            -- FDB-TODO: fdb-appearance integration pending audit (line 75)
             TriggerClientEvent('fdb-appearance:client:OpenCreator', src, false, true)
         end
         TriggerEvent('fdb-log:server:CreateLog', 'joinleave', 'Player Joined Server', 'green', '**' .. GetPlayerName(src) .. '** joined the server..')
