@@ -188,7 +188,7 @@ CreateThread(function()
             label = targetLabel,
             icon = 'fa-solid fa-droplet',
             onSelect = function() TriggerEvent('fdb-survival:client:PeeTarget', false) end,
-            distance = 4.0
+            distance = 2.5
         }
     })
     
@@ -199,7 +199,7 @@ CreateThread(function()
             label = targetLabel,
             icon = 'fa-solid fa-toilet',
             onSelect = function() TriggerEvent('fdb-survival:client:PeeTarget', true) end,
-            distance = 4.0
+            distance = 2.5
         }
     })
 end)
