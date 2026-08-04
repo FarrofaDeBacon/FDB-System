@@ -1,14 +1,14 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 --------------
 --- acces
 --------------
 RegisterCommand(Config.CommandOpen, function(source, args, rawCommand)
-    TriggerServerEvent('rsg-animations:server:Open')
+    TriggerServerEvent('fdb-animations:server:Open')
 end, false)
 
-RegisterNetEvent('rsg-animations:client:Open')
-AddEventHandler('rsg-animations:client:Open', function(favorites)
+RegisterNetEvent('fdb-animations:client:Open')
+AddEventHandler('fdb-animations:client:Open', function(favorites)
     local Animations = Config.Animations
 
     for i, v in pairs(Animations) do
@@ -42,7 +42,7 @@ RegisterNUICallback('Close', function(args, cb)
 end)
 
 RegisterNUICallback('Favorite', function(args, cb)
-    TriggerServerEvent('rsg-animations:server:Favorite', args.Animation, args.Favorite)
+    TriggerServerEvent('fdb-animations:server:Favorite', args.Animation, args.Favorite)
 end)
 
 --------------

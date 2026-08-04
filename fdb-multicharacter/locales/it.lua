@@ -71,7 +71,7 @@ Translations = Translations or {
         }
     }
 
-if GetConvar('rsg_locale', 'en') == 'it' then
+if GetConvar('fdb_locale', 'en') == 'it' then
     Lang = Locale:new({
         phrases = Translations,
         warnOnMissing = true,

@@ -1,7 +1,7 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 local function hasAdminPermission(source)
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return false end
     
     local job = player.PlayerData.job
@@ -17,7 +17,7 @@ local function hasAdminPermission(source)
 end
 
 local function hasCreateRecordsPermission(source)
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return false end
     
     local job = player.PlayerData.job
@@ -33,7 +33,7 @@ local function hasCreateRecordsPermission(source)
 end
 
 local function logChargeAction(source, action, targetType, targetId, targetName, details)
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return end
     
     local performerName = player.PlayerData.charinfo.firstname .. ' ' .. player.PlayerData.charinfo.lastname
@@ -47,7 +47,7 @@ end
 
 local function getAdmins()
     local admins = {}
-    local players = RSGCore.Functions.GetPlayers()
+    local players = FDBCore.Functions.GetPlayers()
     for _, playerId in ipairs(players) do
         local src = tonumber(playerId)
         if hasAdminPermission(src) then
@@ -66,10 +66,10 @@ end
 
 local function getLawOfficers()
     local officers = {}
-    local players = RSGCore.Functions.GetPlayers()
+    local players = FDBCore.Functions.GetPlayers()
     for _, playerId in ipairs(players) do
         local src = tonumber(playerId)
-        local player = RSGCore.Functions.GetPlayer(src)
+        local player = FDBCore.Functions.GetPlayer(src)
         if player and player.PlayerData.job then
             local jobName = player.PlayerData.job.name
             if Config.LawJobs[jobName] then
@@ -87,7 +87,7 @@ local function broadcastToOfficers(event, data)
     end
 end
 
-lib.callback.register('rsg-mdt:server:getChargeTemplates', function(source)
+lib.callback.register('fdb-mdt:server:getChargeTemplates', function(source)
     local templates = MySQL.query.await(
         "SELECT * FROM mdt_charge_templates ORDER BY category, name"
     )
@@ -95,7 +95,7 @@ lib.callback.register('rsg-mdt:server:getChargeTemplates', function(source)
     return templates or {}
 end)
 
-lib.callback.register('rsg-mdt:server:addChargeTemplate', function(source, data)
+lib.callback.register('fdb-mdt:server:addChargeTemplate', function(source, data)
     if not hasAdminPermission(source) then
         return { success = false, message = locale('notification_charge_permission') }
     end
@@ -115,7 +115,7 @@ lib.callback.register('rsg-mdt:server:addChargeTemplate', function(source, data)
         return { success = false, message = locale('notification_charge_exists') }
     end
     
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     local createdBy = player and player.PlayerData.citizenid or nil
     local createdByName = player and (player.PlayerData.charinfo.firstname .. ' ' .. player.PlayerData.charinfo.lastname) or 'System'
     
@@ -132,7 +132,7 @@ lib.callback.register('rsg-mdt:server:addChargeTemplate', function(source, data)
             category = category
         })
         
-        broadcastToAdmins('rsg-mdt:client:chargesUpdated', { action = 'created', id = insertId, name = name })
+        broadcastToAdmins('fdb-mdt:client:chargesUpdated', { action = 'created', id = insertId, name = name })
         
         return { success = true, id = insertId }
     end
@@ -140,7 +140,7 @@ lib.callback.register('rsg-mdt:server:addChargeTemplate', function(source, data)
     return { success = false, message = locale('notification_failed_create_charge') }
 end)
 
-lib.callback.register('rsg-mdt:server:updateChargeTemplate', function(source, data)
+lib.callback.register('fdb-mdt:server:updateChargeTemplate', function(source, data)
     if not hasAdminPermission(source) then
         return { success = false, message = locale('notification_charge_permission') }
     end
@@ -177,7 +177,7 @@ lib.callback.register('rsg-mdt:server:updateChargeTemplate', function(source, da
             category = category
         })
         
-        broadcastToAdmins('rsg-mdt:client:chargesUpdated', { action = 'updated', id = id, name = name })
+        broadcastToAdmins('fdb-mdt:client:chargesUpdated', { action = 'updated', id = id, name = name })
         
         return { success = true }
     end
@@ -185,7 +185,7 @@ lib.callback.register('rsg-mdt:server:updateChargeTemplate', function(source, da
     return { success = false, message = locale('notification_failed_update_charge') }
 end)
 
-lib.callback.register('rsg-mdt:server:deleteChargeTemplate', function(source, id)
+lib.callback.register('fdb-mdt:server:deleteChargeTemplate', function(source, id)
     if not hasAdminPermission(source) then
         return { success = false, message = locale('notification_charge_permission') }
     end
@@ -207,7 +207,7 @@ lib.callback.register('rsg-mdt:server:deleteChargeTemplate', function(source, id
     if affected and affected > 0 then
         logChargeAction(source, 'charge_template_deleted', 'charge_template', tostring(id), templateName)
         
-        broadcastToAdmins('rsg-mdt:client:chargesUpdated', { action = 'deleted', id = id, name = templateName })
+        broadcastToAdmins('fdb-mdt:client:chargesUpdated', { action = 'deleted', id = id, name = templateName })
         
         return { success = true }
     end
@@ -215,7 +215,7 @@ lib.callback.register('rsg-mdt:server:deleteChargeTemplate', function(source, id
     return { success = false, message = locale('notification_failed_delete_charge') }
 end)
 
-lib.callback.register('rsg-mdt:server:issueCharges', function(source, data)
+lib.callback.register('fdb-mdt:server:issueCharges', function(source, data)
     if not hasCreateRecordsPermission(source) then
         return { success = false, message = locale('notification_issue_permission') }
     end
@@ -228,7 +228,7 @@ lib.callback.register('rsg-mdt:server:issueCharges', function(source, data)
         return { success = false, message = locale('notification_citizen_and_charge_required') }
     end
     
-    local targetPlayer = RSGCore.Functions.GetPlayerByCitizenId(citizenid)
+    local targetPlayer = FDBCore.Functions.GetPlayerByCitizenId(citizenid)
     local citizenName
     
     if targetPlayer then
@@ -243,7 +243,7 @@ lib.callback.register('rsg-mdt:server:issueCharges', function(source, data)
         end
     end
     
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then
         return { success = false, message = locale('notification_officer_not_found') }
     end
@@ -286,7 +286,7 @@ lib.callback.register('rsg-mdt:server:issueCharges', function(source, data)
         end
         
         if totalFine > 0 then
-            exports['rsg-mdt']:createOrUpdateFine(citizenid, citizenName, chargeIds, totalFine, officerName, officerCid)
+            exports['fdb-mdt']:createOrUpdateFine(citizenid, citizenName, chargeIds, totalFine, officerName, officerCid)
         end
         
         logChargeAction(source, 'charges_issued', 'citizen', citizenid, citizenName, {
@@ -298,13 +298,13 @@ lib.callback.register('rsg-mdt:server:issueCharges', function(source, data)
         
         if targetPlayer then
             local targetSource = targetPlayer.PlayerData.source
-            TriggerClientEvent('rsg-mdt:client:notify', targetSource, {
+            TriggerClientEvent('fdb-mdt:client:notify', targetSource, {
                 type = 'warning',
                 message = locale('notification_charges_notification', #issuedCharges, totalFine, totalJailtime)
             })
         end
         
-        broadcastToOfficers('rsg-mdt:client:chargesUpdated', { 
+        broadcastToOfficers('fdb-mdt:client:chargesUpdated', { 
             action = 'issued', 
             citizenid = citizenid, 
             citizenName = citizenName,
@@ -324,7 +324,7 @@ lib.callback.register('rsg-mdt:server:issueCharges', function(source, data)
     return { success = false, message = locale('notification_failed_issue_charges') }
 end)
 
-lib.callback.register('rsg-mdt:server:submitCharges', function(source, data)
+lib.callback.register('fdb-mdt:server:submitCharges', function(source, data)
     if not hasCreateRecordsPermission(source) then
         return { success = false, message = locale('notification_issue_permission') }
     end
@@ -338,8 +338,8 @@ lib.callback.register('rsg-mdt:server:submitCharges', function(source, data)
         return { success = false, message = locale('notification_citizen_and_charge_required') }
     end
     
-    local targetPlayer = targetPlayerId and RSGCore.Functions.GetPlayer(tonumber(targetPlayerId)) or nil
-    local targetPlayerByCid = RSGCore.Functions.GetPlayerByCitizenId(citizenid)
+    local targetPlayer = targetPlayerId and FDBCore.Functions.GetPlayer(tonumber(targetPlayerId)) or nil
+    local targetPlayerByCid = FDBCore.Functions.GetPlayerByCitizenId(citizenid)
     local citizenName
     
     if targetPlayer then
@@ -357,7 +357,7 @@ lib.callback.register('rsg-mdt:server:submitCharges', function(source, data)
         end
     end
     
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then
         return { success = false, message = locale('notification_officer_not_found') }
     end
@@ -404,7 +404,7 @@ lib.callback.register('rsg-mdt:server:submitCharges', function(source, data)
     end
     
     if totalFine > 0 then
-        exports['rsg-mdt']:createOrUpdateFine(citizenid, citizenName, chargeIds, totalFine, officerName, officerCid)
+        exports['fdb-mdt']:createOrUpdateFine(citizenid, citizenName, chargeIds, totalFine, officerName, officerCid)
     end
     
     if #attachedReportIds > 0 and #chargeIds > 0 then
@@ -429,7 +429,7 @@ lib.callback.register('rsg-mdt:server:submitCharges', function(source, data)
         targetPlayer.Functions.SetMetaData('criminalrecord', { ['hasRecord'] = true, ['date'] = currentDate })
         
         local targetSource = targetPlayer.PlayerData.source
-        TriggerClientEvent('rsg-lawman:client:sendtojail', targetSource, jailMinutes)
+        TriggerClientEvent('fdb-lawman:client:sendtojail', targetSource, jailMinutes)
         
         MySQL.update.await(
             "UPDATE mdt_issued_charges SET time_served = jailtime, is_served = 1 WHERE id IN (" .. table.concat(chargeIds, ",") .. ")"
@@ -442,7 +442,7 @@ lib.callback.register('rsg-mdt:server:submitCharges', function(source, data)
         
         jailed = true
         
-        TriggerClientEvent('rsg-mdt:client:notify', targetSource, {
+        TriggerClientEvent('fdb-mdt:client:notify', targetSource, {
             type = 'warning',
             message = locale('notification_charges_committed_notification', #issuedCharges, jailMinutes)
         })
@@ -463,7 +463,7 @@ lib.callback.register('rsg-mdt:server:submitCharges', function(source, data)
         jailed = jailed
     })
     
-    broadcastToOfficers('rsg-mdt:client:chargesUpdated', { 
+    broadcastToOfficers('fdb-mdt:client:chargesUpdated', { 
         action = jailed and 'committed' or 'issued', 
         citizenid = citizenid, 
         citizenName = citizenName,
@@ -493,7 +493,7 @@ lib.callback.register('rsg-mdt:server:submitCharges', function(source, data)
     }
 end)
 
-lib.callback.register('rsg-mdt:server:getIssuedCharges', function(source, citizenid)
+lib.callback.register('fdb-mdt:server:getIssuedCharges', function(source, citizenid)
     if not citizenid then return {} end
     
     local charges = MySQL.query.await(
@@ -543,7 +543,7 @@ exports('getChargeTemplates', function()
     return MySQL.query.await("SELECT * FROM mdt_charge_templates ORDER BY category, name") or {}
 end)
 
-lib.callback.register('rsg-mdt:server:getAllIssuedCharges', function(source, searchQuery)
+lib.callback.register('fdb-mdt:server:getAllIssuedCharges', function(source, searchQuery)
     if not hasCreateRecordsPermission(source) then
         return {}
     end
@@ -589,7 +589,7 @@ lib.callback.register('rsg-mdt:server:getAllIssuedCharges', function(source, sea
     return charges or {}
 end)
 
-lib.callback.register('rsg-mdt:server:getChargeDetails', function(source, chargeId)
+lib.callback.register('fdb-mdt:server:getChargeDetails', function(source, chargeId)
     if not hasCreateRecordsPermission(source) then
         return nil
     end
@@ -611,12 +611,12 @@ lib.callback.register('rsg-mdt:server:getChargeDetails', function(source, charge
     return nil
 end)
 
-lib.callback.register('rsg-mdt:server:jailPlayer', function(source, data)
+lib.callback.register('fdb-mdt:server:jailPlayer', function(source, data)
     if not hasCreateRecordsPermission(source) then
         return { success = false, message = locale('notification_jail_permission') }
     end
     
-    local targetPlayer = RSGCore.Functions.GetPlayerByCitizenId(data.citizenid)
+    local targetPlayer = FDBCore.Functions.GetPlayerByCitizenId(data.citizenid)
     if not targetPlayer then
         return { success = false, message = locale('notification_player_online_required') }
     end
@@ -632,9 +632,9 @@ lib.callback.register('rsg-mdt:server:jailPlayer', function(source, data)
     local currentDate = os.date('*t')
     if currentDate.day == 31 then currentDate.day = 30 end
     targetPlayer.Functions.SetMetaData('criminalrecord', { ['hasRecord'] = true, ['date'] = currentDate })
-    TriggerClientEvent('rsg-lawman:client:sendtojail', targetSource, minutes)
+    TriggerClientEvent('fdb-lawman:client:sendtojail', targetSource, minutes)
     
-    local officer = RSGCore.Functions.GetPlayer(source)
+    local officer = FDBCore.Functions.GetPlayer(source)
     local officerName = officer and (officer.PlayerData.charinfo.firstname .. ' ' .. officer.PlayerData.charinfo.lastname) or 'Unknown'
     
     logChargeAction(source, 'player_jailed', 'citizen', data.citizenid, targetPlayer.PlayerData.charinfo.firstname .. ' ' .. targetPlayer.PlayerData.charinfo.lastname, {
@@ -645,7 +645,7 @@ lib.callback.register('rsg-mdt:server:jailPlayer', function(source, data)
     return { success = true, message = locale('notification_player_jailed') }
 end)
 
-lib.callback.register('rsg-mdt:server:getJailConfig', function(source)
+lib.callback.register('fdb-mdt:server:getJailConfig', function(source)
     return {
         delaySeconds = Config.Jail.delaySeconds,
         maxDistance = Config.Jail.maxDistance,
@@ -657,7 +657,7 @@ lib.callback.register('rsg-mdt:server:getJailConfig', function(source)
     }
 end)
 
-lib.callback.register('rsg-mdt:server:getCitizenJailTotals', function(source, citizenid)
+lib.callback.register('fdb-mdt:server:getCitizenJailTotals', function(source, citizenid)
     if not citizenid then return { totalJailtime = 0, totalServed = 0, charges = {} } end
     
     local charges = MySQL.query.await(
@@ -685,7 +685,7 @@ lib.callback.register('rsg-mdt:server:getCitizenJailTotals', function(source, ci
     }
 end)
 
-lib.callback.register('rsg-mdt:server:commitCharges', function(source, data)
+lib.callback.register('fdb-mdt:server:commitCharges', function(source, data)
     if not hasCreateRecordsPermission(source) then
         return { success = false, message = locale('notification_issue_permission') }
     end
@@ -708,7 +708,7 @@ lib.callback.register('rsg-mdt:server:commitCharges', function(source, data)
         return { success = false, message = locale('notification_invalid_jail_time') }
     end
     
-    local targetPlayer = RSGCore.Functions.GetPlayer(tonumber(targetPlayerId))
+    local targetPlayer = FDBCore.Functions.GetPlayer(tonumber(targetPlayerId))
     if not targetPlayer then
         return { success = false, message = locale('notification_player_online_required') }
     end
@@ -716,7 +716,7 @@ lib.callback.register('rsg-mdt:server:commitCharges', function(source, data)
     local targetSource = targetPlayer.PlayerData.source
     local citizenName = targetPlayer.PlayerData.charinfo.firstname .. ' ' .. targetPlayer.PlayerData.charinfo.lastname
     
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then
         return { success = false, message = locale('notification_officer_not_found') }
     end
@@ -763,7 +763,7 @@ lib.callback.register('rsg-mdt:server:commitCharges', function(source, data)
     end
     
     if totalFine > 0 then
-        exports['rsg-mdt']:createOrUpdateFine(citizenid, citizenName, chargeIds, totalFine, officerName, officerCid)
+        exports['fdb-mdt']:createOrUpdateFine(citizenid, citizenName, chargeIds, totalFine, officerName, officerCid)
     end
     
     if #attachedReportIds > 0 and #chargeIds > 0 then
@@ -782,7 +782,7 @@ lib.callback.register('rsg-mdt:server:commitCharges', function(source, data)
     local currentDate = os.date('*t')
     if currentDate.day == 31 then currentDate.day = 30 end
     targetPlayer.Functions.SetMetaData('criminalrecord', { ['hasRecord'] = true, ['date'] = currentDate })
-    TriggerClientEvent('rsg-lawman:client:sendtojail', targetSource, jailMinutes)
+    TriggerClientEvent('fdb-lawman:client:sendtojail', targetSource, jailMinutes)
     
     local updatedTotals = MySQL.query.await(
         "SELECT COALESCE(SUM(jailtime), 0) as total_jailtime, COALESCE(SUM(time_served), 0) as total_served FROM mdt_issued_charges WHERE citizenid = ?",
@@ -799,12 +799,12 @@ lib.callback.register('rsg-mdt:server:commitCharges', function(source, data)
         minutesPerMonth = minutesPerMonth
     })
     
-    TriggerClientEvent('rsg-mdt:client:notify', targetSource, {
+    TriggerClientEvent('fdb-mdt:client:notify', targetSource, {
         type = 'warning',
         message = locale('notification_charges_committed_notification', #issuedCharges, jailMinutes)
     })
     
-    broadcastToOfficers('rsg-mdt:client:chargesUpdated', { 
+    broadcastToOfficers('fdb-mdt:client:chargesUpdated', { 
         action = 'committed', 
         citizenid = citizenid, 
         citizenName = citizenName,

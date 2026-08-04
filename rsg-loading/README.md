@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 🎬 rsg-loading
+# 🎬 fdb-loading
 **Custom RedM loading screen for RSG Core framework.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -65,10 +65,10 @@ files {
 ---
 
 ## 📂 Installation
-1. Copy the folder `rsg-loading` into your `resources/[rsg]` directory.  
+1. Copy the folder `fdb-loading` into your `resources/[rsg]` directory.  
 2. In your `server.cfg`, add:
    ```cfg
-   ensure rsg-loading
+   ensure fdb-loading
    ```
 3. (Optional) Replace video/audio assets with your own files.  
 4. Restart your RedM server.

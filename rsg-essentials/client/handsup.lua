@@ -1,13 +1,13 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 CreateThread(function()
     while true do
         Wait(7)
 
-        local keybind = RSGCore.Shared.Keybinds['X']
+        local keybind = FDBCore.Shared.Keybinds['X']
 
         if IsControlJustPressed(0, keybind) then
-            RSGCore.Functions.GetPlayerData(function(PlayerData)
+            FDBCore.Functions.GetPlayerData(function(PlayerData)
                 if not PlayerData.metadata["isdead"]
                 and not IsEntityDead(cache.ped) -- unconditional death
                 and not PlayerData.metadata["ishandcuffed"]

@@ -90,7 +90,7 @@ Inventory.SetInventory = function(source, items)
     Player.Functions.SetPlayerData('items', items)
     if not Player.Offline then
         local logMessage = string.format('**%s (citizenid: %s | id: %s)** items set: %s', GetPlayerName(source), Player.PlayerData.citizenid, source, json.encode(items))
-        TriggerEvent('rsg-log:server:CreateLog', 'playerinventory', 'SetInventory', 'blue', logMessage)
+        TriggerEvent('fdb-log:server:CreateLog', 'playerinventory', 'SetInventory', 'blue', logMessage)
     end
 end
 
@@ -385,7 +385,7 @@ Inventory.ClearInventory = function(source, filterItems)
     player.Functions.SetPlayerData('items', savedItemData)
     if not player.Offline then
         local logMessage = string.format('**%s (citizenid: %s | id: %s)** inventory cleared', GetPlayerName(source), player.PlayerData.citizenid, source)
-        TriggerEvent('rsg-log:server:CreateLog', 'playerinventory', 'ClearInventory', 'red', logMessage)
+        TriggerEvent('fdb-log:server:CreateLog', 'playerinventory', 'ClearInventory', 'red', logMessage)
         local ped = GetPlayerPed(source)
         local weapon = GetSelectedPedWeapon(ped)
         if weapon ~= `WEAPON_UNARMED` then
@@ -624,7 +624,7 @@ Inventory.ForceDropItem = function(source, item, amount, info, reason)
     -- Log the forced drop
     local logMessage = string.format('**%s (citizenid: %s | id: %s)** item force dropped due to full inventory: %s x%s at %s',
         GetPlayerName(source), Player.PlayerData.citizenid, source, item, amount, coords)
-    TriggerEvent('rsg-log:server:CreateLog', 'playerinventory', 'Force Drop', 'orange', logMessage)
+    TriggerEvent('fdb-log:server:CreateLog', 'playerinventory', 'Force Drop', 'orange', logMessage)
 
     -- Notify the player
     TriggerClientEvent('ox_lib:notify', source, {
@@ -769,9 +769,9 @@ Inventory.AddItem = function(identifier, item, amount, slot, info, reason)
     end
     local invName = player and GetPlayerName(identifier) .. ' (' .. identifier .. ')' or identifier
     local addReason = reason or 'No reason specified'
-    local resourceName = GetInvokingResource() or 'rsg-inventory'
+    local resourceName = GetInvokingResource() or 'fdb-inventory'
     TriggerEvent(
-        'rsg-log:server:CreateLog',
+        'fdb-log:server:CreateLog',
         'playerinventory',
         'Item Added',
         'green',
@@ -855,8 +855,8 @@ Inventory.RemoveItem = function(identifier, item, amount, slot, reason, isMove)
                                 stashInv.items[sKey] = nil
                             end
                             Inventory.SaveStash(hItem.stashId)
-                            local resourceName = GetInvokingResource() or 'rsg-inventory'
-                            TriggerEvent('rsg-log:server:CreateLog', 'playerinventory', 'Item Removed (Hotbar Stash)', 'red', '**Inventory:** ' .. hItem.stashId .. ' (Slot: ' .. hItem.originalSlot .. ')\n**Item:** ' .. item .. '\n**Amount:** ' .. amount .. '\n**Reason:** ' .. (reason or 'No reason specified') .. '\n**Resource:** ' .. resourceName)
+                            local resourceName = GetInvokingResource() or 'fdb-inventory'
+                            TriggerEvent('fdb-log:server:CreateLog', 'playerinventory', 'Item Removed (Hotbar Stash)', 'red', '**Inventory:** ' .. hItem.stashId .. ' (Slot: ' .. hItem.originalSlot .. ')\n**Item:** ' .. item .. '\n**Amount:** ' .. amount .. '\n**Reason:** ' .. (reason or 'No reason specified') .. '\n**Resource:** ' .. resourceName)
                             return true
                         end
                     end
@@ -913,7 +913,7 @@ Inventory.RemoveItem = function(identifier, item, amount, slot, reason, isMove)
     if player then 
         player.Functions.SetPlayerData('items', inventory)
         -- Trigger event hook for external resources to handle custom 'after removal' logic
-        -- This event is not registered in rsg-inventory itself - it's for third-party resources
+        -- This event is not registered in fdb-inventory itself - it's for third-party resources
         local data = {
             amount = amount,
             slot = slot,
@@ -926,10 +926,10 @@ Inventory.RemoveItem = function(identifier, item, amount, slot, reason, isMove)
 
     local invName = player and GetPlayerName(identifier) .. ' (' .. identifier .. ')' or identifier
     local removeReason = reason or 'No reason specified'
-    local resourceName = GetInvokingResource() or 'rsg-inventory'
+    local resourceName = GetInvokingResource() or 'fdb-inventory'
 
     TriggerEvent(
-        'rsg-log:server:CreateLog',
+        'fdb-log:server:CreateLog',
         'playerinventory',
         'Item Removed',
         'red',

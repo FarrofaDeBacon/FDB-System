@@ -134,9 +134,9 @@ local function placeProp(propmodel, item, gunsitename, gunsiteid)
                 SetEntityCollision(propObj, true, true)
                 DeleteObject(propObj)
                 if item == Config.Gunsmithitem then
-                    TriggerEvent('rsg-weaponcomp:client:setupgunzone', propmodel, item, coords, heading)
+                    TriggerEvent('fdb-weaponcomp:client:setupgunzone', propmodel, item, coords, heading)
                 else
-                    TriggerEvent('rsg-weaponcomp:client:placegunsiteitem', propmodel, item, gunsiteid, coords, heading)
+                    TriggerEvent('fdb-weaponcomp:client:placegunsiteitem', propmodel, item, gunsiteid, coords, heading)
                 end
             end
 
@@ -150,6 +150,6 @@ local function placeProp(propmodel, item, gunsitename, gunsiteid)
     end)
 end
 
-RegisterNetEvent('rsg-weaponcomp:client:createprop', function(data)
+RegisterNetEvent('fdb-weaponcomp:client:createprop', function(data)
     placeProp(data.propmodel, data.item, data.gunsitename, data.gunsiteid)
 end)

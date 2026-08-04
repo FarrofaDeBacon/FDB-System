@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 🏥 rsg-medic
+# 🏥 fdb-medic
 **Complete medical and revive system for RedM using RSG Core.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -12,13 +12,13 @@
 ---
 
 ## 🛠️ Dependencies
-- [**rsg-core**](https://github.com/Rexshack-RedM/rsg-core) 🤠  
+- [**fdb-core**](https://github.com/Rexshack-RedM/fdb-core) 🤠  
 - [**ox_lib**](https://github.com/Rexshack-RedM/ox_lib) ⚙️ *(prompts & notifications)*  
-- [**rsg-inventory**](https://github.com/Rexshack-RedM/rsg-inventory) 🎒 *(Medic stash & bandage itMedic)*  
+- [**fdb-inventory**](https://github.com/Rexshack-RedM/fdb-inventory) 🎒 *(Medic stash & bandage itMedic)*  
 - [**oxmysql**](https://github.com/overextended/oxmysql) 🗄️ *(data persistence)*  
 
 **Locales:** `en`, `fr`, `es`, `el`, `it`, `pt-br`, `ro`  
-**SQL:** No additional tables required (uses `rsg-core` player data).
+**SQL:** No additional tables required (uses `fdb-core` player data).
 
 ---
 
@@ -58,7 +58,7 @@
 - GPS marker automatically attached for medics if `Config.AddGPSRoute = true`.
 
 ### 💼 Medic Storage
-- Configurable stash for Medic use (via `rsg-inventory`).
+- Configurable stash for Medic use (via `fdb-inventory`).
 - Adjustable slot & weight limits:
   ```lua
   Config.StorageMaxWeight = 4000000
@@ -115,14 +115,14 @@ Config.BandageHealth = 15 -- percent restored
 ---
 
 ## 📂 Installation
-1. Place `rsg-medic` in your `resources/[rsg]` folder.  
-2. Ensure `rsg-core`, `rsg-inventory`, `ox_lib`, and `oxmysql` are installed.  
+1. Place `fdb-medic` in your `resources/[rsg]` folder.  
+2. Ensure `fdb-core`, `fdb-inventory`, `ox_lib`, and `oxmysql` are installed.  
 3. Add to your `server.cfg`:
    ```cfg
    ensure ox_lib
-   ensure rsg-core
-   ensure rsg-inventory
-   ensure rsg-medic
+   ensure fdb-core
+   ensure fdb-inventory
+   ensure fdb-medic
    ```
 4. Restart your server.
 

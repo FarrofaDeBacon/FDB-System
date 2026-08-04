@@ -1,10 +1,10 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
-RegisterServerEvent("rsg-barber:server:SaveSkin")
-AddEventHandler("rsg-barber:server:SaveSkin", function(CreatorCache)
+RegisterServerEvent("fdb-barber:server:SaveSkin")
+AddEventHandler("fdb-barber:server:SaveSkin", function(CreatorCache)
     local src = source
-    local player = RSGCore.Functions.GetPlayer(src)
+    local player = FDBCore.Functions.GetPlayer(src)
     local citizenid = player.PlayerData.citizenid
     local price = Config.BarberCost
     local money = player.Functions.GetMoney('cash')

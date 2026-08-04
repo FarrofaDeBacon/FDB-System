@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
 -- Orden y prioridades (shared helper defined in config.lua: GetSortedComponentKeys)
@@ -43,16 +43,16 @@ local function clearAllComponents(ped, weaponHash)
     end
 end
 
-RegisterNetEvent("rsg-weaponcomp:client:reloadWeapon")
-AddEventHandler("rsg-weaponcomp:client:reloadWeapon", function()
+RegisterNetEvent("fdb-weaponcomp:client:reloadWeapon")
+AddEventHandler("fdb-weaponcomp:client:reloadWeapon", function()
     local ped     = PlayerPedId()
     local wHash   = GetPedCurrentHeldWeapon(ped)
     if wHash == GetHashKey("WEAPON_UNARMED") then return end
 
-    local serial = exports['rsg-weapons']:weaponInHands()[wHash]
+    local serial = exports['fdb-weapons']:weaponInHands()[wHash]
     if not serial then return end
 
-    RSGCore.Functions.TriggerCallback('rsg-weaponcomp:server:getPlayerWeaponComponents', function(result)
+    FDBCore.Functions.TriggerCallback('fdb-weaponcomp:server:getPlayerWeaponComponents', function(result)
         local comps = result and result.components or {}
         if not next(comps) then return end
         -- print(json.encode(comps))
@@ -78,17 +78,17 @@ RegisterCommand(Config.Commandequipscope, function()
     local wHash   = GetPedCurrentHeldWeapon(ped)
     if wHash == GetHashKey("WEAPON_UNARMED") then return end
 
-    local serial = exports['rsg-weapons']:weaponInHands()[wHash]
+    local serial = exports['fdb-weapons']:weaponInHands()[wHash]
     if not serial then return end
 
-    RSGCore.Functions.TriggerCallback('rsg-weaponcomp:server:equipScope', function(success)
+    FDBCore.Functions.TriggerCallback('fdb-weaponcomp:server:equipScope', function(success)
         if success then
-            local Player = RSGCore.Functions.GetPlayerData()
+            local Player = FDBCore.Functions.GetPlayerData()
             for _, item in pairs(Player.items or {}) do
                 if item.info and item.info.serie == serial then
                     local scopeName = item.info.componentshash and item.info.componentshash["SCOPE"]
                     if scopeName then
-                        TriggerEvent('rsg-weaponcomp:client:equipScope', scopeName)
+                        TriggerEvent('fdb-weaponcomp:client:equipScope', scopeName)
                         lib.notify({ type = 'success', description = locale('cl_scope_equipped_ok') })
                     end
                     break
@@ -103,17 +103,17 @@ RegisterCommand(Config.Commanddesequipscope, function()
     local wHash   = GetPedCurrentHeldWeapon(ped)
     if wHash == GetHashKey("WEAPON_UNARMED") then return end
 
-    local serial = exports['rsg-weapons']:weaponInHands()[wHash]
+    local serial = exports['fdb-weapons']:weaponInHands()[wHash]
     if not serial then return end
 
-    RSGCore.Functions.TriggerCallback('rsg-weaponcomp:server:unequipScope', function(success)
+    FDBCore.Functions.TriggerCallback('fdb-weaponcomp:server:unequipScope', function(success)
         if success then
-            local Player = RSGCore.Functions.GetPlayerData()
+            local Player = FDBCore.Functions.GetPlayerData()
             for _, item in pairs(Player.items or {}) do
                 if item.info and item.info.serie == serial then
                     local scopeName = item.info.componentshash and item.info.componentshash["SCOPE"]
                     if scopeName then
-                        TriggerEvent('rsg-weaponcomp:client:unequipScope', scopeName)
+                        TriggerEvent('fdb-weaponcomp:client:unequipScope', scopeName)
                         lib.notify({ type = 'success', description = locale('cl_scope_removed_ok') })
                     end
                     break
@@ -145,11 +145,11 @@ local function playScopeAnim(ped)
 
 end
 
-RegisterNetEvent('rsg-weaponcomp:client:equipScope', function(scopeName)
+RegisterNetEvent('fdb-weaponcomp:client:equipScope', function(scopeName)
     local ped     = PlayerPedId()
     local wHash   = GetPedCurrentHeldWeapon(ped)
     if wHash == GetHashKey("WEAPON_UNARMED") then return end
-    local serial = exports['rsg-weapons']:weaponInHands()[wHash]
+    local serial = exports['fdb-weapons']:weaponInHands()[wHash]
     if not serial then return end
 
     playScopeAnim(ped)
@@ -160,11 +160,11 @@ RegisterNetEvent('rsg-weaponcomp:client:equipScope', function(scopeName)
     end
 end)
 
-RegisterNetEvent('rsg-weaponcomp:client:unequipScope', function(scopeName)
+RegisterNetEvent('fdb-weaponcomp:client:unequipScope', function(scopeName)
     local ped     = PlayerPedId()
     local wHash   = GetPedCurrentHeldWeapon(ped)
     if wHash == GetHashKey("WEAPON_UNARMED") then return end
-    local serial = exports['rsg-weapons']:weaponInHands()[wHash]
+    local serial = exports['fdb-weapons']:weaponInHands()[wHash]
     if not serial then return end
 
     playScopeAnim(ped)

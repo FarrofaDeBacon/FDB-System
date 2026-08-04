@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
 local _ammoTypes = {}
@@ -24,11 +24,11 @@ local function canAddAmmo(ammoType, amount)
     end
 end
 
-lib.callback.register('rsg-ammo:client:CanAddAmmo', function(ammoType, amount)
+lib.callback.register('fdb-ammo:client:CanAddAmmo', function(ammoType, amount)
     return canAddAmmo(ammoType, amount)
 end)
 
-RegisterNetEvent('rsg-ammo:client:AddAmmo', function(ammoType, amount)
+RegisterNetEvent('fdb-ammo:client:AddAmmo', function(ammoType, amount)
     local ammoDefinition = _ammoTypes[ammoType]
     if not ammoDefinition then
         return
@@ -44,7 +44,7 @@ end)
 ------------------------------------------
 -- open ammo box
 ------------------------------------------
-RegisterNetEvent('rsg-ammo:client:openAmmoBox', function(ammoBoxItem, ammoType, amount)
+RegisterNetEvent('fdb-ammo:client:openAmmoBox', function(ammoBoxItem, ammoType, amount)
     if not canAddAmmo(ammoType, amount) then return end
 
     if LocalPlayer.state.inv_busy then return end
@@ -52,11 +52,11 @@ RegisterNetEvent('rsg-ammo:client:openAmmoBox', function(ammoBoxItem, ammoType, 
     LocalPlayer.state:set("inv_busy", true, true)
     lib.progressBar({
         duration = Config.OpenAmmoBoxTime,
-        label = locale('cl_lang_5') .. ' '.. RSGCore.Shared.Items[ammoBoxItem].label,
+        label = locale('cl_lang_5') .. ' '.. FDBCore.Shared.Items[ammoBoxItem].label,
         useWhileDead = false,
         canCancel = false,
     })
-    TriggerServerEvent('rsg-ammo:server:openAmmoBox', ammoBoxItem, ammoType, amount)
+    TriggerServerEvent('fdb-ammo:server:openAmmoBox', ammoBoxItem, ammoType, amount)
     LocalPlayer.state:set("inv_busy", false, true)
 end)
 
@@ -80,7 +80,7 @@ CreateThread(function()
             end
 
             if next(update) ~= nil then
-                TriggerServerEvent('rsg-ammo:server:updateDb', update)
+                TriggerServerEvent('fdb-ammo:server:updateDb', update)
             end
         end
         
@@ -117,7 +117,7 @@ local function onPlayerLoaded()
         AMMO_HATCHET_CLEAVER = 0xEF32A25D,
     }
 
-    RSGCore.Functions.TriggerCallback('rsg-ammo:server:initializeDb', function(ammoRow)
+    FDBCore.Functions.TriggerCallback('fdb-ammo:server:initializeDb', function(ammoRow)
         for dbColumn, amount in pairs(ammoRow) do
             if not amount then goto continue end
 
@@ -136,7 +136,7 @@ local function onPlayerLoaded()
         dbDataInitialized = true
     end)
 end
-AddEventHandler('RSGCore:Client:OnPlayerLoaded', onPlayerLoaded)
+AddEventHandler('FDBCore:Client:OnPlayerLoaded', onPlayerLoaded)
 
 AddEventHandler('onResourceStart', function (resourceName) 
     if GetCurrentResourceName() == resourceName then

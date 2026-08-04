@@ -131,7 +131,7 @@ WeaponAPI.RemoveWeaponFromPeds = function(weaponName, serial)
     end
 
     if weaponRemoved and #EquippedWeapons > 0 then
-        exports['rsg-weapons']:UsedWeapons(serial)
+        exports['fdb-weapons']:UsedWeapons(serial)
         WeaponAPI.used2 = false
         local characterItem = getGuidFromItemId(1, nil, joaat("CHARACTER"), 0xA1212100)
         if not characterItem then
@@ -153,7 +153,7 @@ WeaponAPI.RemoveWeaponFromPeds = function(weaponName, serial)
         end
     else
         RemoveWeaponFromPed(playerPedId, joaat(weaponName), true, 0)
-        exports['rsg-weapons']:UsedWeapons(serial)
+        exports['fdb-weapons']:UsedWeapons(serial)
         WeaponAPI.used = false
     end
 end

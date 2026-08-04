@@ -16,7 +16,7 @@ function round(num, numDecimalPlaces)
     return math.floor(num * mult + 0.5) / mult
 end
 
-RegisterNetEvent('rsg-adminmenu:client:toggledoorid', function()
+RegisterNetEvent('fdb-adminmenu:client:toggledoorid', function()
     if not showdoorid then
         showdoorid = true
         lib.notify({ title = locale('cl_door_on'), type = 'inform', duration = 7000 })

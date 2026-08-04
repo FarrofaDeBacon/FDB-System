@@ -51,7 +51,7 @@ function NearPed(npcmodel, npccoords, barberid)
                 icon = 'far fa-eye',
                 label = locale('cl_open_barber'),
                 onSelect = function()
-                    TriggerEvent('rsg-barber:client:menu', barberid)
+                    TriggerEvent('fdb-barber:client:menu', barberid)
                 end,
                 distance = 2.0
             },

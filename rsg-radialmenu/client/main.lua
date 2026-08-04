@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 local inRadialMenu = false
 local jobIndex = nil
 local vehicleIndex = nil
@@ -44,7 +44,7 @@ local function RemoveOption(id)
 end
 
 local function SetupJobMenu()
-    local PlayerData = RSGCore.Functions.GetPlayerData()
+    local PlayerData = FDBCore.Functions.GetPlayerData()
     local JobMenu = {
         id = 'jobinteractions',
         title = 'Work',
@@ -95,10 +95,10 @@ end
 local function setRadialState(bool, sendMessage, delay)
 
     if bool then
-        TriggerEvent('rsg-radialmenu:client:onRadialmenuOpen')
+        TriggerEvent('fdb-radialmenu:client:onRadialmenuOpen')
         SetupRadialMenu()
     else
-        TriggerEvent('rsg-radialmenu:client:onRadialmenuClose')
+        TriggerEvent('fdb-radialmenu:client:onRadialmenuClose')
     end
     SetNuiFocus(bool, bool)
     if sendMessage then
@@ -115,13 +115,13 @@ end
 -- Main Open Event
 CreateThread(function()
     local IsRadialJustActivated = Config.HoldToOpen
-        and function() return IsControlJustPressed(0, RSGCore.Shared.Keybinds[Config.Keybind]) end
-        or function() return IsControlJustReleased(0, RSGCore.Shared.Keybinds[Config.Keybind]) end
+        and function() return IsControlJustPressed(0, FDBCore.Shared.Keybinds[Config.Keybind]) end
+        or function() return IsControlJustReleased(0, FDBCore.Shared.Keybinds[Config.Keybind]) end
 
     while true do
         Citizen.Wait(7)
         if IsRadialJustActivated() then
-            local PlayerData = RSGCore.Functions.GetPlayerData()
+            local PlayerData = FDBCore.Functions.GetPlayerData()
             if not PlayerData.metadata['isdead'] then
                 setRadialState(true, true)
                 SetCursorLocation(0.5, 0.5)
@@ -130,7 +130,7 @@ CreateThread(function()
     end
 end)
 
-RegisterNetEvent('rsg-radialmenu:client:noPlayers', function()
+RegisterNetEvent('fdb-radialmenu:client:noPlayers', function()
     lib.notify({ title = 'Error', description = 'No One Nearby', type = 'error', duration = 5000 })
 end)
 
@@ -142,7 +142,7 @@ RegisterNUICallback('closeRadial', function(data, cb)
 end)
 
 RegisterNUICallback('selectItem', function(inData, cb)
-    local PlayerData = RSGCore.Functions.GetPlayerData()
+    local PlayerData = FDBCore.Functions.GetPlayerData()
     if PlayerData.metadata['isdead'] then 
         cb('ok')
         return 
@@ -160,32 +160,32 @@ RegisterNUICallback('selectItem', function(inData, cb)
         elseif data.type == 'command' then
             ExecuteCommand(data.event)
         elseif data.type == 'rsgcommand' then
-            TriggerServerEvent('RSGCore:CallCommand', data.event, data)
+            TriggerServerEvent('FDBCore:CallCommand', data.event, data)
         end
     end
     cb('ok')
 end)
 
 -- police emergency button pressed
-RegisterNetEvent('rsg-radialmenu:client:SendLawmanEmergencyAlert', function()
-    local Player = RSGCore.Functions.GetPlayerData()
+RegisterNetEvent('fdb-radialmenu:client:SendLawmanEmergencyAlert', function()
+    local Player = FDBCore.Functions.GetPlayerData()
     local firstname = Player.charinfo.firstname
     local lastname = Player.charinfo.lastname
     -- notify police
-    TriggerServerEvent('rsg-lawman:server:lawmanAlert', 'Officer '..firstname..' '..lastname..' emergency button pressed!')
+    TriggerServerEvent('fdb-lawman:server:lawmanAlert', 'Officer '..firstname..' '..lastname..' emergency button pressed!')
     -- notify medics
-    TriggerServerEvent('rsg-medic:server:medicAlert', 'Medic '..firstname..' '..lastname..' emergency button pressed!')
+    TriggerServerEvent('fdb-medic:server:medicAlert', 'Medic '..firstname..' '..lastname..' emergency button pressed!')
 end)
 
 -- medic emergency button pressed
-RegisterNetEvent('rsg-radialmenu:client:SendMedicEmergencyAlert', function()
-    local Player = RSGCore.Functions.GetPlayerData()
+RegisterNetEvent('fdb-radialmenu:client:SendMedicEmergencyAlert', function()
+    local Player = FDBCore.Functions.GetPlayerData()
     local firstname = Player.charinfo.firstname
     local lastname = Player.charinfo.lastname
     -- notify medics
-    TriggerServerEvent('rsg-medic:server:medicAlert', 'Medic '..firstname..' '..lastname..' emergency button pressed!')
+    TriggerServerEvent('fdb-medic:server:medicAlert', 'Medic '..firstname..' '..lastname..' emergency button pressed!')
     -- notify police
-    TriggerServerEvent('rsg-lawman:server:lawmanAlert', 'Officer '..firstname..' '..lastname..' emergency button pressed!')
+    TriggerServerEvent('fdb-lawman:server:lawmanAlert', 'Officer '..firstname..' '..lastname..' emergency button pressed!')
 end)
 
 exports('AddOption', AddOption)

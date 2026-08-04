@@ -1,4 +1,4 @@
-AddEventHandler('rsg-lockpick:client:openLockpick', function(callback)
+AddEventHandler('fdb-lockpick:client:openLockpick', function(callback)
     lockpickCallback = callback
     openLockpick(true)
 end)

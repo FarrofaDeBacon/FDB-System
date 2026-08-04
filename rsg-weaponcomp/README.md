@@ -1,4 +1,4 @@
-# rsg-weaponcomp
+# fdb-weaponcomp
 
 Weapon customization system for RedM (RSG Core). Customize weapon components — barrels, grips, sights, materials, engravings, tints, wraps, and more — through placeable gunsmith props with a 3D inspection camera.
 
@@ -14,23 +14,23 @@ Weapon customization system for RedM (RSG Core). Customize weapon components —
 - **Diff-based pricing** — Only components that differ from the weapon's current saved state are charged.
 - **Dual payment type** — Supports `cash` or `bloodmoney` payment.
 - **ox_target integration** — Right-click the placed prop for "Weapon Customization" and "PackUp" options.
-- **Native weapon inspection** — RDR2-style stats UI, clean animation with real-time stat recovery. Open via `/inspect` or weapon wheel **Maintain** (scroll click). Cleaning uses `gun_oil`; full repair remains `weapon_repair_kit` via `rsg-weapons`.
+- **Native weapon inspection** — RDR2-style stats UI, clean animation with real-time stat recovery. Open via `/inspect` or weapon wheel **Maintain** (scroll click). Cleaning uses `gun_oil`; full repair remains `weapon_repair_kit` via `fdb-weapons`.
 - **Weapon restriction list** — Certain weapons (knives, throwables, binoculars, lasso, etc.) can be excluded from customization.
 - **Persistence** — All prop and component data saved to MySQL database (`player_weapons_custom` table).
 
 ## Dependencies
 
-- [rsg-core](https://github.com/Rexshack-RedM/rsg-core)
+- [fdb-core](https://github.com/Rexshack-RedM/fdb-core)
 - [ox_lib](https://github.com/overextended/ox_lib)
 - [oxmysql](https://github.com/overextended/oxmysql)
 - [ox_target](https://github.com/overextended/ox_target) (client-side dependency for prop interaction)
-- [rsg-weapons](https://github.com/Rexshack-RedM/rsg-weapons)
+- [fdb-weapons](https://github.com/Rexshack-RedM/fdb-weapons)
 
 ## Installation
 
 1. Clone the repository into your server's `resources/[framework]/` directory:
    ```
-   git clone https://github.com/your-org/rsg-weaponcomp.git
+   git clone https://github.com/your-org/fdb-weaponcomp.git
    ```
 
 2. Add the SQL table to your database:
@@ -48,7 +48,7 @@ Weapon customization system for RedM (RSG Core). Customize weapon components —
 
 3. Ensure the resource in your `server.cfg`:
    ```
-   ensure rsg-weaponcomp
+   ensure fdb-weaponcomp
    ```
 
 4. Add the `gunsmith` item to your items table (or configure a different item name in `config.lua`):
@@ -62,7 +62,7 @@ Weapon customization system for RedM (RSG Core). Customize weapon components —
    gun_oil = { name = 'gun_oil', label = 'Gun Oil', weight = 120, type = 'item', image = 'weapon_repair_kit.png', unique = false, useable = false, shouldClose = true, description = 'Cleans weapons during inspection' },
    ```
 
-   Optional: integrate `rsg-weapons` callbacks `consumeGunOil` / `syncCleanedWeapon` to persist cleaned quality. Without them, cleaning still works visually; item removal falls back to `rsg-weapons:server:removeitem`.
+   Optional: integrate `fdb-weapons` callbacks `consumeGunOil` / `syncCleanedWeapon` to persist cleaned quality. Without them, cleaning still works visually; item removal falls back to `fdb-weapons:server:removeitem`.
 
 ## Configuration
 
@@ -73,7 +73,7 @@ All settings in `config.lua`:
 | `Config.Debug` | bool | `false` | Enable debug logging |
 | `Config.LoadNotification` | bool | `false` | Show load notifications |
 | `Config.PlaceDistance` | float | `5.0` | Max distance to place a gunsmith prop |
-| `Config.RepairItem` | string | `weapon_repair_kit` | Full repair item (via `rsg-weapons`) |
+| `Config.RepairItem` | string | `weapon_repair_kit` | Full repair item (via `fdb-weapons`) |
 | `Config.CleanItem` | string | `gun_oil` | Item consumed when cleaning during inspection |
 | `Config.WeaponWheelInspect` | bool | `true` | Hook weapon wheel Maintain action (scroll click) |
 | `Config.Gunsmithitem` | string | `gunsmith` | Item used to deploy a gunsmith prop |
@@ -126,5 +126,5 @@ Add/edit locale files in the `locales/` directory. Available locales: `cs`, `en`
 ## Export
 
 ```lua
-exports['rsg-weaponcomp']:startWeaponInspection(hasCleanItem, cleanCallbacks, weaponHashOverride)
+exports['fdb-weaponcomp']:startWeaponInspection(hasCleanItem, cleanCallbacks, weaponHashOverride)
 ```

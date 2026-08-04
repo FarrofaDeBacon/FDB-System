@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 🍞 rsg-consume
+# 🍞 fdb-consume
 **Universal consumption system for RedM using RSG Core.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -12,9 +12,9 @@
 ---
 
 ## 🛠️ Dependencies
-- [**rsg-core**](https://github.com/Rexshack-RedM/rsg-core) 🤠  
+- [**fdb-core**](https://github.com/Rexshack-RedM/fdb-core) 🤠  
 - [**ox_lib**](https://github.com/Rexshack-RedM/ox_lib) ⚙️ *(notifications, locales)*  
-- [**rsg-inventory**](https://github.com/Rexshack-RedM/rsg-inventory) 🎒 *(item use integration)*  
+- [**fdb-inventory**](https://github.com/Rexshack-RedM/fdb-inventory) 🎒 *(item use integration)*  
 
 **Locales:** `en`, `fr`, `es`, `el`, `pt-br`, `it`, `ro`  
 **License:** GPL‑3.0  
@@ -30,7 +30,7 @@
   - `Stew` → soups and stews (uses bowl animation)
 - Each item can modify multiple needs:
   - Hunger, Thirst, Stress, Alcohol, Poison, PoisonRate
-- Items automatically become **usable** via `RSGCore.Functions.CreateUseableItem()`.
+- Items automatically become **usable** via `FDBCore.Functions.CreateUseableItem()`.
 
 ### 🍺 Alcohol System
 - Each alcoholic item increases the player’s alcohol level.  
@@ -133,14 +133,14 @@ coffee  = { name = 'coffee',  label = 'Cup of Coffee',      weight = 80,  type =
 ---
 
 ## 📂 Installation
-1. Place `rsg-consume` inside your `resources/[rsg]` folder.  
-2. Ensure `rsg-core`, `rsg-inventory`, and `ox_lib` are installed.  
+1. Place `fdb-consume` inside your `resources/[rsg]` folder.  
+2. Ensure `fdb-core`, `fdb-inventory`, and `ox_lib` are installed.  
 3. Add to your `server.cfg`:
    ```cfg
    ensure ox_lib
-   ensure rsg-core
-   ensure rsg-inventory
-   ensure rsg-consume
+   ensure fdb-core
+   ensure fdb-inventory
+   ensure fdb-consume
    ```
 4. Restart your server.
 

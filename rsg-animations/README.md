@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 💃 rsg-animations
+# 💃 fdb-animations
 **Comprehensive emote & animation system for RedM (RSG Core).**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -11,7 +11,7 @@
 ---
 
 ## 🛠️ Dependencies
-- **rsg-core** (framework & player data)  
+- **fdb-core** (framework & player data)  
 - **ox_lib** (locale, notifications, context)  
 - **oxmysql** (database handler for favorites)
 
@@ -29,7 +29,7 @@
   - **Emote** → RDR2 native emote (e.g. `KIT_EMOTE_GREETING_TIP_HAT`)  
   - **Scenario** → world scenarios (e.g. `WORLD_HUMAN_SMOKE`)  
 - 🧭 **Open via command or radial menu** (`/anim` by default).  
-- 🗃️ **SQL file included** (`rsg-animations.sql`) to create favorite table automatically.  
+- 🗃️ **SQL file included** (`fdb-animations.sql`) to create favorite table automatically.  
 - 🌍 **Locale support** (English, Greek by default).  
 
 ---
@@ -76,7 +76,7 @@ Config.Animations = {
 ---
 
 ## 💾 Database (Favorites System)
-Run the SQL file `rsg-animations.sql` to create the table for player favorites:
+Run the SQL file `fdb-animations.sql` to create the table for player favorites:
 
 ```sql
 CREATE TABLE IF NOT EXISTS favorites_animations (
@@ -98,20 +98,20 @@ Favorites are automatically reloaded on login.
 - `server/server.lua` — manages favorite storage and SQL communication  
 - `config.lua` — main configuration file  
 - `ui/` — Vue.js front‑end (menu interface)  
-- `rsg-animations.sql` — table creation script  
+- `fdb-animations.sql` — table creation script  
 - `fxmanifest.lua` — defines NUI and dependencies
 
 ---
 
 ## 📂 Installation
-1. Place `rsg-animations` in your `resources/[rsg]` folder.  
-2. Import `rsg-animations.sql` into your database.  
+1. Place `fdb-animations` in your `resources/[rsg]` folder.  
+2. Import `fdb-animations.sql` into your database.  
 3. Add to your `server.cfg`:
    ```cfg
    ensure ox_lib
    ensure oxmysql
-   ensure rsg-core
-   ensure rsg-animations
+   ensure fdb-core
+   ensure fdb-animations
    ```
 4. Restart your server.  
 5. Use `/anim` in-game to open the menu.

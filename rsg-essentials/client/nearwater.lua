@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 local WashPromp
 local DrinkPromp
 local RiverGroup = GetRandomIntInRange(0, 0xffffff)
@@ -10,7 +10,7 @@ function WashPrompt()
         local str = locale('cl_wash')
         local wait = 0
         WashPromp = Citizen.InvokeNative(0x04F97DE45A519419)
-        PromptSetControlAction(WashPromp, RSGCore.Shared.Keybinds['ENTER'])
+        PromptSetControlAction(WashPromp, FDBCore.Shared.Keybinds['ENTER'])
         str = CreateVarString(10, 'LITERAL_STRING', str)
         PromptSetText(WashPromp, str)
         PromptSetEnabled(WashPromp, true)
@@ -27,7 +27,7 @@ function DrinkPrompt()
         local str =locale('cl_drink')
         local wait = 0
         DrinkPromp = Citizen.InvokeNative(0x04F97DE45A519419)
-        PromptSetControlAction(DrinkPromp, RSGCore.Shared.Keybinds['J'])
+        PromptSetControlAction(DrinkPromp, FDBCore.Shared.Keybinds['J'])
         str = CreateVarString(10, 'LITERAL_STRING', str)
         PromptSetText(DrinkPromp, str)
         PromptSetEnabled(DrinkPromp, true)
@@ -77,7 +77,7 @@ CreateThread(function()
                 PromptSetActiveGroupThisFrame(RiverGroup, drink)
 
                 if PromptHasHoldModeCompleted(DrinkPromp) then
-                    TriggerEvent('rsg-river:client:drink')
+                    TriggerEvent('fdb-river:client:drink')
                 end
                 
                 sleep = 4
@@ -90,7 +90,7 @@ CreateThread(function()
 end)
 
 -- drink action
-AddEventHandler('rsg-river:client:drink', function()
+AddEventHandler('fdb-river:client:drink', function()
     if drink ~= 0 then
         SetEntityAsMissionEntity(drink)
         DeleteObject(nativerioprop)
@@ -109,7 +109,7 @@ AddEventHandler('rsg-river:client:drink', function()
 end)
 
 ---Wash face animation
-AddEventHandler('rsg-river:client:lavati', function()
+AddEventHandler('fdb-river:client:lavati', function()
     StartWash("amb_misc@world_human_wash_face_bucket@ground@male_a@idle_d", "idle_l")
 end)
 

@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# ⚙️ rsg-multijob
+# ⚙️ fdb-multijob
 **Multi-job management system for RedM using RSG Core.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -12,7 +12,7 @@
 ---
 
 ## 🛠️ Dependencies
-- [**rsg-core**](https://github.com/Rexshack-RedM/rsg-core) 🤠  
+- [**fdb-core**](https://github.com/Rexshack-RedM/fdb-core) 🤠  
 - [**ox_lib**](https://github.com/overextended/ox_lib) ⚙️ *(menu & notifications)*  
 
 **Locales:** `en`, `fr`, `es`, `it`, `pt-br`, `el`  
@@ -25,7 +25,7 @@
 - 🔄 **Switch between jobs** instantly using `/myjobs` or via menu.  
 - 🔔 **Localized notifications** through `ox_lib`.  
 - 🧩 **SQL storage** for persistence (`player_jobs` table).  
-- 🛠️ **Duty toggle** supported (calls `RSGCore:ToggleDuty`).  
+- 🛠️ **Duty toggle** supported (calls `FDBCore:ToggleDuty`).  
 - 🎨 **Configurable job icons** using FontAwesome.  
 - 🔐 **Whitelist system** to allow specific players more jobs.  
 - 🌍 Multi-language support built-in.  
@@ -69,13 +69,13 @@ Config.JobIcons = {
 - On resource start, all player jobs are loaded and linked to their citizenid.  
 - When a player adds or switches job:
   - Verifies against `Config.MaxJobs` (or whitelist exception).  
-  - Updates both **RSGCore job data** and **SQL table**.  
+  - Updates both **FDBCore job data** and **SQL table**.  
   - Triggers localized notification with job name & grade.  
 
 ### Client Side
 - Opens a **context menu** using `ox_lib.registerContext`.  
 - Displays all jobs (current job highlighted).  
-- Selecting one job calls `TriggerServerEvent('rsg-multijob:switchJob', job)`  
+- Selecting one job calls `TriggerServerEvent('fdb-multijob:switchJob', job)`  
 - Displays success/failure notification.
 
 ---
@@ -108,24 +108,24 @@ CREATE TABLE IF NOT EXISTS `player_jobs` (
 Every time a player switches job:
 - Their job is updated in `PlayerData.job`.  
 - All server checks (`Player.PlayerData.job.name`) instantly reflect the change.  
-- If the new job supports `onDuty`, it triggers a call to `RSGCore:ToggleDuty`.  
+- If the new job supports `onDuty`, it triggers a call to `FDBCore:ToggleDuty`.  
 
 Example usage:
 ```lua
-local Player = RSGCore.Functions.GetPlayer(source)
+local Player = FDBCore.Functions.GetPlayer(source)
 print(Player.PlayerData.job.name) -- returns the currently active job
 ```
 
 ---
 
 ## 📂 Installation
-1. Place `rsg-multijob` inside your `resources/[rsg]` folder.  
-2. Import `rsg-multijob.sql` (or manually create the table above).  
+1. Place `fdb-multijob` inside your `resources/[rsg]` folder.  
+2. Import `fdb-multijob.sql` (or manually create the table above).  
 3. Add to your `server.cfg`:
    ```cfg
    ensure ox_lib
-   ensure rsg-core
-   ensure rsg-multijob
+   ensure fdb-core
+   ensure fdb-multijob
    ```
 4. Restart your server.
 

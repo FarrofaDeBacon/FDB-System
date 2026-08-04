@@ -1,6 +1,6 @@
-RegisterServerEvent('rsg-appearance:server:saveOutfit', function(newClothes, isMale, outfitName)
+RegisterServerEvent('fdb-appearance:server:saveOutfit', function(newClothes, isMale, outfitName)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
         
     local citizenid = Player.PlayerData.citizenid
@@ -32,9 +32,9 @@ RegisterServerEvent('rsg-appearance:server:saveOutfit', function(newClothes, isM
     end
 end)
 
-RegisterNetEvent('rsg-appearance:server:saveUseOutfit', function(clothes)
+RegisterNetEvent('fdb-appearance:server:saveUseOutfit', function(clothes)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     if clothes ~= nil then
         local isMale = (Player.PlayerData.charinfo?.gender or 0) == 0
@@ -47,17 +47,17 @@ RegisterNetEvent('rsg-appearance:server:saveUseOutfit', function(clothes)
     end
 end)
 
-RegisterServerEvent('rsg-appearance:server:DeleteOutfit')
-AddEventHandler('rsg-appearance:server:DeleteOutfit', function(name)
+RegisterServerEvent('fdb-appearance:server:DeleteOutfit')
+AddEventHandler('fdb-appearance:server:DeleteOutfit', function(name)
     local src = source
     local _name = name
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     local citizenid = Player.PlayerData.citizenid
     MySQL.Async.execute('DELETE FROM playeroutfit WHERE citizenid = ? AND name = ?', {citizenid, _name})
 end)
 
-lib.callback.register('rsg-appearance:server:LoadClothes', function(source)
-    local Player = RSGCore.Functions.GetPlayer(source)
+lib.callback.register('fdb-appearance:server:LoadClothes', function(source)
+    local Player = FDBCore.Functions.GetPlayer(source)
     local citizenid = Player.PlayerData.citizenid
     local clothes = {}
     local Result = MySQL.query.await('SELECT clothes FROM playerskins WHERE citizenid = ?', { citizenid })
@@ -69,8 +69,8 @@ lib.callback.register('rsg-appearance:server:LoadClothes', function(source)
     return clothes
 end)
 
-lib.callback.register('rsg-appearance:server:getOutfits', function(source)
-    local Player = RSGCore.Functions.GetPlayer(source)
+lib.callback.register('fdb-appearance:server:getOutfits', function(source)
+    local Player = FDBCore.Functions.GetPlayer(source)
     local outfit = {}
     local Result = MySQL.query.await('SELECT * FROM playeroutfit WHERE citizenid=@citizenid', {['@citizenid'] = Player.PlayerData.citizenid})
 

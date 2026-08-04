@@ -4,7 +4,7 @@ Sistema modular premium para RedM por **FarrofaDeBacon**.
 
 ## Módulos do Sistema
 
-- **[FDB-Core](./FDB-Core)**: Core framework open-source de alta performance, server-authoritative e seguro (Fork do RSG-Core).
+- **[FDB-Core](./FDB-Core)**: Core framework open-source de alta performance, server-authoritative e seguro (Fork do fdb-core).
 
 ---
 

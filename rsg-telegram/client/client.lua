@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
 local cuteBird = nil
@@ -109,7 +109,7 @@ CreateThread(function()
     LocalPlayer.state.telegramIsBirdPostApproaching = false
     repeat Wait(100) until LocalPlayer.state.isLoggedIn
 
-    RSGCore.Functions.TriggerCallback('rsg-telegram:server:getTelegramsAmount', function(amount)
+    FDBCore.Functions.TriggerCallback('fdb-telegram:server:getTelegramsAmount', function(amount)
         LocalPlayer.state:set('telegramUnreadMessages', amount or 0, true)
     end)
 end)
@@ -118,7 +118,7 @@ end)
 local BirdPrompt = function()
     Citizen.CreateThread(function()
         birdPrompt = Citizen.InvokeNative(0x04F97DE45A519419)
-        PromptSetControlAction(birdPrompt, RSGCore.Shared.Keybinds['ENTER'])
+        PromptSetControlAction(birdPrompt, FDBCore.Shared.Keybinds['ENTER'])
         local str = CreateVarString(10, 'LITERAL_STRING', locale("cl_prompt_button"))
         PromptSetText(birdPrompt, str)
         PromptSetEnabled(birdPrompt, true)
@@ -135,15 +135,15 @@ Citizen.CreateThread(function()
         local pos = Config.PostOfficeLocations[i]
 
         -- Prompt to open telegram
-        exports['rsg-core']:createPrompt(pos.location, pos.coords, RSGCore.Shared.Keybinds['J'], locale("cl_prompt") ..' '.. pos.name, {
+        exports['fdb-core']:createPrompt(pos.location, pos.coords, FDBCore.Shared.Keybinds['J'], locale("cl_prompt") ..' '.. pos.name, {
             type = 'client',
-            event = 'rsg-telegram:client:OpenTelegram'
+            event = 'fdb-telegram:client:OpenTelegram'
         })
         
         -- Prompt to pick up waiting messages
-        exports['rsg-core']:createPrompt(pos.location .. '_pickup', pos.coords, RSGCore.Shared.Keybinds['G'], locale('cl_pickup_mail_prompt'), {
+        exports['fdb-core']:createPrompt(pos.location .. '_pickup', pos.coords, FDBCore.Shared.Keybinds['G'], locale('cl_pickup_mail_prompt'), {
             type = 'client',
-            event = 'rsg-telegram:client:PickupMessages'
+            event = 'fdb-telegram:client:PickupMessages'
         })
 
         if pos.showblip == true then
@@ -158,13 +158,13 @@ Citizen.CreateThread(function()
 end)
 
 -- Open Telegram UI
-RegisterNetEvent('rsg-telegram:client:OpenTelegram', function()
+RegisterNetEvent('fdb-telegram:client:OpenTelegram', function()
     SetNuiFocus(true, true)
     SendNUIMessage(OpenTelegramUiPayload())
 end)
 
 -- Pick up messages from post office
-RegisterNetEvent('rsg-telegram:client:PickupMessages', function()
+RegisterNetEvent('fdb-telegram:client:PickupMessages', function()
     -- Check if player is at post office
     if not IsPlayerAtPostOffice() then
         lib.notify({
@@ -177,7 +177,7 @@ RegisterNetEvent('rsg-telegram:client:PickupMessages', function()
     end
     
     -- Check for waiting messages
-    RSGCore.Functions.TriggerCallback('rsg-telegram:server:checkWaitingMessages', function(count)
+    FDBCore.Functions.TriggerCallback('fdb-telegram:server:checkWaitingMessages', function(count)
         if count > 0 then
             -- Show confirmation with count
             lib.notify({
@@ -188,7 +188,7 @@ RegisterNetEvent('rsg-telegram:client:PickupMessages', function()
             })
             
             -- Pick up messages
-            TriggerServerEvent('rsg-telegram:server:pickupMessages')
+            TriggerServerEvent('fdb-telegram:server:pickupMessages')
         else
             lib.notify({
                 title = locale("cl_title_11"),
@@ -213,9 +213,9 @@ local function Prompts()
         return
     end
 
-    TriggerEvent("rsg-telegram:client:OpenTelegram")
+    TriggerEvent("fdb-telegram:client:OpenTelegram")
 
-    TriggerServerEvent('rsg-telegram:server:DeliverySuccess', sID, tPName)
+    TriggerServerEvent('fdb-telegram:server:DeliverySuccess', sID, tPName)
 
     Wait(1000)
 
@@ -379,8 +379,8 @@ CreateThread(function()
 end)
 
 -- Receive Message
-RegisterNetEvent('rsg-telegram:client:ReceiveMessage')
-AddEventHandler('rsg-telegram:client:ReceiveMessage', function(SsID, StPName)
+RegisterNetEvent('fdb-telegram:client:ReceiveMessage')
+AddEventHandler('fdb-telegram:client:ReceiveMessage', function(SsID, StPName)
     LocalPlayer.state.telegramIsBirdPostApproaching = true
     sID = SsID
     tPName = StPName
@@ -505,7 +505,7 @@ AddEventHandler('rsg-telegram:client:ReceiveMessage', function(SsID, StPName)
                 ClearPedSecondaryTask(ped)
 
                 -- Trigger server event and end receiving state
-                TriggerServerEvent('rsg-telegram:server:ReadMessage', sID)
+                TriggerServerEvent('fdb-telegram:server:ReadMessage', sID)
                 LocalPlayer.state.telegramIsBirdPostApproaching = false
                 return
             end
@@ -563,7 +563,7 @@ end)
 
 
 -- Write the Message (when using bird post item)
-RegisterNetEvent('rsg-telegram:client:WriteMessage', function()
+RegisterNetEvent('fdb-telegram:client:WriteMessage', function()
     -- Open custom UI to new message tab
     SetNuiFocus(true, true)
     SendNUIMessage(OpenTelegramUiPayload({
@@ -573,7 +573,7 @@ RegisterNetEvent('rsg-telegram:client:WriteMessage', function()
 end)
 
 -- Spawn Bird for Sending Message
-RegisterNetEvent('rsg-telegram:client:SpawnBirdForSend', function()
+RegisterNetEvent('fdb-telegram:client:SpawnBirdForSend', function()
     local ped = PlayerPedId()
     
     if IsPedOnMount(ped) or IsPedOnVehicle(ped) then
@@ -582,11 +582,11 @@ RegisterNetEvent('rsg-telegram:client:SpawnBirdForSend', function()
     end
     
     -- Request validation from server (will check item and send callback if valid)
-    TriggerServerEvent('rsg-telegram:server:ValidateBirdPostSend', messageData.sender, messageData.sendername, messageData.recipient, messageData.subject, messageData.message, messageData.jobSender)
+    TriggerServerEvent('fdb-telegram:server:ValidateBirdPostSend', messageData.sender, messageData.sendername, messageData.recipient, messageData.subject, messageData.message, messageData.jobSender)
 end)
 
 -- Server validated bird post send, spawn the bird
-RegisterNetEvent('rsg-telegram:client:StartBirdDelivery', function(targetCoords)
+RegisterNetEvent('fdb-telegram:client:StartBirdDelivery', function(targetCoords)
     local ped = PlayerPedId()
     local pID = PlayerId()
     local playerCoords = GetEntityCoords(ped)
@@ -675,8 +675,8 @@ RegisterNetEvent('rsg-telegram:client:StartBirdDelivery', function(targetCoords)
 end)
 
 -- Read the Message
-RegisterNetEvent('rsg-telegram:client:ReadMessages')
-AddEventHandler('rsg-telegram:client:ReadMessages', function()
+RegisterNetEvent('fdb-telegram:client:ReadMessages')
+AddEventHandler('fdb-telegram:client:ReadMessages', function()
     InMenu = true
     SetNuiFocus(true, true)
 
@@ -685,12 +685,12 @@ AddEventHandler('rsg-telegram:client:ReadMessages', function()
         type = 'openGeneral'
     })
 
-    TriggerServerEvent('rsg-telegram:server:CheckInbox')
+    TriggerServerEvent('fdb-telegram:server:CheckInbox')
 end)
 
 -- Show Messages List
-RegisterNetEvent('rsg-telegram:client:InboxList')
-AddEventHandler('rsg-telegram:client:InboxList', function(data)
+RegisterNetEvent('fdb-telegram:client:InboxList')
+AddEventHandler('fdb-telegram:client:InboxList', function(data)
     SendNUIMessage
     ({
         type = 'inboxlist', response = data
@@ -699,23 +699,23 @@ end)
 
 -- Get the Message
 RegisterNUICallback('getview', function(data)
-    TriggerServerEvent('rsg-telegram:server:GetMessages', tonumber(data.id))
-    TriggerServerEvent('rsg-telegram:server:CheckInbox')
+    TriggerServerEvent('fdb-telegram:server:GetMessages', tonumber(data.id))
+    TriggerServerEvent('fdb-telegram:server:CheckInbox')
 end)
 
 -- Get the Message all 
 RegisterNUICallback('getviewall', function(data, cb)
     local ids = data.ids
     for _, id in ipairs(ids) do
-        TriggerServerEvent('rsg-telegram:server:GetMessages', tonumber(id))
+        TriggerServerEvent('fdb-telegram:server:GetMessages', tonumber(id))
     end
-    TriggerServerEvent('rsg-telegram:server:CheckInbox')
+    TriggerServerEvent('fdb-telegram:server:CheckInbox')
     cb('ok')
 end)
 
 -- Message Data
-RegisterNetEvent('rsg-telegram:client:MessageData')
-AddEventHandler('rsg-telegram:client:MessageData', function(tele)
+RegisterNetEvent('fdb-telegram:client:MessageData')
+AddEventHandler('fdb-telegram:client:MessageData', function(tele)
     SendNUIMessage
     ({
         type = 'view',
@@ -725,17 +725,17 @@ end)
 
 -- Delete Message
 RegisterNUICallback('delete', function(data)
-    TriggerServerEvent('rsg-telegram:server:DeleteMessage', tonumber(data.id))
-    TriggerServerEvent('rsg-telegram:server:CheckInbox')
+    TriggerServerEvent('fdb-telegram:server:DeleteMessage', tonumber(data.id))
+    TriggerServerEvent('fdb-telegram:server:CheckInbox')
 end)
 
 -- Delete Message all
 RegisterNUICallback('deleteall', function(data, cb)
     local ids = data.ids  -- Un array de IDs
     for _, id in ipairs(ids) do
-        TriggerServerEvent('rsg-telegram:server:DeleteMessage', tonumber(id))
+        TriggerServerEvent('fdb-telegram:server:DeleteMessage', tonumber(id))
     end
-    TriggerServerEvent('rsg-telegram:server:CheckInbox')
+    TriggerServerEvent('fdb-telegram:server:CheckInbox')
     cb('ok')
 end)
 
@@ -773,7 +773,7 @@ AddEventHandler("onResourceStop", function(resourceName)
     for i = 1, #Config.PostOfficeLocations do
         local pos = Config.PostOfficeLocations[i]
 
-        exports['rsg-core']:deletePrompt(pos.location)
+        exports['fdb-core']:deletePrompt(pos.location)
     end
 
     for i = 1, #blipEntries do
@@ -806,7 +806,7 @@ end)
 -- Get Inbox Messages
 RegisterNUICallback('getInbox', function(data, cb)
     local atPostOffice = IsPlayerAtPostOffice()
-    RSGCore.Functions.TriggerCallback('rsg-telegram:server:getInbox', function(messages)
+    FDBCore.Functions.TriggerCallback('fdb-telegram:server:getInbox', function(messages)
         cb(messages or {})
     end, atPostOffice)
 end)
@@ -814,22 +814,22 @@ end)
 -- Get Job Inbox Messages
 RegisterNUICallback('getJobInbox', function(data, cb)
     local atPostOffice = IsPlayerAtPostOffice()
-    RSGCore.Functions.TriggerCallback('rsg-telegram:server:getJobInbox', function(messages)
+    FDBCore.Functions.TriggerCallback('fdb-telegram:server:getJobInbox', function(messages)
         cb(messages or {})
     end, atPostOffice)
 end)
 
 -- Get Addressbook
 RegisterNUICallback('getAddressbook', function(data, cb)
-    RSGCore.Functions.TriggerCallback('rsg-telegram:server:getAddressbook', function(contacts)
+    FDBCore.Functions.TriggerCallback('fdb-telegram:server:getAddressbook', function(contacts)
         cb(contacts or {})
     end)
 end)
 
 -- Get All Players for Recipient List
 RegisterNUICallback('getPlayers', function(data, cb)
-    RSGCore.Functions.TriggerCallback('rsg-telegram:server:getAddressbook', function(contacts)
-        RSGCore.Functions.TriggerCallback('rsg-telegram:server:getJobRecipients', function(jobRecipients)
+    FDBCore.Functions.TriggerCallback('fdb-telegram:server:getAddressbook', function(contacts)
+        FDBCore.Functions.TriggerCallback('fdb-telegram:server:getJobRecipients', function(jobRecipients)
             -- Job recipients are appended to contacts so aliases like "sheriff" can be selected like a normal recipient.
             local recipients = contacts or {}
 
@@ -844,7 +844,7 @@ end)
 
 -- Get job mailboxes this player can use as a sender.
 RegisterNUICallback('getJobSenders', function(data, cb)
-    RSGCore.Functions.TriggerCallback('rsg-telegram:server:getJobSenders', function(senders)
+    FDBCore.Functions.TriggerCallback('fdb-telegram:server:getJobSenders', function(senders)
         cb(senders or {})
     end)
 end)
@@ -862,9 +862,9 @@ RegisterNUICallback('sendMessage', function(data, cb)
     -- Get sender info
     local pID = PlayerId()
     local senderID = GetPlayerServerId(pID)
-    local senderfirstname = RSGCore.Functions.GetPlayerData().charinfo.firstname
-    local senderlastname = RSGCore.Functions.GetPlayerData().charinfo.lastname
-    local sendertelegram = RSGCore.Functions.GetPlayerData().citizenid
+    local senderfirstname = FDBCore.Functions.GetPlayerData().charinfo.firstname
+    local senderlastname = FDBCore.Functions.GetPlayerData().charinfo.lastname
+    local sendertelegram = FDBCore.Functions.GetPlayerData().citizenid
     local senderfullname = senderfirstname..' '..senderlastname
     
     -- If not at post office, trigger bird spawn flow
@@ -880,10 +880,10 @@ RegisterNUICallback('sendMessage', function(data, cb)
         }
         
         -- Trigger bird spawn event (will check item and spawn bird)
-        TriggerEvent('rsg-telegram:client:SpawnBirdForSend')
+        TriggerEvent('fdb-telegram:client:SpawnBirdForSend')
     else
         -- At post office, send normally without bird
-        TriggerServerEvent('rsg-telegram:server:SendMessagePostOffice', sendertelegram, senderfullname, data.recipient, data.subject, data.message, data.jobSender)
+        TriggerServerEvent('fdb-telegram:server:SendMessagePostOffice', sendertelegram, senderfullname, data.recipient, data.subject, data.message, data.jobSender)
     end
     
     cb('ok')
@@ -891,25 +891,25 @@ end)
 
 -- Mark Message as Read
 RegisterNUICallback('markAsRead', function(data, cb)
-    TriggerServerEvent('rsg-telegram:server:MarkAsRead', tonumber(data.id))
+    TriggerServerEvent('fdb-telegram:server:MarkAsRead', tonumber(data.id))
     cb('ok')
 end)
 
 -- Delete Message
 RegisterNUICallback('deleteMessage', function(data, cb)
-    TriggerServerEvent('rsg-telegram:server:DeleteMessage', tonumber(data.id))
+    TriggerServerEvent('fdb-telegram:server:DeleteMessage', tonumber(data.id))
     cb('ok')
 end)
 
 -- Add Contact to Addressbook
 RegisterNUICallback('addContact', function(data, cb)
-    TriggerServerEvent('rsg-telegram:server:SavePerson', data.name, data.citizenid)
+    TriggerServerEvent('fdb-telegram:server:SavePerson', data.name, data.citizenid)
     cb('ok')
 end)
 
 -- Remove Contact from Addressbook
 RegisterNUICallback('removeContact', function(data, cb)
-    TriggerServerEvent('rsg-telegram:server:RemovePerson', data.citizenid)
+    TriggerServerEvent('fdb-telegram:server:RemovePerson', data.citizenid)
     cb('ok')
 end)
 
@@ -918,30 +918,30 @@ end)
 -- ================================
 
 RegisterNUICallback('getview', function(data)
-    TriggerServerEvent('rsg-telegram:server:GetMessages', tonumber(data.id))
-    TriggerServerEvent('rsg-telegram:server:CheckInbox')
+    TriggerServerEvent('fdb-telegram:server:GetMessages', tonumber(data.id))
+    TriggerServerEvent('fdb-telegram:server:CheckInbox')
 end)
 
 RegisterNUICallback('getviewall', function(data, cb)
     local ids = data.ids
     for _, id in ipairs(ids) do
-        TriggerServerEvent('rsg-telegram:server:GetMessages', tonumber(id))
+        TriggerServerEvent('fdb-telegram:server:GetMessages', tonumber(id))
     end
-    TriggerServerEvent('rsg-telegram:server:CheckInbox')
+    TriggerServerEvent('fdb-telegram:server:CheckInbox')
     cb('ok')
 end)
 
 RegisterNUICallback('delete', function(data)
-    TriggerServerEvent('rsg-telegram:server:DeleteMessage', tonumber(data.id))
-    TriggerServerEvent('rsg-telegram:server:CheckInbox')
+    TriggerServerEvent('fdb-telegram:server:DeleteMessage', tonumber(data.id))
+    TriggerServerEvent('fdb-telegram:server:CheckInbox')
 end)
 
 RegisterNUICallback('deleteall', function(data, cb)
     local ids = data.ids
     for _, id in ipairs(ids) do
-        TriggerServerEvent('rsg-telegram:server:DeleteMessage', tonumber(id))
+        TriggerServerEvent('fdb-telegram:server:DeleteMessage', tonumber(id))
     end
-    TriggerServerEvent('rsg-telegram:server:CheckInbox')
+    TriggerServerEvent('fdb-telegram:server:CheckInbox')
     cb('ok')
 end)
 
@@ -958,25 +958,25 @@ RegisterNUICallback('NUIFocusOff', function()
 end)
 
 -- Legacy Events (kept for compatibility)
-RegisterNetEvent('rsg-telegram:client:ReadMessages')
-AddEventHandler('rsg-telegram:client:ReadMessages', function()
+RegisterNetEvent('fdb-telegram:client:ReadMessages')
+AddEventHandler('fdb-telegram:client:ReadMessages', function()
     SetNuiFocus(true, true)
     SendNUIMessage({ type = 'openGeneral' })
-    TriggerServerEvent('rsg-telegram:server:CheckInbox')
+    TriggerServerEvent('fdb-telegram:server:CheckInbox')
 end)
 
-RegisterNetEvent('rsg-telegram:client:InboxList')
-AddEventHandler('rsg-telegram:client:InboxList', function(data)
+RegisterNetEvent('fdb-telegram:client:InboxList')
+AddEventHandler('fdb-telegram:client:InboxList', function(data)
     SendNUIMessage({ type = 'inboxlist', response = data })
 end)
 
-RegisterNetEvent('rsg-telegram:client:MessageData')
-AddEventHandler('rsg-telegram:client:MessageData', function(tele)
+RegisterNetEvent('fdb-telegram:client:MessageData')
+AddEventHandler('fdb-telegram:client:MessageData', function(tele)
     SendNUIMessage({ type = 'view', telegram = tele })
 end)
 
 -- AddressBook (Legacy - kept for backward compatibility)
-RegisterNetEvent('rsg-telegram:client:OpenAddressbook', function()
+RegisterNetEvent('fdb-telegram:client:OpenAddressbook', function()
     -- Open custom UI to addressbook tab
     SetNuiFocus(true, true)
     SendNUIMessage(OpenTelegramUiPayload({
@@ -985,7 +985,7 @@ RegisterNetEvent('rsg-telegram:client:OpenAddressbook', function()
 end)
 
 
-RegisterNetEvent('rsg-telegram:client:AddPersonMenu', function()
+RegisterNetEvent('fdb-telegram:client:AddPersonMenu', function()
     local input = lib.inputDialog(locale("cl_title_24"), {
         { type = 'input', label = locale("cl_title_25"),      required = true },
         { type = 'input', label = locale("cl_title_26"), required = true },
@@ -995,12 +995,12 @@ RegisterNetEvent('rsg-telegram:client:AddPersonMenu', function()
     local name = input[1]
     local cid = input[2]
     if name and cid then
-        TriggerServerEvent('rsg-telegram:server:SavePerson', name, cid)
+        TriggerServerEvent('fdb-telegram:server:SavePerson', name, cid)
     end
 end)
 
-RegisterNetEvent('rsg-telegram:client:ViewAddressBook', function()
-    RSGCore.Functions.TriggerCallback('rsg-telegram:server:GetPlayers', function(players)
+RegisterNetEvent('fdb-telegram:client:ViewAddressBook', function()
+    FDBCore.Functions.TriggerCallback('fdb-telegram:server:GetPlayers', function(players)
         if players ~= nil then
             local options = {
                 {
@@ -1022,7 +1022,7 @@ RegisterNetEvent('rsg-telegram:client:ViewAddressBook', function()
                 title = locale("cl_title_30"),
                 description = locale("cl_title_31"),
                 icon = 'fa-solid fa-circle-xmark',
-                event = 'rsg-telegram:client:OpenAddressbook',
+                event = 'fdb-telegram:client:OpenAddressbook',
                 args = {
                     isServer = false
                 }
@@ -1040,8 +1040,8 @@ RegisterNetEvent('rsg-telegram:client:ViewAddressBook', function()
     end)
 end)
 
-RegisterNetEvent('rsg-telegram:client:RemovePersonMenu', function()
-    RSGCore.Functions.TriggerCallback('rsg-telegram:server:GetPlayers', function(players)
+RegisterNetEvent('fdb-telegram:client:RemovePersonMenu', function()
+    FDBCore.Functions.TriggerCallback('fdb-telegram:server:GetPlayers', function(players)
         if players ~= nil then
             local option = {}
             for i = 1, #players do
@@ -1058,7 +1058,7 @@ RegisterNetEvent('rsg-telegram:client:RemovePersonMenu', function()
 
             local citizenid = input[1]
             if citizenid then
-                TriggerServerEvent('rsg-telegram:server:RemovePerson', citizenid)
+                TriggerServerEvent('fdb-telegram:server:RemovePerson', citizenid)
             end
         else
             lib.notify({ title = locale("cl_title_36"), description = locale("cl_title_37"), type = 'error', duration = 7000 })

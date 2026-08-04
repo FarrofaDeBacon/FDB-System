@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 BathingPed = nil
 local currentAnimScene = nil
 local currentCam = nil
@@ -9,8 +9,8 @@ exports('IsBathingActive', function()
     return LocalPlayer.state.isBathingActive
 end)
 
-RegisterNetEvent('rsg-bathing:client:ToggleInvincibility')
-AddEventHandler('rsg-bathing:client:ToggleInvincibility', function(state)
+RegisterNetEvent('fdb-bathing:client:ToggleInvincibility')
+AddEventHandler('fdb-bathing:client:ToggleInvincibility', function(state)
     LocalPlayer.state.invincible = state
 end)
 
@@ -51,8 +51,8 @@ GetClosestConsumer = function()
     return nil
 end
 
-RegisterNetEvent('rsg-bathing:client:StartBath')
-AddEventHandler('rsg-bathing:client:StartBath', function(town)
+RegisterNetEvent('fdb-bathing:client:StartBath')
+AddEventHandler('fdb-bathing:client:StartBath', function(town)
     LocalPlayer.state.isBathingActive = true
     currentTown = town
     if Config.BathingZones[town] then
@@ -98,8 +98,8 @@ AddEventHandler('rsg-bathing:client:StartBath', function(town)
 
         TogglePrompts({ "STOP_BATHING", "REQUEST_DELUXE_BATHING", "SCRUB" }, true)
 
-        TriggerEvent("rsg-bathing:TASK_MOVE_NETWORK_BY_NAME_WITH_INIT_PARAMS", { cache.ped, "Script_Mini_Game_Bathing_Regular", `CLIPSET@MINI_GAMES@BATHING@REGULAR@ARTHUR`, `DEFAULT`, "BATHING" })
-        TriggerEvent("rsg-bathing:TASK_MOVE_NETWORK_BY_NAME_WITH_INIT_PARAMS", { rag, "Script_Mini_Game_Bathing_Regular", `CLIPSET@MINI_GAMES@BATHING@REGULAR@RAG`, `DEFAULT`, "BATHING" })
+        TriggerEvent("fdb-bathing:TASK_MOVE_NETWORK_BY_NAME_WITH_INIT_PARAMS", { cache.ped, "Script_Mini_Game_Bathing_Regular", `CLIPSET@MINI_GAMES@BATHING@REGULAR@ARTHUR`, `DEFAULT`, "BATHING" })
+        TriggerEvent("fdb-bathing:TASK_MOVE_NETWORK_BY_NAME_WITH_INIT_PARAMS", { rag, "Script_Mini_Game_Bathing_Regular", `CLIPSET@MINI_GAMES@BATHING@REGULAR@RAG`, `DEFAULT`, "BATHING" })
 
         ForceEntityAiAndAnimationUpdate(rag, true);
         Citizen.InvokeNative(0x55546004A244302A, cache.ped)
@@ -236,17 +236,17 @@ ExitBathing = function()
     N_0x69d65e89ffd72313(false, false)
     TriggerMusicEvent("MG_BATHING_STOP")
     Citizen.InvokeNative(0x704C908E9C405136, cache.ped)
-    TriggerServerEvent("RSGCore:Server:SetMetaData", "cleanliness", 100)
+    TriggerServerEvent("FDBCore:Server:SetMetaData", "cleanliness", 100)
     TriggerEvent('hud:client:UpdateCleanliness', 100)
-    TriggerServerEvent("rsg-bathing:server:setBathAsFree", town)
+    TriggerServerEvent("fdb-bathing:server:setBathAsFree", town)
 
     SetPedCanLegIk(cache.ped, true)
     SetPedLegIkMode(cache.ped, 2)
     LocalPlayer.state.isBathingActive = false
 end
 
-RegisterNetEvent('rsg-bathing:client:StartDeluxeBath')
-AddEventHandler('rsg-bathing:client:StartDeluxeBath', function(town)
+RegisterNetEvent('fdb-bathing:client:StartDeluxeBath')
+AddEventHandler('fdb-bathing:client:StartDeluxeBath', function(town)
     if not currentAnimScene or not Citizen.InvokeNative(0x25557E324489393C, currentAnimScene) then return end
     Citizen.InvokeNative(0x84EEDB2C6E650000, currentAnimScene)
 
@@ -276,16 +276,16 @@ AddEventHandler('rsg-bathing:client:StartDeluxeBath', function(town)
         Citizen.InvokeNative(0x84EEDB2C6E650000, currentAnimScene)
     end
 
-    TriggerEvent("rsg-bathing:TASK_MOVE_NETWORK_BY_NAME_WITH_INIT_PARAMS", { cache.ped, "Script_Mini_Game_Bathing_Deluxe", `CLIPSET@MINI_GAMES@BATHING@DELUXE@ARTHUR`, `DEFAULT`, "BATHING" })
-    TriggerEvent("rsg-bathing:TASK_MOVE_NETWORK_BY_NAME_WITH_INIT_PARAMS", { BathingPed, "Script_Mini_Game_Bathing_Deluxe", `CLIPSET@MINI_GAMES@BATHING@DELUXE@MAID`, `DEFAULT`, "BATHING" })
+    TriggerEvent("fdb-bathing:TASK_MOVE_NETWORK_BY_NAME_WITH_INIT_PARAMS", { cache.ped, "Script_Mini_Game_Bathing_Deluxe", `CLIPSET@MINI_GAMES@BATHING@DELUXE@ARTHUR`, `DEFAULT`, "BATHING" })
+    TriggerEvent("fdb-bathing:TASK_MOVE_NETWORK_BY_NAME_WITH_INIT_PARAMS", { BathingPed, "Script_Mini_Game_Bathing_Deluxe", `CLIPSET@MINI_GAMES@BATHING@DELUXE@MAID`, `DEFAULT`, "BATHING" })
 
     TogglePrompts({ "STOP_BATHING", "SCRUB" }, true)
 
     RenderScriptCams(true, true, 0, true, false, 0)
 end)
 
-RegisterNetEvent('rsg-bathing:client:HideDeluxePrompt')
-AddEventHandler('rsg-bathing:client:HideDeluxePrompt', function()
+RegisterNetEvent('fdb-bathing:client:HideDeluxePrompt')
+AddEventHandler('fdb-bathing:client:HideDeluxePrompt', function()
     TogglePrompts({ "REQUEST_DELUXE_BATHING" }, false)
     TogglePrompts({ "STOP_BATHING", "SCRUB" }, true)
 end)
@@ -309,8 +309,8 @@ ExitPremiumBath = function(disableScrub)
         Citizen.InvokeNative(0x84EEDB2C6E650000, outroScene)
     end
 
-    TriggerEvent("rsg-bathing:TASK_MOVE_NETWORK_BY_NAME_WITH_INIT_PARAMS", { cache.ped, "Script_Mini_Game_Bathing_Regular", `CLIPSET@MINI_GAMES@BATHING@REGULAR@ARTHUR`, `DEFAULT`, "BATHING" })
-    TriggerEvent("rsg-bathing:TASK_MOVE_NETWORK_BY_NAME_WITH_INIT_PARAMS", { BathingPed, "Script_Mini_Game_Bathing_Deluxe", `CLIPSET@MINI_GAMES@BATHING@REGULAR@MAID`, `DEFAULT`, "BATHING" })
+    TriggerEvent("fdb-bathing:TASK_MOVE_NETWORK_BY_NAME_WITH_INIT_PARAMS", { cache.ped, "Script_Mini_Game_Bathing_Regular", `CLIPSET@MINI_GAMES@BATHING@REGULAR@ARTHUR`, `DEFAULT`, "BATHING" })
+    TriggerEvent("fdb-bathing:TASK_MOVE_NETWORK_BY_NAME_WITH_INIT_PARAMS", { BathingPed, "Script_Mini_Game_Bathing_Deluxe", `CLIPSET@MINI_GAMES@BATHING@REGULAR@MAID`, `DEFAULT`, "BATHING" })
 
     TogglePrompts({ "STOP_BATHING", "SCRUB" }, true)
     if IsPromptEnabled("SCRUB") and disableScrub then TogglePrompts({ "SCRUB" }, false) end
@@ -356,14 +356,14 @@ end
 
 function UndressCharacter()
     SetPedAllWeaponsVisibility(cache.ped, false)
-    TriggerServerEvent('rsg-bathing:server:undressPlayer')
+    TriggerServerEvent('fdb-bathing:server:undressPlayer')
 end
 
 DressCharacter = function()
     local currentHealth = GetEntityHealth(cache.ped)
     local maxStamina = Citizen.InvokeNative(0xCB42AFE2B613EE55, cache.ped, Citizen.ResultAsFloat())
     local currentStamina = Citizen.InvokeNative(0x775A1CA7893AA8B5, cache.ped, Citizen.ResultAsFloat()) / maxStamina * 100
-    TriggerServerEvent('rsg-bathing:server:dressPlayer')
+    TriggerServerEvent('fdb-bathing:server:dressPlayer')
     Wait(1000)
     Citizen.InvokeNative(0x9C720776DAA43E7E, cache.ped, 0.0)
     Citizen.InvokeNative(0x44CB6447D2571AA0, cache.ped, -1.0)
@@ -398,9 +398,9 @@ Action = function(name)
     TogglePrompts("ALL", false)
 
     if (name == "START_BATHING") then
-        TriggerServerEvent("rsg-bathing:server:canEnterBath", currentTown)
+        TriggerServerEvent("fdb-bathing:server:canEnterBath", currentTown)
     elseif (name == "REQUEST_DELUXE_BATHING") then
-        TriggerServerEvent("rsg-bathing:server:canEnterDeluxeBath", currentTown)
+        TriggerServerEvent("fdb-bathing:server:canEnterDeluxeBath", currentTown)
     elseif (name == "STOP_BATHING") then
         ExitBathing()
     end

@@ -1,11 +1,11 @@
-# rsg-wardrobe
+# fdb-wardrobe
 
 Toggle individual clothing items on/off via chat commands for RSG Framework (RedM).
 
 ## Dependencies
 
-- [rsg-core](https://github.com/Rexshack-RedM/rsg-core)
-- [rsg-appearance](https://github.com/Rexshack-RedM/rsg-appearance)
+- [fdb-core](https://github.com/Rexshack-RedM/fdb-core)
+- [fdb-appearance](https://github.com/Rexshack-RedM/fdb-appearance)
 - [oxmysql](https://github.com/Rexshack-RedM/oxmysql)
 - [ox_lib](https://github.com/Rexshack-RedM/ox_lib)
 
@@ -75,19 +75,19 @@ add_ace group.admin command.wardrobe allow
 
 ```lua
 -- Toggle a clothing item by its config name
-exports['rsg-wardrobe']:ToggleClothing(name)
+exports['fdb-wardrobe']:ToggleClothing(name)
 
 -- Remove all clothing from the local player
-exports['rsg-wardrobe']:RemoveAllClothing()
+exports['fdb-wardrobe']:RemoveAllClothing()
 
 -- Check if a specific clothing item is currently worn (returns boolean)
-local wearing = exports['rsg-wardrobe']:IsWearing(name)
+local wearing = exports['fdb-wardrobe']:IsWearing(name)
 ```
 
 Example:
 ```lua
-exports['rsg-wardrobe']:ToggleClothing('hat')
-if exports['rsg-wardrobe']:IsWearing('mask') then
+exports['fdb-wardrobe']:ToggleClothing('hat')
+if exports['fdb-wardrobe']:IsWearing('mask') then
     print('Player is wearing a mask')
 end
 ```
@@ -96,29 +96,29 @@ end
 
 ```lua
 -- Toggle a clothing item for a specific player
-exports['rsg-wardrobe']:TogglePlayerClothing(source, name)
+exports['fdb-wardrobe']:TogglePlayerClothing(source, name)
 
 -- Remove all clothing from a specific player
-exports['rsg-wardrobe']:RemovePlayerClothing(source)
+exports['fdb-wardrobe']:RemovePlayerClothing(source)
 
 -- Dress a player (wear all stored clothing from DB)
-exports['rsg-wardrobe']:DressPlayer(source)
+exports['fdb-wardrobe']:DressPlayer(source)
 ```
 
 Example:
 ```lua
 -- Force remove mask when entering jail
-exports['rsg-wardrobe']:TogglePlayerClothing(source, 'masks')
+exports['fdb-wardrobe']:TogglePlayerClothing(source, 'masks')
 
 -- Strip all clothing on arrest
-exports['rsg-wardrobe']:RemovePlayerClothing(source)
+exports['fdb-wardrobe']:RemovePlayerClothing(source)
 
 -- Re-dress on release
-exports['rsg-wardrobe']:DressPlayer(source)
+exports['fdb-wardrobe']:DressPlayer(source)
 ```
 
 ## Installation
 
 1. Ensure all dependencies are installed and started.
-2. Add `ensure rsg-wardrobe` to your server config.
+2. Add `ensure fdb-wardrobe` to your server config.
 3. Configure `config.lua` as needed.

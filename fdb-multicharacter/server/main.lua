@@ -35,7 +35,7 @@ local function GiveStarterItems(source)
         Player.Functions.AddItem(v.item, v.amount)
     end
     if Config.StarterHorse then
-        -- FDB-TODO: rsg-horses integration pending audit (line 38)
+        -- FDB-TODO: fdb-horses integration pending audit (line 38)
         local horseid = GenerateHorseid()
         local horsesex = {'male', 'female'}
         local randomSex = math.random(1, #horsesex)
@@ -70,8 +70,8 @@ RegisterNetEvent('fdb-multicharacter:server:loadUserData', function(cData, skind
         if not skindata then
             TriggerClientEvent('fdb-spawn:client:setupSpawnUI', src, cData, false)
         else
-            -- FDB-TODO: rsg-appearance integration pending audit (line 75)
-            TriggerClientEvent('rsg-appearance:client:OpenCreator', src, false, true)
+            -- FDB-TODO: fdb-appearance integration pending audit (line 75)
+            TriggerClientEvent('fdb-appearance:client:OpenCreator', src, false, true)
         end
         TriggerEvent('fdb-log:server:CreateLog', 'joinleave', 'Player Joined Server', 'green', '**' .. GetPlayerName(src) .. '** joined the server..')
     end

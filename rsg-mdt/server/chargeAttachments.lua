@@ -1,7 +1,7 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 local function hasCreateRecordsPermission(source)
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return false end
     
     local job = player.PlayerData.job
@@ -17,7 +17,7 @@ local function hasCreateRecordsPermission(source)
 end
 
 local function logAttachmentAction(source, action, chargeId, reportId, details)
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return end
     
     local performerName = player.PlayerData.charinfo.firstname .. ' ' .. player.PlayerData.charinfo.lastname
@@ -29,7 +29,7 @@ local function logAttachmentAction(source, action, chargeId, reportId, details)
     )
 end
 
-lib.callback.register('rsg-mdt:server:getAvailableReportsForAttachment', function(source, searchQuery)
+lib.callback.register('fdb-mdt:server:getAvailableReportsForAttachment', function(source, searchQuery)
     if not hasCreateRecordsPermission(source) then return {} end
     
     local query
@@ -59,7 +59,7 @@ lib.callback.register('rsg-mdt:server:getAvailableReportsForAttachment', functio
     return reports or {}
 end)
 
-lib.callback.register('rsg-mdt:server:attachReportsToCharge', function(source, data)
+lib.callback.register('fdb-mdt:server:attachReportsToCharge', function(source, data)
     if not hasCreateRecordsPermission(source) then
         return { success = false, message = locale('notification_attach_permission') }
     end
@@ -76,7 +76,7 @@ lib.callback.register('rsg-mdt:server:attachReportsToCharge', function(source, d
         return { success = false, message = locale('notification_charge_not_found_attach') }
     end
     
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then
         return { success = false, message = locale('notification_player_not_found') }
     end
@@ -143,7 +143,7 @@ lib.callback.register('rsg-mdt:server:attachReportsToCharge', function(source, d
     }
 end)
 
-lib.callback.register('rsg-mdt:server:removeAttachmentFromCharge', function(source, data)
+lib.callback.register('fdb-mdt:server:removeAttachmentFromCharge', function(source, data)
     if not hasCreateRecordsPermission(source) then
         return { success = false, message = locale('notification_remove_attach_permission') }
     end
@@ -168,7 +168,7 @@ lib.callback.register('rsg-mdt:server:removeAttachmentFromCharge', function(sour
     return { success = false, message = locale('notification_attachment_not_found') }
 end)
 
-lib.callback.register('rsg-mdt:server:getChargeAttachments', function(source, chargeId)
+lib.callback.register('fdb-mdt:server:getChargeAttachments', function(source, chargeId)
     chargeId = tonumber(chargeId)
     if not chargeId then return {} end
     
@@ -193,7 +193,7 @@ lib.callback.register('rsg-mdt:server:getChargeAttachments', function(source, ch
     return attachments or {}
 end)
 
-lib.callback.register('rsg-mdt:server:getReportsWithCharges', function(source, reportId)
+lib.callback.register('fdb-mdt:server:getReportsWithCharges', function(source, reportId)
     reportId = tonumber(reportId)
     if not reportId then return {} end
     

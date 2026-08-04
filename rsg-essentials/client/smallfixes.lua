@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 local PauseOpen = false
 
@@ -12,7 +12,7 @@ end)
 
 -- change voice proximity
 CreateThread(function()
-    local keybind = RSGCore.Shared.Keybinds['RIGHTBRACKET']
+    local keybind = FDBCore.Shared.Keybinds['RIGHTBRACKET']
     while true do
         Wait(7)
         if IsControlJustPressed(0, keybind) then
@@ -146,7 +146,7 @@ CreateThread(function()
     end
 end)
 
-RegisterNetEvent('rsg-essentials:client:pvpToggle',function()
+RegisterNetEvent('fdb-essentials:client:pvpToggle',function()
     local ped = PlayerPedId()
 
     if pvp == true then

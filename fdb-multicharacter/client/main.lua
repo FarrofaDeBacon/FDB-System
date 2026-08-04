@@ -116,8 +116,8 @@ local function initializePedModel(appearanceData, coords, heading)
         while not IsPedReadyToRender(charPed) do Wait(1) end
 
         if skinTable then
-            -- FDB-TODO: rsg-appearance integration pending audit (line 119)
-            exports['rsg-appearance']:ApplySkinMultiChar(skinTable, charPed, clothesTable)
+            -- FDB-TODO: fdb-appearance integration pending audit (line 119)
+            exports['fdb-appearance']:ApplySkinMultiChar(skinTable, charPed, clothesTable)
         else
             baseModel(modelName)
         end
@@ -261,10 +261,10 @@ RegisterNUICallback('selectCharacter', function(data, cb)
         openCharMenu(false)
         cleanPed(charPed)
         Wait(5000)
-        -- FDB-TODO: rsg-appearance integration pending audit (lines 265-266)
-        TriggerServerEvent('rsg-appearance:server:LoadSkin')
+        -- FDB-TODO: fdb-appearance integration pending audit (lines 265-266)
+        TriggerServerEvent('fdb-appearance:server:LoadSkin')
         Wait(500)
-        TriggerServerEvent('rsg-appearance:server:LoadClothes', 1)
+        TriggerServerEvent('fdb-appearance:server:LoadClothes', 1)
     else
         DoScreenFadeOut(10)
         TriggerServerEvent('fdb-multicharacter:server:loadUserData', cData, true)
@@ -301,8 +301,8 @@ RegisterNUICallback('createNewCharacter', function(data, cb) -- Creating a char
     cleanPed(charPed)
     DoScreenFadeIn(1000)
     FreezeEntityPosition(PlayerPedId(), false)
-    -- FDB-TODO: rsg-appearance integration pending audit (line 305)
-    TriggerEvent('rsg-appearance:client:OpenCreator', data)
+    -- FDB-TODO: fdb-appearance integration pending audit (line 305)
+    TriggerEvent('fdb-appearance:client:OpenCreator', data)
     Wait(500)
     cb('ok')
 end)

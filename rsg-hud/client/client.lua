@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 local speed = 0.0
 local cashAmount = 0
 local goldAmount = 0
@@ -97,7 +97,7 @@ end)
 -- functions
 ------------------------------------------------
 local function updateStress(amount, isGain)
-    RSGCore.Functions.GetPlayerData(function(PlayerData)
+    FDBCore.Functions.GetPlayerData(function(PlayerData)
         if not PlayerData.metadata['isdead'] and  (isGain or PlayerData.job.type ~= 'leo') then
             local currentStress = LocalPlayer.state.stress or 0
             local newStress = currentStress + (isGain and amount or -amount)
@@ -250,7 +250,7 @@ end)
 CreateThread(function()
     while true do
         Wait(30000)
-        RSGCore.Functions.TriggerCallback('hud:server:getoutlawstatus', function(result)
+        FDBCore.Functions.TriggerCallback('hud:server:getoutlawstatus', function(result)
             outlawstatus = result
         end)
     end
@@ -412,7 +412,7 @@ CreateThread(function()
 
             -- check if job type is exempt from clothing warmth
             if Config.EnableNoWarmthJobs and Config.NoWarmthJobs then
-                local playerData = RSGCore.Functions.GetPlayerData()
+                local playerData = FDBCore.Functions.GetPlayerData()
                 if playerData.job and playerData.job.type then
                     for _, jobType in pairs(Config.NoWarmthJobs) do
                         if playerData.job.type == jobType then
@@ -459,7 +459,7 @@ CreateThread(function()
 
     while true do
         Wait(Config.StatusInterval)
-        local playerData = RSGCore.Functions.GetPlayerData()
+        local playerData = FDBCore.Functions.GetPlayerData()
 
         if LocalPlayer.state.isLoggedIn and not playerData.metadata['isdead'] then
             local state = LocalPlayer.state
@@ -534,7 +534,7 @@ CreateThread(function()
     repeat Wait(100) until LocalPlayer.state.isLoggedIn
     while true do
         Wait(Config.StatusInterval)
-        local playerData = RSGCore.Functions.GetPlayerData()
+        local playerData = FDBCore.Functions.GetPlayerData()
         if LocalPlayer.state.isLoggedIn and not playerData.metadata['isdead'] then
             local cleanStats = Citizen.InvokeNative(0x147149F2E909323C, cache.ped, 16, Citizen.ResultAsInteger())
             local newDirtStatus = 100 - cleanStats
@@ -578,7 +578,7 @@ end)
 -- on money change
 ------------------------------------------------
 RegisterNetEvent('hud:client:OnMoneyChange', function(type, amount, isMinus)
-    RSGCore.Functions.GetPlayerData(function(PlayerData)
+    FDBCore.Functions.GetPlayerData(function(PlayerData)
         cashAmount = PlayerData.money.cash
         goldAmount = PlayerData.money.gold or 0
         bloodmoneyAmount = PlayerData.money.bloodmoney
@@ -601,7 +601,7 @@ end)
 ------------------------------------------------
 CreateThread(function() -- Speeding
     while true do
-        if RSGCore ~= nil then
+        if FDBCore ~= nil then
             if IsPedInAnyVehicle(cache.ped, false) then
                 speed = GetEntitySpeed(GetVehiclePedIsIn(cache.ped, false)) * 2.237 --mph
                 if speed >= Config.MinimumSpeed then

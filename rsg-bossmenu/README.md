@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 👑 rsg-bossmenu
+# 👑 fdb-bossmenu
 **Boss management menu for RedM servers using RSG Core.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -11,10 +11,10 @@
 ---
 
 ## 🛠️ Dependencies
-- [**rsg-core**](https://github.com/Rexshack-RedM/rsg-core) 🤠
+- [**fdb-core**](https://github.com/Rexshack-RedM/fdb-core) 🤠
 - [**ox_lib**](https://github.com/Rexshack-RedM/ox_lib) ⚙️
 - [**oxmysql**](https://github.com/overextended/oxmysql) 🗄️ *(required for job funds)*
-- [**rsg-inventory**](https://github.com/Rexshack-RedM/rsg-inventory) 🎒 *(for the boss stash)*
+- [**fdb-inventory**](https://github.com/Rexshack-RedM/fdb-inventory) 🎒 *(for the boss stash)*
 
 **Interaction:** Each entry in `Config.BossLocations` defines a prompt and optional blip.  
 **Locales:** `locales/en.json, fr.json, es.json, it.json, de.json, el.json, pt-br.json` (loaded via `lib.locale()`).
@@ -29,7 +29,7 @@
   - **Promote / Demote** employees.
   - **Hire / Fire** nearby players.
 - **Storage Access**
-  - Open a shared **boss stash** via `rsg-inventory`, customizable capacity.
+  - Open a shared **boss stash** via `fdb-inventory`, customizable capacity.
 - **Company Funds**
   - View, deposit, or withdraw company funds from SQL (`management_funds` type = 'boss').
   - All actions are logged and synchronized via oxmysql.
@@ -38,7 +38,7 @@
 
 ### 🗺️ Prompts & Blips
 - For every entry in `Config.BossLocations`, the script:
-  - Creates a **prompt** using `exports['rsg-core']:createPrompt`.
+  - Creates a **prompt** using `exports['fdb-core']:createPrompt`.
   - Optionally spawns a **blip** if `showblip = true`.
   - Customizable blip icon and scale.
 
@@ -79,16 +79,16 @@ Config.BossLocations = {
 ---
 
 ## 📂 Installation
-1. Place `rsg-bossmenu` inside your `resources` (or `resources/[rsg]`) folder.
-2. Ensure **rsg-core**, **ox_lib**, **rsg-inventory**, and **oxmysql** are installed and started.
-3. **Database:** import `rsg-bossmenu.sql` (creates `management_funds` with `type='boss'`).
+1. Place `fdb-bossmenu` inside your `resources` (or `resources/[rsg]`) folder.
+2. Ensure **fdb-core**, **ox_lib**, **fdb-inventory**, and **oxmysql** are installed and started.
+3. **Database:** import `fdb-bossmenu.sql` (creates `management_funds` with `type='boss'`).
 4. Edit `config.lua` to adjust blips, locations, and stash limits.
 5. Add to your `server.cfg`:
    ```cfg
    ensure ox_lib
-   ensure rsg-core
-   ensure rsg-inventory
-   ensure rsg-bossmenu
+   ensure fdb-core
+   ensure fdb-inventory
+   ensure fdb-bossmenu
    ```
 
 ---
@@ -101,7 +101,7 @@ Config.BossLocations = {
 ---
 
 ## 🗄️ SQL
-`rsg-bossmenu.sql` creates and seeds the `management_funds` table with default jobs:
+`fdb-bossmenu.sql` creates and seeds the `management_funds` table with default jobs:
 
 ```sql
 CREATE TABLE IF NOT EXISTS `management_funds` (

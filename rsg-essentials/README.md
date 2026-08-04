@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 🧰 rsg-essentials
+# 🧰 fdb-essentials
 **Quality-of-life utilities and fixes for RedM using RSG Core.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -11,13 +11,13 @@
 ---
 
 ## 🛠️ Dependencies
-- [**rsg-core**](https://github.com/Rexshack-RedM/rsg-core) 🤠
+- [**fdb-core**](https://github.com/Rexshack-RedM/fdb-core) 🤠
 - [**ox_lib**](https://github.com/Rexshack-RedM/ox_lib) ⚙️ *(locales, progress bars, UI)*
 - [**oxmysql**](https://github.com/overextended/oxmysql) 🗄️ *(logs where applicable)*
-- [**rsg-inventory**](https://github.com/Rexshack-RedM/rsg-inventory) 🎒 *(for certain inventory interactions)*
+- [**fdb-inventory**](https://github.com/Rexshack-RedM/fdb-inventory) 🎒 *(for certain inventory interactions)*
 - [**ox_target**](https://github.com/overextended/ox_target) 🎯 *(for water pump interaction)*
 - [**weathersync**](https://github.com/Rexshack-RedM/weathersync) 🌦️
-- [**rsg-weapons**](https://github.com/Rexshack-RedM/rsg-weapons) 🔫 *(for weapon check/remove events)*
+- [**fdb-weapons**](https://github.com/Rexshack-RedM/fdb-weapons) 🔫 *(for weapon check/remove events)*
 
 **Locales:** `locales/en.json, fr.json, es.json, pt-br.json` (loaded via `lib.locale()`).  
 **Config:** `config.lua` exposes toggles and parameters for each module.
@@ -55,7 +55,7 @@
 - Unlocks a curated set of shop/clinic doors by hash at resource start.
 
 ### 💧 Near Water & Water Pump (`client/nearwater.lua`, `client/waterpump.lua`)
-- Wash/drink prompts near natural water sources with `RSGCore.Shared.Keybinds` prompts.
+- Wash/drink prompts near natural water sources with `FDBCore.Shared.Keybinds` prompts.
 - **Water pump** interactions via **ox_target**; fills canteen items (checks `canteen0`), plays progress bar and animation.
 
 ### 👆 Pointing (`client/pointing.lua`)
@@ -71,7 +71,7 @@
 - Option to stop auto-shuffle to driver seat for wagons (`Config.StopAutoShuffle = true`).
 
 ### 🔫 Weapon Check (`client/weaponcheck.lua`)
-- Removes weapons from ped slots on event `rsg-core:client:RemoveWeaponFromTab`, integrates with `rsg-weapons` and unequips if needed.
+- Removes weapons from ped slots on event `fdb-core:client:RemoveWeaponFromTab`, integrates with `fdb-weapons` and unequips if needed.
 
 ### 🌩️ Storm & Xmas (`server/storm.lua`, `server/xmas.lua`)
 - **Storm**: reacts to `txAdmin:events:announcement` to trigger thunderstorm prints and optional weather sync.
@@ -116,15 +116,15 @@ Config.Discord = {
 ---
 
 ## 📂 Installation
-1. Place `rsg-essentials` inside your `resources/[rsg]` folder.
-2. Ensure **rsg-core**, **ox_lib**, **ox_target**, and any optional dependencies you use are installed.
+1. Place `fdb-essentials` inside your `resources/[rsg]` folder.
+2. Ensure **fdb-core**, **ox_lib**, **ox_target**, and any optional dependencies you use are installed.
 3. Configure `config.lua` (Discord, Eagle Eye, Xmas, etc.).
 4. Add to your `server.cfg`:
    ```cfg
    ensure ox_lib
-   ensure rsg-core
+   ensure fdb-core
    ensure ox_target
-   ensure rsg-essentials
+   ensure fdb-essentials
    ```
 5. Restart your server.
 

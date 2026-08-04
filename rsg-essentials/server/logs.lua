@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
 local Webhooks = {
@@ -45,7 +45,7 @@ local Colors = { -- https://www.spycolor.com/
     ["lightgreen"] = 65309,
 }
 
-RegisterNetEvent('rsg-log:server:CreateLog', function(name, title, color, message, tagEveryone)
+RegisterNetEvent('fdb-log:server:CreateLog', function(name, title, color, message, tagEveryone)
     local tag = tagEveryone or false
     local webHook = Webhooks[name] or Webhooks['default']
     local embedData = {
@@ -69,6 +69,6 @@ RegisterNetEvent('rsg-log:server:CreateLog', function(name, title, color, messag
     end
 end)
 
-RSGCore.Commands.Add('testwebhook', locale('sv_test_your_webhook'), {}, false, function()
-    TriggerEvent('rsg-log:server:CreateLog', 'testwebhook', locale('sv_test_webhook'), 'default', locale('sv_webhook_successfully'))
+FDBCore.Commands.Add('testwebhook', locale('sv_test_your_webhook'), {}, false, function()
+    TriggerEvent('fdb-log:server:CreateLog', 'testwebhook', locale('sv_test_webhook'), 'default', locale('sv_webhook_successfully'))
 end, 'god')

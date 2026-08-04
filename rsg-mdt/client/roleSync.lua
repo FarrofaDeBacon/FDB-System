@@ -15,7 +15,7 @@ local RoleState = {
 
 -- Debug logging
 local function logMismatch(context, localData, serverData, message)
-    print('[rsg-mdt] ROLE MISMATCH [' .. context .. ']')
+    print('[fdb-mdt] ROLE MISMATCH [' .. context .. ']')
     print('  Message: ' .. message)
     if localData then
         print('  Local: job=' .. tostring(localData.job and localData.job.name) .. 
@@ -34,7 +34,7 @@ local function logMismatch(context, localData, serverData, message)
 end
 
 local function logInfo(message)
-    print('[rsg-mdt] RoleSync: ' .. message)
+    print('[fdb-mdt] RoleSync: ' .. message)
 end
 
 -- ============================================
@@ -76,12 +76,12 @@ local function GetJobInfo()
 end
 
 local function RequestRoleSync()
-    TriggerServerEvent('rsg-mdt:roleSync:requestRoles')
+    TriggerServerEvent('fdb-mdt:roleSync:requestRoles')
 end
 
 local function ValidateLocalState()
     if RoleState.myRole then
-        TriggerServerEvent('rsg-mdt:roleSync:validateLocalState', RoleState.myRole)
+        TriggerServerEvent('fdb-mdt:roleSync:validateLocalState', RoleState.myRole)
     end
 end
 
@@ -102,21 +102,21 @@ exports('attemptLocalOverride', AttemptLocalOverride)
 -- ============================================
 -- Event Handlers - Server -> Client
 -- ============================================
-RegisterNetEvent('rsg-mdt:roleSync:receiveRoles', function(data)
+RegisterNetEvent('fdb-mdt:roleSync:receiveRoles', function(data)
     RoleState.allRoles = data.roles or {}
     RoleState.configVersion = data.configVersion or 0
     RoleState.myRole = data.yourRole
     RoleState.lastSync = GetGameTimer()
     RoleState.isInitialized = true
     
-    TriggerEvent('rsg-mdt:roleSync:stateUpdated', {
+    TriggerEvent('fdb-mdt:roleSync:stateUpdated', {
         myRole = RoleState.myRole,
         roleCount = #RoleState.allRoles,
         configVersion = RoleState.configVersion
     })
 end)
 
-RegisterNetEvent('rsg-mdt:roleSync:receiveMyRole', function(roleData)
+RegisterNetEvent('fdb-mdt:roleSync:receiveMyRole', function(roleData)
     local previousRole = RoleState.myRole
     RoleState.myRole = roleData
     RoleState.lastSync = GetGameTimer()
@@ -131,17 +131,17 @@ RegisterNetEvent('rsg-mdt:roleSync:receiveMyRole', function(roleData)
         logInfo(locale('role_removed', previousRole.job.name))
     end
     
-    TriggerEvent('rsg-mdt:roleSync:myRoleUpdated', roleData)
+    TriggerEvent('fdb-mdt:roleSync:myRoleUpdated', roleData)
 end)
 
-RegisterNetEvent('rsg-mdt:roleSync:roleUpdated', function(data)
+RegisterNetEvent('fdb-mdt:roleSync:roleUpdated', function(data)
     local changeType = data.changeType
     local roleData = data.roleData
     local source = data.source
     
     if changeType == 'add' then
         table.insert(RoleState.allRoles, roleData)
-        TriggerEvent('rsg-mdt:roleSync:playerAdded', roleData)
+        TriggerEvent('fdb-mdt:roleSync:playerAdded', roleData)
     elseif changeType == 'update' then
         for i, role in ipairs(RoleState.allRoles) do
             if role.source == source then
@@ -149,7 +149,7 @@ RegisterNetEvent('rsg-mdt:roleSync:roleUpdated', function(data)
                 break
             end
         end
-        TriggerEvent('rsg-mdt:roleSync:playerUpdated', roleData)
+        TriggerEvent('fdb-mdt:roleSync:playerUpdated', roleData)
     elseif changeType == 'remove' then
         for i, role in ipairs(RoleState.allRoles) do
             if role.source == source then
@@ -157,49 +157,49 @@ RegisterNetEvent('rsg-mdt:roleSync:roleUpdated', function(data)
                 break
             end
         end
-        TriggerEvent('rsg-mdt:roleSync:playerRemoved', roleData)
+        TriggerEvent('fdb-mdt:roleSync:playerRemoved', roleData)
     end
 end)
 
-RegisterNetEvent('rsg-mdt:roleSync:forceRefresh', function(data)
+RegisterNetEvent('fdb-mdt:roleSync:forceRefresh', function(data)
     RoleState.allRoles = data.roles or {}
     RoleState.configVersion = data.configVersion or 0
     RoleState.lastSync = GetGameTimer()
     
     logInfo('Force refresh received, config version: ' .. RoleState.configVersion)
     
-    TriggerEvent('rsg-mdt:roleSync:forceRefreshReceived', {
+    TriggerEvent('fdb-mdt:roleSync:forceRefreshReceived', {
         configVersion = RoleState.configVersion,
         roleCount = #RoleState.allRoles
     })
 end)
 
-RegisterNetEvent('rsg-mdt:roleSync:stateMismatch', function(data)
+RegisterNetEvent('fdb-mdt:roleSync:stateMismatch', function(data)
     logMismatch('Server Validation', data.localState, data.serverState, data.message)
     
     RoleState.myRole = data.serverState
     RoleState.lastSync = GetGameTimer()
     
-    TriggerEvent('rsg-mdt:roleSync:stateCorrected', {
+    TriggerEvent('fdb-mdt:roleSync:stateCorrected', {
         correctedRole = data.serverState,
         message = data.message
     })
 end)
 
-RegisterNetEvent('rsg-mdt:roleSync:refreshComplete', function(data)
+RegisterNetEvent('fdb-mdt:roleSync:refreshComplete', function(data)
     if data.success then
         logInfo('Admin refresh completed: ' .. data.message)
     else
         logInfo('Admin refresh failed: ' .. data.message)
     end
     
-    TriggerEvent('rsg-mdt:roleSync:adminRefreshResult', data)
+    TriggerEvent('fdb-mdt:roleSync:adminRefreshResult', data)
 end)
 
 -- ============================================
 -- Callbacks
 -- ============================================
-lib.callback.register('rsg-mdt:roleSync:getLocalState', function()
+lib.callback.register('fdb-mdt:roleSync:getLocalState', function()
     return {
         myRole = RoleState.myRole,
         configVersion = RoleState.configVersion,
@@ -216,15 +216,15 @@ CreateThread(function()
     RequestRoleSync()
 end)
 
-RegisterNetEvent('RSGCore:Client:OnPlayerLoaded', function()
+RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', function()
     Wait(2000)
     RequestRoleSync()
 end)
 
-RegisterNetEvent('RSGCore:Player:SetPlayerData', function(data)
+RegisterNetEvent('FDBCore:Player:SetPlayerData', function(data)
     if data.job then
         Wait(1000)
-        TriggerServerEvent('rsg-mdt:roleSync:requestMyRole')
+        TriggerServerEvent('fdb-mdt:roleSync:requestMyRole')
     end
 end)
 

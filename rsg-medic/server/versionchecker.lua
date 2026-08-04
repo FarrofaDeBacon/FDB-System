@@ -3,7 +3,7 @@
 ----------------------------------------------------------------------- 
 
 local resourceName = GetCurrentResourceName()
-local githubRawBase = 'https://raw.githubusercontent.com/Rexshack-RedM/rsg-versioncheckers/main/'
+local githubRawBase = 'https://raw.githubusercontent.com/Rexshack-RedM/fdb-versioncheckers/main/'
 
 local function printLog(type, message)
     local color = (type == 'success' and '^2') or (type == 'warning' and '^3') or '^1'

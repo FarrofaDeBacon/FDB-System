@@ -150,7 +150,7 @@ AddEventHandler('playerDropped', function()
 end)
 
 -- REMOVED (rename cleanup): this callback was registered under the dead
--- 'rsg-weapons:server:getWeaponBySerial' name and was never reachable after
+-- 'fdb-weapons:server:getWeaponBySerial' name and was never reachable after
 -- the fdb-weapons rename (the client calls 'fdb-weapons:server:getWeaponBySerial').
 -- Its logic (pocket + satchel/holster/backpack lookup) was merged into
 -- fdb-weapons/server/server.lua's own getWeaponBySerial callback, which is
@@ -163,7 +163,7 @@ RegisterNetEvent('fdb-inventory:server:UseHotbarSlot', function(slot)
     if not Player then return end
     local hotbarItems, _ = Inventory.GetHotbarItems(Player)
     local itemData = hotbarItems[slot]
-    print(("[rsg-inventory DEBUG] UseHotbarSlot triggered. Slot: %s, ItemData: %s"):format(tostring(slot), json.encode(itemData)))
+    print(("[fdb-inventory DEBUG] UseHotbarSlot triggered. Slot: %s, ItemData: %s"):format(tostring(slot), json.encode(itemData)))
     if not itemData then return end
 
     local itemInfo = FDBCore.Shared.Items[itemData.name]
@@ -179,7 +179,7 @@ RegisterNetEvent('fdb-inventory:server:UseHotbarSlot', function(slot)
     end
 
     if itemData.type == 'weapon' then
-        print("[rsg-inventory DEBUG] Item is weapon, preparing player_weapons entry...")
+        print("[fdb-inventory DEBUG] Item is weapon, preparing player_weapons entry...")
         local result = MySQL.Sync.fetchAll(
             'SELECT * FROM player_weapons WHERE serial = @serial and citizenid = @citizenid',
             { serial = itemData.info.serie, citizenid = Player.PlayerData.citizenid }
@@ -190,7 +190,7 @@ RegisterNetEvent('fdb-inventory:server:UseHotbarSlot', function(slot)
                 { serial = itemData.info.serie, citizenid = Player.PlayerData.citizenid }
             )
         end
-        print("[rsg-inventory DEBUG] Triggering fdb-weapons:client:UseWeapon")
+        print("[fdb-inventory DEBUG] Triggering fdb-weapons:client:UseWeapon")
         TriggerClientEvent('fdb-weapons:client:UseWeapon', src, itemData)
         TriggerClientEvent('fdb-inventory:client:ItemBox', src, itemInfo, 'use')
 

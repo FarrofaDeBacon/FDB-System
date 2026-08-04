@@ -11,12 +11,12 @@ Citizen.CreateThread(function()
     SetDiscordRichPresenceAction(1, Config.Discord.SecondButtonPlaceholder, Config.Discord.SecondButtonLink)
 
     while true do
-        TriggerServerEvent('rsg-discord:getdata')
+        TriggerServerEvent('fdb-discord:getdata')
 
         Citizen.Wait(Config.Discord.UpdateEvery)
     end
 end)
 
-RegisterNetEvent("rsg-discord:receivedata", function(richPresenceString)
+RegisterNetEvent("fdb-discord:receivedata", function(richPresenceString)
     SetRichPresence(richPresenceString)
 end)

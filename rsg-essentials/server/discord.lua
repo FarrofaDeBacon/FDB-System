@@ -1,4 +1,4 @@
-RegisterNetEvent('rsg-discord:getdata', function()
+RegisterNetEvent('fdb-discord:getdata', function()
     local activePlayers = GetPlayers()
     local playerName = GetPlayerName(source)
     local maxServerCapacity = GetConvarInt("sv_maxClients", 48)
@@ -15,5 +15,5 @@ RegisterNetEvent('rsg-discord:getdata', function()
         return replacements['{' .. key .. '}'] or key
     end)
 
-    TriggerClientEvent('rsg-discord:receivedata', source, result)
+    TriggerClientEvent('fdb-discord:receivedata', source, result)
 end)

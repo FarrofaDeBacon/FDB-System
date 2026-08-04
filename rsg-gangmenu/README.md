@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 💀 rsg-gangmenu
+# 💀 fdb-gangmenu
 **Gang boss management menu for RedM servers using RSG Core.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -11,13 +11,13 @@
 ---
 
 ## 🛠️ Dependencies
-- [**rsg-core**](https://github.com/Rexshack-RedM/rsg-core) 🤠
+- [**fdb-core**](https://github.com/Rexshack-RedM/fdb-core) 🤠
 - [**ox_lib**](https://github.com/Rexshack-RedM/ox_lib) ⚙️
 - [**oxmysql**](https://github.com/overextended/oxmysql) 🗄️ *(required for gang funds)*
-- [**rsg-inventory**](https://github.com/Rexshack-RedM/rsg-inventory) 🎒 *(for the gang stash)*
+- [**fdb-inventory**](https://github.com/Rexshack-RedM/fdb-inventory) 🎒 *(for the gang stash)*
 
-**Interaction:** Context prompt at each `Config.GangLocations[i].coords` opens the main menu (uses `exports['rsg-core']:createPrompt`).  
-**Key text:** Prompt displays the configured key from `RSGCore.Shared.Keybinds[Config.Keybind]`.  
+**Interaction:** Context prompt at each `Config.GangLocations[i].coords` opens the main menu (uses `exports['fdb-core']:createPrompt`).  
+**Key text:** Prompt displays the configured key from `FDBCore.Shared.Keybinds[Config.Keybind]`.  
 **Locales:** `locales/en.json, fr.json, es.json, it.json, el.json, pt-br.json` (loaded via `lib.locale()`).
 
 **Command:** `/gangmenu` opens the main gang management menu.
@@ -34,7 +34,7 @@
 - **Hire Gang Members**
   - List **nearby civilians** and recruit them into your gang.
 - **Storage Access**
-  - Open the **shared gang stash** (via `rsg-inventory`), with configurable slots/weight.
+  - Open the **shared gang stash** (via `fdb-inventory`), with configurable slots/weight.
 - **Money Management**
   - View gang **balance** (server callback).
   - **Deposit** and **Withdraw** funds via input dialogs.
@@ -93,16 +93,16 @@ Config.GangLocations = {
 ---
 
 ## 📂 Installation
-1. Place `rsg-gangmenu` inside your `resources` (or `resources/[rsg]`) folder.
-2. Ensure **rsg-core**, **ox_lib**, **rsg-inventory**, and **oxmysql** are installed and started.
-3. **Database:** import `rsg-gangmenu.sql` (creates `management_funds` with `type='gang'`).
+1. Place `fdb-gangmenu` inside your `resources` (or `resources/[rsg]`) folder.
+2. Ensure **fdb-core**, **ox_lib**, **fdb-inventory**, and **oxmysql** are installed and started.
+3. **Database:** import `fdb-gangmenu.sql` (creates `management_funds` with `type='gang'`).
 4. Edit `config.lua` (keybind, stash sizes, blip & gang locations).
 5. Add to your `server.cfg`:
    ```cfg
    ensure ox_lib
-   ensure rsg-core
-   ensure rsg-inventory
-   ensure rsg-gangmenu
+   ensure fdb-core
+   ensure fdb-inventory
+   ensure fdb-gangmenu
    ```
 
 ---
@@ -114,7 +114,7 @@ Config.GangLocations = {
 ---
 
 ## 🗄️ SQL
-`rsg-gangmenu.sql` creates (and seeds) the **management_funds** table:
+`fdb-gangmenu.sql` creates (and seeds) the **management_funds** table:
 ```sql
 CREATE TABLE IF NOT EXISTS `management_funds` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,

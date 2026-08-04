@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 local playerFines = {}
 local finesTargetCreated = false
@@ -47,7 +47,7 @@ exports('hasUnpaidFines', hasUnpaidFines)
 exports('getTotalFinesAmount', getTotalFinesAmount)
 exports('getPlayerFines', function() return playerFines end)
 
-RegisterNetEvent('rsg-mdt:client:updatePlayerFines', function(fines)
+RegisterNetEvent('fdb-mdt:client:updatePlayerFines', function(fines)
     playerFines = fines or {}
     
     SendNUIMessage(json.encode({
@@ -56,7 +56,7 @@ RegisterNetEvent('rsg-mdt:client:updatePlayerFines', function(fines)
     }))
 end)
 
-RegisterNetEvent('rsg-mdt:client:finePaid', function(data)
+RegisterNetEvent('fdb-mdt:client:finePaid', function(data)
     for i, fine in ipairs(playerFines) do
         if fine.id == data.fineId then
             table.remove(playerFines, i)
@@ -70,7 +70,7 @@ RegisterNetEvent('rsg-mdt:client:finePaid', function(data)
     }))
 end)
 
-RegisterNetEvent('rsg-mdt:client:finePaymentResult', function(data)
+RegisterNetEvent('fdb-mdt:client:finePaymentResult', function(data)
     if data.success then
         lib.notify({
             title = locale('fines_title'),
@@ -106,7 +106,7 @@ local function createFinesPaymentTargets()
         end
         
         if not HasModelLoaded(pedModel) then
-            print('[rsg-mdt] Warning: Failed to load ped model for fines payment NPC at ' .. name)
+            print('[fdb-mdt] Warning: Failed to load ped model for fines payment NPC at ' .. name)
             goto continue
         end
         
@@ -129,7 +129,7 @@ local function createFinesPaymentTargets()
                     return hasUnpaidFines()
                 end,
                 onSelect = function()
-                    lib.callback('rsg-mdt:server:getPlayerFines', false, function(fines)
+                    lib.callback('fdb-mdt:server:getPlayerFines', false, function(fines)
                         playerFines = fines or {}
                         
                         if #playerFines == 0 then
@@ -165,9 +165,9 @@ local function createFinesPaymentTargets()
                                     })
                                     
                                     if alert == 'confirm' then
-                                        local result = lib.callback.await('rsg-mdt:server:payFine', false, fine.id)
+                                        local result = lib.callback.await('fdb-mdt:server:payFine', false, fine.id)
                                         if result and result.success then
-                                            lib.callback('rsg-mdt:server:getPlayerFines', false, function(newFines)
+                                            lib.callback('fdb-mdt:server:getPlayerFines', false, function(newFines)
                                                 playerFines = newFines or {}
                                             end)
                                         end
@@ -194,10 +194,10 @@ local function createFinesPaymentTargets()
                                 
                                 if alert == 'confirm' then
                                     for _, fine in ipairs(playerFines) do
-                                        lib.callback.await('rsg-mdt:server:payFine', false, fine.id)
+                                        lib.callback.await('fdb-mdt:server:payFine', false, fine.id)
                                     end
                                     
-                                    lib.callback('rsg-mdt:server:getPlayerFines', false, function(newFines)
+                                    lib.callback('fdb-mdt:server:getPlayerFines', false, function(newFines)
                                         playerFines = newFines or {}
                                     end)
                                 end
@@ -220,7 +220,7 @@ local function createFinesPaymentTargets()
                 label = locale('fines_check_label'),
                 distance = 2.5,
                 onSelect = function()
-                    lib.callback('rsg-mdt:server:getPlayerFines', false, function(fines)
+                    lib.callback('fdb-mdt:server:getPlayerFines', false, function(fines)
                         playerFines = fines or {}
                         
                         if #playerFines == 0 then
@@ -251,7 +251,7 @@ end
 CreateThread(function()
     Wait(3000)
     
-    lib.callback('rsg-mdt:server:getPlayerFines', false, function(fines)
+    lib.callback('fdb-mdt:server:getPlayerFines', false, function(fines)
         playerFines = fines or {}
     end)
     
@@ -260,53 +260,53 @@ CreateThread(function()
     end
 end)
 
-RegisterNetEvent('RSGCore:Client:OnPlayerLoaded', function()
+RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', function()
     Wait(2000)
     
-    lib.callback('rsg-mdt:server:getPlayerFines', false, function(fines)
+    lib.callback('fdb-mdt:server:getPlayerFines', false, function(fines)
         playerFines = fines or {}
     end)
 end)
 
 RegisterNuiCallback('getPlayerFines', function(_, cb)
-    local fines = lib.callback.await('rsg-mdt:server:getPlayerFines')
+    local fines = lib.callback.await('fdb-mdt:server:getPlayerFines')
     cb(fines or {})
 end)
 
 RegisterNuiCallback('payFine', function(data, cb)
-    local result = lib.callback.await('rsg-mdt:server:payFine', false, data.fineId)
+    local result = lib.callback.await('fdb-mdt:server:payFine', false, data.fineId)
     cb(result or { success = false, message = locale('notification_unknown_error') })
 end)
 
 RegisterNuiCallback('getUnpaidFinesCount', function(data, cb)
-    local count = lib.callback.await('rsg-mdt:server:getUnpaidFinesCount', false, data.citizenid)
+    local count = lib.callback.await('fdb-mdt:server:getUnpaidFinesCount', false, data.citizenid)
     cb(count or 0)
 end)
 
 RegisterNuiCallback('getCitizenFines', function(data, cb)
-    local fines = lib.callback.await('rsg-mdt:server:getCitizenFines', false, data.citizenid)
+    local fines = lib.callback.await('fdb-mdt:server:getCitizenFines', false, data.citizenid)
     cb(fines or {})
 end)
 
 RegisterNuiCallback('getAllUnpaidFines', function(_, cb)
-    local fines = lib.callback.await('rsg-mdt:server:getAllUnpaidFines')
+    local fines = lib.callback.await('fdb-mdt:server:getAllUnpaidFines')
     cb(fines or {})
 end)
 
 RegisterNuiCallback('markFinePaid', function(data, cb)
-    local result = lib.callback.await('rsg-mdt:server:markFinePaid', false, data.fineId)
+    local result = lib.callback.await('fdb-mdt:server:markFinePaid', false, data.fineId)
     cb(result or { success = false, message = locale('notification_unknown_error') })
 end)
 
-RegisterNetEvent('rsg-mdt:client:finePaid', function(data)
+RegisterNetEvent('fdb-mdt:client:finePaid', function(data)
     SendNUIMessage(json.encode({ action = 'finePaid', data = data }))
 end)
 
-RegisterNetEvent('rsg-mdt:client:fineStatusUpdated', function(data)
+RegisterNetEvent('fdb-mdt:client:fineStatusUpdated', function(data)
     SendNUIMessage(json.encode({ action = 'fineStatusUpdated', data = data }))
 end)
 
-RegisterNetEvent('rsg-mdt:client:playerFinePaid', function(data)
+RegisterNetEvent('fdb-mdt:client:playerFinePaid', function(data)
     for i, fine in ipairs(playerFines) do
         if fine.id == data.fineId then
             table.remove(playerFines, i)

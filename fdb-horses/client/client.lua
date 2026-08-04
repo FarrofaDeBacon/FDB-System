@@ -77,7 +77,7 @@ local initialHorseComps = {}
 lib.locale()
 
 MenuData = {}
-TriggerEvent('rsg-menubase:getData', function(call)
+TriggerEvent('fdb-menubase:getData', function(call)
     MenuData = call
 end)
 
@@ -754,7 +754,7 @@ function UpdatePedVariation(ped)
 end
 
 ------------------------------------
--- menu components rsg-menubase
+-- menu components fdb-menubase
 ------------------------------------
 function MainMenu(horses, horsedata)
     MenuData.CloseAll()

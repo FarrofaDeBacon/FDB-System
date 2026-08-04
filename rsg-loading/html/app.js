@@ -7,15 +7,15 @@ const load = Vue.createApp({
     return {
       CarouselText1: 'You can add/remove items, vehicles, jobs & gangs through the shared folder.',
       CarouselSubText1: 'Photo captured by: Markyoo#8068',
-      CarouselText2: 'Adding additional player data can be achieved by modifying the rsg-core player.lua file.',
+      CarouselText2: 'Adding additional player data can be achieved by modifying the fdb-core player.lua file.',
       CarouselSubText2: 'Photo captured by: ihyajb#9723',
       CarouselText3: 'All server-specific adjustments can be made in the config.lua files throughout the build.',
       CarouselSubText3: 'Photo captured by: FLAPZ[INACTIV]#9925',
-      CarouselText4: 'For additional support please join our community at discord.gg/rsgcore',
+      CarouselText4: 'For additional support please join our community at discord.gg/fdbcore',
       CarouselSubText4: 'Photo captured by: Robinerino#1312',
 
-      DownloadTitle: 'Downloading RSGCore Server',
-      DownloadDesc: "Hold tight while we begin downloading all the resources/assets required to play on RSGCore Server. \n\nAfter download has been finished successfully, you'll be placed into the server and this screen will disappear. Please don't leave or turn off your PC. ",
+      DownloadTitle: 'Downloading FDBCore Server',
+      DownloadDesc: "Hold tight while we begin downloading all the resources/assets required to play on FDBCore Server. \n\nAfter download has been finished successfully, you'll be placed into the server and this screen will disappear. Please don't leave or turn off your PC. ",
 
       SettingsTitle: 'Settings',
       AudioTrackDesc1: 'When disabled the current audio-track playing will be stopped.',

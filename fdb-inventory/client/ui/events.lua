@@ -207,24 +207,24 @@ RegisterNetEvent('fdb-inventory:client:openInventory', function(items, other, se
         end
 
         if uid and model then
-            print(("[rsg-inventory] Fetching backpack stash for uid: %s, model: %s"):format(uid, model))
+            print(("[fdb-inventory] Fetching backpack stash for uid: %s, model: %s"):format(uid, model))
             backpackData = lib.callback.await('fdb-inventory:server:getBackpackStash', false, uid, model)
             if backpackData then
                 backpackData.autoOpen = autoOpenBackpack
                 backpackData.isEquipped = isEquipped
-                print("[rsg-inventory] Backpack stash data retrieved successfully: " .. json.encode(backpackData))
+                print("[fdb-inventory] Backpack stash data retrieved successfully: " .. json.encode(backpackData))
             else
-                print("[rsg-inventory] WARNING: getBackpackStash returned nil")
+                print("[fdb-inventory] WARNING: getBackpackStash returned nil")
             end
         else
-            -- print("[rsg-inventory] No uid or model for backpack search. uid: " .. tostring(uid) .. ", model: " .. tostring(model))
+            -- print("[fdb-inventory] No uid or model for backpack search. uid: " .. tostring(uid) .. ", model: " .. tostring(model))
         end
 
         autoOpenBackpack = false -- reset state
         tempBackpackUid = nil
         tempBackpackModel = nil
 
-        print("[rsg-inventory] Sending open NUI message with backpack data presence: " .. tostring(backpackData ~= nil))
+        print("[fdb-inventory] Sending open NUI message with backpack data presence: " .. tostring(backpackData ~= nil))
         SendNUIMessage({
             action    = 'open',
             inventory = items,
@@ -248,7 +248,7 @@ end)
 
 RegisterNetEvent("fdb-inventory:client:openBackpackDrawer")
 AddEventHandler("fdb-inventory:client:openBackpackDrawer", function(backpackUid, backpackModel)
-    print(("[rsg-inventory] openBackpackDrawer event triggered. backpackUid: %s, backpackModel: %s"):format(tostring(backpackUid), tostring(backpackModel)))
+    print(("[fdb-inventory] openBackpackDrawer event triggered. backpackUid: %s, backpackModel: %s"):format(tostring(backpackUid), tostring(backpackModel)))
     autoOpenBackpack = true
     tempBackpackUid = backpackUid
     tempBackpackModel = backpackModel

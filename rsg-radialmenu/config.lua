@@ -16,7 +16,7 @@ Config.MenuItems = {
                 title = 'Horse Lantern',
                 icon = 'lightbulb',
                 type = 'client',
-                event = 'rsg-horses:client:equipHorseLantern',
+                event = 'fdb-horses:client:equipHorseLantern',
                 shouldClose = true
             },
         },
@@ -102,7 +102,7 @@ Config.MenuItems = {
                 title = 'Toggle PVP on/off',
                 icon = 'hand-holding-hand',
                 type = 'client',
-                event = 'rsg-essentials:client:pvpToggle',
+                event = 'fdb-essentials:client:pvpToggle',
                 shouldClose = true
             }, 
             {
@@ -110,7 +110,7 @@ Config.MenuItems = {
                 title = 'Adress book',
                 icon = 'address-book',
                 type = 'client',
-                event = 'rsg-telegram:client:OpenAddressbook',
+                event = 'fdb-telegram:client:OpenAddressbook',
                 shouldClose = true
             },
             {
@@ -251,7 +251,7 @@ Config.JobInteractions = {
             title = 'Emergency Button',
             icon = 'exclamation',
             type = 'client',
-            event = 'rsg-radialmenu:client:SendMedicEmergencyAlert',
+            event = 'fdb-radialmenu:client:SendMedicEmergencyAlert',
             shouldClose = true
         },
         {
@@ -259,7 +259,7 @@ Config.JobInteractions = {
             title = 'Revive',
             icon = 'user-doctor',
             type = 'client',
-            event = 'rsg-medic:client:RevivePlayer',
+            event = 'fdb-medic:client:RevivePlayer',
             shouldClose = true
         },
         {
@@ -267,7 +267,7 @@ Config.JobInteractions = {
             title = 'Heal wounds',
             icon = 'bandage',
             type = 'client',
-            event = 'rsg-medic:client:TreatWounds',
+            event = 'fdb-medic:client:TreatWounds',
             shouldClose = true
         }
     },
@@ -277,7 +277,7 @@ Config.JobInteractions = {
             title = 'Emergency Button',
             icon = 'exclamation',
             type = 'client',
-            event = 'rsg-radialmenu:client:SendLawmanEmergencyAlert',
+            event = 'fdb-radialmenu:client:SendLawmanEmergencyAlert',
             shouldClose = true
         },
         {
@@ -285,7 +285,7 @@ Config.JobInteractions = {
             title = 'Cuff',
             icon = 'user-lock',
             type = 'client',
-            event = 'rsg-lawman:client:cuffplayer',
+            event = 'fdb-lawman:client:cuffplayer',
             shouldClose = true
         },
         {
@@ -293,7 +293,7 @@ Config.JobInteractions = {
             title = 'Escort',
             icon = 'user-group',
             type = 'client',
-            event = 'rsg-lawman:client:escortplayer',
+            event = 'fdb-lawman:client:escortplayer',
             shouldClose = true
         },
         {
@@ -301,7 +301,7 @@ Config.JobInteractions = {
             title = 'Jail',
             icon = 'user-lock',
             type = 'client',
-            event = 'rsg-lawman:client:jailplayer',
+            event = 'fdb-lawman:client:jailplayer',
             shouldClose = true
         },
         {
@@ -327,7 +327,7 @@ Config.JobInteractions = {
             title = 'Emergency Button',
             icon = 'exclamation',
             type = 'client',
-            event = 'rsg-radialmenu:client:SendLawmanEmergencyAlert',
+            event = 'fdb-radialmenu:client:SendLawmanEmergencyAlert',
             shouldClose = true
         },
         {
@@ -335,7 +335,7 @@ Config.JobInteractions = {
             title = 'Cuff',
             icon = 'user-lock',
             type = 'client',
-            event = 'rsg-lawman:client:cuffplayer',
+            event = 'fdb-lawman:client:cuffplayer',
             shouldClose = true
         },
         {
@@ -343,7 +343,7 @@ Config.JobInteractions = {
             title = 'Escort',
             icon = 'user-group',
             type = 'client',
-            event = 'rsg-lawman:client:escortplayer',
+            event = 'fdb-lawman:client:escortplayer',
             shouldClose = true
         },
         {
@@ -351,7 +351,7 @@ Config.JobInteractions = {
             title = 'Jail',
             icon = 'user-lock',
             type = 'client',
-            event = 'rsg-lawman:client:jailplayer',
+            event = 'fdb-lawman:client:jailplayer',
             shouldClose = true
         },
         {
@@ -377,7 +377,7 @@ Config.JobInteractions = {
             title = 'Emergency Button',
             icon = 'exclamation',
             type = 'client',
-            event = 'rsg-radialmenu:client:SendLawmanEmergencyAlert',
+            event = 'fdb-radialmenu:client:SendLawmanEmergencyAlert',
             shouldClose = true
         },
         {
@@ -385,7 +385,7 @@ Config.JobInteractions = {
             title = 'Cuff',
             icon = 'user-lock',
             type = 'client',
-            event = 'rsg-lawman:client:cuffplayer',
+            event = 'fdb-lawman:client:cuffplayer',
             shouldClose = true
         },
         {
@@ -393,7 +393,7 @@ Config.JobInteractions = {
             title = 'Escort',
             icon = 'user-group',
             type = 'client',
-            event = 'rsg-lawman:client:escortplayer',
+            event = 'fdb-lawman:client:escortplayer',
             shouldClose = true
         },
         {
@@ -401,7 +401,7 @@ Config.JobInteractions = {
             title = 'Jail',
             icon = 'user-lock',
             type = 'client',
-            event = 'rsg-lawman:client:jailplayer',
+            event = 'fdb-lawman:client:jailplayer',
             shouldClose = true
         },
         {
@@ -427,7 +427,7 @@ Config.JobInteractions = {
             title = 'Emergency Button',
             icon = 'exclamation',
             type = 'client',
-            event = 'rsg-radialmenu:client:SendLawmanEmergencyAlert',
+            event = 'fdb-radialmenu:client:SendLawmanEmergencyAlert',
             shouldClose = true
         },
         {
@@ -435,7 +435,7 @@ Config.JobInteractions = {
             title = 'Cuff',
             icon = 'user-lock',
             type = 'client',
-            event = 'rsg-lawman:client:cuffplayer',
+            event = 'fdb-lawman:client:cuffplayer',
             shouldClose = true
         },
         {
@@ -443,7 +443,7 @@ Config.JobInteractions = {
             title = 'Escort',
             icon = 'user-group',
             type = 'client',
-            event = 'rsg-lawman:client:escortplayer',
+            event = 'fdb-lawman:client:escortplayer',
             shouldClose = true
         },
         {
@@ -451,7 +451,7 @@ Config.JobInteractions = {
             title = 'Jail',
             icon = 'user-lock',
             type = 'client',
-            event = 'rsg-lawman:client:jailplayer',
+            event = 'fdb-lawman:client:jailplayer',
             shouldClose = true
         },
         {
@@ -477,7 +477,7 @@ Config.JobInteractions = {
             title = 'Emergency Button',
             icon = 'exclamation',
             type = 'client',
-            event = 'rsg-radialmenu:client:SendLawmanEmergencyAlert',
+            event = 'fdb-radialmenu:client:SendLawmanEmergencyAlert',
             shouldClose = true
         },
         {
@@ -485,7 +485,7 @@ Config.JobInteractions = {
             title = 'Cuff',
             icon = 'user-lock',
             type = 'client',
-            event = 'rsg-lawman:client:cuffplayer',
+            event = 'fdb-lawman:client:cuffplayer',
             shouldClose = true
         },
         {
@@ -493,7 +493,7 @@ Config.JobInteractions = {
             title = 'Escort',
             icon = 'user-group',
             type = 'client',
-            event = 'rsg-lawman:client:escortplayer',
+            event = 'fdb-lawman:client:escortplayer',
             shouldClose = true
         },
         {
@@ -501,7 +501,7 @@ Config.JobInteractions = {
             title = 'Jail',
             icon = 'user-lock',
             type = 'client',
-            event = 'rsg-lawman:client:jailplayer',
+            event = 'fdb-lawman:client:jailplayer',
             shouldClose = true
         },
         {

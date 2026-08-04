@@ -1,15 +1,15 @@
 local Config = lib.require('config')
 lib.locale()
 
-RSGCore.Commands.Add('myjobs', locale('sv_command_desc'), {}, false, function(source)
+FDBCore.Commands.Add('myjobs', locale('sv_command_desc'), {}, false, function(source)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
-    TriggerClientEvent('rsg-multijob:client:openmenu', src)
+    local Player = FDBCore.Functions.GetPlayer(src)
+    TriggerClientEvent('fdb-multijob:client:openmenu', src)
 end)
 
-RSGCore.Functions.CreateCallback('rsg-multijob:server:checkjobs', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-multijob:server:checkjobs', function(source, cb)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     local citizenid = Player.PlayerData.citizenid
     -- Look up allowed jobs; if not defined, use the default Config.MaxJobs.
     local allowedJobs = Config.AllowedMultipleJobs[citizenid] or Config.MaxJobs
@@ -42,13 +42,13 @@ local function CanSetJob(cid, jobName)
     return false, nil
 end
 
-lib.callback.register('rsg-multijob:server:myJobs', function(source)
+lib.callback.register('fdb-multijob:server:myJobs', function(source)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     local storeJobs = {}
     local result = MySQL.query.await('SELECT * FROM player_jobs WHERE citizenid = ?', {Player.PlayerData.citizenid})
     for k, v in pairs(result) do
-        local job = RSGCore.Shared.Jobs[v.job]
+        local job = FDBCore.Shared.Jobs[v.job]
 
         if not job then
             return error(('MISSING JOB FROM jobs.lua: "%s" | CITIZEN ID: %s'): format(v.job, Player.PlayerData.citizenid))
@@ -71,16 +71,16 @@ lib.callback.register('rsg-multijob:server:myJobs', function(source)
     return storeJobs
 end)
 
-RegisterNetEvent('rsg-multijob:server:changeJob', function(job)
+RegisterNetEvent('fdb-multijob:server:changeJob', function(job)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
 
     if Player.PlayerData.job.name == job then
         TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_current_job_error'), type = 'error', duration = 5000 })
         return 
     end
 
-    local jobInfo = RSGCore.Shared.Jobs[job]
+    local jobInfo = FDBCore.Shared.Jobs[job]
     if not jobInfo then
         TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_invalid_job'), type = 'error', duration = 5000 })
         return
@@ -95,13 +95,13 @@ RegisterNetEvent('rsg-multijob:server:changeJob', function(job)
 
     Player.Functions.SetJob(job, grade)
     Player.Functions.SetJobDuty(false)
-    TriggerClientEvent('RSGCore:Client:SetDuty', src, false)
+    TriggerClientEvent('FDBCore:Client:SetDuty', src, false)
     TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_job') .. ': ' .. jobInfo.label, type = 'info', duration = 5000 })
 end)
 
-RegisterNetEvent('rsg-multijob:server:newJob', function(newJob)
+RegisterNetEvent('fdb-multijob:server:newJob', function(newJob)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     local cid = Player.PlayerData.citizenid
     
     if newJob.name == 'unemployed' then 
@@ -130,20 +130,20 @@ RegisterNetEvent('rsg-multijob:server:newJob', function(newJob)
     MySQL.insert.await('INSERT INTO player_jobs (citizenid, job, grade) VALUE (?, ?, ?)', {cid, newJob.name, newJob.grade.level})
 end)
 
-RegisterNetEvent('rsg-multijob:server:deleteJob', function(job)
+RegisterNetEvent('fdb-multijob:server:deleteJob', function(job)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     MySQL.query.await('DELETE FROM player_jobs WHERE citizenid = ? and job = ?', {Player.PlayerData.citizenid, job})
-    TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_job_deleted') .. ' ' .. RSGCore.Shared.Jobs[job].label .. ' '.. locale('sv_job_deleted_2'), type = 'success', duration = 5000 })
+    TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_job_deleted') .. ' ' .. FDBCore.Shared.Jobs[job].label .. ' '.. locale('sv_job_deleted_2'), type = 'success', duration = 5000 })
     if Player.PlayerData.job.name == job then
         Player.Functions.SetJob('unemployed', 0)
     end
 end)
 
-RegisterNetEvent('rsg-bossmenu:server:FireEmployee', function(target) -- Removes job when fired from rsg-bossmenu.
+RegisterNetEvent('fdb-bossmenu:server:FireEmployee', function(target) -- Removes job when fired from fdb-bossmenu.
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
-    local Employee = RSGCore.Functions.GetPlayerByCitizenId(target)
+    local Player = FDBCore.Functions.GetPlayer(src)
+    local Employee = FDBCore.Functions.GetPlayerByCitizenId(target)
     if Employee then
         local oldJob = Employee.PlayerData.job.name
         MySQL.query.await('DELETE FROM player_jobs WHERE citizenid = ? AND job = ?', {Employee.PlayerData.citizenid, oldJob})
@@ -159,7 +159,7 @@ RegisterNetEvent('rsg-bossmenu:server:FireEmployee', function(target) -- Removes
 end)
 
 local function adminRemoveJob(src, id, job)
-    local Player = RSGCore.Functions.GetPlayer(id)
+    local Player = FDBCore.Functions.GetPlayer(id)
     local cid = Player.PlayerData.citizenid
     local result = MySQL.query.await('SELECT * FROM player_jobs WHERE citizenid = ? AND job = ?', {cid, job})
     if not result[1] then
@@ -176,7 +176,7 @@ local function adminRemoveJob(src, id, job)
     end
 end
 
-RSGCore.Commands.Add('removejob', locale('sv_command_remove'), { { name = 'id', help = locale('sv_command_r_id')  }, { name = 'job', help = locale('sv_command_r_name') } }, true, function(source, args)
+FDBCore.Commands.Add('removejob', locale('sv_command_remove'), { { name = 'id', help = locale('sv_command_r_id')  }, { name = 'job', help = locale('sv_command_r_name') } }, true, function(source, args)
     local src = source
     if not args[1] then
         TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_provide'), type = 'error', duration = 5000 })
@@ -187,7 +187,7 @@ RSGCore.Commands.Add('removejob', locale('sv_command_remove'), { { name = 'id', 
         return
     end
     local id = tonumber(args[1])
-    local Player = RSGCore.Functions.GetPlayer(id)
+    local Player = FDBCore.Functions.GetPlayer(id)
     if not Player then TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_not_online'), type = 'error', duration = 5000 }) return end
 
     adminRemoveJob(src, id, args[2])

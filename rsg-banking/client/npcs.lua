@@ -54,7 +54,7 @@ function NearPed(npcmodel, npccoords, moneytype)
                 icon = 'far fa-eye',
                 label = locale('cl_lang_1'),
                 onSelect = function()
-                    TriggerEvent('rsg-banking:client:OpenBanking', moneytype)
+                    TriggerEvent('fdb-banking:client:OpenBanking', moneytype)
                 end,
                 distance = 5.0
             }

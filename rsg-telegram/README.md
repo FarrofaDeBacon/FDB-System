@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 🕊️ rsg-telegram
+# 🕊️ fdb-telegram
 **Interactive telegram & bird post delivery system for RedM using RSG Core.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -12,9 +12,9 @@
 ---
 
 ## 🛠️ Dependencies
-- [**rsg-core**](https://github.com/Rexshack-RedM/rsg-core) 🤠  
+- [**fdb-core**](https://github.com/Rexshack-RedM/fdb-core) 🤠  
 - [**ox_lib**](https://github.com/overextended/ox_lib) ⚙️ *(notifications, prompts, locales)*  
-- [**rsg-inventory**](https://github.com/Rexshack-RedM/rsg-inventory) 🎒 *(for the birdpost item)*  
+- [**fdb-inventory**](https://github.com/Rexshack-RedM/fdb-inventory) 🎒 *(for the birdpost item)*  
 
 **Locales included:** `en`, `fr`, `es`, `it`, `pt-br`, `el`  
 **License:** GPL‑3.0  
@@ -47,7 +47,7 @@
 - Bird Post blip (with blue colour) for the recipient to be able to detect Bird Post position  
 - Send letter to ourself for debugging/testing purpose  
 - RSG Core Framework Locales support  
-- Fully integrated into rsg-hud  
+- Fully integrated into fdb-hud  
 - The bird will follow the target person anywhere until he/she picks up the letter (until the timeout we set reached)  
 - Automatic resource cleanup for 'ensure' freaks like myself  
 - The bird may stuck at the tall building, that's RDR2 feature. There's no bird flying on the cities, so whenever a Bird Post is coming we'll be notified to stay away from any buildings  
@@ -100,7 +100,7 @@ Config.PostOfficeLocations = {
 
 ## 🧺 Inventory Item (one-line format)
 
-Add this to `rsg-inventory/items.lua`:
+Add this to `fdb-inventory/items.lua`:
 ```lua
 birdpost = { name = 'birdpost', label = 'Telegram Bird', weight = 500, type = 'item', image = 'birdspost.png', unique = true, useable = true, shouldClose = true, description = 'A trained bird used to deliver telegrams.' },
 ```
@@ -109,23 +109,23 @@ birdpost = { name = 'birdpost', label = 'Telegram Bird', weight = 500, type = 'i
 
 Usage registration:
 ```lua
-RSGCore.Functions.CreateUseableItem('birdpost', function(src)
-    TriggerClientEvent('rsg-telegram:client:openUI', src)
+FDBCore.Functions.CreateUseableItem('birdpost', function(src)
+    TriggerClientEvent('fdb-telegram:client:openUI', src)
 end)
 ```
 
 ---
 
 ## 📂 Installation
-1. Place `rsg-telegram` inside `resources/[rsg]`.  
-2. Import `rsg-telegram.sql` into your database.  
+1. Place `fdb-telegram` inside `resources/[rsg]`.  
+2. Import `fdb-telegram.sql` into your database.  
 3. Add the `birdpost` item (and image) to your inventory setup.  
 4. Add to your `server.cfg`:
    ```cfg
    ensure ox_lib
-   ensure rsg-core
-   ensure rsg-inventory
-   ensure rsg-telegram
+   ensure fdb-core
+   ensure fdb-inventory
+   ensure fdb-telegram
    ```
 5. Restart your server.
 

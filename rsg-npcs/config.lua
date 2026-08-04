@@ -17,7 +17,7 @@ Config.PedList = {
         blipScale = 0.2,
         scenario = "WORLD_HUMAN_WRITE_NOTEBOOK", -- Animation here
         audio = {
-            -- 'nui://rsg-npcs/sounds/doctor_exemple.ogg',
+            -- 'nui://fdb-npcs/sounds/doctor_exemple.ogg',
             'https://youtu.be/RZEPIvX5G10', -- YouTube URL example
         },
         audioDistance = 4.0,      -- Distance to start playing audio

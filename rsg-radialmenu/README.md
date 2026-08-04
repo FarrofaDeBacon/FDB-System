@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 🧭 rsg-radialmenu
+# 🧭 fdb-radialmenu
 **Radial interaction menu for RedM using RSG Core.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -12,8 +12,8 @@
 ---
 
 ## 🛠️ Dependencies
-- **rsg-core** (framework & player data)  
-- **rsg-essentials** (shared actions & menu hooks)  
+- **fdb-core** (framework & player data)  
+- **fdb-essentials** (shared actions & menu hooks)  
 - **ox_lib** (locale & notifications)  
 
 **License:** GPL‑3.0
@@ -105,20 +105,20 @@ local myCategory = {
     -- Optional: only show when a condition is true
     { id = 'police_only', title = 'Police Tools', icon = 'shield', type = 'client', event = 'my_res:client:policeTools',
       canOpen = function()
-        local p = exports['rsg-core']:GetCoreObject().Functions.GetPlayerData()
+        local p = exports['fdb-core']:GetCoreObject().Functions.GetPlayerData()
         return p.job and p.job.name == 'police'
       end
     },
   }
 }
 
-local menuId = exports['rsg-radialmenu']:AddOption(myCategory)
+local menuId = exports['fdb-radialmenu']:AddOption(myCategory)
 -- store menuId to remove later if needed
 ```
 
 ### 2) Remove a previously added category
 ```lua
-exports['rsg-radialmenu']:RemoveOption(menuId)
+exports['fdb-radialmenu']:RemoveOption(menuId)
 ```
 
 ### 💡 Item schema (leaf items)
@@ -126,7 +126,7 @@ A leaf **must** either provide an `action` function **or** a pair `{ type, event
 - `type = 'client'` → `TriggerEvent(event, data)`  
 - `type = 'server'` → `TriggerServerEvent(event, data)`  
 - `type = 'command'` → `ExecuteCommand(event)`  
-- `type = 'rsgcommand'` → `TriggerServerEvent('RSGCore:CallCommand', event, data)`
+- `type = 'rsgcommand'` → `TriggerServerEvent('FDBCore:CallCommand', event, data)`
 
 Optional field: `canOpen = function() return true/false end` — if present and false, the item is filtered out.
 
@@ -144,13 +144,13 @@ Optional field: `canOpen = function() return true/false end` — if present and 
 ---
 
 ## 📂 Installation
-1. Place `rsg-radialmenu` into your `resources/[rsg]` folder.  
+1. Place `fdb-radialmenu` into your `resources/[rsg]` folder.  
 2. Add to your `server.cfg`:
    ```cfg
    ensure ox_lib
-   ensure rsg-core
-   ensure rsg-essentials
-   ensure rsg-radialmenu
+   ensure fdb-core
+   ensure fdb-essentials
+   ensure fdb-radialmenu
    ```
 3. Restart your server.  
 4. (Optional) Edit `config.lua` to change keybind or add menu items.

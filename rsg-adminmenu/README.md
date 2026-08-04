@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 🎯 rsg-adminmenu
+# 🎯 fdb-adminmenu
 **Admin & developer toolkit for RedM servers using RSG Core.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -11,11 +11,11 @@
 ---
 
 ## 🛠️ Dependencies
-- [**rsg-core**](https://github.com/Rexshack-RedM/rsg-core) 🤠
+- [**fdb-core**](https://github.com/Rexshack-RedM/fdb-core) 🤠
 - [**ox_lib**](https://github.com/Rexshack-RedM/ox_lib) ⚙️
 - [**oxmysql**](https://github.com/overextended/oxmysql) 🗄️ *(required for the report system)*
 
-**Keybind:** **PGUP** opens the menu (client checks `RSGCore.Shared.Keybinds['PGUP']`) and runs the **`adminmenu`** command.  
+**Keybind:** **PGUP** opens the menu (client checks `FDBCore.Shared.Keybinds['PGUP']`) and runs the **`adminmenu`** command.  
 **Locales:** `locales/en.json, fr.json, es.json, it.json, el.json, pt-br.json` (loaded via `lib.locale()`).
 
 ---
@@ -152,15 +152,15 @@ Config.DoorHashes = {
 ---
 
 ## 📂 Installation
-1. Place `rsg-adminmenu` inside your `resources` (or `resources/[rsg]`) folder.
-2. Ensure `rsg-core` and `ox_lib` are installed and started.
+1. Place `fdb-adminmenu` inside your `resources` (or `resources/[rsg]`) folder.
+2. Ensure `fdb-core` and `ox_lib` are installed and started.
 3. **Database (Reports):** import `reports.sql`.
 4. Edit `config.lua` (webhooks, role mentions, colors, distance, cooldown, admin horses).
 5. Add to your `server.cfg`:
    ```cfg
    ensure ox_lib
-   ensure rsg-core
-   ensure rsg-adminmenu
+   ensure fdb-core
+   ensure fdb-adminmenu
    ```
 
 ---

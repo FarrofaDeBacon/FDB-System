@@ -1,6 +1,6 @@
-# RSG-Multijob Exports Documentation
+# fdb-Multijob Exports Documentation
 
-This document describes the available exports for the `rsg-multijob` resource.
+This document describes the available exports for the `fdb-multijob` resource.
 
 ## Server Exports
 
@@ -15,7 +15,7 @@ Get the number of jobs a player has.
 
 **Example:**
 ```lua
-local jobCount = exports['rsg-multijob']:GetJobCount('ABC12345')
+local jobCount = exports['fdb-multijob']:GetJobCount('ABC12345')
 print('Player has ' .. jobCount .. ' jobs')
 ```
 
@@ -32,7 +32,7 @@ Check if a player can take a new job based on their max allowed jobs.
 
 **Example:**
 ```lua
-local canTake = exports['rsg-multijob']:CanTakeNewJob('ABC12345')
+local canTake = exports['fdb-multijob']:CanTakeNewJob('ABC12345')
 if canTake then
     print('Player can take a new job')
 end
@@ -53,7 +53,7 @@ Check if a player has a specific job.
 
 **Example:**
 ```lua
-local hasJob, grade = exports['rsg-multijob']:HasJob('ABC12345', 'vallaw')
+local hasJob, grade = exports['fdb-multijob']:HasJob('ABC12345', 'vallaw')
 if hasJob then
     print('Player has vallaw job at grade ' .. grade)
 end
@@ -77,7 +77,7 @@ Get all jobs for a player.
 
 **Example:**
 ```lua
-local jobs = exports['rsg-multijob']:GetPlayerJobs('ABC12345')
+local jobs = exports['fdb-multijob']:GetPlayerJobs('ABC12345')
 for _, jobData in ipairs(jobs) do
     print(jobData.jobLabel .. ' - Grade: ' .. jobData.gradeLabel .. ' - Salary: $' .. jobData.salary)
 end
@@ -98,7 +98,7 @@ Add a job to a player. If the player already has the job, it will update the gra
 
 **Example:**
 ```lua
-local success = exports['rsg-multijob']:AddJobToPlayer('ABC12345', 'vallaw', 2)
+local success = exports['fdb-multijob']:AddJobToPlayer('ABC12345', 'vallaw', 2)
 if success then
     print('Job added successfully')
 else
@@ -120,7 +120,7 @@ Remove a job from a player.
 
 **Example:**
 ```lua
-local success = exports['rsg-multijob']:RemoveJobFromPlayer('ABC12345', 'vallaw')
+local success = exports['fdb-multijob']:RemoveJobFromPlayer('ABC12345', 'vallaw')
 if success then
     print('Job removed successfully')
 else
@@ -141,7 +141,7 @@ Get the maximum number of jobs allowed for a player.
 
 **Example:**
 ```lua
-local maxJobs = exports['rsg-multijob']:GetMaxJobs('ABC12345')
+local maxJobs = exports['fdb-multijob']:GetMaxJobs('ABC12345')
 print('Player can have up to ' .. maxJobs .. ' jobs')
 ```
 
@@ -158,7 +158,7 @@ Open the multijob menu for the local player.
 
 **Example:**
 ```lua
-exports['rsg-multijob']:OpenMultijobMenu()
+exports['fdb-multijob']:OpenMultijobMenu()
 ```
 
 ---
@@ -171,8 +171,8 @@ To use these exports in your own resources, simply call them using the `exports`
 ```lua
 -- In your server script
 RegisterCommand('checkjobs', function(source, args)
-    local Player = RSGCore.Functions.GetPlayer(source)
-    local jobs = exports['rsg-multijob']:GetPlayerJobs(Player.PlayerData.citizenid)
+    local Player = FDBCore.Functions.GetPlayer(source)
+    local jobs = exports['fdb-multijob']:GetPlayerJobs(Player.PlayerData.citizenid)
     print(json.encode(jobs, {indent = true}))
 end)
 ```
@@ -181,6 +181,6 @@ end)
 ```lua
 -- In your client script
 RegisterCommand('openjobs', function()
-    exports['rsg-multijob']:OpenMultijobMenu()
+    exports['fdb-multijob']:OpenMultijobMenu()
 end)
 ```

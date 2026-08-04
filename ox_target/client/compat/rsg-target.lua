@@ -1,5 +1,5 @@
 local function exportHandler(exportName, func)
-    AddEventHandler(('__cfx_export_rsg-target_%s'):format(exportName), function(setCB)
+    AddEventHandler(('__cfx_export_fdb-target_%s'):format(exportName), function(setCB)
         setCB(func)
     end)
 end

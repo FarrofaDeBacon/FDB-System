@@ -3,7 +3,7 @@ rdr3_warning 'I acknowledge that this is a prerelease build of RedM, and I am aw
 game 'rdr3'
 lua54 'yes'
 
-description 'rsg-appearance'
+description 'fdb-appearance'
 version '2.5.4'
 
 shared_scripts {
@@ -36,7 +36,7 @@ ox_libs {
 }
 
 dependencies {
-    'rsg-core',
+    'fdb-core',
     'ox_lib',
-    'rsg-menubase'
+    'fdb-menubase'
 }

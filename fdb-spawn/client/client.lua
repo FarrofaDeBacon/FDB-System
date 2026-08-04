@@ -23,8 +23,8 @@ RegisterNetEvent('fdb-spawn:client:existingplayer', function()
     Wait(10000)
 
     DoScreenFadeOut(1000)
-    -- FDB-TODO: rsg-appearance integration pending audit (line 26)
-    exports['rsg-appearance']:ApplySkin()
+    -- FDB-TODO: fdb-appearance integration pending audit (line 26)
+    exports['fdb-appearance']:ApplySkin()
 
     -- set player health
     local currentHealth = PlayerData.metadata["health"]
@@ -36,7 +36,7 @@ RegisterNetEvent('fdb-spawn:client:existingplayer', function()
     SetEntityVisible(playerPed, true)
 
     -- [fdb-weapons] AutoDualWield: chamada removida.
-    -- O evento 'rsg-weapons:client:AutoDualWield' nunca teve handler no rsg-weapons
+    -- O evento 'fdb-weapons:client:AutoDualWield' nunca teve handler no fdb-weapons
     -- original nem no fdb-weapons. Feature não implementada — decisão pendente.
 
     ShutdownLoadingScreen()
@@ -65,8 +65,8 @@ local function SpawnChar(coords)
     Wait(10000)
     DoScreenFadeOut(1000)
 
-    -- FDB-TODO: rsg-appearance integration pending audit (line 68)
-    exports['rsg-appearance']:ApplySkin()
+    -- FDB-TODO: fdb-appearance integration pending audit (line 68)
+    exports['fdb-appearance']:ApplySkin()
     local ped = PlayerPedId()
 
     SetEntityCoordsNoOffset(ped, coords, true, true, true)
@@ -75,7 +75,7 @@ local function SpawnChar(coords)
     FreezeEntityPosition(ped, false)
     SetEntityVisible(ped, true)
     -- [fdb-weapons] AutoDualWield: chamada removida.
-    -- O evento 'rsg-weapons:client:AutoDualWield' nunca teve handler no rsg-weapons
+    -- O evento 'fdb-weapons:client:AutoDualWield' nunca teve handler no fdb-weapons
     -- original nem no fdb-weapons. Feature não implementada — decisão pendente.
     ShutdownLoadingScreen()
     ExecuteCommand('revive')

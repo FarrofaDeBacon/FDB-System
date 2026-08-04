@@ -1,11 +1,11 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 lib.locale()
 ------------------------------------
 -- callback to get weapon info
 -----------------------------------
-RSGCore.Functions.CreateCallback('rsg-weapons:server:getweaponinfo', function(source, cb, weaponserial)
--- lib.callback.register('rsg-weapons:server:getweaponinfo', function(source, cb, weaponserial)
+FDBCore.Functions.CreateCallback('fdb-weapons:server:getweaponinfo', function(source, cb, weaponserial)
+-- lib.callback.register('fdb-weapons:server:getweaponinfo', function(source, cb, weaponserial)
     local weaponinfo = MySQL.query.await('SELECT * FROM player_weapons WHERE serial=@weaponserial', { ['@weaponserial'] = weaponserial })
     if weaponinfo[1] == nil then return end
     cb(weaponinfo)
@@ -25,11 +25,11 @@ local function isRateLimited(src)
     return false
 end
 
-RegisterNetEvent('rsg-weapons:server:degradeWeapon', function(degradationQueue) 
+RegisterNetEvent('fdb-weapons:server:degradeWeapon', function(degradationQueue) 
     local src = source
     if isRateLimited(src) then return end
 
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then 
         return 
     end
@@ -55,7 +55,7 @@ RegisterNetEvent('rsg-weapons:server:degradeWeapon', function(degradationQueue)
             if newQuality <= 0 then
                 newQuality = 0
                 items[svslot].info.quality = newQuality
-                TriggerClientEvent('rsg-weapons:client:UseWeapon', src, items[svslot])
+                TriggerClientEvent('fdb-weapons:client:UseWeapon', src, items[svslot])
             else
                 items[svslot].info.quality = newQuality
             end
@@ -70,16 +70,16 @@ end)
 ------------------------------------------
 -- use weapon repair kit
 ------------------------------------------
-RSGCore.Functions.CreateUseableItem('weapon_repair_kit', function(source, item)
-    TriggerClientEvent('rsg-weapons:client:repairweapon', source)
+FDBCore.Functions.CreateUseableItem('weapon_repair_kit', function(source, item)
+    TriggerClientEvent('fdb-weapons:client:repairweapon', source)
 end)
 
 -----------------------------------
 -- repair weapon
 -----------------------------------
-RegisterNetEvent('rsg-weapons:server:repairweapon', function(serie)
+RegisterNetEvent('fdb-weapons:server:repairweapon', function(serie)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     local kitCount = 0
@@ -114,12 +114,12 @@ end)
 ---------------------------------------------
 -- remove item
 ---------------------------------------------
-RegisterServerEvent('rsg-weapons:server:removeitem')
-AddEventHandler('rsg-weapons:server:removeitem', function(item, amount)
+RegisterServerEvent('fdb-weapons:server:removeitem')
+AddEventHandler('fdb-weapons:server:removeitem', function(item, amount)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
-    if not RSGCore.Shared.Items[item] then return end
+    if not FDBCore.Shared.Items[item] then return end
     local count = 0
     for _, v in pairs(Player.PlayerData.items) do
         if v.name == item then
@@ -128,12 +128,12 @@ AddEventHandler('rsg-weapons:server:removeitem', function(item, amount)
     end
     if count < (amount or 1) then return end
     Player.Functions.RemoveItem(item, amount)
-    TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[item], 'remove', amount)
+    TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[item], 'remove', amount)
 end)
 
-RegisterNetEvent('rsg-weapons:server:saveEquippedWeapon', function(weaponData, isEquipped)
+RegisterNetEvent('fdb-weapons:server:saveEquippedWeapon', function(weaponData, isEquipped)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     if type(weaponData) ~= 'table' or type(weaponData.info) ~= 'table' then return end
 
@@ -161,9 +161,9 @@ RegisterNetEvent('rsg-weapons:server:saveEquippedWeapon', function(weaponData, i
     Player.Functions.SetMetaData('equippedweapons', equippedWeapons)
 end)
 
-RegisterNetEvent('rsg-weapons:server:saveEquippedKnife', function(knifeName, equipped)
+RegisterNetEvent('fdb-weapons:server:saveEquippedKnife', function(knifeName, equipped)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     if type(knifeName) ~= 'string' then return end
 
@@ -187,20 +187,20 @@ RegisterNetEvent('rsg-weapons:server:saveEquippedKnife', function(knifeName, equ
     Player.Functions.SetMetaData('equippedknives', equippedKnives)
 end)
 
-RSGCore.Functions.CreateCallback('rsg-weapons:server:getEquippedWeapons', function(source, cb)
-    local Player = RSGCore.Functions.GetPlayer(source)
+FDBCore.Functions.CreateCallback('fdb-weapons:server:getEquippedWeapons', function(source, cb)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then cb(nil) return end
     cb(Player.PlayerData.metadata.equippedweapons or {})
 end)
 
-RSGCore.Functions.CreateCallback('rsg-weapons:server:getEquippedKnives', function(source, cb)
-    local Player = RSGCore.Functions.GetPlayer(source)
+FDBCore.Functions.CreateCallback('fdb-weapons:server:getEquippedKnives', function(source, cb)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then cb({}) return end
     cb(Player.PlayerData.metadata.equippedknives or {})
 end)
 
-RSGCore.Functions.CreateCallback('rsg-weapons:server:getWeaponBySerial', function(source, cb, serial)
-    local Player = RSGCore.Functions.GetPlayer(source)
+FDBCore.Functions.CreateCallback('fdb-weapons:server:getWeaponBySerial', function(source, cb, serial)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then cb(nil) return end
     for _, item in pairs(Player.PlayerData.items) do
         if item and item.name and item.info and item.info.serie == serial then
@@ -214,10 +214,10 @@ end)
 ---------------------------------------------
 -- Infinityammo for admin
 ---------------------------------------------
-RegisterNetEvent('rsg-weapons:requestToggle', function()
+RegisterNetEvent('fdb-weapons:requestToggle', function()
     local src = source
-    if RSGCore.Functions.HasPermission(src, 'admin') then
-        TriggerClientEvent('rsg-weapons:toggle', src)
+    if FDBCore.Functions.HasPermission(src, 'admin') then
+        TriggerClientEvent('fdb-weapons:toggle', src)
     else
         TriggerClientEvent('ox_lib:notify', src, {
             title = 'Infinity Ammo',

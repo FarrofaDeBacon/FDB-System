@@ -81,7 +81,7 @@ RegisterNetEvent('fdb-inventory:server:EquipItem', function(slot, equipmentType)
     end
 
     if equipmentType == 'backpack' or equipmentType == 'satchel' then
-        exports['rsg-inventory']:UseItem(item.name, src, item)
+        exports['fdb-inventory']:UseItem(item.name, src, item)
         return
     end
 

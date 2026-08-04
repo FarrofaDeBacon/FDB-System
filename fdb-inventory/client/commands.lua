@@ -26,13 +26,13 @@ local function openErrorNotify()
     local meta = getMeta()
     if meta.isdead then
         lib.notify({
-            title       = 'rsg-inventory',
+            title       = 'fdb-inventory',
             description = locale('error.openinverror'),
             type        = 'error'
         })
     elseif meta.ishandcuffed then
         lib.notify({
-            title       = 'rsg-inventory',
+            title       = 'fdb-inventory',
             description = locale('error.cuffopeninv'),
             type        = 'error'
         })

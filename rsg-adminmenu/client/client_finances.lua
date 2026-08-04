@@ -1,15 +1,15 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
 -- finances players menu
-RegisterNetEvent('rsg-adminmenu:client:playersfinances', function()
-    RSGCore.Functions.TriggerCallback('rsg-adminmenu:server:getplayers', function(players)
+RegisterNetEvent('fdb-adminmenu:client:playersfinances', function()
+    FDBCore.Functions.TriggerCallback('fdb-adminmenu:server:getplayers', function(players)
         local options = {}
         for k, v in pairs(players) do
             options[#options + 1] = {
                 title = locale('cl_finan_19') .. ' ' .. v.id .. ' | ' .. v.name,
                 icon = 'fa-solid fa-circle-user',
-                event = 'rsg-adminmenu:client:financesoptions',
+                event = 'fdb-adminmenu:client:financesoptions',
                 args = { name = v.name, player = v.id },
                 arrow = true,
             }
@@ -27,8 +27,8 @@ RegisterNetEvent('rsg-adminmenu:client:playersfinances', function()
 end)
 
 -- finances options menu
-RegisterNetEvent('rsg-adminmenu:client:financesoptions', function(data)
-    RSGCore.Functions.TriggerCallback('rsg-adminmenu:server:getPlayerData', function(result)
+RegisterNetEvent('fdb-adminmenu:client:financesoptions', function(data)
+    FDBCore.Functions.TriggerCallback('fdb-adminmenu:server:getPlayerData', function(result)
         lib.registerContext({
             id = 'finances_optionsmenu',
             title = locale('cl_finan_90'),
@@ -75,7 +75,7 @@ RegisterNetEvent('rsg-adminmenu:client:financesoptions', function(data)
                 description = locale('cl_finan_92'),
                 icon = 'fa-solid fa-user-plus',
                 iconColor = 'green',
-                event = 'rsg-adminmenu:client:givemoney',
+                event = 'fdb-adminmenu:client:givemoney',
                 args = { id = data.player, name = data.name },
                 arrow = true
             },
@@ -84,7 +84,7 @@ RegisterNetEvent('rsg-adminmenu:client:financesoptions', function(data)
                 description = locale('cl_finan_94'),
                 icon = 'fa-solid fa-user-minus',
                 iconColor = 'red',
-                event = 'rsg-adminmenu:client:removemoney',
+                event = 'fdb-adminmenu:client:removemoney',
                 args = { id = data.player, name = data.name },
                 arrow = true
             },
@@ -95,7 +95,7 @@ RegisterNetEvent('rsg-adminmenu:client:financesoptions', function(data)
 end)
 
 -- give money to player (bank, cash, bloodmoney)
-RegisterNetEvent('rsg-adminmenu:client:givemoney', function(data)
+RegisterNetEvent('fdb-adminmenu:client:givemoney', function(data)
     local input = lib.inputDialog(data.name, {
         {
             label = locale('cl_finan_95'),
@@ -121,12 +121,12 @@ RegisterNetEvent('rsg-adminmenu:client:givemoney', function(data)
     })
 
     if not input then return end
-    TriggerServerEvent('rsg-adminmenu:server:financeadd', data.id, input[1], input[2])
+    TriggerServerEvent('fdb-adminmenu:server:financeadd', data.id, input[1], input[2])
 
 end)
 
 -- remove money from player (bank, cash, bloodmoney)
-RegisterNetEvent('rsg-adminmenu:client:removemoney', function(data)
+RegisterNetEvent('fdb-adminmenu:client:removemoney', function(data)
 
     local input = lib.inputDialog(data.name, {
         {
@@ -153,6 +153,6 @@ RegisterNetEvent('rsg-adminmenu:client:removemoney', function(data)
     })
 
     if not input then return end
-    TriggerServerEvent('rsg-adminmenu:server:financeremove', data.id, input[1], input[2])
+    TriggerServerEvent('fdb-adminmenu:server:financeremove', data.id, input[1], input[2])
 
 end)

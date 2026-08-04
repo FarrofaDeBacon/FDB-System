@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 🚔 rsg-prison
+# 🚔 fdb-prison
 **Complete prison system for RedM servers using RSG Core.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -12,7 +12,7 @@
 ---
 
 ## 🛠️ Dependencies
-- [**rsg-core**](https://github.com/Rexshack-RedM/rsg-core) 🤠
+- [**fdb-core**](https://github.com/Rexshack-RedM/fdb-core) 🤠
 - [**ox_lib**](https://github.com/Rexshack-RedM/ox_lib) ⚙️ *(for UI and notifications)*
 - [**oxmysql**](https://github.com/overextended/oxmysql) 🗄️ *(for player metadata)*
 - [**PolyZone**](https://github.com/mkafrin/PolyZone) 📦 *(for prison area detection)*
@@ -41,13 +41,13 @@
 ### 🚨 Server Events
 ```lua
 -- Update sentence time
-TriggerServerEvent('rsg-prison:server:updateSentance', newTime)
+TriggerServerEvent('fdb-prison:server:updateSentance', newTime)
 
 -- Remove job when jailed
-TriggerServerEvent('rsg-prison:server:RemovePlayerJob')
+TriggerServerEvent('fdb-prison:server:RemovePlayerJob')
 
 -- Free player after sentence expires
-TriggerServerEvent('rsg-prison:server:FreePlayer')
+TriggerServerEvent('fdb-prison:server:FreePlayer')
 ```
 
 ### ⚙️ Configuration
@@ -92,15 +92,15 @@ Config.MenuLocations = {
 ---
 
 ## 📂 Installation
-1. Place `rsg-prison` inside your `resources/[rsg]` folder.
-2. Ensure `rsg-core`, `ox_lib`, `PolyZone`, and `oxmysql` are installed.
+1. Place `fdb-prison` inside your `resources/[rsg]` folder.
+2. Ensure `fdb-core`, `ox_lib`, `PolyZone`, and `oxmysql` are installed.
 3. Configure `config.lua` for jail locations and behavior.
 4. Add to your `server.cfg`:
    ```cfg
    ensure ox_lib
-   ensure rsg-core
+   ensure fdb-core
    ensure PolyZone
-   ensure rsg-prison
+   ensure fdb-prison
    ```
 5. Restart your server.
 

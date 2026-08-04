@@ -1,10 +1,10 @@
-RSGCore = exports['rsg-core']:GetCoreObject()
+FDBCore = exports['fdb-core']:GetCoreObject()
 
-RegisterServerEvent('rsg-appearance:server:SaveSkin')
-AddEventHandler('rsg-appearance:server:SaveSkin', function(skin, clothes, oldplayer)
+RegisterServerEvent('fdb-appearance:server:SaveSkin')
+AddEventHandler('fdb-appearance:server:SaveSkin', function(skin, clothes, oldplayer)
     local encode = json.encode(skin)
     local encode2 = json.encode(clothes)
-    local Player = RSGCore.Functions.GetPlayer(source)
+    local Player = FDBCore.Functions.GetPlayer(source)
     local citizenid = Player.PlayerData.citizenid
 
     if oldplayer then
@@ -33,14 +33,14 @@ AddEventHandler('rsg-appearance:server:SaveSkin', function(skin, clothes, oldpla
         end
     else
         MySQL.Async.insert('INSERT INTO playerskins (citizenid, skin, clothes) VALUES (?, ?, ?);', { citizenid, encode, encode2 })
-        TriggerClientEvent('rsg-spawn:client:setupSpawnUI', source, encode, true)
+        TriggerClientEvent('fdb-spawn:client:setupSpawnUI', source, encode, true)
     end
 end)
 
-RegisterServerEvent('rsg-appearance:server:SetPlayerBucket')
-AddEventHandler('rsg-appearance:server:SetPlayerBucket', function(b, random)
+RegisterServerEvent('fdb-appearance:server:SetPlayerBucket')
+AddEventHandler('fdb-appearance:server:SetPlayerBucket', function(b, random)
     if random then
-        local BucketID = RSGCore.Shared.RandomInt(1000, 9999)
+        local BucketID = FDBCore.Shared.RandomInt(1000, 9999)
         SetRoutingBucketPopulationEnabled(BucketID, false)
         SetPlayerRoutingBucket(source, BucketID)
     else
@@ -48,10 +48,10 @@ AddEventHandler('rsg-appearance:server:SetPlayerBucket', function(b, random)
     end
 end)
 
-RegisterServerEvent('rsg-appearance:server:LoadSkin')
-AddEventHandler('rsg-appearance:server:LoadSkin', function()
+RegisterServerEvent('fdb-appearance:server:LoadSkin')
+AddEventHandler('fdb-appearance:server:LoadSkin', function()
     local _source = source
-    local User = RSGCore.Functions.GetPlayer(source)
+    local User = FDBCore.Functions.GetPlayer(source)
     local citizenid = User.PlayerData.citizenid
     local skins = MySQL.query.await('SELECT * FROM playerskins WHERE citizenid = ?', {citizenid})
     if skins[1] then
@@ -59,27 +59,27 @@ AddEventHandler('rsg-appearance:server:LoadSkin', function()
         local clothes = skins[1].clothes  -- Assuming you have a 'clothes' column in your table
         local decodedSkin = json.decode(skin)
         local decodedClothes = json.decode(clothes)
-        TriggerClientEvent('rsg-appearance:client:ApplySkin', _source, decodedSkin, decodedClothes)
+        TriggerClientEvent('fdb-appearance:client:ApplySkin', _source, decodedSkin, decodedClothes)
     else
-        TriggerClientEvent('rsg-appearance:client:OpenCreator', _source)
+        TriggerClientEvent('fdb-appearance:client:OpenCreator', _source)
     end
 end)
 
 
-RegisterServerEvent('rsg-appearance:server:deleteSkin')
-AddEventHandler('rsg-appearance:server:deleteSkin', function(license)
+RegisterServerEvent('fdb-appearance:server:deleteSkin')
+AddEventHandler('fdb-appearance:server:deleteSkin', function(license)
     local _source = source
-    local Player = RSGCore.Functions.GetPlayer(_source)
+    local Player = FDBCore.Functions.GetPlayer(_source)
     if not Player then return end
     local citizenid = Player.PlayerData.citizenid
     MySQL.Async.execute('DELETE FROM playerskins WHERE citizenid = ? AND license = ?', {citizenid, license})
 end)
 
-RegisterServerEvent('rsg-appearance:server:updategender', function(gender)
-    local Player = RSGCore.Functions.GetPlayer(source)
+RegisterServerEvent('fdb-appearance:server:updategender', function(gender)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return end
     local citizenid = Player.PlayerData.citizenid
-    local license = RSGCore.Functions.GetIdentifier(source, 'license')
+    local license = FDBCore.Functions.GetIdentifier(source, 'license')
 
     local result = MySQL.query.await('SELECT * FROM players WHERE citizenid = ? AND license = ?', {citizenid, license})
     if not result or not result[1] then return end

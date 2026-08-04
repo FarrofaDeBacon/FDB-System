@@ -1,9 +1,9 @@
-# rsg-menubase Examples
+# fdb-menubase Examples
 
-Copy-paste templates for common menu patterns. All examples assume `rsg-menubase` is started before your resource and use the exported `MenuData`.
+Copy-paste templates for common menu patterns. All examples assume `fdb-menubase` is started before your resource and use the exported `MenuData`.
 
 ```lua
-local MenuData = exports['rsg-menubase']:GetMenuData()
+local MenuData = exports['fdb-menubase']:GetMenuData()
 ```
 
 ---
@@ -289,7 +289,7 @@ if MenuData.IsOpen("default", "myshop", "main") then
 end
 
 -- Force-close everything (e.g. on player death or resource stop)
-AddEventHandler('rsg-core:client:onPlayerUnload', function()
+AddEventHandler('fdb-core:client:onPlayerUnload', function()
     MenuData.CloseAll()
 end)
 ```

@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 local ClothingCamera = nil
 local c_zoom = 2.4
 local c_offset = -0.15
@@ -24,7 +24,7 @@ local BODY_CATEGORY_MAP = {
 }
 
 function GetBodyFallbackHash(name)
-    local hash = exports['rsg-appearance']:GetBodyCurrentComponentHash(name)
+    local hash = exports['fdb-appearance']:GetBodyCurrentComponentHash(name)
     if not hash then
         local comps = IsPedMale(PlayerPedId()) and ComponentsMale or ComponentsFemale
         hash = comps[name] and comps[name][1]
@@ -35,8 +35,8 @@ local CurrentPrice = 0
 local CurentCoords = {}
 local playerHeading = nil
 local RoomPrompts = GetRandomIntInRange(0, 0xffffff)
-local Divider = "<img style='margin-top: 10px;margin-bottom: 10px; margin-left: -10px;'src='nui://rsg-appearance/img/divider_line.png'>"
-local image = "<img style='max-height:250px;max-width:250px;float: center;'src='nui://rsg-appearance/img/%s.png'>"
+local Divider = "<img style='margin-top: 10px;margin-bottom: 10px; margin-left: -10px;'src='nui://fdb-appearance/img/divider_line.png'>"
+local image = "<img style='max-height:250px;max-width:250px;float: center;'src='nui://fdb-appearance/img/%s.png'>"
 
 local clothing = require 'data.clothing'
 local hashToCache = require 'client.hashtocache'
@@ -96,9 +96,9 @@ function OpenClothingMenu()
                     local ClothesHash = ConvertCacheToHash(ClothesCache)
                     local isMale = IsPedMale(PlayerPedId())
                     if input and input[1] then
-                        TriggerServerEvent("rsg-appearance:server:saveOutfit", ClothesHash, isMale, input[1])
+                        TriggerServerEvent("fdb-appearance:server:saveOutfit", ClothesHash, isMale, input[1])
                     else
-                        TriggerServerEvent("rsg-appearance:server:saveOutfit", ClothesHash, isMale)
+                        TriggerServerEvent("fdb-appearance:server:saveOutfit", ClothesHash, isMale)
                     end
                     if next(CurentCoords) == nil then
                         CurentCoords = RSG.Zones1[1]
@@ -270,11 +270,11 @@ function ClothingLight()
 
         TogglePrompts({ "TURN_LR", "CAM_UD", "ZOOM_IO" }, true)
 
-        if IsControlPressed(2, RSGCore.Shared.Keybinds['D']) then
+        if IsControlPressed(2, FDBCore.Shared.Keybinds['D']) then
             local heading = GetEntityHeading(PlayerPedId())
             SetEntityHeading(PlayerPedId(), heading + 2 * dt)
         end
-        if IsControlPressed(2, RSGCore.Shared.Keybinds['A']) then
+        if IsControlPressed(2, FDBCore.Shared.Keybinds['A']) then
             local heading = GetEntityHeading(PlayerPedId())
             SetEntityHeading(PlayerPedId(), heading - 2 * dt)
         end
@@ -290,13 +290,13 @@ function ClothingLight()
                 camera(c_zoom, c_offset)
             end
         end
-        if IsControlPressed(2, RSGCore.Shared.Keybinds['W']) then
+        if IsControlPressed(2, FDBCore.Shared.Keybinds['W']) then
             if c_offset + (0.5 / 7) * dt < 1.2 and c_offset + (0.5 / 7) * dt > -1.0 then
                 c_offset = c_offset + (0.5 / 7) * dt
                 camera(c_zoom, c_offset)
             end
         end
-        if IsControlPressed(2, RSGCore.Shared.Keybinds['S']) then
+        if IsControlPressed(2, FDBCore.Shared.Keybinds['S']) then
             if c_offset - (0.5 / 7) * dt < 1.2 and c_offset - (0.5 / 7) * dt > -1.0 then
                 c_offset = c_offset - (0.5 / 7) * dt
                 camera(c_zoom, c_offset)
@@ -329,8 +329,8 @@ function Change(id, category, change_type)
     end
 end
 
-RegisterNetEvent('rsg-appearance:client:ApplyClothes')
-AddEventHandler('rsg-appearance:client:ApplyClothes', function(ClothesComponents, Target)
+RegisterNetEvent('fdb-appearance:client:ApplyClothes')
+AddEventHandler('fdb-appearance:client:ApplyClothes', function(ClothesComponents, Target)
     CreateThread(function()
         local _Target = Target or PlayerPedId()
         if type(ClothesComponents) ~= "table" then
@@ -420,7 +420,7 @@ function TeleportAndFade(coords4, resetCoords)
         CurentCoords = {}
         TogglePrompts({ "TURN_LR", "CAM_UD", "ZOOM_IO" }, false)
         LocalPlayer.state.inClothingStore = false
-        TriggerServerEvent('rsg-appearance:server:SetPlayerBucket', 0)
+        TriggerServerEvent('fdb-appearance:server:SetPlayerBucket', 0)
     end
 end
 
@@ -470,7 +470,7 @@ end
 
 function Outfits()
     MenuData.CloseAll()
-    local Result = lib.callback.await('rsg-appearance:server:getOutfits', false)
+    local Result = lib.callback.await('fdb-appearance:server:getOutfits', false)
     local elements_outfits = {}
     for k, v in pairs(Result) do
         elements_outfits[#elements_outfits + 1] = {
@@ -499,12 +499,12 @@ function OutfitsManage(outfit, id)
         {title = RSG.Label.clothes, subtext = RSG.Label.options, align = 'top-left', elements = elements_outfits_manage, itemHeight = "4vh"}, function(data, menu)
             menu.close()
         if data.current.value == 'SetOutfits' then
-            TriggerEvent('rsg-appearance:client:ApplyClothes', outfit, PlayerPedId())
+            TriggerEvent('fdb-appearance:client:ApplyClothes', outfit, PlayerPedId())
             local ClothesHash = ConvertCacheToHash(outfit)
-            TriggerServerEvent('rsg-appearance:server:saveUseOutfit', ClothesHash)
+            TriggerServerEvent('fdb-appearance:server:saveUseOutfit', ClothesHash)
         end
         if data.current.value == 'DeleteOutfit' then
-            return TriggerServerEvent('rsg-appearance:server:DeleteOutfit', id)
+            return TriggerServerEvent('fdb-appearance:server:DeleteOutfit', id)
         end
     end, function(data, menu)
         Outfits()
@@ -540,7 +540,7 @@ exports('GetClothesCurrentComponentHash', function(name)
     return hash
 end)
 
-RegisterNetEvent('rsg-appearance:client:outfits', function()
+RegisterNetEvent('fdb-appearance:client:outfits', function()
     Outfits()
 end)
 
@@ -585,11 +585,11 @@ CreateThread(function()
 end)
 
 function GenerateMenu()
-    TriggerEvent('rsg-horses:client:FleeHorse')
+    TriggerEvent('fdb-horses:client:FleeHorse')
     Wait(0)
     TeleportAndFade(CurentCoords.fittingcoords, false)
-    TriggerServerEvent('rsg-appearance:server:SetPlayerBucket', 0, true)
-    local ClothesComponents = lib.callback.await('rsg-appearance:server:LoadClothes', false)
+    TriggerServerEvent('fdb-appearance:server:SetPlayerBucket', 0, true)
+    local ClothesComponents = lib.callback.await('fdb-appearance:server:LoadClothes', false)
     ClothesCache = hashToCache.PopulateClothingCache(ClothesComponents, IsPedMale(PlayerPedId()))
     OldClothesCache = deepcopy(ClothesCache)
     camera(2.4, -0.15)
@@ -643,7 +643,7 @@ RegisterPrompts = function()
     for i=1, #RSG.Prompts do
         local prompt = Citizen.InvokeNative(0x04F97DE45A519419, Citizen.ResultAsInteger())
         Citizen.InvokeNative(0x5DD02A8318420DD7, prompt, CreateVarString(10, "LITERAL_STRING", RSG.Prompts[i].label))
-        Citizen.InvokeNative(0xB5352B7494A08258, prompt, RSG.Prompts[i].control or RSGCore.Shared.Keybinds[RSG.Keybind])
+        Citizen.InvokeNative(0xB5352B7494A08258, prompt, RSG.Prompts[i].control or FDBCore.Shared.Keybinds[RSG.Keybind])
 
         if RSG.Prompts[i].control2  then
             Citizen.InvokeNative(0xB5352B7494A08258, prompt, RSG.Prompts[i].control2)

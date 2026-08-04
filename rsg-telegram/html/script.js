@@ -78,7 +78,7 @@ function closeTelegramUI() {
     setTimeout(() => {
         $('#telegramContainer').fadeOut(300).css('display', 'none');
         $('#telegramContainer').removeClass('closing');
-        $.post('https://rsg-telegram/closeUI', JSON.stringify({}));
+        $.post('https://fdb-telegram/closeUI', JSON.stringify({}));
     }, 300);
 }
 
@@ -109,9 +109,9 @@ function switchTab(tabName) {
 
 // Load Inbox
 function loadInbox() {
-    $.post('https://rsg-telegram/getAddressbook', JSON.stringify({}), function(contactList) {
+    $.post('https://fdb-telegram/getAddressbook', JSON.stringify({}), function(contactList) {
         contacts = contactList || [];
-        $.post('https://rsg-telegram/getInbox', JSON.stringify({}), function(messageList) {
+        $.post('https://fdb-telegram/getInbox', JSON.stringify({}), function(messageList) {
             displayMessages(messageList, 'personal');
         });
     });
@@ -119,9 +119,9 @@ function loadInbox() {
 
 // Job inbox uses the same message renderer but writes to a separate list and badge.
 function loadJobInbox() {
-    $.post('https://rsg-telegram/getAddressbook', JSON.stringify({}), function(contactList) {
+    $.post('https://fdb-telegram/getAddressbook', JSON.stringify({}), function(contactList) {
         contacts = contactList || [];
-        $.post('https://rsg-telegram/getJobInbox', JSON.stringify({}), function(messageList) {
+        $.post('https://fdb-telegram/getJobInbox', JSON.stringify({}), function(messageList) {
             displayMessages(messageList, 'job');
         });
     });
@@ -175,7 +175,7 @@ function displayMessages(messageList, mailbox = 'personal') {
 
 // Load Addressbook
 function loadAddressbook() {
-    $.post('https://rsg-telegram/getAddressbook', JSON.stringify({}), function(contactList) {
+    $.post('https://fdb-telegram/getAddressbook', JSON.stringify({}), function(contactList) {
         displayContacts(contactList);
     });
 }
@@ -219,12 +219,12 @@ function displayContacts(contactList) {
 function loadRecipients() {
     jobSendersLoaded = false;
 
-    $.post('https://rsg-telegram/getPlayers', JSON.stringify({}), function(playerList) {
+    $.post('https://fdb-telegram/getPlayers', JSON.stringify({}), function(playerList) {
         displayRecipients(playerList);
     });
 
     if (enableJobMailboxes) {
-        $.post('https://rsg-telegram/getJobSenders', JSON.stringify({}), function(senderList) {
+        $.post('https://fdb-telegram/getJobSenders', JSON.stringify({}), function(senderList) {
             displayJobSenders(senderList);
         });
     } else {
@@ -303,7 +303,7 @@ function showMessage(messageId) {
     $('#messageModal').addClass('active');
     
     // Mark as read
-    $.post('https://rsg-telegram/markAsRead', JSON.stringify({ id: messageId }));
+    $.post('https://fdb-telegram/markAsRead', JSON.stringify({ id: messageId }));
 }
 
 function closeMessageModal() {
@@ -393,7 +393,7 @@ function sendMessage() {
     };
     
     // Check location and get cost info
-    $.post('https://rsg-telegram/checkLocation', JSON.stringify({}), function(response) {
+    $.post('https://fdb-telegram/checkLocation', JSON.stringify({}), function(response) {
         if (response.atPostOffice) {
             $('#birdPostWarning').hide();
             
@@ -442,7 +442,7 @@ function renderRecipientDropdown() {
 function confirmSend() {
     if (!window.pendingSendData) return;
     
-    $.post('https://rsg-telegram/sendMessage', JSON.stringify(window.pendingSendData));
+    $.post('https://fdb-telegram/sendMessage', JSON.stringify(window.pendingSendData));
     
     // Close confirmation dialog
     $('#confirmSendDialog').removeClass('active');
@@ -470,7 +470,7 @@ function clearMessageForm() {
 
 // Delete Message
 function deleteMessage(messageId) {
-    $.post('https://rsg-telegram/deleteMessage', JSON.stringify({ id: messageId }));
+    $.post('https://fdb-telegram/deleteMessage', JSON.stringify({ id: messageId }));
     closeMessageModal();
 }
 
@@ -495,7 +495,7 @@ function addContact() {
         return;
     }
     
-    $.post('https://rsg-telegram/addContact', JSON.stringify({
+    $.post('https://fdb-telegram/addContact', JSON.stringify({
         name: name,
         citizenid: citizenid
     }));
@@ -510,7 +510,7 @@ function addContact() {
 
 // Remove Contact
 function removeContact(citizenid) {
-    $.post('https://rsg-telegram/removeContact', JSON.stringify({ citizenid: citizenid }));
+    $.post('https://fdb-telegram/removeContact', JSON.stringify({ citizenid: citizenid }));
     
     // Reload addressbook after a short delay
     setTimeout(() => {

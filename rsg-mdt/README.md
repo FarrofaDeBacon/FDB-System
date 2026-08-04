@@ -20,7 +20,7 @@ Mobile Data Terminal for RSG Framework (RedM)
 
 ## Requirements
 
-- [rsg-core](https://github.com/Rexshack-RedM/rsg-core)
+- [fdb-core](https://github.com/Rexshack-RedM/fdb-core)
 - [ox_lib](https://github.com/Rexshack-RedM/ox_lib)
 - [oxmysql](https://github.com/CommunityOx/oxmysql/releases/latest/download/oxmysql.zip)
 
@@ -32,8 +32,8 @@ Mobile Data Terminal for RSG Framework (RedM)
 ```
 ensure ox_lib
 ensure oxmysql
-ensure rsg-core
-ensure rsg-mdt
+ensure fdb-core
+ensure fdb-mdt
 ```
 4. Configure jobs and settings in `shared/config.lua`
 5. Restart your server

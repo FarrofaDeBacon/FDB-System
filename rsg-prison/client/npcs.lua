@@ -40,14 +40,14 @@ CreateThread(function()
                 self.ped = NearNPC(self.model, self.coords, self.heading)
 
                 pcall(function ()
-                    exports['rsg-target']:AddTargetEntity(self.ped, {
+                    exports['fdb-target']:AddTargetEntity(self.ped, {
                         options = {
                             {
                                 icon = 'fa-solid fa-eye',
                                 label = locale('cl_prison_menu'),
                                 targeticon = 'fa-solid fa-eye',
                                 action = function()
-                                    TriggerEvent('rsg-prison:client:menu', self.prompt)
+                                    TriggerEvent('fdb-prison:client:menu', self.prompt)
                                 end
                             },
                         },
@@ -58,7 +58,7 @@ CreateThread(function()
         end
 
         newpoint.onExit = function(self)
-            exports['rsg-target']:RemoveTargetEntity(self.ped, locale('cl_prison_menu'))
+            exports['fdb-target']:RemoveTargetEntity(self.ped, locale('cl_prison_menu'))
             if self.ped and DoesEntityExist(self.ped) then
                 if Config.FadeIn then
                     for i = 255, 0, -51 do
@@ -79,7 +79,7 @@ end)
 AddEventHandler("onResourceStop", function(resourceName)
     if GetCurrentResourceName() ~= resourceName then return end
     for k, v in pairs(spawnedPeds) do
-        exports['rsg-target']:RemoveTargetEntity(v.ped, locale('cl_prison_menu'))
+        exports['fdb-target']:RemoveTargetEntity(v.ped, locale('cl_prison_menu'))
         if v.ped and DoesEntityExist(v.ped) then
             DeleteEntity(v.ped)
         end

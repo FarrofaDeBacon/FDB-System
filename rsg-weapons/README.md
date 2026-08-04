@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 🔫 rsg-weapons
+# 🔫 fdb-weapons
 **Weapon handling, degradation & repair for RSG Framework.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -12,7 +12,7 @@
 ---
 
 ## 🛠️ Dependencies
-- **rsg-core** (framework)
+- **fdb-core** (framework)
 - **ox_lib** (locales, notifications)
 
 **Locales included:** `en`, `fr`, `es`, `it`, `pt-br`, `el`, `ro`  
@@ -66,7 +66,7 @@ AmmoWeaponTypes = {
 |--------|--------|-------------|
 | `/infinityammo` | Admin | Toggles infinite ammo for the current weapon (server permission checked). |
 
-The client event is `rsg-weapons:toggle`; the server validates with `RSGCore.Functions.HasPermission(src, 'admin')` before triggering it.
+The client event is `fdb-weapons:toggle`; the server validates with `FDBCore.Functions.HasPermission(src, 'admin')` before triggering it.
 
 ---
 
@@ -78,8 +78,8 @@ weapon_repair_kit = { name = 'weapon_repair_kit', label = 'Weapon Repair Kit', w
 
 This item is registered server‑side as usable and calls the client repair flow:
 ```lua
-RSGCore.Functions.CreateUseableItem('weapon_repair_kit', function(source, item)
-    TriggerClientEvent('rsg-weapons:client:repairweapon', source)
+FDBCore.Functions.CreateUseableItem('weapon_repair_kit', function(source, item)
+    TriggerClientEvent('fdb-weapons:client:repairweapon', source)
 end)
 ```
 
@@ -103,14 +103,14 @@ end)
 ---
 
 ## 📂 Installation
-1. Add `rsg-weapons` to `resources/[rsg]`.  
-2. Ensure `rsg-core` and `ox_lib` are running before it.  
+1. Add `fdb-weapons` to `resources/[rsg]`.  
+2. Ensure `fdb-core` and `ox_lib` are running before it.  
 3. Add the inventory item above and an icon if desired.  
 4. In `server.cfg`:
    ```cfg
    ensure ox_lib
-   ensure rsg-core
-   ensure rsg-weapons
+   ensure fdb-core
+   ensure fdb-weapons
    ```
 5. Restart your server.
 

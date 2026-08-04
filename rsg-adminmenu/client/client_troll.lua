@@ -1,15 +1,15 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
 -- troll players menu
-RegisterNetEvent('rsg-adminmenu:client:playerstroll', function()
-    RSGCore.Functions.TriggerCallback('rsg-adminmenu:server:getplayers', function(players)
+RegisterNetEvent('fdb-adminmenu:client:playerstroll', function()
+    FDBCore.Functions.TriggerCallback('fdb-adminmenu:server:getplayers', function(players)
         local options = {}
         for k, v in pairs(players) do
             options[#options + 1] = {
                 title = locale('cl_troll_19') .. ': ' .. v.id..' | '..v.name,
                 icon = 'fa-solid fa-circle-user',
-                event = 'rsg-adminmenu:client:trolloptions',
+                event = 'fdb-adminmenu:client:trolloptions',
                 args = { name = v.name, player = v.id },
                 arrow = true,
             }
@@ -27,7 +27,7 @@ RegisterNetEvent('rsg-adminmenu:client:playerstroll', function()
 end)
 
 -- troll options menu
-RegisterNetEvent('rsg-adminmenu:client:trolloptions', function(data)
+RegisterNetEvent('fdb-adminmenu:client:trolloptions', function(data)
 
     lib.registerContext({
         id = 'troll_optionsmenu',
@@ -39,7 +39,7 @@ RegisterNetEvent('rsg-adminmenu:client:trolloptions', function(data)
                 title = locale('cl_troll_86'),
                 description = locale('cl_troll_87'),
                 icon = 'fa-solid fa-paw',
-                serverEvent = 'rsg-adminmenu:server:wildattack',
+                serverEvent = 'fdb-adminmenu:server:wildattack',
                 args = { id = data.player },
                 arrow = true
             },
@@ -47,7 +47,7 @@ RegisterNetEvent('rsg-adminmenu:client:trolloptions', function(data)
                 title = locale('cl_troll_128'),
                 description = locale('cl_troll_129'),
                 icon = 'fa-solid fa-fire',
-                serverEvent = 'rsg-adminmenu:server:playerfire',
+                serverEvent = 'fdb-adminmenu:server:playerfire',
                 args = { id = data.player },
                 arrow = true
             },
@@ -69,7 +69,7 @@ local attackAnimals = {
 local animalGroupHash = joaat("Animal")
 local playerGroupHash = joaat("PLAYER")
 
-RegisterNetEvent('rsg-adminmenu:client:wildattack', function(player)
+RegisterNetEvent('fdb-adminmenu:client:wildattack', function(player)
     local targetplayer = GetPlayerFromServerId(player)
     local playerPed = GetPlayerPed(targetplayer)
     local animalHash = attackAnimals[math.random(#attackAnimals)]
@@ -103,7 +103,7 @@ end)
 -------------------------------------------------------------------
 -- set player on fire troll action
 -------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:client:playerfire', function(player)
+RegisterNetEvent('fdb-adminmenu:client:playerfire', function(player)
     local targetplayer = GetPlayerFromServerId(player)
     local playerPed = GetPlayerPed(targetplayer)
     StartEntityFire(playerPed)

@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 local CoolDown = 0
 local doorLockPrompt = GetRandomIntInRange(0, 0xffffff)
 local lockPrompt = nil
@@ -19,7 +19,7 @@ local DoorLockPrompt = function()
     local stra = CreateVarString(10, 'LITERAL_STRING', str)
 
     lockPrompt = PromptRegisterBegin()
-    PromptSetControlAction(lockPrompt, RSGCore.Shared.Keybinds['ENTER'])
+    PromptSetControlAction(lockPrompt, FDBCore.Shared.Keybinds['ENTER'])
     PromptSetText(lockPrompt, stra)
     PromptSetEnabled(lockPrompt, 1)
     PromptSetVisible(lockPrompt, 1)
@@ -133,7 +133,7 @@ Citizen.CreateThread(function()
                     if PromptHasHoldModeCompleted(lockPrompt) and CoolDown < 1 then
                         CoolDown = 1000
                         local state = not doorID.locked
-                        TriggerServerEvent("rsg-doorlock:updatedoorsv", k, state)
+                        TriggerServerEvent("fdb-doorlock:updatedoorsv", k, state)
                     end
                 end
             end
@@ -151,8 +151,8 @@ Citizen.CreateThread(function()
     end
 end)
 
-RegisterNetEvent('rsg-doorlock:changedoor')
-AddEventHandler('rsg-doorlock:changedoor', function(doorID, state)
+RegisterNetEvent('fdb-doorlock:changedoor')
+AddEventHandler('fdb-doorlock:changedoor', function(doorID, state)
     local pedCoords = GetEntityCoords(cache.ped, true)
     local prop_name = GetHashKey('P_KEY02X')
     local doorCoords = Config.DoorList[doorID].textCoords
@@ -181,7 +181,7 @@ AddEventHandler('rsg-doorlock:changedoor', function(doorID, state)
         Wait(750)
         AttachEntityToEntity(prop, cache.ped, boneIndex, 0.02, 0.0120, -0.00850, 0.024, -160.0, 200.0, true, true, false, true, 1, true)
         Wait(250)
-        TriggerServerEvent('rsg-doorlock:updateState', doorID, state, function(cb) end)
+        TriggerServerEvent('fdb-doorlock:updateState', doorID, state, function(cb) end)
         Wait(1500)
         ClearPedSecondaryTask(cache.ped)
         DeleteObject(prop)
@@ -189,8 +189,8 @@ AddEventHandler('rsg-doorlock:changedoor', function(doorID, state)
 end)
 
 -- Set State for a Door
-RegisterNetEvent('rsg-doorlock:setState')
-AddEventHandler('rsg-doorlock:setState', function(doorID, state)
+RegisterNetEvent('fdb-doorlock:setState')
+AddEventHandler('fdb-doorlock:setState', function(doorID, state)
     Config.DoorList[doorID].locked = state
 end)
 

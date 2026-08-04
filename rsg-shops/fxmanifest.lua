@@ -2,7 +2,7 @@ fx_version 'cerulean'
 rdr3_warning 'I acknowledge that this is a prerelease build of RedM, and I am aware my resources *will* become incompatible once RedM ships.'
 game 'rdr3'
 
-description 'rsg-shops'
+description 'fdb-shops'
 version '2.1.3'
 
 shared_scripts {
@@ -24,8 +24,8 @@ files {
 }
 
 dependencies {
-    'rsg-core',
-    'rsg-inventory',
+    'fdb-core',
+    'fdb-inventory',
     'ox_lib',
     'ox_target'
 }

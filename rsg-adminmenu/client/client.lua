@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
 -------------------------------
@@ -7,8 +7,8 @@ lib.locale()
 CreateThread(function()
     while true do
         Wait(0)
-        if IsControlJustReleased(0, RSGCore.Shared.Keybinds['PGUP']) then
-            local playerData = RSGCore.Functions.GetPlayerData()
+        if IsControlJustReleased(0, FDBCore.Shared.Keybinds['PGUP']) then
+            local playerData = FDBCore.Functions.GetPlayerData()
             if playerData and playerData.citizenid then
                 ExecuteCommand('adminmenu')
             end
@@ -19,7 +19,7 @@ end)
 -------------------------------
 -- main admin base menu
 -------------------------------
-RegisterNetEvent('rsg-adminmenu:client:openadminmenu', function()
+RegisterNetEvent('fdb-adminmenu:client:openadminmenu', function()
     lib.registerContext({
         id = 'admin_mainmenu',
         title = locale('cl_client_0'),
@@ -28,49 +28,49 @@ RegisterNetEvent('rsg-adminmenu:client:openadminmenu', function()
                 title = locale('cl_client_0'),
                 description = locale('cl_client_1'),
                 icon = 'fa-solid fa-user-secret',
-                event = 'rsg-adminmenu:client:adminoptions',
+                event = 'fdb-adminmenu:client:adminoptions',
                 arrow = true
             },
             {
                 title = locale('cl_report_admin_menu'),
                 description = locale('cl_report_admin_menu_desc'),
                 icon = 'fa-solid fa-ticket',
-                event = 'rsg-adminmenu:client:adminreportsmenu',
+                event = 'fdb-adminmenu:client:adminreportsmenu',
                 arrow = true
             },
             {
                 title = locale('cl_client_2'),
                 description = locale('cl_client_3'),
                 icon = 'fa-solid fa-user',
-                event = 'rsg-adminmenu:client:playersoptions',
+                event = 'fdb-adminmenu:client:playersoptions',
                 arrow = true
             },
             {
                 title = locale('cl_client_88'),
                 description = locale('cl_client_89'),
                 icon = 'fa-solid fa-money-bill',
-                event = 'rsg-adminmenu:client:playersfinances',
+                event = 'fdb-adminmenu:client:playersfinances',
                 arrow = true
             },
             {
                 title = locale('cl_client_4'),
                 description = locale('cl_client_5'),
                 icon = 'fa-regular fa-face-grin-squint-tears',
-                event = 'rsg-adminmenu:client:playerstroll',
+                event = 'fdb-adminmenu:client:playerstroll',
                 arrow = true
             },
             {
                 title = locale('cl_client_6'),
                 description = locale('cl_client_7'),
                 icon = 'fa-solid fa-server',
-                event = 'rsg-adminmenu:client:serveroptions',
+                event = 'fdb-adminmenu:client:serveroptions',
                 arrow = true
             },
             {
                 title = locale('cl_client_8'),
                 description = locale('cl_client_9'),
                 icon = 'fa-solid fa-code',
-                event = 'rsg-adminmenu:client:devoptions',
+                event = 'fdb-adminmenu:client:devoptions',
                 arrow = true
             },
         }
@@ -79,20 +79,20 @@ RegisterNetEvent('rsg-adminmenu:client:openadminmenu', function()
 end)
 
 -- admin options menu
-RegisterNetEvent('rsg-adminmenu:client:adminoptions', function()
+RegisterNetEvent('fdb-adminmenu:client:adminoptions', function()
     local options = {
         {
             title = locale('cl_client_11'),
             description = locale('cl_client_12'),
             icon = 'fa-solid fa-up-down-left-right',
-            event = 'RSGCore:Command:GoToMarker',
+            event = 'FDBCore:Command:GoToMarker',
             arrow = true
         },
         {
             title = locale('cl_client_13'),
             description = locale('cl_client_14'),
             icon = 'fa-solid fa-heart-pulse',
-            event = 'rsg-medic:client:playerRevive',
+            event = 'fdb-medic:client:playerRevive',
             arrow = true
         },
         {
@@ -117,7 +117,7 @@ RegisterNetEvent('rsg-adminmenu:client:adminoptions', function()
             title = locale('cl_client_17'),
             description = locale('cl_client_18'),
             icon = 'fa-solid fa-book-bible',
-            event = 'rsg-adminmenu:client:godmode',
+            event = 'fdb-adminmenu:client:godmode',
             arrow = true
         },
     }
@@ -127,7 +127,7 @@ RegisterNetEvent('rsg-adminmenu:client:adminoptions', function()
             title = locale('cl_client_154'),
             description = locale('cl_client_155'),
             icon = 'fa-solid fa-map-location-dot',
-            event = 'rsg-adminmenu:client:toggleplayerblips',
+            event = 'fdb-adminmenu:client:toggleplayerblips',
             arrow = true
         })
     end
@@ -146,14 +146,14 @@ end)
 ----------------------------------------
 -- player options
 ----------------------------------------
-RegisterNetEvent('rsg-adminmenu:client:playersoptions', function()
-    RSGCore.Functions.TriggerCallback('rsg-adminmenu:server:getplayers', function(players)
+RegisterNetEvent('fdb-adminmenu:client:playersoptions', function()
+    FDBCore.Functions.TriggerCallback('fdb-adminmenu:server:getplayers', function(players)
         local options = {}
         for k, v in pairs(players) do
             options[#options + 1] = {
                 title = locale('cl_client_19') .. ' ' .. v.id .. ' | ' .. v.name,
                 icon = 'fa-solid fa-circle-user',
-                event = 'rsg-adminmenu:client:playermenu',
+                event = 'fdb-adminmenu:client:playermenu',
                 args = { name = v.name, player = v.id },
                 arrow = true,
             }
@@ -173,7 +173,7 @@ end)
 --------------------------------------
 -- player menu
 --------------------------------------
-RegisterNetEvent('rsg-adminmenu:client:playermenu', function(data)
+RegisterNetEvent('fdb-adminmenu:client:playermenu', function(data)
     lib.registerContext({
         id = 'player_menu',
         title = data.name,
@@ -184,7 +184,7 @@ RegisterNetEvent('rsg-adminmenu:client:playermenu', function(data)
                 title = locale('cl_client_137'),
                 description = locale('cl_client_138'),
                 icon = 'fa-solid fa-briefcase-medical',
-                event = 'rsg-adminmenu:server:playerinfo',
+                event = 'fdb-adminmenu:server:playerinfo',
                 args = { id = data.player },
                 arrow = true
             },
@@ -192,7 +192,7 @@ RegisterNetEvent('rsg-adminmenu:client:playermenu', function(data)
                 title = locale('cl_client_22'),
                 description = locale('cl_client_23'),
                 icon = 'fa-solid fa-briefcase-medical',
-                serverEvent = 'rsg-adminmenu:server:playerrevive',
+                serverEvent = 'fdb-adminmenu:server:playerrevive',
                 args = { id = data.player },
                 arrow = true
             },
@@ -200,7 +200,7 @@ RegisterNetEvent('rsg-adminmenu:client:playermenu', function(data)
                 title = locale('cl_client_130'),
                 description = locale('cl_client_131'),
                 icon = 'fa-solid fa-gift',
-                event = 'rsg-adminmenu:client:giveitem',
+                event = 'fdb-adminmenu:client:giveitem',
                 args = { id = data.player },
                 arrow = true
             },
@@ -208,7 +208,7 @@ RegisterNetEvent('rsg-adminmenu:client:playermenu', function(data)
                 title = locale('cl_client_24'),
                 description = locale('cl_client_25'),
                 icon = 'fa-solid fa-box',
-                serverEvent = 'rsg-adminmenu:server:openinventory',
+                serverEvent = 'fdb-adminmenu:server:openinventory',
                 args = { id = data.player },
                 arrow = true
             },
@@ -216,7 +216,7 @@ RegisterNetEvent('rsg-adminmenu:client:playermenu', function(data)
                 title = locale('cl_client_26'),
                 description = locale('cl_client_27'),
                 icon = 'fa-solid fa-socks',
-                event = 'rsg-adminmenu:client:kickplayer',
+                event = 'fdb-adminmenu:client:kickplayer',
                 args = { id = data.player, name = data.name },
                 arrow = true
             },
@@ -224,7 +224,7 @@ RegisterNetEvent('rsg-adminmenu:client:playermenu', function(data)
                 title = locale('cl_client_28'),
                 description = locale('cl_client_29'),
                 icon = 'fa-solid fa-ban',
-                event = 'rsg-adminmenu:client:banplayer',
+                event = 'fdb-adminmenu:client:banplayer',
                 args = { id = data.player, name = data.name },
                 arrow = true
             },
@@ -232,7 +232,7 @@ RegisterNetEvent('rsg-adminmenu:client:playermenu', function(data)
                 title = locale('cl_client_30'),
                 description = locale('cl_client_31'),
                 icon = 'fa-solid fa-location-dot',
-                serverEvent = 'rsg-adminmenu:server:gotoplayer',
+                serverEvent = 'fdb-adminmenu:server:gotoplayer',
                 args = { id = data.player },
                 arrow = true
             },
@@ -240,7 +240,7 @@ RegisterNetEvent('rsg-adminmenu:client:playermenu', function(data)
                 title = locale('cl_client_32'),
                 description = locale('cl_client_33'),
                 icon = 'fa-solid fa-hand',
-                serverEvent = 'rsg-adminmenu:server:bringplayer',
+                serverEvent = 'fdb-adminmenu:server:bringplayer',
                 args = { id = data.player },
                 arrow = true
             },
@@ -248,7 +248,7 @@ RegisterNetEvent('rsg-adminmenu:client:playermenu', function(data)
                 title = locale('cl_client_34'),
                 description = locale('cl_client_35'),
                 icon = 'fa-solid fa-snowflake',
-                serverEvent = 'rsg-adminmenu:server:freezeplayer',
+                serverEvent = 'fdb-adminmenu:server:freezeplayer',
                 args = { id = data.player, name = data.name },
                 arrow = true
             },
@@ -256,7 +256,7 @@ RegisterNetEvent('rsg-adminmenu:client:playermenu', function(data)
                 title = locale('cl_client_36'),
                 description = locale('cl_client_37'),
                 icon = 'fa-solid fa-eye',
-                serverEvent = 'rsg-adminmenu:server:spectateplayer',
+                serverEvent = 'fdb-adminmenu:server:spectateplayer',
                 args = { id = data.player },
                 arrow = true
             },
@@ -266,7 +266,7 @@ RegisterNetEvent('rsg-adminmenu:client:playermenu', function(data)
 end)
 
 -- server options menu
-RegisterNetEvent('rsg-adminmenu:client:serveroptions', function()
+RegisterNetEvent('fdb-adminmenu:client:serveroptions', function()
     lib.registerContext({
         id = 'server_optionssmenu',
         title = locale('cl_client_38'),
@@ -292,7 +292,7 @@ local playerBlipsEnabled = false
 local playerBlips = {}
 local blipUpdateThread = nil
 
-RegisterNetEvent('rsg-adminmenu:client:toggleplayerblips', function()
+RegisterNetEvent('fdb-adminmenu:client:toggleplayerblips', function()
     local playerId = PlayerId()
     local serverId = GetPlayerServerId(playerId)
     local playerName = GetPlayerName(playerId)
@@ -301,14 +301,14 @@ RegisterNetEvent('rsg-adminmenu:client:toggleplayerblips', function()
 
     if playerBlipsEnabled then
         lib.notify({ title = locale('cl_client_156'), description = locale('cl_client_157'), type = 'inform' })
-        TriggerServerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('cl_adminmenu'), 'red',
+        TriggerServerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('cl_adminmenu'), 'red',
             playerName .. ' (ID: ' .. serverId .. ') ' .. locale('cl_adminmenu_e'))
 
         if not blipUpdateThread then
             blipUpdateThread = CreateThread(function()
                 while playerBlipsEnabled do
                     Wait(1000)
-                    RSGCore.Functions.TriggerCallback('rsg-adminmenu:server:getplayers', function(players)
+                    FDBCore.Functions.TriggerCallback('fdb-adminmenu:server:getplayers', function(players)
                         for _, player in pairs(players) do
                             if player.id ~= playerId then
                                 if not playerBlips[player.id] then
@@ -346,7 +346,7 @@ RegisterNetEvent('rsg-adminmenu:client:toggleplayerblips', function()
         end
     else
         lib.notify({ title = locale('cl_client_158'), description = locale('cl_client_159'), type = 'inform' })
-        TriggerServerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('cl_adminmenu'), 'red',
+        TriggerServerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('cl_adminmenu'), 'red',
             playerName .. ' (ID: ' .. serverId .. ') ' .. locale('cl_adminmenu_f'))
 
         for _, blip in pairs(playerBlips) do
@@ -360,7 +360,7 @@ end)
 -- go invisible
 -------------------------------------------------------------------
 local invisible = false
-RegisterNetEvent('rsg-adminmenu:client:goinvisible', function()
+RegisterNetEvent('fdb-adminmenu:client:goinvisible', function()
     local playerId = PlayerId()
     local serverId = GetPlayerServerId(playerId)
     local playerName = GetPlayerName(playerId)
@@ -371,7 +371,7 @@ RegisterNetEvent('rsg-adminmenu:client:goinvisible', function()
         invisible = false
         lib.notify({ title = locale('cl_client_42'), description = locale('cl_client_43'), type = 'inform' })
         TriggerServerEvent(
-            'rsg-log:server:CreateLog',
+            'fdb-log:server:CreateLog',
             'adminmenu',
             locale('cl_adminmenu'),
             'red',
@@ -383,7 +383,7 @@ RegisterNetEvent('rsg-adminmenu:client:goinvisible', function()
         invisible = true
         lib.notify({ title = locale('cl_client_44'), description = locale('cl_client_45'), type = 'inform' })
         TriggerServerEvent(
-            'rsg-log:server:CreateLog',
+            'fdb-log:server:CreateLog',
             'adminmenu',
             locale('cl_adminmenu'),
             'red',
@@ -395,7 +395,7 @@ end)
 -------------------------------------------------------------------
 -- god mode
 -------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:client:godmode', function()
+RegisterNetEvent('fdb-adminmenu:client:godmode', function()
     godmode = not godmode
 
     local playerId = PlayerId()
@@ -406,7 +406,7 @@ RegisterNetEvent('rsg-adminmenu:client:godmode', function()
         -- Godmode enabled
         lib.notify({ title = locale('cl_client_46'), description = locale('cl_client_47'), type = 'inform' })
         TriggerServerEvent(
-            'rsg-log:server:CreateLog',
+            'fdb-log:server:CreateLog',
             'adminmenu',
             locale('cl_adminmenu'),
             'red',
@@ -421,7 +421,7 @@ RegisterNetEvent('rsg-adminmenu:client:godmode', function()
         SetPlayerInvincible(cache.ped, false)
         lib.notify({ title = locale('cl_client_48'), description = locale('cl_client_49'), type = 'inform' })
         TriggerServerEvent(
-            'rsg-log:server:CreateLog',
+            'fdb-log:server:CreateLog',
             'adminmenu',
             locale('cl_adminmenu'),
             'red',
@@ -434,7 +434,7 @@ end)
 ------------------------
 -- kick player reason
 ------------------------
-RegisterNetEvent('rsg-adminmenu:client:kickplayer', function(data)
+RegisterNetEvent('fdb-adminmenu:client:kickplayer', function(data)
     local input = lib.inputDialog(locale('cl_client_50') .. ': ' .. data.name, {
         {
             label = locale('cl_client_51'),
@@ -444,13 +444,13 @@ RegisterNetEvent('rsg-adminmenu:client:kickplayer', function(data)
     })
     if not input then return end
 
-    TriggerServerEvent('rsg-adminmenu:server:kickplayer', data.id, input[1])
+    TriggerServerEvent('fdb-adminmenu:server:kickplayer', data.id, input[1])
 end)
 
 ----------------------
 -- ban player reason
 ----------------------
-RegisterNetEvent('rsg-adminmenu:client:banplayer', function(data)
+RegisterNetEvent('fdb-adminmenu:client:banplayer', function(data)
     local input = lib.inputDialog(locale('cl_client_52') .. ': ' .. data.name, {
         {
             label = locale('cl_client_53'),
@@ -490,12 +490,12 @@ RegisterNetEvent('rsg-adminmenu:client:banplayer', function(data)
 
     -- permanent ban
     if input[1] == 'permanent' then
-        TriggerServerEvent('rsg-adminmenu:server:banplayer', data.id, '99999999999', input[3])
+        TriggerServerEvent('fdb-adminmenu:server:banplayer', data.id, '99999999999', input[3])
         lib.notify({ title = locale('cl_client_66'), description = data.name .. locale('cl_client_67'), type = 'inform' })
     end
     -- temporary ban
     if input[1] == 'temporary' then
-        TriggerServerEvent('rsg-adminmenu:server:banplayer', data.id, input[2], input[3])
+        TriggerServerEvent('fdb-adminmenu:server:banplayer', data.id, input[2], input[3])
         lib.notify({ title = locale('cl_client_66'), description = data.name .. locale('cl_client_68'), type = 'inform' })
     end
 end)
@@ -507,7 +507,7 @@ end)
 local lastSpectateCoord = nil
 local isSpectating = false
 
-RegisterNetEvent('rsg-adminmenu:client:spectateplayer', function(targetPed)
+RegisterNetEvent('fdb-adminmenu:client:spectateplayer', function(targetPed)
     local targetplayer = GetPlayerFromServerId(targetPed)
     local target = GetPlayerPed(targetplayer)
     if not isSpectating then
@@ -540,8 +540,8 @@ end
 ---------------------
 -- give item
 ---------------------
-RegisterNetEvent('rsg-adminmenu:client:giveitem', function(data)
-    local items = RSGCore.Shared.Items
+RegisterNetEvent('fdb-adminmenu:client:giveitem', function(data)
+    local items = FDBCore.Shared.Items
 
     local searchInput = lib.inputDialog('Search and Give Item', {
         {
@@ -595,14 +595,14 @@ RegisterNetEvent('rsg-adminmenu:client:giveitem', function(data)
         return lib.notify({ type = 'error', description = 'Invalid input.' })
     end
 
-    TriggerServerEvent('rsg-adminmenu:server:giveitem', data.id, selectedItem, quantity)
+    TriggerServerEvent('fdb-adminmenu:server:giveitem', data.id, selectedItem, quantity)
 end)
 
 -------------------------
 -- player info
 -------------------------
-RegisterNetEvent('rsg-adminmenu:server:playerinfo', function(player)
-    RSGCore.Functions.TriggerCallback('rsg-adminmenu:server:getplayerinfo', function(data)
+RegisterNetEvent('fdb-adminmenu:server:playerinfo', function(player)
+    FDBCore.Functions.TriggerCallback('fdb-adminmenu:server:getplayerinfo', function(data)
         lib.registerContext(
             {
                 id = 'adminplayer_info',

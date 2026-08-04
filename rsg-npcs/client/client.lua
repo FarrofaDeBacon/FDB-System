@@ -51,7 +51,7 @@ CreateThread(function()
                     playingAudio[k] = audioName
 
                     if Config.Debug then
-                        print("[RSG-NPCs] Audio started for NPC " .. k)
+                        print("[fdb-NPCs] Audio started for NPC " .. k)
                     end
 
                     -- Auto-stop after specified duration

@@ -24,7 +24,7 @@ function utils.getFilesInDirectory(path, pattern)
     return files, fileCount
 end
 
-local frameworks = { 'rsg-core' }
+local frameworks = { 'fdb-core' }
 local sucess = false
 
 for i = 1, #frameworks do

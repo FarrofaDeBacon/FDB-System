@@ -43,7 +43,7 @@ AddEventHandler('FDBCore:Server:PlayerLoaded', function(Player)
             end
         end
         if isCorrupted then
-            print(('[rsg-inventory] [MIGRATION] Player ' .. tostring(src) .. ' had corrupted equipmentSlots (key: ' .. tostring(next(metadata.equipmentSlots)) .. '). Resetting.'))
+            print(('[fdb-inventory] [MIGRATION] Player ' .. tostring(src) .. ' had corrupted equipmentSlots (key: ' .. tostring(next(metadata.equipmentSlots)) .. '). Resetting.'))
             metadata.equipmentSlots = { backpack = nil, satchel = nil, wallet = nil, holster = nil }
             changed = true
         end

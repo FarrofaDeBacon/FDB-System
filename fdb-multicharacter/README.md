@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 👥 rsg-multicharacter
+# 👥 fdb-multicharacter
 **Multi‑character creation and selection system for RedM using RSG Core.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -12,10 +12,10 @@
 ---
 
 ## 🛠️ Dependencies
-- **rsg-core** (framework & events)  
+- **fdb-core** (framework & events)  
 - **ox_lib** (dialogs, locale)  
 - **oxmysql** (database handling)  
-- **rsg-horses** (required for starter horse feature)  
+- **fdb-horses** (required for starter horse feature)  
 
 **License:** GPL‑3.0
 
@@ -24,7 +24,7 @@
 ## ✨ Features
 - 🧑‍🤝‍🧑 **Multi‑character selection** — configurable number of character slots.  
 - 🐎 **Starter horse system** — gives new characters a horse automatically.  
-- 🎁 **Starter items** — auto‑granted via `RSGCore.Shared.StarterItems`.  
+- 🎁 **Starter items** — auto‑granted via `FDBCore.Shared.StarterItems`.  
 - 🧠 **Preloading synchronization** — prevents desyncs during character load.  
 - 🗃️ **Persistent horse IDs** — generated via `GenerateHorseId()` for each player horse.  
 - ⚙️ **Configurable slots per license** (override default).  
@@ -60,22 +60,22 @@ Config.PlayersNumberOfCharacters = {
 2. The server checks their license in `Config.PlayersNumberOfCharacters`.  
 3. If no override is found, they receive `Config.DefaultNumberOfCharacters` slots.  
 4. When a new character is created:  
-   - Starter items from `RSGCore.Shared.StarterItems` are given.  
+   - Starter items from `FDBCore.Shared.StarterItems` are given.  
    - If enabled, a **starter horse** is generated and added to their stable.  
 5. All characters and horses are stored persistently in the database.
 
 ---
 
 ## 📂 Installation
-1. Place `rsg-multicharacter` in your `resources/[rsg]` folder.  
-2. Ensure `rsg-core`, `ox_lib`, and `oxmysql` are installed.  
+1. Place `fdb-multicharacter` in your `resources/[rsg]` folder.  
+2. Ensure `fdb-core`, `ox_lib`, and `oxmysql` are installed.  
 3. Add to your `server.cfg`:
    ```cfg
    ensure ox_lib
    ensure oxmysql
-   ensure rsg-core
-   ensure rsg-horses
-   ensure rsg-multicharacter
+   ensure fdb-core
+   ensure fdb-horses
+   ensure fdb-multicharacter
    ```
 4. Restart your server.  
 

@@ -1,13 +1,13 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
-RSGCore.Commands.Add('info', locale('sv_view_stats'), {}, true, function(source, args)
-    TriggerClientEvent('rsg-playerstats:client:openPlayerStats', source)
+FDBCore.Commands.Add('info', locale('sv_view_stats'), {}, true, function(source, args)
+    TriggerClientEvent('fdb-playerstats:client:openPlayerStats', source)
 end)
 
-RSGCore.Functions.CreateCallback('rsg-playerstats:server:getPlayerData', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-playerstats:server:getPlayerData', function(source, cb)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     
     -- Validate player exists
     if not Player or not Player.PlayerData then

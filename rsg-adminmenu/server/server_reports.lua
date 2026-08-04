@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
 -----------------------------------------------------------------------
@@ -57,19 +57,19 @@ local function GetNearbyPlayers(source)
     local srcCoords = GetEntityCoords(GetPlayerPed(src))
     local nearbyPlayers = {}
     
-    for _, playerId in ipairs(RSGCore.Functions.GetPlayers()) do
+    for _, playerId in ipairs(FDBCore.Functions.GetPlayers()) do
         if playerId ~= src then
             local targetPed = GetPlayerPed(playerId)
             local targetCoords = GetEntityCoords(targetPed)
             local distance = #(srcCoords - targetCoords)
             
             if distance <= Config.Reports.NearbyDistance then
-                local Player = RSGCore.Functions.GetPlayer(playerId)
+                local Player = FDBCore.Functions.GetPlayer(playerId)
                 if Player then
                     table.insert(nearbyPlayers, {
                         player_id = playerId,
                         player_name = Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname,
-                        player_license = RSGCore.Functions.GetIdentifier(playerId, 'license'),
+                        player_license = FDBCore.Functions.GetIdentifier(playerId, 'license'),
                         distance = distance
                     })
                 end
@@ -133,14 +133,14 @@ end
 -----------------------------------------------------------------------
 -- Create a new report
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:server:createreport', function(reportData)
+RegisterNetEvent('fdb-adminmenu:server:createreport', function(reportData)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     
     if not Player then return end
     
     local reporterName = Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname
-    local reporterLicense = RSGCore.Functions.GetIdentifier(src, 'license')
+    local reporterLicense = FDBCore.Functions.GetIdentifier(src, 'license')
     local reporterDiscord = GetPlayerDiscord(src)
     local coords = GetEntityCoords(GetPlayerPed(src))
     local coordsString = string.format("%.2f, %.2f, %.2f", coords.x, coords.y, coords.z)
@@ -151,7 +151,7 @@ RegisterNetEvent('rsg-adminmenu:server:createreport', function(reportData)
     
     -- VALIDATION: Check if the reported player exists
     if reportData.reportedPlayerId then
-        local ReportedPlayer = RSGCore.Functions.GetPlayer(reportData.reportedPlayerId)
+        local ReportedPlayer = FDBCore.Functions.GetPlayer(reportData.reportedPlayerId)
         
         if not ReportedPlayer then
             -- The player does not exist or is not connected
@@ -164,7 +164,7 @@ RegisterNetEvent('rsg-adminmenu:server:createreport', function(reportData)
         end
         
         reportedPlayerName = ReportedPlayer.PlayerData.charinfo.firstname .. ' ' .. ReportedPlayer.PlayerData.charinfo.lastname
-        reportedPlayerLicense = RSGCore.Functions.GetIdentifier(reportData.reportedPlayerId, 'license')
+        reportedPlayerLicense = FDBCore.Functions.GetIdentifier(reportData.reportedPlayerId, 'license')
         reportedPlayerDiscord = GetPlayerDiscord(reportData.reportedPlayerId)
     end
     
@@ -223,9 +223,9 @@ RegisterNetEvent('rsg-adminmenu:server:createreport', function(reportData)
             })
             
             -- Notify online admins about the new report
-            for _, playerId in ipairs(RSGCore.Functions.GetPlayers()) do
-                if RSGCore.Functions.HasPermission(playerId, reportPermissions['viewreports']) or IsPlayerAceAllowed(playerId, 'command') then
-                    TriggerClientEvent('rsg-adminmenu:client:newreportnotification', playerId, {
+            for _, playerId in ipairs(FDBCore.Functions.GetPlayers()) do
+                if FDBCore.Functions.HasPermission(playerId, reportPermissions['viewreports']) or IsPlayerAceAllowed(playerId, 'command') then
+                    TriggerClientEvent('fdb-adminmenu:client:newreportnotification', playerId, {
                         id = reportId,
                         reporter_name = reporterName,
                         report_type = reportData.reportType
@@ -287,7 +287,7 @@ RegisterNetEvent('rsg-adminmenu:server:createreport', function(reportData)
             SendDiscordWebhook(webhookUrl, embed, true)
             
             -- Log the report creation
-            TriggerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('sv_report_log_created'), 'blue', locale('sv_report_log_created_desc', reporterName, src, reportId, reportData.reportType), true)
+            TriggerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('sv_report_log_created'), 'blue', locale('sv_report_log_created_desc', reporterName, src, reportId, reportData.reportType), true)
         end
     end)
 end)
@@ -295,16 +295,16 @@ end)
 -----------------------------------------------------------------------
 -- Get my reports (player)
 -----------------------------------------------------------------------
-RSGCore.Functions.CreateCallback('rsg-adminmenu:server:getmyreports', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-adminmenu:server:getmyreports', function(source, cb)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     
     if not Player then 
         cb(nil)
         return 
     end
     
-    local reporterLicense = RSGCore.Functions.GetIdentifier(src, 'license')
+    local reporterLicense = FDBCore.Functions.GetIdentifier(src, 'license')
     
     MySQL.query('SELECT * FROM admin_reports WHERE reporter_license = ? AND status != ? ORDER BY created_at DESC', {
         reporterLicense, 'closed'
@@ -316,10 +316,10 @@ end)
 -----------------------------------------------------------------------
 -- Get all reports (admin)
 -----------------------------------------------------------------------
-RSGCore.Functions.CreateCallback('rsg-adminmenu:server:getallreports', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-adminmenu:server:getallreports', function(source, cb)
     local src = source
     
-    if not RSGCore.Functions.HasPermission(src, reportPermissions['viewreports']) and not IsPlayerAceAllowed(src, 'command') then
+    if not FDBCore.Functions.HasPermission(src, reportPermissions['viewreports']) and not IsPlayerAceAllowed(src, 'command') then
         cb(nil)
         return
     end
@@ -334,7 +334,7 @@ end)
 -----------------------------------------------------------------------
 -- Get report details
 -----------------------------------------------------------------------
-RSGCore.Functions.CreateCallback('rsg-adminmenu:server:getreportdetails', function(source, cb, reportId)
+FDBCore.Functions.CreateCallback('fdb-adminmenu:server:getreportdetails', function(source, cb, reportId)
     local src = source
     
     MySQL.single('SELECT * FROM admin_reports WHERE id = ?', { reportId }, function(report)
@@ -343,14 +343,14 @@ RSGCore.Functions.CreateCallback('rsg-adminmenu:server:getreportdetails', functi
             return
         end
         
-        local Player = RSGCore.Functions.GetPlayer(src)
+        local Player = FDBCore.Functions.GetPlayer(src)
         if not Player then
             cb(nil)
             return
         end
         
-        local reporterLicense = RSGCore.Functions.GetIdentifier(src, 'license')
-        local isAdmin = RSGCore.Functions.HasPermission(src, reportPermissions['viewreports']) or IsPlayerAceAllowed(src, 'command')
+        local reporterLicense = FDBCore.Functions.GetIdentifier(src, 'license')
+        local isAdmin = FDBCore.Functions.HasPermission(src, reportPermissions['viewreports']) or IsPlayerAceAllowed(src, 'command')
         
         if report.reporter_license ~= reporterLicense and not isAdmin then
             cb(nil)
@@ -408,11 +408,11 @@ end)
 -----------------------------------------------------------------------
 -- Claim a report (admin)
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:server:claimreport', function(data)
+RegisterNetEvent('fdb-adminmenu:server:claimreport', function(data)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     
-    if not RSGCore.Functions.HasPermission(src, reportPermissions['managereports']) and not IsPlayerAceAllowed(src, 'command') then
+    if not FDBCore.Functions.HasPermission(src, reportPermissions['managereports']) and not IsPlayerAceAllowed(src, 'command') then
         return
     end
     
@@ -442,7 +442,7 @@ RegisterNetEvent('rsg-adminmenu:server:claimreport', function(data)
             }
             SendDiscordWebhook(Config.Reports.Webhooks.Main, embed)
             
-            TriggerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('sv_report_log_claimed'), 'yellow', locale('sv_report_log_claimed_desc', adminName, src, data.reportId), true)
+            TriggerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('sv_report_log_claimed'), 'yellow', locale('sv_report_log_claimed_desc', adminName, src, data.reportId), true)
         end
     end)
 end)
@@ -450,11 +450,11 @@ end)
 -----------------------------------------------------------------------
 -- Release a report (admin)
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:server:releasereport', function(data)
+RegisterNetEvent('fdb-adminmenu:server:releasereport', function(data)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     
-    if not RSGCore.Functions.HasPermission(src, reportPermissions['managereports']) and not IsPlayerAceAllowed(src, 'command') then
+    if not FDBCore.Functions.HasPermission(src, reportPermissions['managereports']) and not IsPlayerAceAllowed(src, 'command') then
         return
     end
     
@@ -482,7 +482,7 @@ RegisterNetEvent('rsg-adminmenu:server:releasereport', function(data)
             }
             SendDiscordWebhook(Config.Reports.Webhooks.Main, embed)
             
-            TriggerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('sv_report_log_released'), 'blue', locale('sv_report_log_released_desc', adminName, src, data.reportId), true)
+            TriggerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('sv_report_log_released'), 'blue', locale('sv_report_log_released_desc', adminName, src, data.reportId), true)
         end
     end)
 end)
@@ -490,11 +490,11 @@ end)
 -----------------------------------------------------------------------
 -- Resolve a report (admin)
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:server:resolvereport', function(data)
+RegisterNetEvent('fdb-adminmenu:server:resolvereport', function(data)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     
-    if not RSGCore.Functions.HasPermission(src, reportPermissions['managereports']) and not IsPlayerAceAllowed(src, 'command') then
+    if not FDBCore.Functions.HasPermission(src, reportPermissions['managereports']) and not IsPlayerAceAllowed(src, 'command') then
         return
     end
     
@@ -513,7 +513,7 @@ RegisterNetEvent('rsg-adminmenu:server:resolvereport', function(data)
             
             MySQL.single('SELECT reporter_id FROM admin_reports WHERE id = ?', { data.reportId }, function(report)
                 if report and report.reporter_id then
-                    local reporterPlayer = RSGCore.Functions.GetPlayer(report.reporter_id)
+                    local reporterPlayer = FDBCore.Functions.GetPlayer(report.reporter_id)
                     if reporterPlayer then
                         TriggerClientEvent('ox_lib:notify', report.reporter_id, {
                             title = locale('sv_report_resolved_player'),
@@ -536,7 +536,7 @@ RegisterNetEvent('rsg-adminmenu:server:resolvereport', function(data)
             }
             SendDiscordWebhook(Config.Reports.Webhooks.Main, embed)
             
-            TriggerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('sv_report_log_resolved'), 'green', locale('sv_report_log_resolved_desc', adminName, src, data.reportId), true)
+            TriggerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('sv_report_log_resolved'), 'green', locale('sv_report_log_resolved_desc', adminName, src, data.reportId), true)
         end
     end)
 end)
@@ -544,11 +544,11 @@ end)
 -----------------------------------------------------------------------
 -- Delete a report (admin)
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:server:deletereport', function(reportId, reason)
+RegisterNetEvent('fdb-adminmenu:server:deletereport', function(reportId, reason)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     
-    if not RSGCore.Functions.HasPermission(src, reportPermissions['managereports']) and not IsPlayerAceAllowed(src, 'command') then
+    if not FDBCore.Functions.HasPermission(src, reportPermissions['managereports']) and not IsPlayerAceAllowed(src, 'command') then
         return
     end
     
@@ -577,7 +577,7 @@ RegisterNetEvent('rsg-adminmenu:server:deletereport', function(reportId, reason)
             }
             SendDiscordWebhook(Config.Reports.Webhooks.Main, embed)
             
-            TriggerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('sv_report_log_deleted'), 'red', locale('sv_report_log_deleted_desc', adminName, src, reportId, reason), true)
+            TriggerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('sv_report_log_deleted'), 'red', locale('sv_report_log_deleted_desc', adminName, src, reportId, reason), true)
         end
     end)
 end)
@@ -585,9 +585,9 @@ end)
 -----------------------------------------------------------------------
 -- Reply to a report
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:server:replyreport', function(reportId, message, senderType)
+RegisterNetEvent('fdb-adminmenu:server:replyreport', function(reportId, message, senderType)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     
     if not Player then return end
     
@@ -596,8 +596,8 @@ RegisterNetEvent('rsg-adminmenu:server:replyreport', function(reportId, message,
     MySQL.single('SELECT * FROM admin_reports WHERE id = ?', { reportId }, function(report)
         if not report then return end
         
-        local reporterLicense = RSGCore.Functions.GetIdentifier(src, 'license')
-        local isAdmin = RSGCore.Functions.HasPermission(src, reportPermissions['viewreports']) or IsPlayerAceAllowed(src, 'command')
+        local reporterLicense = FDBCore.Functions.GetIdentifier(src, 'license')
+        local isAdmin = FDBCore.Functions.HasPermission(src, reportPermissions['viewreports']) or IsPlayerAceAllowed(src, 'command')
         
         if report.reporter_license ~= reporterLicense and not isAdmin then
             return
@@ -624,27 +624,27 @@ RegisterNetEvent('rsg-adminmenu:server:replyreport', function(reportId, message,
                 })
                 
                 if senderType == 'admin' then
-                    local reporterPlayer = RSGCore.Functions.GetPlayer(report.reporter_id)
+                    local reporterPlayer = FDBCore.Functions.GetPlayer(report.reporter_id)
                     if reporterPlayer then
-                        TriggerClientEvent('rsg-adminmenu:client:reportreplynotification', report.reporter_id, {
+                        TriggerClientEvent('fdb-adminmenu:client:reportreplynotification', report.reporter_id, {
                             reportId = reportId,
                             adminName = senderName
                         })
                     end
                 else
                     if report.assigned_admin_id then
-                        local assignedAdmin = RSGCore.Functions.GetPlayer(report.assigned_admin_id)
+                        local assignedAdmin = FDBCore.Functions.GetPlayer(report.assigned_admin_id)
                         if assignedAdmin then
-                            TriggerClientEvent('rsg-adminmenu:client:newreportnotification', report.assigned_admin_id, {
+                            TriggerClientEvent('fdb-adminmenu:client:newreportnotification', report.assigned_admin_id, {
                                 id = reportId,
                                 reporter_name = senderName,
                                 report_type = 'response'
                             })
                         end
                     else
-                        for _, playerId in ipairs(RSGCore.Functions.GetPlayers()) do
-                            if RSGCore.Functions.HasPermission(playerId, reportPermissions['viewreports']) or IsPlayerAceAllowed(playerId, 'command') then
-                                TriggerClientEvent('rsg-adminmenu:client:newreportnotification', playerId, {
+                        for _, playerId in ipairs(FDBCore.Functions.GetPlayers()) do
+                            if FDBCore.Functions.HasPermission(playerId, reportPermissions['viewreports']) or IsPlayerAceAllowed(playerId, 'command') then
+                                TriggerClientEvent('fdb-adminmenu:client:newreportnotification', playerId, {
                                     id = reportId,
                                     reporter_name = senderName,
                                     report_type = 'response'

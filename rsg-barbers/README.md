@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 💈 rsg-barbers
+# 💈 fdb-barbers
 **Fully functional barbershop system for RedM (RSG Core).**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -11,8 +11,8 @@
 ---
 
 ## 🛠️ Dependencies
-- **rsg-core** (framework & player data)  
-- **rsg-menubase** (menu interface)  
+- **fdb-core** (framework & player data)  
+- **fdb-menubase** (menu interface)  
 - **ox_lib** (locales, notifications)  
 - **oxmysql** (database handler)
 
@@ -41,7 +41,7 @@ Config = {}
 Config.BarberCost = 5           -- Price per haircut
 Config.CameraFov = 35.0         -- Default camera zoom
 Config.KeyOpen = 'J'            -- Keybind to interact (optional)
-Config.UseTarget = false        -- Use rsg-target or proximity prompt
+Config.UseTarget = false        -- Use fdb-target or proximity prompt
 
 Config.Barbers = {
     { name = "Saint Denis Barbershop", coords = vector3(2651.49, -1211.27, 53.28) },
@@ -80,14 +80,14 @@ If not present, make sure the table is created by your skin system.
 ---
 
 ## 📂 Installation
-1. Place `rsg-barbers` inside `resources/[rsg]`.  
+1. Place `fdb-barbers` inside `resources/[rsg]`.  
 2. Add the resource to your `server.cfg`:
    ```cfg
    ensure ox_lib
    ensure oxmysql
-   ensure rsg-core
-   ensure rsg-menubase
-   ensure rsg-barbers
+   ensure fdb-core
+   ensure fdb-menubase
+   ensure fdb-barbers
    ```
 3. Restart your server.
 

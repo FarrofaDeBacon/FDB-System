@@ -75,7 +75,7 @@ FDBCore.Functions.CreateUseableItem('horse_brush', function(source, item)
     if not Player then return end
 
     if Player.Functions.RemoveItem(item.name, 1, item.slot) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
 
         local activehorse = MySQL.scalar.await('SELECT id FROM fdb_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
         if not activehorse then
@@ -108,7 +108,7 @@ FDBCore.Functions.CreateUseableItem('horse_stimulant', function(source, item)
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     if Player.Functions.RemoveItem(item.name, 1, item.slot) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
         -- Estimulante restaura vida/stamina core nativos; não altera metadata de sobrevivência
         TriggerClientEvent('fdb-horses:client:playerfeedhorse', src, item.name)
     end
@@ -121,7 +121,7 @@ if FDBCore.Shared.Items['horse_medicine'] then
         local Player = FDBCore.Functions.GetPlayer(src)
         if not Player then return end
         if Player.Functions.RemoveItem(item.name, 1, item.slot) then
-            TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
+            TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
 
             local activehorse = MySQL.scalar.await('SELECT id FROM fdb_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
             if not activehorse then return end
@@ -147,7 +147,7 @@ FDBCore.Functions.CreateUseableItem('horse_carrot', function(source, item)
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     if Player.Functions.RemoveItem(item.name, 1, item.slot) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
 
         local activehorse = MySQL.scalar.await('SELECT id FROM fdb_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
         if not activehorse then return end
@@ -173,7 +173,7 @@ FDBCore.Functions.CreateUseableItem('horse_apple', function(source, item)
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     if Player.Functions.RemoveItem(item.name, 1, item.slot) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
 
         local activehorse = MySQL.scalar.await('SELECT id FROM fdb_horses WHERE citizenid = ? AND active = ?', {Player.PlayerData.citizenid, true})
         if not activehorse then return end
@@ -236,7 +236,7 @@ FDBCore.Functions.CreateUseableItem('horse_reviver', function(source, item)
 
     -- remove item first (server-authoritative), then trigger revive
     if Player.Functions.RemoveItem(item.name, 1, item.slot) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], 'remove', 1)
         TriggerClientEvent('fdb-horses:client:revivehorse', src, item, result[1])
     end
 end)
@@ -410,7 +410,7 @@ RegisterServerEvent('fdb-horses:server:HorseDied', function(horseid, horsename)
         MySQL.update('DELETE FROM fdb_horses WHERE citizenid = ? AND horseid = ?', {cid, horseid})
         
         -- Log the death
-        TriggerEvent('rsg-log:server:CreateLog', 'horsetrainer', locale('sv_log_horse_trainer'), 'red', horsename .. ' ' .. locale('sv_log_horse_belong') .. ' ' .. cid .. ' ' .. locale('sv_log_horse_dead'))
+        TriggerEvent('fdb-log:server:CreateLog', 'horsetrainer', locale('sv_log_horse_trainer'), 'red', horsename .. ' ' .. locale('sv_log_horse_belong') .. ' ' .. cid .. ' ' .. locale('sv_log_horse_dead'))
         
         lib.notify(src, {title = locale('sv_error_horse_died'), type = 'error', duration = 7000})
     end
@@ -865,7 +865,7 @@ RegisterNetEvent('fdb-horses:server:openhorseinventory', function(horseid)
     end
 
     local data = { label = locale('sv_horse_inventory'), maxweight = invWeight, slots = invSlots }
-    exports['rsg-inventory']:OpenInventory(src, horsestash, data)
+    exports['fdb-inventory']:OpenInventory(src, horsestash, data)
 end)
 
 --------------------------------------
@@ -883,8 +883,8 @@ CreateThread(function()
     local success, err = pcall(function()
         if GetResourceState('fdb-inventory') == 'started' then
             return exports['fdb-inventory']:CreateShop(shopData)
-        elseif GetResourceState('rsg-inventory') == 'started' then
-            return exports['rsg-inventory']:CreateShop(shopData)
+        elseif GetResourceState('fdb-inventory') == 'started' then
+            return exports['fdb-inventory']:CreateShop(shopData)
         end
     end)
     if not success then
@@ -916,8 +916,8 @@ RegisterNetEvent('fdb-horses:server:openShop', function()
     local success, err = pcall(function()
         if GetResourceState('fdb-inventory') == 'started' then
             return exports['fdb-inventory']:OpenShop(src, 'horse')
-        elseif GetResourceState('rsg-inventory') == 'started' then
-            return exports['rsg-inventory']:OpenShop(src, 'horse')
+        elseif GetResourceState('fdb-inventory') == 'started' then
+            return exports['fdb-inventory']:OpenShop(src, 'horse')
         end
     end)
     if not success then
@@ -959,7 +959,7 @@ UpkeepInterval = function()
 
             -- delete horse
             MySQL.update('DELETE FROM fdb_horses WHERE id = ?', {id})
-            TriggerEvent('rsg-log:server:CreateLog', 'horsetrainer', locale('sv_log_horse_trainer'), 'red', horsename..' '..locale('sv_log_horse_belong')..' '..ownercid..' '..locale('sv_log_horse_dead'))
+            TriggerEvent('fdb-log:server:CreateLog', 'horsetrainer', locale('sv_log_horse_trainer'), 'red', horsename..' '..locale('sv_log_horse_belong')..' '..ownercid..' '..locale('sv_log_horse_dead'))
 
             -- telegram message to the horse owner
             MySQL.insert('INSERT INTO telegrams (citizenid, recipient, sender, sendername, subject, sentDate, message) VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -984,7 +984,7 @@ UpkeepInterval = function()
                 
                 -- Clear horse inventory
                 local success = pcall(function()
-                    exports['rsg-inventory']:ClearInventory(horsestash)
+                    exports['fdb-inventory']:ClearInventory(horsestash)
                 end)
                 
                 if not success then
@@ -994,7 +994,7 @@ UpkeepInterval = function()
 
             -- delete horse
             MySQL.update('DELETE FROM fdb_horses WHERE id = ?', {id})
-            TriggerEvent('rsg-log:server:CreateLog', 'horsetrainer', locale('sv_log_horse_trainer'), 'red', horsename..' '..locale('sv_log_horse_belong')..' '..ownercid..' '..locale('sv_log_horse_dead'))
+            TriggerEvent('fdb-log:server:CreateLog', 'horsetrainer', locale('sv_log_horse_trainer'), 'red', horsename..' '..locale('sv_log_horse_belong')..' '..ownercid..' '..locale('sv_log_horse_dead'))
 
             -- telegram message to the horse owner
             MySQL.insert('INSERT INTO telegrams (citizenid, recipient, sender, sendername, subject, sentDate, message) VALUES (?, ?, ?, ?, ?, ?, ?)',

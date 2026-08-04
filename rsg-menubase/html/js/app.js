@@ -74,7 +74,7 @@
     }
 
     window.MenuData = {};
-    MenuData.ResourceName = "rsg-menubase";
+    MenuData.ResourceName = "fdb-menubase";
     MenuData.opened = {};
     MenuData.focus = [];
     MenuData.pos = {};

@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 local ComponentsMale = {}
 local ComponentsFemale = {}
@@ -173,17 +173,17 @@ local LoadLowerBody = function(target, data)
     end
 end
 
-RegisterNetEvent('RSGCore:Client:OnPlayerLoaded')
-AddEventHandler('RSGCore:Client:OnPlayerLoaded', function()
+RegisterNetEvent('FDBCore:Client:OnPlayerLoaded')
+AddEventHandler('FDBCore:Client:OnPlayerLoaded', function()
     Wait(3000)
 
-    RSGCore.Functions.TriggerCallback('rsg-wardrobe:server:getPlayerSkin', function(result)
+    FDBCore.Functions.TriggerCallback('fdb-wardrobe:server:getPlayerSkin', function(result)
         if not result or not result.skin then return end
 
         local ped = PlayerPedId()
         local male = IsPedMale(ped)
 
-        local bodyComponents = exports['rsg-appearance']:GetBodyComponents()
+        local bodyComponents = exports['fdb-appearance']:GetBodyComponents()
 
         if male then
             ComponentsMale = bodyComponents[1]
@@ -217,7 +217,7 @@ local function toggleClothing(clothingName)
 
                 -- Need to remove boot as well to avoid blank lower body
                 if clothingData['currentBoots'] == 0 then
-                    ClothesCache = exports['rsg-appearance']:GetClothesCache()
+                    ClothesCache = exports['fdb-appearance']:GetClothesCache()
                     clothingData['currentBoots'] = ClothesCache['boots'].hash
                     local isWearingComps = IsPedUsingComponent(playerPed, 2004797167)
 
@@ -230,7 +230,7 @@ local function toggleClothing(clothingName)
                 end
 
                 if clothingData[data] == 0 then
-                    ClothesCache = exports['rsg-appearance']:GetClothesCache()
+                    ClothesCache = exports['fdb-appearance']:GetClothesCache()
                     clothingData[data] = ClothesCache[comps].hash
                     local isWearingComps = IsPedUsingComponent(playerPed, hash)
 
@@ -249,7 +249,7 @@ local function toggleClothing(clothingName)
 
             if name == 'sleeve' then
                 if clothingData[data] == 0 then
-                    ClothesCache = exports['rsg-appearance']:GetClothesCache()
+                    ClothesCache = exports['fdb-appearance']:GetClothesCache()
                     clothingData[data] = ClothesCache[comps].hash
                     UpdateWearableState(playerPed, clothingData[data], `closed_collar_rolled_sleeve`, 0, true , 1)
                 else
@@ -263,7 +263,7 @@ local function toggleClothing(clothingName)
             if name == 'collar1' then
 
                 if clothingData[data] == 0 then
-                    ClothesCache = exports['rsg-appearance']:GetClothesCache()
+                    ClothesCache = exports['fdb-appearance']:GetClothesCache()
                     clothingData[data] = ClothesCache[comps].hash
                     UpdateWearableState(playerPed, clothingData[data], `open_collar_rolled_sleeve`, 0, true , 1)
                 else
@@ -276,7 +276,7 @@ local function toggleClothing(clothingName)
 
             if name == 'collar2' then
                 if clothingData[data] == 0 then
-                    ClothesCache = exports['rsg-appearance']:GetClothesCache()
+                    ClothesCache = exports['fdb-appearance']:GetClothesCache()
                     clothingData[data] = ClothesCache[comps].hash
                     UpdateWearableState(playerPed, clothingData[data], `open_collar_full_sleeve`, 0, true , 1)
                 else
@@ -323,7 +323,7 @@ local function toggleClothing(clothingName)
                         LoadUpperBody(playerPed, playerSkin)
                     end
                 else
-                    ClothesCache = exports['rsg-appearance']:GetClothesCache()
+                    ClothesCache = exports['fdb-appearance']:GetClothesCache()
                     if not ClothesCache[comps] or not ClothesCache[comps].hash then return end
                     clothingData[data] = ClothesCache[comps].hash
                     NativeSetPedComponentEnabled(playerPed, clothingData[data], false, true)
@@ -336,14 +336,14 @@ local function toggleClothing(clothingName)
     end
 end
 
-RegisterNetEvent('rsg-wardrobe:client:OnOffClothing', toggleClothing)
+RegisterNetEvent('fdb-wardrobe:client:OnOffClothing', toggleClothing)
 exports('ToggleClothing', toggleClothing)
 
 local function removeAllClothing()
     local ped = PlayerPedId()
     local male = IsPedMale(ped)
 
-    TriggerServerEvent('rsg-weapons:server:RemoveAllObjects')
+    TriggerServerEvent('fdb-weapons:server:RemoveAllObjects')
 
     for i = 1, #Config.ClothingComponents do
         local category = Config.ClothingComponents[i]
@@ -365,7 +365,7 @@ local function removeAllClothing()
     end
 end
 
-RegisterNetEvent('rsg-wardrobe:client:removeAllClothing', removeAllClothing)
+RegisterNetEvent('fdb-wardrobe:client:removeAllClothing', removeAllClothing)
 exports('RemoveAllClothing', removeAllClothing)
 
 exports('IsWearing', function(name)

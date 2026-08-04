@@ -26,7 +26,7 @@ tasks:
   # Prepare Database
   - action: connect_database
   - action: query_database
-    file: ./tmp/FDBSystem/rsgcore_original.sql
+    file: ./tmp/FDBSystem/fdbcore_original.sql
 
   # ================================================
   #  External Resources (not in our repo)
@@ -116,148 +116,148 @@ tasks:
   # ================================================
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-core
-    dest: ./resources/[framework]/rsg-core
+    src: ./tmp/FDBSystem/fdb-core
+    dest: ./resources/[framework]/fdb-core
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-inventory
-    dest: ./resources/[framework]/rsg-inventory
+    src: ./tmp/FDBSystem/fdb-inventory
+    dest: ./resources/[framework]/fdb-inventory
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-multicharacter
-    dest: ./resources/[framework]/rsg-multicharacter
+    src: ./tmp/FDBSystem/fdb-multicharacter
+    dest: ./resources/[framework]/fdb-multicharacter
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-appearance
-    dest: ./resources/[framework]/rsg-appearance
+    src: ./tmp/FDBSystem/fdb-appearance
+    dest: ./resources/[framework]/fdb-appearance
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-wardrobe
-    dest: ./resources/[framework]/rsg-wardrobe
+    src: ./tmp/FDBSystem/fdb-wardrobe
+    dest: ./resources/[framework]/fdb-wardrobe
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-medic
-    dest: ./resources/[framework]/rsg-medic
+    src: ./tmp/FDBSystem/fdb-medic
+    dest: ./resources/[framework]/fdb-medic
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-lawman
-    dest: ./resources/[framework]/rsg-lawman
+    src: ./tmp/FDBSystem/fdb-lawman
+    dest: ./resources/[framework]/fdb-lawman
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-prison
-    dest: ./resources/[framework]/rsg-prison
+    src: ./tmp/FDBSystem/fdb-prison
+    dest: ./resources/[framework]/fdb-prison
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-doorlock
-    dest: ./resources/[framework]/rsg-doorlock
+    src: ./tmp/FDBSystem/fdb-doorlock
+    dest: ./resources/[framework]/fdb-doorlock
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-banking
-    dest: ./resources/[framework]/rsg-banking
+    src: ./tmp/FDBSystem/fdb-banking
+    dest: ./resources/[framework]/fdb-banking
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-spawn
-    dest: ./resources/[framework]/rsg-spawn
+    src: ./tmp/FDBSystem/fdb-spawn
+    dest: ./resources/[framework]/fdb-spawn
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-weapons
-    dest: ./resources/[framework]/rsg-weapons
+    src: ./tmp/FDBSystem/fdb-weapons
+    dest: ./resources/[framework]/fdb-weapons
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-ammo
-    dest: ./resources/[framework]/rsg-ammo
+    src: ./tmp/FDBSystem/fdb-ammo
+    dest: ./resources/[framework]/fdb-ammo
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-shops
-    dest: ./resources/[framework]/rsg-shops
+    src: ./tmp/FDBSystem/fdb-shops
+    dest: ./resources/[framework]/fdb-shops
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-radialmenu
-    dest: ./resources/[framework]/rsg-radialmenu
+    src: ./tmp/FDBSystem/fdb-radialmenu
+    dest: ./resources/[framework]/fdb-radialmenu
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-essentials
-    dest: ./resources/[framework]/rsg-essentials
+    src: ./tmp/FDBSystem/fdb-essentials
+    dest: ./resources/[framework]/fdb-essentials
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-telegram
-    dest: ./resources/[framework]/rsg-telegram
+    src: ./tmp/FDBSystem/fdb-telegram
+    dest: ./resources/[framework]/fdb-telegram
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-horses
-    dest: ./resources/[framework]/rsg-horses
+    src: ./tmp/FDBSystem/fdb-horses
+    dest: ./resources/[framework]/fdb-horses
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-hud
-    dest: ./resources/[framework]/rsg-hud
+    src: ./tmp/FDBSystem/fdb-hud
+    dest: ./resources/[framework]/fdb-hud
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-menubase
-    dest: ./resources/[framework]/rsg-menubase
+    src: ./tmp/FDBSystem/fdb-menubase
+    dest: ./resources/[framework]/fdb-menubase
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-playerinfo
-    dest: ./resources/[framework]/rsg-playerinfo
+    src: ./tmp/FDBSystem/fdb-playerinfo
+    dest: ./resources/[framework]/fdb-playerinfo
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-bossmenu
-    dest: ./resources/[framework]/rsg-bossmenu
+    src: ./tmp/FDBSystem/fdb-bossmenu
+    dest: ./resources/[framework]/fdb-bossmenu
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-gangmenu
-    dest: ./resources/[framework]/rsg-gangmenu
+    src: ./tmp/FDBSystem/fdb-gangmenu
+    dest: ./resources/[framework]/fdb-gangmenu
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-npcs
-    dest: ./resources/[framework]/rsg-npcs
+    src: ./tmp/FDBSystem/fdb-npcs
+    dest: ./resources/[framework]/fdb-npcs
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-canteen
-    dest: ./resources/[framework]/rsg-canteen
+    src: ./tmp/FDBSystem/fdb-canteen
+    dest: ./resources/[framework]/fdb-canteen
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-barbers
-    dest: ./resources/[framework]/rsg-barbers
+    src: ./tmp/FDBSystem/fdb-barbers
+    dest: ./resources/[framework]/fdb-barbers
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-bathing
-    dest: ./resources/[framework]/rsg-bathing
+    src: ./tmp/FDBSystem/fdb-bathing
+    dest: ./resources/[framework]/fdb-bathing
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-lockpick
-    dest: ./resources/[framework]/rsg-lockpick
+    src: ./tmp/FDBSystem/fdb-lockpick
+    dest: ./resources/[framework]/fdb-lockpick
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-adminmenu
-    dest: ./resources/[framework]/rsg-adminmenu
+    src: ./tmp/FDBSystem/fdb-adminmenu
+    dest: ./resources/[framework]/fdb-adminmenu
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-animations
-    dest: ./resources/[framework]/rsg-animations
+    src: ./tmp/FDBSystem/fdb-animations
+    dest: ./resources/[framework]/fdb-animations
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-multijob
-    dest: ./resources/[framework]/rsg-multijob
+    src: ./tmp/FDBSystem/fdb-multijob
+    dest: ./resources/[framework]/fdb-multijob
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-consume
-    dest: ./resources/[framework]/rsg-consume
+    src: ./tmp/FDBSystem/fdb-consume
+    dest: ./resources/[framework]/fdb-consume
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-fishing
-    dest: ./resources/[framework]/rsg-fishing
+    src: ./tmp/FDBSystem/fdb-fishing
+    dest: ./resources/[framework]/fdb-fishing
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-weaponcomp
-    dest: ./resources/[framework]/rsg-weaponcomp
+    src: ./tmp/FDBSystem/fdb-weaponcomp
+    dest: ./resources/[framework]/fdb-weaponcomp
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-loading
-    dest: ./resources/[framework]/rsg-loading
+    src: ./tmp/FDBSystem/fdb-loading
+    dest: ./resources/[framework]/fdb-loading
 
   - action: move_path
-    src: ./tmp/FDBSystem/rsg-mdt
-    dest: ./resources/[framework]/rsg-mdt
+    src: ./tmp/FDBSystem/fdb-mdt
+    dest: ./resources/[framework]/fdb-mdt
 
   # ================================================
   #  Map Mods (from our repo)

@@ -1,4 +1,4 @@
--- Server Exports for rsg-multijob
+-- Server Exports for fdb-multijob
 
 -- Get the number of jobs a player has
 -- @param citizenid string - The citizen ID of the player
@@ -44,7 +44,7 @@ exports('GetPlayerJobs', function(citizenid)
     local result = MySQL.query.await('SELECT * FROM player_jobs WHERE citizenid = ?', {citizenid})
     
     for k, v in pairs(result) do
-        local job = RSGCore.Shared.Jobs[v.job]
+        local job = FDBCore.Shared.Jobs[v.job]
         if job then
             local grade = job.grades[tostring(v.grade)]
             if grade then

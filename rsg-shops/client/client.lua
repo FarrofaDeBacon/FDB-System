@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 local resourceName = GetCurrentResourceName()
 local spawnedNPCs = {}
 lib.locale()
@@ -62,7 +62,7 @@ local function SetupNPCTarget(npc, shopData)
             icon = 'fa-solid fa-basket-shopping',
             distance = 3.0,
             onSelect = function()
-                TriggerServerEvent('rsg-shops:server:openstore', shopData.products, shopData.name, shopData.label)
+                TriggerServerEvent('fdb-shops:server:openstore', shopData.products, shopData.name, shopData.label)
             end
         }
     })
@@ -75,7 +75,7 @@ end
 -- prompts & blips
 -------------------------
 CreateThread(function()
-    local keybind = RSGCore.Shared.Keybinds[Config.Keybind] or Config.Keybind
+    local keybind = FDBCore.Shared.Keybinds[Config.Keybind] or Config.Keybind
 
     for _, v in pairs(Config.StoreLocations) do
         if not v.name or not v.shopcoords then
@@ -90,11 +90,11 @@ CreateThread(function()
                 SetupNPCTarget(npc, v)
             end
         else
-            pcall(exports['rsg-core'].createPrompt, exports['rsg-core'],
+            pcall(exports['fdb-core'].createPrompt, exports['fdb-core'],
                 v.name, v.shopcoords, keybind,
                 locale('lang_1') .. v.label, {
                     type = 'server',
-                    event = 'rsg-shops:server:openstore',
+                    event = 'fdb-shops:server:openstore',
                     args = {v.products, v.name, v.label},
                 })
         end

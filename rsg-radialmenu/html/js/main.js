@@ -27,7 +27,7 @@ function createMenu(items) {
             }
             
             if (item.items == null && item.shouldClose != null) {
-                $.post('https://rsg-radialmenu/selectItem', JSON.stringify({
+                $.post('https://fdb-radialmenu/selectItem', JSON.stringify({
                     itemData: item
                 }))
             }

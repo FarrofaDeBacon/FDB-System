@@ -34,10 +34,10 @@ files {
     'client/debug.lua',
     'client/framework/rsg.lua',
     'client/compat/qtarget.lua',
-    'client/compat/rsg-target.lua',
+    'client/compat/fdb-target.lua',
 }
 
 provide 'qtarget'
-provide 'rsg-target'
+provide 'fdb-target'
 
 dependency 'ox_lib'

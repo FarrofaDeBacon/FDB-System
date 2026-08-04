@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 local isBusy = false
 lib.locale()
 
@@ -12,7 +12,7 @@ CreateThread(function()
         exports.ox_target:addModel(WaterOutlet, {
             {
                 name = 'waterpump_main_canteenfill',
-                event = 'rsg-waterpump:client:canteenfill',
+                event = 'fdb-waterpump:client:canteenfill',
                 icon = 'fa fa-bottle-droplet',
                 label = locale('cl_canteen_take_a'),
                 canInteract = function(_, distance)
@@ -21,7 +21,7 @@ CreateThread(function()
             },
             {
                 name = 'waterpump_main_drinking',
-                event = 'rsg-waterpump:client:drinking',
+                event = 'fdb-waterpump:client:drinking',
                 icon = 'fa fa-droplet',
                 label = locale('cl_canteen_take_b'),
                 canInteract = function(_, distance)
@@ -33,7 +33,7 @@ CreateThread(function()
         exports.ox_target:addModel(WaterOutlet, {
             {
                 name = 'waterpump_main_drinking_c',
-                event = 'rsg-waterpump:client:drinking',
+                event = 'fdb-waterpump:client:drinking',
                 icon = 'fa fa-droplet',
                 label = locale('cl_canteen_take_b'),
                 canInteract = function(_, distance)
@@ -44,9 +44,9 @@ CreateThread(function()
     end
 end)
 
-RegisterNetEvent('rsg-waterpump:client:canteenfill', function()
+RegisterNetEvent('fdb-waterpump:client:canteenfill', function()
     if Config.canteenPump then
-        if RSGCore.Functions.HasItem('canteen0') then
+        if FDBCore.Functions.HasItem('canteen0') then
             LocalPlayer.state:set('inv_busy', true, true)
             SetCurrentPedWeapon(cache.ped, joaat('weapon_unarmed'))
             Wait(100)
@@ -61,7 +61,7 @@ RegisterNetEvent('rsg-waterpump:client:canteenfill', function()
                 anim = { scenario = 'WORLD_HUMAN_CROUCH_INSPECT' },
                 label = locale('cl_canteen_take_c'),
             }) then
-                TriggerServerEvent('rsg-canteen:server:givefullcanteen')
+                TriggerServerEvent('fdb-canteen:server:givefullcanteen')
             end
             LocalPlayer.state:set('inv_busy', false, true)
         else
@@ -71,7 +71,7 @@ RegisterNetEvent('rsg-waterpump:client:canteenfill', function()
 end)
 
 -- waterpump drink water
-RegisterNetEvent('rsg-waterpump:client:drinking', function()
+RegisterNetEvent('fdb-waterpump:client:drinking', function()
     SetCurrentPedWeapon(cache.ped, joaat('weapon_unarmed'))
     Wait(100)
     

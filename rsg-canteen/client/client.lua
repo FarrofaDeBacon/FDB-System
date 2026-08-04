@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 local isBusy = false
 local entity = nil
 lib.locale()
@@ -16,7 +16,7 @@ end
 ------------------------
 -- drink water from flask
 ------------------------
-RegisterNetEvent('rsg-canteen:client:drink', function(amount, item)
+RegisterNetEvent('fdb-canteen:client:drink', function(amount, item)
     if isBusy then return end
     isBusy = true
 
@@ -83,22 +83,22 @@ RegisterNetEvent('rsg-canteen:client:drink', function(amount, item)
     local shouldDegrade = not refillable or not inWater
 
     if shouldRefill then
-        TriggerServerEvent("RSGCore:Server:SetMetaData", "thirst", RSGCore.Functions.GetPlayerData().metadata["thirst"] + 100)
+        TriggerServerEvent("FDBCore:Server:SetMetaData", "thirst", FDBCore.Functions.GetPlayerData().metadata["thirst"] + 100)
 
         if item == 'canteen0' then
-            TriggerServerEvent('rsg-canteen:server:givefullcanteen')
+            TriggerServerEvent('fdb-canteen:server:givefullcanteen')
         elseif item == 'canteen25' then
-            TriggerServerEvent('rsg-canteen:server:givefullcanteen25')
+            TriggerServerEvent('fdb-canteen:server:givefullcanteen25')
         elseif item == 'canteen50' then
-            TriggerServerEvent('rsg-canteen:server:givefullcanteen50')
+            TriggerServerEvent('fdb-canteen:server:givefullcanteen50')
         elseif item == 'canteen75' then
-            TriggerServerEvent('rsg-canteen:server:givefullcanteen75')
+            TriggerServerEvent('fdb-canteen:server:givefullcanteen75')
         end
 
         TriggerEvent('hud:client:UpdateThirst', LocalPlayer.state.thirst + amount)
 
     elseif shouldDegrade then
-        TriggerServerEvent('rsg-canteen:server:degradecanteen', item)
+        TriggerServerEvent('fdb-canteen:server:degradecanteen', item)
         TriggerEvent('hud:client:UpdateThirst', LocalPlayer.state.thirst + amount)
 
     else

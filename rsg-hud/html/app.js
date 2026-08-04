@@ -853,7 +853,7 @@ function GetParentResourceName() {
     // For RedM/FiveM NUI, the resource name is typically available in the URL
     const url = window.location.href;
     const match = url.match(/nui:\/\/([^/]+)/);
-    return match ? match[1] : 'rsg-hud';
+    return match ? match[1] : 'fdb-hud';
 }
 
 // Initialize the drag system

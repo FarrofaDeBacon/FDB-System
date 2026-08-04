@@ -3,7 +3,7 @@
 -- =========================================================================================
 local config = require 'config'
 ---@type table
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 ---Registers usable items on the server based on the configuration.
 ---@param category string The category of consumables (e.g., "Eat", "Drink").
@@ -15,7 +15,7 @@ local function registerConsumables(category, clientEvent)
         ---Registers a usable item.
         ---@param source number The source ID of the player who used the item.
         ---@param item table The item data.
-        RSGCore.Functions.CreateUseableItem(itemName, function(source, item)
+        FDBCore.Functions.CreateUseableItem(itemName, function(source, item)
             TriggerClientEvent(clientEvent, source, item.name)
         end)
     end
@@ -25,11 +25,11 @@ end
 -- Registering Consumables
 -- =========================================================================================
 
-registerConsumables("Eat",       'rsg-consume:client:eat')
-registerConsumables("Drink",     'rsg-consume:client:drink')
-registerConsumables("Hotdrinks", 'rsg-consume:client:drinkcoffee')
-registerConsumables("Stew",      'rsg-consume:client:stew')
-registerConsumables("Eatcanned", 'rsg-consume:client:eatcanned')
+registerConsumables("Eat",       'fdb-consume:client:eat')
+registerConsumables("Drink",     'fdb-consume:client:drink')
+registerConsumables("Hotdrinks", 'fdb-consume:client:drinkcoffee')
+registerConsumables("Stew",      'fdb-consume:client:stew')
+registerConsumables("Eatcanned", 'fdb-consume:client:eatcanned')
 
 -- =========================================================================================
 -- Server Events
@@ -38,12 +38,12 @@ registerConsumables("Eatcanned", 'rsg-consume:client:eatcanned')
 ---Removes a consumed item from the player's inventory.
 ---@param item string The name of the item to remove.
 ---@param amount number The number of items to remove.
-RegisterNetEvent('rsg-consume:server:removeitem', function(item, amount)
+RegisterNetEvent('fdb-consume:server:removeitem', function(item, amount)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player or not item or not amount then return end
 
     if Player.Functions.RemoveItem(item, amount) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[item], 'remove', amount)
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[item], 'remove', amount)
     end
 end)

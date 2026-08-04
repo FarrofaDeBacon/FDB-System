@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 
 function EnableEagleeye(player, enable)
@@ -20,7 +20,7 @@ function ShouldEnableEagleEye(job)
 end
 
 function HandleEagleEyeAccess()
-    local playerJob = RSGCore.Functions.GetPlayerData().job.name
+    local playerJob = FDBCore.Functions.GetPlayerData().job.name
     if ShouldEnableEagleEye(playerJob) then
         EnableEagleeye(PlayerId(), true)
     else
@@ -29,13 +29,13 @@ function HandleEagleEyeAccess()
 end
 
 
-AddEventHandler('RSGCore:Client:OnPlayerLoaded', function()
+AddEventHandler('FDBCore:Client:OnPlayerLoaded', function()
     HandleEagleEyeAccess()
 end)
 
 
-RegisterNetEvent('RSGCore:Client:OnJobUpdate')
-AddEventHandler('RSGCore:Client:OnJobUpdate', function(JobInfo)
+RegisterNetEvent('FDBCore:Client:OnJobUpdate')
+AddEventHandler('FDBCore:Client:OnJobUpdate', function(JobInfo)
     PlayerJob = JobInfo
     HandleEagleEyeAccess()
 end)

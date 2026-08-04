@@ -1,4 +1,4 @@
-on('rsg-bathing:TASK_MOVE_NETWORK_BY_NAME_WITH_INIT_PARAMS', (args) => {
+on('fdb-bathing:TASK_MOVE_NETWORK_BY_NAME_WITH_INIT_PARAMS', (args) => {
     const struct = new DataView(new ArrayBuffer(512));
     struct.setBigInt64(0, BigInt(args[2]), true);
     struct.setBigInt64(8, BigInt(args[3]), true);

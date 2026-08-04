@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 RegisterNetEvent('rNotify:NotifyLeft')
 AddEventHandler('rNotify:NotifyLeft', function(firsttext, secondtext, dict, icon, duration)

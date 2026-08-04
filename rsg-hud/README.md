@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 🧭 rsg-hud
+# 🧭 fdb-hud
 **Player HUD for RSG Framework.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -9,9 +9,9 @@
 ---
 
 ## 🛠️ Dependencies
-- **rsg-core**
+- **fdb-core**
 - **ox_lib**
-- **rsg-telegram**
+- **fdb-telegram**
 
 `ui_page`: `html/index.html`
 
@@ -104,13 +104,13 @@ Config.IconColors = {
 ---
 
 ## 📦 Installation
-1. Put `rsg-hud` in `resources/[rsg]`.
+1. Put `fdb-hud` in `resources/[rsg]`.
 2. In `server.cfg`:
    ```cfg
    ensure ox_lib
-   ensure rsg-core
-   ensure rsg-telegram
-   ensure rsg-hud
+   ensure fdb-core
+   ensure fdb-telegram
+   ensure fdb-hud
    ```
 3. (Optional) Edit `config.lua` to tune decay, stress, native HUD toggles, icon colours, etc.
 

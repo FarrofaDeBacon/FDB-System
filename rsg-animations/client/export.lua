@@ -89,8 +89,8 @@ end
 
 exports('PlayAnimation', playAnimationByName)
 
--- exports['rsg-animations']:PlayAnimation('Wave') -- defaults to full
--- exports['rsg-animations']:PlayAnimation('Wave', 'full')
+-- exports['fdb-animations']:PlayAnimation('Wave') -- defaults to full
+-- exports['fdb-animations']:PlayAnimation('Wave', 'full')
 -- animation does the full body.
--- exports['rsg-animations']:PlayAnimation('Wave', 'upper')
+-- exports['fdb-animations']:PlayAnimation('Wave', 'upper')
 -- animation does only the upper of the body. Allows animations to be done on horse and other positions.

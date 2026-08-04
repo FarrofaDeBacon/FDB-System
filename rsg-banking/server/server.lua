@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 local banking = nil
 lib.locale()
 math = lib.math
@@ -40,27 +40,27 @@ end
 ---------------
 -- stash
 ----------------
-RegisterNetEvent('rsg-banking:server:opensafedeposit', function(town)
+RegisterNetEvent('fdb-banking:server:opensafedeposit', function(town)
     local src = source
     if isRateLimited(src, 'opensafedeposit') then return end
     if not isValidTown(town) then
         print(('[%s] Player %s attempted to open invalid town: %s'):format(GetCurrentResourceName(), src, town))
         return
     end
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     local data = { label = locale('sv_lang'), maxweight = Config.StorageMaxWeight, slots = Config.StorageMaxSlots }
     local citizenId = Player.PlayerData.citizenid
     local stashName = 'safedeposit_' .. citizenId .. town
-    exports['rsg-inventory']:OpenInventory(src, stashName, data)
+    exports['fdb-inventory']:OpenInventory(src, stashName, data)
 end)
 
 ---------------------------------
 -- callback for bank balance
 ---------------------------------
-RSGCore.Functions.CreateCallback('rsg-banking:getBankingInformation', function(source, cb, moneytype)
+FDBCore.Functions.CreateCallback('fdb-banking:getBankingInformation', function(source, cb, moneytype)
 
-    local Player = RSGCore.Functions.GetPlayer(source)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return cb(nil) end
     if not isValidMoneyType(moneytype) then
         print(('[%s] Player %s attempted to access invalid moneytype: %s'):format(GetCurrentResourceName(), source, moneytype))
@@ -79,14 +79,14 @@ end)
 ---------------------------------
 -- deposit & withdraw
 ---------------------------------
-RegisterNetEvent('rsg-banking:server:transact', function(type, amount, moneytype)
+RegisterNetEvent('fdb-banking:server:transact', function(type, amount, moneytype)
     local src = source
     if isRateLimited(src, 'transact') then return end
     if not isValidMoneyType(moneytype) then
         print(('[%s] Player %s attempted to transact with invalid moneytype: %s'):format(GetCurrentResourceName(), src, moneytype))
         return
     end
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     local currentCash = Player.Functions.GetMoney('cash')
     local currentBank = Player.Functions.GetMoney(moneytype)
@@ -114,7 +114,7 @@ RegisterNetEvent('rsg-banking:server:transact', function(type, amount, moneytype
             Player.Functions.RemoveMoney(moneytype, bankRemove, 'bank-withdraw')
             Player.Functions.AddMoney('cash', amount, 'bank-withdraw')
             local newBankBalance = Player.Functions.GetMoney(moneytype)
-            TriggerClientEvent('rsg-banking:client:UpdateBanking', src, newBankBalance, moneytype)
+            TriggerClientEvent('fdb-banking:client:UpdateBanking', src, newBankBalance, moneytype)
             if Config.Discord.TrackWithdrawals and amount >= Config.Discord.TransactionThreshold then
                 local playerName = Player.PlayerData.charinfo.firstname .. " " .. Player.PlayerData.charinfo.lastname
                 SendDiscordWebhook(playerName, "Bank (" .. moneytype .. ")", amount, "Withdrawal")
@@ -136,7 +136,7 @@ RegisterNetEvent('rsg-banking:server:transact', function(type, amount, moneytype
             Player.Functions.RemoveMoney('cash', amount, 'bank-deposit')
             Player.Functions.AddMoney(moneytype, amount, 'bank-deposit')
             local newBankBalance = Player.Functions.GetMoney(moneytype)
-            TriggerClientEvent('rsg-banking:client:UpdateBanking', src, newBankBalance, moneytype)
+            TriggerClientEvent('fdb-banking:client:UpdateBanking', src, newBankBalance, moneytype)
             if Config.Discord.TrackDeposits and amount >= Config.Discord.TransactionThreshold then
                 local playerName = Player.PlayerData.charinfo.firstname .. " " .. Player.PlayerData.charinfo.lastname
                 SendDiscordWebhook(playerName, "Bank (" .. moneytype .. ")", amount, "Deposit")
@@ -159,7 +159,7 @@ RegisterNetEvent('rsg-banking:server:transact', function(type, amount, moneytype
             Player.Functions.RemoveMoney(moneytype, amount, 'bank-money_clip')
             Player.Functions.AddItem('money_clip', 1, false, info)
             local newBankBalance = Player.Functions.GetMoney(moneytype)
-            TriggerClientEvent('rsg-banking:client:UpdateBanking', src, newBankBalance, moneytype)
+            TriggerClientEvent('fdb-banking:client:UpdateBanking', src, newBankBalance, moneytype)
             lib.notify(src, { title = locale('sv_lang_9'), description = locale('sv_lang_10') .. ' ' .. amount .. ' ' .. locale('sv_lang_11'), type = 'success' })
             if Config.Discord.TrackMoneyClips and amount >= Config.Discord.TransactionThreshold then
                 local playerName = Player.PlayerData.charinfo.firstname .. " " .. Player.PlayerData.charinfo.lastname
@@ -177,9 +177,9 @@ end)
 ---------------------------------
 -- money clip made usable
 ---------------------------------
-RSGCore.Functions.CreateUseableItem('money_clip', function(source, item)
+FDBCore.Functions.CreateUseableItem('money_clip', function(source, item)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     local itemData = Player.Functions.GetItemBySlot(item.slot)
@@ -195,7 +195,7 @@ end)
 ---------------------------------
 -- create money clip command
 ---------------------------------
-RSGCore.Commands.Add('moneyclip', locale('sv_lang_6'), {{ name = 'amount', help = locale('sv_lang_7') }}, true, function(source, args)
+FDBCore.Commands.Add('moneyclip', locale('sv_lang_6'), {{ name = 'amount', help = locale('sv_lang_7') }}, true, function(source, args)
     local src = source
     local args1 = tonumber(args[1])
     if args1 <= 0 then
@@ -203,7 +203,7 @@ RSGCore.Commands.Add('moneyclip', locale('sv_lang_6'), {{ name = 'amount', help 
         return
     end
 
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     local money = Player.Functions.GetMoney('cash')
@@ -223,9 +223,9 @@ end, 'user')
 ---------------------------------
 -- blood money_clip made usable
 ---------------------------------
-RSGCore.Functions.CreateUseableItem('blood_money_clip', function(source, item)
+FDBCore.Functions.CreateUseableItem('blood_money_clip', function(source, item)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     local itemData = Player.Functions.GetItemBySlot(item.slot)
@@ -241,7 +241,7 @@ end)
 ---------------------------------
 -- create blood money clip command
 ---------------------------------
-RSGCore.Commands.Add('bloodmoneyclip', locale('sv_lang_14'), {{ name = 'amount', help = locale('sv_lang_15') }}, true, function(source, args)
+FDBCore.Commands.Add('bloodmoneyclip', locale('sv_lang_14'), {{ name = 'amount', help = locale('sv_lang_15') }}, true, function(source, args)
     local src = source
     local args1 = tonumber(args[1])
 
@@ -250,7 +250,7 @@ RSGCore.Commands.Add('bloodmoneyclip', locale('sv_lang_14'), {{ name = 'amount',
         return
     end
 
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     local money = Player.Functions.GetMoney('bloodmoney')
@@ -270,7 +270,7 @@ end, 'user')
 ---------------------------------
 -- target give money transfer
 ---------------------------------
-RegisterNetEvent('rsg-banking:server:givemoney', function(targetPlayerId, amount)
+RegisterNetEvent('fdb-banking:server:givemoney', function(targetPlayerId, amount)
     local src = source
     if isRateLimited(src, 'givemoney') then return end
     local targetId = tonumber(targetPlayerId)
@@ -285,8 +285,8 @@ RegisterNetEvent('rsg-banking:server:givemoney', function(targetPlayerId, amount
         print(('[%s] Player %s exceeded max transfer amount: %s > %s'):format(GetCurrentResourceName(), src, amount, Config.MaxTransfer))
         return
     end
-    local Player = RSGCore.Functions.GetPlayer(src)
-    local targetPlayer = RSGCore.Functions.GetPlayer(targetId)
+    local Player = FDBCore.Functions.GetPlayer(src)
+    local targetPlayer = FDBCore.Functions.GetPlayer(targetId)
     
     if not Player then
         TriggerClientEvent('lib.notify', src, { title = locale('sv_lang_18'), description = locale('sv_lang_19'), type = 'error' })

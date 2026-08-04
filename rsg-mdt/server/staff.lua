@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 local StaffPermissions = {
     'canCreateRecords',
@@ -8,7 +8,7 @@ local StaffPermissions = {
 }
 
 local function hasAdminPermission(source)
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return false end
     
     local job = player.PlayerData.job
@@ -82,7 +82,7 @@ end
 
 local function getAdmins()
     local admins = {}
-    local players = RSGCore.Functions.GetPlayers()
+    local players = FDBCore.Functions.GetPlayers()
     for _, playerId in ipairs(players) do
         local src = tonumber(playerId)
         if hasAdminPermission(src) then
@@ -93,7 +93,7 @@ local function getAdmins()
 end
 
 local function logAction(source, action, targetType, targetId, targetName, details)
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return end
     
     local performerName = player.PlayerData.charinfo.firstname .. ' ' .. player.PlayerData.charinfo.lastname
@@ -112,7 +112,7 @@ local function broadcastToAdmins(event, data)
     end
 end
 
-lib.callback.register('rsg-mdt:server:getStaff', function(source)
+lib.callback.register('fdb-mdt:server:getStaff', function(source)
     if not hasAdminPermission(source) then return {} end
     
     local staff = MySQL.query.await([[
@@ -150,7 +150,7 @@ lib.callback.register('rsg-mdt:server:getStaff', function(source)
     return staff
 end)
 
-lib.callback.register('rsg-mdt:server:getRoles', function(source)
+lib.callback.register('fdb-mdt:server:getRoles', function(source)
     if not hasAdminPermission(source) then return {} end
     
     local roles = MySQL.query.await("SELECT * FROM mdt_roles ORDER BY name")
@@ -166,7 +166,7 @@ lib.callback.register('rsg-mdt:server:getRoles', function(source)
     return roles
 end)
 
-lib.callback.register('rsg-mdt:server:addStaff', function(source, data)
+lib.callback.register('fdb-mdt:server:addStaff', function(source, data)
     if not hasAdminPermission(source) then return { success = false, message = locale('notification_permission_denied') } end
     
     local citizenid = data.citizenid
@@ -181,7 +181,7 @@ lib.callback.register('rsg-mdt:server:addStaff', function(source, data)
         return { success = false, message = locale('notification_already_staff') }
     end
     
-    local targetPlayer = RSGCore.Functions.GetPlayerByCitizenId(citizenid)
+    local targetPlayer = FDBCore.Functions.GetPlayerByCitizenId(citizenid)
     local name
     
     if targetPlayer then
@@ -204,7 +204,7 @@ lib.callback.register('rsg-mdt:server:addStaff', function(source, data)
     if insertId then
         logAction(source, 'staff_added', 'staff', citizenid, name, { role = role })
         
-        broadcastToAdmins('rsg-mdt:client:staffUpdated', { action = 'added', citizenid = citizenid, name = name, role = role })
+        broadcastToAdmins('fdb-mdt:client:staffUpdated', { action = 'added', citizenid = citizenid, name = name, role = role })
         
         return { success = true, id = insertId }
     end
@@ -212,7 +212,7 @@ lib.callback.register('rsg-mdt:server:addStaff', function(source, data)
     return { success = false, message = locale('notification_failed_add_staff') }
 end)
 
-lib.callback.register('rsg-mdt:server:removeStaff', function(source, citizenid)
+lib.callback.register('fdb-mdt:server:removeStaff', function(source, citizenid)
     if not hasAdminPermission(source) then return { success = false, message = locale('notification_permission_denied') } end
     
     if not citizenid then
@@ -231,7 +231,7 @@ lib.callback.register('rsg-mdt:server:removeStaff', function(source, citizenid)
     if affected and affected.affectedRows > 0 then
         logAction(source, 'staff_removed', 'staff', citizenid, staffName)
         
-        broadcastToAdmins('rsg-mdt:client:staffUpdated', { action = 'removed', citizenid = citizenid, name = staffName })
+        broadcastToAdmins('fdb-mdt:client:staffUpdated', { action = 'removed', citizenid = citizenid, name = staffName })
         
         return { success = true }
     end
@@ -239,7 +239,7 @@ lib.callback.register('rsg-mdt:server:removeStaff', function(source, citizenid)
     return { success = false, message = locale('notification_failed_remove_staff') }
 end)
 
-lib.callback.register('rsg-mdt:server:updateStaffPermissions', function(source, data)
+lib.callback.register('fdb-mdt:server:updateStaffPermissions', function(source, data)
     if not hasAdminPermission(source) then return { success = false, message = locale('notification_permission_denied') } end
     
     local citizenid = data.citizenid
@@ -270,7 +270,7 @@ lib.callback.register('rsg-mdt:server:updateStaffPermissions', function(source, 
             permissions = permissions 
         })
         
-        broadcastToAdmins('rsg-mdt:client:staffUpdated', { 
+        broadcastToAdmins('fdb-mdt:client:staffUpdated', { 
             action = 'updated', 
             citizenid = citizenid, 
             name = staffName, 
@@ -284,7 +284,7 @@ lib.callback.register('rsg-mdt:server:updateStaffPermissions', function(source, 
     return { success = false, message = locale('notification_failed_update_staff') }
 end)
 
-lib.callback.register('rsg-mdt:server:createRole', function(source, data)
+lib.callback.register('fdb-mdt:server:createRole', function(source, data)
     if not hasAdminPermission(source) then return { success = false, message = locale('notification_permission_denied') } end
     
     local name = data.name
@@ -308,7 +308,7 @@ lib.callback.register('rsg-mdt:server:createRole', function(source, data)
     if insertId then
         logAction(source, 'role_created', 'role', name, label, { permissions = permissions })
         
-        broadcastToAdmins('rsg-mdt:client:rolesUpdated', { action = 'created', name = name, label = label })
+        broadcastToAdmins('fdb-mdt:client:rolesUpdated', { action = 'created', name = name, label = label })
         
         return { success = true, id = insertId }
     end
@@ -316,7 +316,7 @@ lib.callback.register('rsg-mdt:server:createRole', function(source, data)
     return { success = false, message = locale('notification_failed_create_role') }
 end)
 
-lib.callback.register('rsg-mdt:server:updateRole', function(source, data)
+lib.callback.register('fdb-mdt:server:updateRole', function(source, data)
     if not hasAdminPermission(source) then return { success = false, message = locale('notification_permission_denied') } end
     
     local name = data.name
@@ -335,7 +335,7 @@ lib.callback.register('rsg-mdt:server:updateRole', function(source, data)
     if affected then
         logAction(source, 'role_updated', 'role', name, label, { permissions = permissions })
         
-        broadcastToAdmins('rsg-mdt:client:rolesUpdated', { action = 'updated', name = name, label = label })
+        broadcastToAdmins('fdb-mdt:client:rolesUpdated', { action = 'updated', name = name, label = label })
         
         return { success = true }
     end
@@ -343,7 +343,7 @@ lib.callback.register('rsg-mdt:server:updateRole', function(source, data)
     return { success = false, message = locale('notification_failed_update_role') }
 end)
 
-lib.callback.register('rsg-mdt:server:deleteRole', function(source, roleName)
+lib.callback.register('fdb-mdt:server:deleteRole', function(source, roleName)
     if not hasAdminPermission(source) then return { success = false, message = locale('notification_permission_denied') } end
     
     if roleName == 'admin' or roleName == 'supervisor' or roleName == 'officer' then
@@ -360,7 +360,7 @@ lib.callback.register('rsg-mdt:server:deleteRole', function(source, roleName)
     if affected and affected.affectedRows > 0 then
         logAction(source, 'role_deleted', 'role', roleName, roleInfo[1].label)
         
-        broadcastToAdmins('rsg-mdt:client:rolesUpdated', { action = 'deleted', name = roleName })
+        broadcastToAdmins('fdb-mdt:client:rolesUpdated', { action = 'deleted', name = roleName })
         
         return { success = true }
     end
@@ -368,7 +368,7 @@ lib.callback.register('rsg-mdt:server:deleteRole', function(source, roleName)
     return { success = false, message = locale('notification_failed_delete_role') }
 end)
 
-lib.callback.register('rsg-mdt:server:getAuditLogs', function(source, data)
+lib.callback.register('fdb-mdt:server:getAuditLogs', function(source, data)
     if not hasAdminPermission(source) then return {} end
     
     local limit = data and data.limit or 100
@@ -403,7 +403,7 @@ lib.callback.register('rsg-mdt:server:getAuditLogs', function(source, data)
     return logs or {}
 end)
 
-lib.callback.register('rsg-mdt:server:searchCitizensForStaff', function(source, query)
+lib.callback.register('fdb-mdt:server:searchCitizensForStaff', function(source, query)
     if not hasAdminPermission(source) then return {} end
     
     query = string.lower(query or '')
@@ -432,7 +432,7 @@ lib.callback.register('rsg-mdt:server:searchCitizensForStaff', function(source, 
     return citizens
 end)
 
-lib.callback.register('rsg-mdt:server:assignLawJob', function(source, data)
+lib.callback.register('fdb-mdt:server:assignLawJob', function(source, data)
     if not hasAdminPermission(source) then
         return { success = false, message = locale('notification_permission_denied') }
     end
@@ -454,7 +454,7 @@ lib.callback.register('rsg-mdt:server:assignLawJob', function(source, data)
         return { success = false, message = locale('notification_invalid_grade') }
     end
     
-    local targetPlayer = RSGCore.Functions.GetPlayerByCitizenId(targetCitizenid)
+    local targetPlayer = FDBCore.Functions.GetPlayerByCitizenId(targetCitizenid)
     if not targetPlayer then
         local offlineResult = MySQL.query.await("SELECT citizenid FROM players WHERE citizenid = ?", { targetCitizenid })
         if not offlineResult or not offlineResult[1] then
@@ -484,7 +484,7 @@ lib.callback.register('rsg-mdt:server:assignLawJob', function(source, data)
     end)
     
     if not success then
-        print('[rsg-mdt] Error assigning job: ' .. tostring(err))
+        print('[fdb-mdt] Error assigning job: ' .. tostring(err))
         return { success = false, message = locale('notification_failed_assign_job') }
     end
     
@@ -502,15 +502,15 @@ lib.callback.register('rsg-mdt:server:assignLawJob', function(source, data)
         replaced = #previousLawJobs > 0
     })
     
-    TriggerClientEvent('rsg-mdt:client:notify', targetSource, {
+    TriggerClientEvent('fdb-mdt:client:notify', targetSource, {
         type = 'success',
         message = locale('notification_job_assigned', jobLabel, gradeLabel)
     })
     
-    local performer = RSGCore.Functions.GetPlayer(source)
+    local performer = FDBCore.Functions.GetPlayer(source)
     local performerName = performer and performer.PlayerData.charinfo.firstname .. ' ' .. performer.PlayerData.charinfo.lastname or 'Unknown'
     
-    broadcastToAdmins('rsg-mdt:client:jobAssigned', {
+    broadcastToAdmins('fdb-mdt:client:jobAssigned', {
         citizenid = targetCitizenid,
         name = playerName,
         job = jobName,
@@ -531,7 +531,7 @@ lib.callback.register('rsg-mdt:server:assignLawJob', function(source, data)
     }
 end)
 
-lib.callback.register('rsg-mdt:server:getLawJobs', function(source)
+lib.callback.register('fdb-mdt:server:getLawJobs', function(source)
     if not hasAdminPermission(source) then return {} end
     
     local jobs = {}
@@ -547,7 +547,7 @@ lib.callback.register('rsg-mdt:server:getLawJobs', function(source)
     return jobs
 end)
 
-lib.callback.register('rsg-mdt:server:getJobGrades', function(source, jobName)
+lib.callback.register('fdb-mdt:server:getJobGrades', function(source, jobName)
     if not hasAdminPermission(source) then return {} end
     
     if not jobName or not Config.LawJobs[jobName] then
@@ -570,7 +570,7 @@ lib.callback.register('rsg-mdt:server:getJobGrades', function(source, jobName)
     return grades
 end)
 
-lib.callback.register('rsg-mdt:server:searchPlayersForJob', function(source, query)
+lib.callback.register('fdb-mdt:server:searchPlayersForJob', function(source, query)
     if not hasAdminPermission(source) then return {} end
     
     query = string.lower(query or '')
@@ -607,7 +607,7 @@ lib.callback.register('rsg-mdt:server:searchPlayersForJob', function(source, que
     return players
 end)
 
-lib.callback.register('rsg-mdt:server:updateOfficerDepartment', function(source, data)
+lib.callback.register('fdb-mdt:server:updateOfficerDepartment', function(source, data)
     if not hasAdminPermission(source) then
         return { success = false, message = locale('notification_permission_denied') }
     end
@@ -641,7 +641,7 @@ lib.callback.register('rsg-mdt:server:updateOfficerDepartment', function(source,
         return { success = false, message = locale('notification_officer_not_found_staff') }
     end
     
-    local targetPlayer = RSGCore.Functions.GetPlayerByCitizenId(targetCitizenid)
+    local targetPlayer = FDBCore.Functions.GetPlayerByCitizenId(targetCitizenid)
     if not targetPlayer then
         return { success = false, message = locale('notification_target_online_required') }
     end
@@ -668,7 +668,7 @@ lib.callback.register('rsg-mdt:server:updateOfficerDepartment', function(source,
     end)
     
     if not success then
-        print('[rsg-mdt] Error updating department: ' .. tostring(err))
+        print('[fdb-mdt] Error updating department: ' .. tostring(err))
         return { success = false, message = locale('notification_failed_update_department') }
     end
     
@@ -686,15 +686,15 @@ lib.callback.register('rsg-mdt:server:updateOfficerDepartment', function(source,
         replaced = #previousLawJobs > 0
     })
     
-    TriggerClientEvent('rsg-mdt:client:notify', targetSource, {
+    TriggerClientEvent('fdb-mdt:client:notify', targetSource, {
         type = 'success',
         message = locale('notification_department_changed', newJobLabel)
     })
     
-    local performer = RSGCore.Functions.GetPlayer(source)
+    local performer = FDBCore.Functions.GetPlayer(source)
     local performerName = performer and performer.PlayerData.charinfo.firstname .. ' ' .. performer.PlayerData.charinfo.lastname or 'Unknown'
     
-    broadcastToAdmins('rsg-mdt:client:departmentUpdated', {
+    broadcastToAdmins('fdb-mdt:client:departmentUpdated', {
         citizenid = targetCitizenid,
         name = playerName,
         oldJob = previousJobName,
@@ -716,7 +716,7 @@ lib.callback.register('rsg-mdt:server:updateOfficerDepartment', function(source,
     }
 end)
 
-lib.callback.register('rsg-mdt:server:getOfficers', function(source)
+lib.callback.register('fdb-mdt:server:getOfficers', function(source)
     if not hasAdminPermission(source) then return {} end
     
     local staff = MySQL.query.await([[
@@ -776,7 +776,7 @@ lib.callback.register('rsg-mdt:server:getOfficers', function(source)
     return officers
 end)
 
-lib.callback.register('rsg-mdt:server:getJobPlayerCounts', function(source)
+lib.callback.register('fdb-mdt:server:getJobPlayerCounts', function(source)
     if not hasAdminPermission(source) then return {} end
     
     local counts = {}
@@ -817,7 +817,7 @@ lib.callback.register('rsg-mdt:server:getJobPlayerCounts', function(source)
     return countsList
 end)
 
-lib.callback.register('rsg-mdt:server:syncStaffFromJobs', function(source, filterJob)
+lib.callback.register('fdb-mdt:server:syncStaffFromJobs', function(source, filterJob)
     if not hasAdminPermission(source) then
         return { success = false, message = locale('notification_permission_denied'), added = 0 }
     end
@@ -847,7 +847,7 @@ lib.callback.register('rsg-mdt:server:syncStaffFromJobs', function(source, filte
     
     local addedCount = 0
     local addedPlayers = {}
-    local performer = RSGCore.Functions.GetPlayer(source)
+    local performer = FDBCore.Functions.GetPlayer(source)
     local performerName = performer and performer.PlayerData.charinfo.firstname .. ' ' .. performer.PlayerData.charinfo.lastname or 'System'
     
     for _, row in ipairs(results) do
@@ -890,7 +890,7 @@ lib.callback.register('rsg-mdt:server:syncStaffFromJobs', function(source, filte
             players = addedPlayers
         })
         
-        broadcastToAdmins('rsg-mdt:client:staffUpdated', { action = 'synced', added = addedCount })
+        broadcastToAdmins('fdb-mdt:client:staffUpdated', { action = 'synced', added = addedCount })
     end
     
     return {

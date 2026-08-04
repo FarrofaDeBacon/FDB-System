@@ -172,7 +172,7 @@ end, false)
 RegisterCommand('checkslots', function(source)
     local ply = FDBCore.Functions.GetPlayer(source)
     if not ply then return end
-    print(string.format('[rsg-inventory] Player %s has %d slots configured in PlayerData.', GetPlayerName(source), ply.PlayerData.slots))
+    print(string.format('[fdb-inventory] Player %s has %d slots configured in PlayerData.', GetPlayerName(source), ply.PlayerData.slots))
     TriggerClientEvent('ox_lib:notify', source, { title = 'Slots', description = 'You have ' .. tostring(ply.PlayerData.slots) .. ' slots in pocket', type = 'info', duration = 5000 })
 end, false)
 

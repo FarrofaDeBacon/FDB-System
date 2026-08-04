@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 local textureId = -1
 local pedloc = vector4(-558.0, -3781.0, 239.0, 91.0)
@@ -556,12 +556,12 @@ function EndCharacterCreatorCam(anim, anim1)
         Citizen.InvokeNative(0x84EEDB2C6E650000, anim)
         Citizen.InvokeNative(0x84EEDB2C6E650000, anim1)
     end
-    TriggerServerEvent('rsg-appearance:server:SetPlayerBucket' , 0)
+    TriggerServerEvent('fdb-appearance:server:SetPlayerBucket' , 0)
 
     local clothesHashes = ConvertCacheToHash(ClothesCache)
     local skin = ConvertCacheToHash(CreatorCache)
 
-    TriggerServerEvent('rsg-appearance:server:SaveSkin', skin, clothesHashes)
+    TriggerServerEvent('fdb-appearance:server:SaveSkin', skin, clothesHashes)
 end
 
 function ConvertCacheToHash(ClothesCache)
@@ -609,8 +609,8 @@ function FotoMugshots()
     PromptSetVisible(CameraPrompt, 0)
     PromptSetVisible(RotatePrompt, 0)
     PromptSetVisible(ZoomPrompt, 0)
-    local FirstName = RSGCore.Functions.GetPlayerData().charinfo.firstname
-    local LastName = RSGCore.Functions.GetPlayerData().charinfo.lastname
+    local FirstName = FDBCore.Functions.GetPlayerData().charinfo.firstname
+    local LastName = FDBCore.Functions.GetPlayerData().charinfo.lastname
     local animscenes = SetupScenes("Pl_Edit_to_Photo_" .. GetGender())
     StartAnimScene(animscenes)
     repeat Wait(0) until Citizen.InvokeNative(0xCBFC7725DE6CE2E0, animscenes)

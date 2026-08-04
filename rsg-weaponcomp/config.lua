@@ -9,7 +9,7 @@ Config.PlaceDistance     = 5.0 -- Max dist to place -> prop acces menu
 
 -- Propiedades y límites
 Config.CleanItem         = 'gun_oil'           -- consumed when cleaning during native inspection
-Config.RepairItem        = 'weapon_repair_kit' -- full repair (via rsg-weapons usable item)
+Config.RepairItem        = 'weapon_repair_kit' -- full repair (via fdb-weapons usable item)
 Config.Gunsmithrobbery  = 'lockpick'
 Config.Gunsmithitem     = 'gunsmith'
 Config.Gunsmithprop     = `p_gunsmithprops09x`

@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 RegisterNetEvent('walkstyles:server:sync')
 AddEventHandler('walkstyles:server:sync', function(clipset, style)

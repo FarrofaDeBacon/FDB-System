@@ -1,11 +1,11 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 --------------------------
 -- update jail sentance
 --------------------------
-RegisterNetEvent('rsg-prison:server:updateSentance', function(updatedTime)
+RegisterNetEvent('fdb-prison:server:updateSentance', function(updatedTime)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     Player.Functions.SetMetaData('injail', updatedTime)
 end)
@@ -13,9 +13,9 @@ end)
 --------------------------
 -- remove player job
 --------------------------
-RegisterNetEvent('rsg-prison:server:RemovePlayerJob', function()
+RegisterNetEvent('fdb-prison:server:RemovePlayerJob', function()
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     if Player.PlayerData.job.name ~= 'unemployed' and Config.RemoveJob == true then
         Player.Functions.SetJob('unemployed')
@@ -25,9 +25,9 @@ end)
 --------------------------
 -- auto free player
 --------------------------
-RegisterNetEvent('rsg-prison:server:FreePlayer', function()
+RegisterNetEvent('fdb-prison:server:FreePlayer', function()
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     Player.Functions.SetMetaData('injail', 0)
 end)
@@ -35,9 +35,9 @@ end)
 --------------------------
 -- save inventory items
 --------------------------
-RegisterNetEvent('rsg-prison:server:SaveJailItems', function()
+RegisterNetEvent('fdb-prison:server:SaveJailItems', function()
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     if not Player.PlayerData.metadata['jailitems'] or not next(Player.PlayerData.metadata['jailitems']) then
         Player.Functions.SetMetaData('jailitems', Player.PlayerData.items)
@@ -50,9 +50,9 @@ end)
 --------------------------
 -- give back inventory items
 --------------------------
-RegisterNetEvent('rsg-prison:server:GiveJailItems', function()
+RegisterNetEvent('fdb-prison:server:GiveJailItems', function()
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     Wait(1000)
     Player.Functions.ClearInventory()
@@ -66,9 +66,9 @@ end)
 --------------------------
 -- set criminal record
 --------------------------
-RegisterNetEvent('rsg-prison:server:CheckRecordStatus', function()
+RegisterNetEvent('fdb-prison:server:CheckRecordStatus', function()
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     local CriminalRecord = Player.PlayerData.metadata['criminalrecord']
     local currentDate = os.date('*t')
@@ -83,9 +83,9 @@ RegisterNetEvent('rsg-prison:server:CheckRecordStatus', function()
     end
 end)
 
-RegisterNetEvent('rsg-prison:server:resetoutlawstatus', function()
+RegisterNetEvent('fdb-prison:server:resetoutlawstatus', function()
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     local citizenid = Player.PlayerData.citizenid
     MySQL.update('UPDATE players SET outlawstatus = ? WHERE citizenid = ?', { 0, citizenid })

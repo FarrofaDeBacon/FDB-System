@@ -182,7 +182,7 @@ end
 ---@param removeItem? boolean
 ---@return string?
 function DoesPlayerHaveItem(player, items, removeItem)
-    local RSGCore = exports['rsg-core']:GetCoreObject()
+    local FDBCore = exports['fdb-core']:GetCoreObject()
     local playerId = player.source or player.PlayerData.source
     
     for i = 1, #items do
@@ -190,7 +190,7 @@ function DoesPlayerHaveItem(player, items, removeItem)
         local itemName = item.name or item
         
         -- Get player's inventory
-        local Player = RSGCore.Functions.GetPlayer(playerId)
+        local Player = FDBCore.Functions.GetPlayer(playerId)
         if Player then
             -- Check if player has the item
             local hasItem = Player.Functions.GetItemByName(itemName)
@@ -200,7 +200,7 @@ function DoesPlayerHaveItem(player, items, removeItem)
                 if removeItem or item.remove then
                     Player.Functions.RemoveItem(itemName, 1)
                     -- Trigger inventory update
-                    TriggerClientEvent('inventory:client:ItemBox', playerId, RSGCore.Shared.Items[itemName], "remove")
+                    TriggerClientEvent('inventory:client:ItemBox', playerId, FDBCore.Shared.Items[itemName], "remove")
                 end
                 return itemName
             end

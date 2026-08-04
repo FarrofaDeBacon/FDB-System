@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 local DoorInfo	= {}
 lib.locale()
 
@@ -11,25 +11,25 @@ local function IsAuthorized(jobName, doorID)
     return false
 end
 
-RegisterServerEvent('rsg-doorlock:updatedoorsv')
-AddEventHandler('rsg-doorlock:updatedoorsv', function(doorID, state, cb)
+RegisterServerEvent('fdb-doorlock:updatedoorsv')
+AddEventHandler('fdb-doorlock:updatedoorsv', function(doorID, state, cb)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not IsAuthorized(Player.PlayerData.job.name, Config.DoorList[doorID]) then
         TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_nokey'), type = 'error', duration = 5000 })
         return
     else
-        TriggerClientEvent('rsg-doorlock:changedoor', src, doorID, state)
+        TriggerClientEvent('fdb-doorlock:changedoor', src, doorID, state)
     end
 end)
 
-RegisterServerEvent('rsg-doorlock:updateState')
-AddEventHandler('rsg-doorlock:updateState', function(doorID, state, cb)
+RegisterServerEvent('fdb-doorlock:updateState')
+AddEventHandler('fdb-doorlock:updateState', function(doorID, state, cb)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if type(doorID) ~= 'number' then return end
     if not IsAuthorized(Player.PlayerData.job.name, Config.DoorList[doorID]) then return end
 
     DoorInfo[doorID] = {}
-    TriggerClientEvent('rsg-doorlock:setState', -1, doorID, state)
+    TriggerClientEvent('fdb-doorlock:setState', -1, doorID, state)
 end)

@@ -1,20 +1,20 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 💥 rsg-ammo
+# 💥 fdb-ammo
 **Comprehensive ammunition system for RedM using RSG Core.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 
 > Allows players to use ammo boxes to replenish weapon ammunition.  
-> Fully integrated with `rsg-core`, `rsg-inventory`, and `ox_lib` notifications/locales.
+> Fully integrated with `fdb-core`, `fdb-inventory`, and `ox_lib` notifications/locales.
 
 ---
 
 ## 🛠️ Dependencies
-- [**rsg-core**](https://github.com/Rexshack-RedM/rsg-core) 🤠  
+- [**fdb-core**](https://github.com/Rexshack-RedM/fdb-core) 🤠  
 - [**ox_lib**](https://github.com/overextended/ox_lib) ⚙️ *(notifications & locales)*  
-- [**rsg-inventory**](https://github.com/Rexshack-RedM/rsg-inventory) 🎒 *(item management)*  
+- [**fdb-inventory**](https://github.com/Rexshack-RedM/fdb-inventory) 🎒 *(item management)*  
 
 **Locales:** `en`, `fr`, `es`, `it`, `pt-br`, `el`, `cs`  
 **License:** GPL‑3.0  
@@ -69,7 +69,7 @@ Config.SaveAmmoInterval = 60000
 
 ## 🔫 Server Logic
 
-- All ammo boxes are registered as **usable items** via `RSGCore.Functions.CreateUseableItem`.  
+- All ammo boxes are registered as **usable items** via `FDBCore.Functions.CreateUseableItem`.  
 - When used, the server:
   1. Checks the player’s current ammo count.  
   2. Prevents overflow (shows localized “cannot add more ammo” message).  
@@ -101,7 +101,7 @@ ammo_box_arrow          = { name = 'ammo_box_arrow',          label = 'Arrow Box
 
 ---
 
-## 🧩 SQL Schema (`rsg-ammo.sql`)
+## 🧩 SQL Schema (`fdb-ammo.sql`)
 ```sql
 CREATE TABLE IF NOT EXISTS `player_ammo` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -120,19 +120,19 @@ CREATE TABLE IF NOT EXISTS `player_ammo` (
 | Ammo doesn’t apply | Wrong ammo type in config or item | Check the mapping in `server.lua` |
 | “Already full” message | Player reached max ammo | Normal behavior |
 | Box not removed | Config or event conflict | Ensure `RemoveItem` is called after `AddAmmoToPedByType` |
-| SQL not saving | Not using persistence | Enable `rsg-ammo.sql` and link via server events |
+| SQL not saving | Not using persistence | Enable `fdb-ammo.sql` and link via server events |
 
 ---
 
 ## 📂 Installation
-1. Place `rsg-ammo` inside `resources/[rsg]`.  
-2. Import `rsg-ammo.sql` into your database *(optional)*.  
+1. Place `fdb-ammo` inside `resources/[rsg]`.  
+2. Import `fdb-ammo.sql` into your database *(optional)*.  
 3. Add to your `server.cfg`:
    ```cfg
    ensure ox_lib
-   ensure rsg-core
-   ensure rsg-inventory
-   ensure rsg-ammo
+   ensure fdb-core
+   ensure fdb-inventory
+   ensure fdb-ammo
    ```
 4. Restart your server.
 

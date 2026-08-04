@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 -- Variable global para almacenar la lista de coordenadas
 local coordsList = {}
@@ -38,7 +38,7 @@ local function CopyCoords(data)
     print(notificationData[data][1])
 end
 
-RegisterNetEvent('rsg-adminmenu:client:copycoordsmenu', function()
+RegisterNetEvent('fdb-adminmenu:client:copycoordsmenu', function()
 
     lib.registerContext({
         id = 'coords_mainmenu',
@@ -86,14 +86,14 @@ RegisterNetEvent('rsg-adminmenu:client:copycoordsmenu', function()
                 title = locale('cl_coords_print_list'),
                 description = locale('cl_coords_print_list_a'),
                 icon = 'fa-solid fa-list',
-                event = 'rsg-adminmenu:client:printlist_on',
+                event = 'fdb-adminmenu:client:printlist_on',
                 arrow = true
             },
             {
                 title = locale('cl_coords_print_full'),
                 description = locale('cl_coords_print_full_a'),
                 icon = 'fa-solid fa-list',
-                event = 'rsg-adminmenu:client:printlist_full',
+                event = 'fdb-adminmenu:client:printlist_full',
                 arrow = true
             },
         }
@@ -105,13 +105,13 @@ end)
 ----------------------
 -- print list
 ----------------------
-RegisterNetEvent('rsg-adminmenu:client:printlist_on', function()
+RegisterNetEvent('fdb-adminmenu:client:printlist_on', function()
     printListEnabled = true
     coordsList = {}
     lib.notify({ title = locale('cl_coords_printlist'), description = locale('cl_coords_printlist_a'), type = 'inform' })
 end)
 
-RegisterNetEvent('rsg-adminmenu:client:printlist_full', function()
+RegisterNetEvent('fdb-adminmenu:client:printlist_full', function()
     printListEnabled = false
     if #coordsList > 0 then
         local listString = table.concat(coordsList, '\n')

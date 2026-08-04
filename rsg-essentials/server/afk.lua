@@ -1,10 +1,10 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
 RegisterNetEvent('KickForAFK', function()
     DropPlayer(source, locale('sv_kick'))
 end)
 
-RSGCore.Functions.CreateCallback('rsg-afkkick:server:GetPermissions', function(source, cb)
-    cb(RSGCore.Functions.GetPermission(source))
+FDBCore.Functions.CreateCallback('fdb-afkkick:server:GetPermissions', function(source, cb)
+    cb(FDBCore.Functions.GetPermission(source))
 end)

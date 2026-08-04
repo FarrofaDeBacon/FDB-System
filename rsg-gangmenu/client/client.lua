@@ -1,18 +1,18 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
-local PlayerGang = RSGCore.Functions.GetPlayerData().gang
+local PlayerGang = FDBCore.Functions.GetPlayerData().gang
 local isFromCommand = false  -- Variable to track the menu's origin
 
 lib.locale()
 
 AddEventHandler('onResourceStart', function(resource)
     if resource == GetCurrentResourceName() then
-        PlayerGang = RSGCore.Functions.GetPlayerData().gang
+        PlayerGang = FDBCore.Functions.GetPlayerData().gang
     end
 end)
 
-RegisterNetEvent('RSGCore:Client:OnPlayerLoaded', function()
-    PlayerGang = RSGCore.Functions.GetPlayerData().gang
+RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', function()
+    PlayerGang = FDBCore.Functions.GetPlayerData().gang
 end)
 
 local function comma_valueGang(amount)
@@ -64,9 +64,9 @@ end
 
 CreateThread(function()
     for _, v in pairs(Config.GangLocations) do
-        exports['rsg-core']:createPrompt(v.id, v.coords, RSGCore.Shared.Keybinds[Config.Keybind], locale('cl_open').. ' ' ..v.name, {
+        exports['fdb-core']:createPrompt(v.id, v.coords, FDBCore.Shared.Keybinds[Config.Keybind], locale('cl_open').. ' ' ..v.name, {
             type = 'client',
-            event = 'rsg-gangmenu:client:mainmenu',
+            event = 'fdb-gangmenu:client:mainmenu',
             args = {},
         })
     end
@@ -75,14 +75,14 @@ CreateThread(function()
 end)
 
 -- Update blips when the player loads
-RegisterNetEvent('RSGCore:Client:OnPlayerLoaded', function()
-    PlayerGang = RSGCore.Functions.GetPlayerData().gang
+RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', function()
+    PlayerGang = FDBCore.Functions.GetPlayerData().gang
     Wait(1000)
     CreateGangBlips()
 end)
 
 -- Update blips when the gang changes
-RegisterNetEvent('RSGCore:Client:OnGangUpdate', function(GangInfo)
+RegisterNetEvent('FDBCore:Client:OnGangUpdate', function(GangInfo)
     PlayerGang = GangInfo
     CreateGangBlips()
 end)
@@ -90,7 +90,7 @@ end)
 -------------------------------------------------------------------------------------------
 -- main menu
 -------------------------------------------------------------------------------------------
-RegisterNetEvent('rsg-gangmenu:client:mainmenu', function()
+RegisterNetEvent('fdb-gangmenu:client:mainmenu', function()
     if not PlayerGang.name or not PlayerGang.isboss then return end
     isFromCommand = false  -- Reset because we came from the blip
     lib.registerContext({
@@ -101,28 +101,28 @@ RegisterNetEvent('rsg-gangmenu:client:mainmenu', function()
                 title = locale('cl_2'),
                 description = locale('cl_3'),
                 icon = 'fa-solid fa-list',
-                event = 'rsg-gangmenu:client:employeelist',
+                event = 'fdb-gangmenu:client:employeelist',
                 arrow = true
             },
             {
                 title = locale('cl_4'),
                 description = locale('cl_5'),
                 icon = 'fa-solid fa-hand-holding',
-                event = 'rsg-gangmenu:client:HireMenu',
+                event = 'fdb-gangmenu:client:HireMenu',
                 arrow = true
             },
             {
                 title = locale('cl_6'),
                 description = locale('cl_7'),
                 icon = 'fa-solid fa-box-open',
-                event = 'rsg-gangmenu:client:Stash',
+                event = 'fdb-gangmenu:client:Stash',
                 arrow = true
             },
             {
                 title = locale('cl_8'),
                 description = locale('cl_9'),
                 icon = 'fa-solid fa-sack-dollar',
-                event = 'rsg-gangmenu:client:SocietyMenu',
+                event = 'fdb-gangmenu:client:SocietyMenu',
                 arrow = true
             },
         }
@@ -133,15 +133,15 @@ end)
 -------------------------------------------------------------------------------------------
 -- employee menu
 -------------------------------------------------------------------------------------------
-RegisterNetEvent('rsg-gangmenu:client:employeelist', function()
-    RSGCore.Functions.TriggerCallback('rsg-gangmenu:server:GetEmployees', function(result)
+RegisterNetEvent('fdb-gangmenu:client:employeelist', function()
+    FDBCore.Functions.TriggerCallback('fdb-gangmenu:server:GetEmployees', function(result)
         local options = {}
         for _, v in pairs(result) do
             options[#options + 1] = {
                 title = v.name,
                 description = v.grade.name,
                 icon = 'fa-solid fa-circle-user',
-                event = 'rsg-gangmenu:client:ManageEmployee',
+                event = 'fdb-gangmenu:client:ManageEmployee',
                 args = { player = v, work = PlayerGang },
                 arrow = true,
             }
@@ -161,21 +161,21 @@ end)
 -------------------------------------------------------------------------------------------
 -- manage employees
 -------------------------------------------------------------------------------------------
-RegisterNetEvent('rsg-gangmenu:client:ManageEmployee', function(data)
+RegisterNetEvent('fdb-gangmenu:client:ManageEmployee', function(data)
     local options = {}
-    for k, v in pairs(RSGCore.Shared.Gangs[data.work.name].grades) do
+    for k, v in pairs(FDBCore.Shared.Gangs[data.work.name].grades) do
         options[#options + 1] = {
             title = locale('cl_11').. ' ' ..v.name,
             description = locale('cl_12').. ': ' .. k,
             icon = 'fa-solid fa-file-pen',
-            serverEvent = 'rsg-gangmenu:server:GradeUpdate',
+            serverEvent = 'fdb-gangmenu:server:GradeUpdate',
             args = { cid = data.player.empSource, grade = tonumber(k), gradename = v.name }
         }
     end
     options[#options + 1] = {
         title = locale('cl_13'),
         icon = 'fa-solid fa-user-large-slash',
-        serverEvent = 'rsg-gangmenu:server:FireMember',
+        serverEvent = 'fdb-gangmenu:server:FireMember',
         args = data.player.empSource,
         iconColor = 'red'
     }
@@ -193,8 +193,8 @@ end)
 -------------------------------------------------------------------------------------------
 -- hire employees
 -------------------------------------------------------------------------------------------
-RegisterNetEvent('rsg-gangmenu:client:HireMenu', function()
-    RSGCore.Functions.TriggerCallback('rsg-gangmenu:getplayers', function(players)
+RegisterNetEvent('fdb-gangmenu:client:HireMenu', function()
+    FDBCore.Functions.TriggerCallback('fdb-gangmenu:getplayers', function(players)
         local options = {}
         for _, v in pairs(players) do
             if v and v ~= PlayerId() then
@@ -202,7 +202,7 @@ RegisterNetEvent('rsg-gangmenu:client:HireMenu', function()
                     title = v.name,
                     description = locale('cl_15').. ': ' .. v.citizenid .. ' - '.. locale('cl_16') .. ': '.. v.sourceplayer,
                     icon = 'fa-solid fa-user-check',
-                    serverEvent = 'rsg-gangmenu:server:HireMember',
+                    serverEvent = 'fdb-gangmenu:server:HireMember',
                     args = v.sourceplayer,
                     arrow = true
                 }
@@ -223,17 +223,17 @@ end)
 -------------------------------------------------------------------------------------------
 -- boss stash
 -------------------------------------------------------------------------------------------
-RegisterNetEvent('rsg-gangmenu:client:Stash', function()
+RegisterNetEvent('fdb-gangmenu:client:Stash', function()
     local stashname = 'gang_' .. PlayerGang.name
-    TriggerServerEvent('rsg-gangmenu:server:openinventory', stashname)
+    TriggerServerEvent('fdb-gangmenu:server:openinventory', stashname)
 end)
 
 -------------------------------------------------------------------------------------------
 -- society menu
 -------------------------------------------------------------------------------------------
-RegisterNetEvent('rsg-gangmenu:client:SocietyMenu', function()
-    local currentmoney = RSGCore.Functions.GetPlayerData().money['cash']
-    RSGCore.Functions.TriggerCallback('rsg-gangmenu:server:GetAccount', function(cb)
+RegisterNetEvent('fdb-gangmenu:client:SocietyMenu', function()
+    local currentmoney = FDBCore.Functions.GetPlayerData().money['cash']
+    FDBCore.Functions.TriggerCallback('fdb-gangmenu:server:GetAccount', function(cb)
         lib.registerContext({
             id = 'gangsociety_menu',
             menu = 'gang_mainmenu',
@@ -243,7 +243,7 @@ RegisterNetEvent('rsg-gangmenu:client:SocietyMenu', function()
                     title = locale('cl_18'),
                     description = locale('cl_19'),
                     icon = 'fa-solid fa-money-bill-transfer',
-                    event = 'rsg-gangmenu:client:SocetyDeposit',
+                    event = 'fdb-gangmenu:client:SocetyDeposit',
                     args = currentmoney,
                     iconColor = 'green',
                     arrow = true
@@ -252,7 +252,7 @@ RegisterNetEvent('rsg-gangmenu:client:SocietyMenu', function()
                     title = locale('cl_20'),
                     description = locale('cl_21'),
                     icon = 'fa-solid fa-money-bill-transfer',
-                    event = 'rsg-gangmenu:client:SocetyWithDraw',
+                    event = 'fdb-gangmenu:client:SocetyWithDraw',
                     args = comma_valueGang(cb),
                     iconColor = 'red',
                     arrow = true
@@ -266,7 +266,7 @@ end)
 -------------------------------------------------------------------------------------------
 -- society deposit
 -------------------------------------------------------------------------------------------
-RegisterNetEvent('rsg-gangmenu:client:SocetyDeposit', function(money)
+RegisterNetEvent('fdb-gangmenu:client:SocetyDeposit', function(money)
     local input = lib.inputDialog(locale('cl_22').. ': $ ' .. money, {
         {
             label = locale('cl_23'),
@@ -276,13 +276,13 @@ RegisterNetEvent('rsg-gangmenu:client:SocetyDeposit', function(money)
         },
     })
     if not input then return end
-    TriggerServerEvent('rsg-gangmenu:server:depositMoney', tonumber(input[1]))
+    TriggerServerEvent('fdb-gangmenu:server:depositMoney', tonumber(input[1]))
 end)
 
 -------------------------------------------------------------------------------------------
 -- society withdraw
 -------------------------------------------------------------------------------------------
-RegisterNetEvent('rsg-gangmenu:client:SocetyWithDraw', function(money)
+RegisterNetEvent('fdb-gangmenu:client:SocetyWithDraw', function(money)
     local input = lib.inputDialog(locale('cl_22').. ': $ ' .. money, {
         {
             label = locale('cl_23'),
@@ -292,13 +292,13 @@ RegisterNetEvent('rsg-gangmenu:client:SocetyWithDraw', function(money)
         },
     })
     if not input then return end
-    TriggerServerEvent('rsg-gangmenu:server:withdrawMoney', tonumber(input[1]))
+    TriggerServerEvent('fdb-gangmenu:server:withdrawMoney', tonumber(input[1]))
 end)
 
 -------------------------------------------------------------------------------------------
 -- command menu
 -------------------------------------------------------------------------------------------
-RegisterNetEvent('rsg-gangmenu:client:commandmenu', function()
+RegisterNetEvent('fdb-gangmenu:client:commandmenu', function()
     if not PlayerGang.name or not PlayerGang.isboss then return end
     isFromCommand = true  -- Mark that we came from the command
     lib.registerContext({
@@ -309,14 +309,14 @@ RegisterNetEvent('rsg-gangmenu:client:commandmenu', function()
                 title = locale('cl_2'),
                 description = locale('cl_3'),
                 icon = 'fa-solid fa-list',
-                event = 'rsg-gangmenu:client:employeelist',
+                event = 'fdb-gangmenu:client:employeelist',
                 arrow = true
             },
             {
                 title = locale('cl_4'),
                 description = locale('cl_5'),
                 icon = 'fa-solid fa-hand-holding',
-                event = 'rsg-gangmenu:client:HireMenu',
+                event = 'fdb-gangmenu:client:HireMenu',
                 arrow = true
             },
         }
@@ -337,5 +337,5 @@ RegisterCommand('gangmenu', function()
         })
         return
     end
-    TriggerEvent('rsg-gangmenu:client:commandmenu')
+    TriggerEvent('fdb-gangmenu:client:commandmenu')
 end, false)

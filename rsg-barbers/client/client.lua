@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 local ComponentsMale = {}
 local ComponentsFemale = {}
 local CreatorCache = {}
@@ -12,16 +12,16 @@ local lighting = nil
 lib.locale()
 
 MenuData = {}
-TriggerEvent('rsg-menubase:getData',function(call)
+TriggerEvent('fdb-menubase:getData',function(call)
     MenuData = call
 end)
 
 CreateThread(function()
     for k, v in pairs(Config.BarberLocations) do
         if not Config.UseTarget then
-            exports['rsg-core']:createPrompt(v.barberid, v.coords, RSGCore.Shared.Keybinds[Config.Key], locale('cl_open_barber'), {
+            exports['fdb-core']:createPrompt(v.barberid, v.coords, FDBCore.Shared.Keybinds[Config.Key], locale('cl_open_barber'), {
                 type = 'client',
-                event = 'rsg-barber:client:menu',
+                event = 'fdb-barber:client:menu',
                 args = { v.barberid },
             })
         end
@@ -35,7 +35,7 @@ CreateThread(function()
     end
 end)
 
-RegisterNetEvent("rsg-barber:client:menu", function(barberid)
+RegisterNetEvent("fdb-barber:client:menu", function(barberid)
     local playerCoords = GetEntityCoords(cache.ped)
     local camFov = GetGameplayCamFov()
     local seat = GetHashKey("PROP_PLAYER_BARBER_SEAT")
@@ -109,7 +109,7 @@ local MainMenus = {
         LoadedComponents = CreatorCache
         local ped = PlayerPedId()
 
-        TriggerServerEvent("rsg-barber:server:SaveSkin", ConvertCacheToHash(CreatorCache))
+        TriggerServerEvent("fdb-barber:server:SaveSkin", ConvertCacheToHash(CreatorCache))
 
         RenderScriptCams(false, true, 1000, true, true)
         SetCamActive(cam, false)
@@ -129,7 +129,7 @@ local MainMenus = {
         local currentHealth = GetEntityHealth(PlayerPedId())
         local maxStamina = Citizen.InvokeNative(0xCB42AFE2B613EE55, PlayerPedId(), Citizen.ResultAsFloat())
         local currentStamina = Citizen.InvokeNative(0x775A1CA7893AA8B5, PlayerPedId(), Citizen.ResultAsFloat()) / maxStamina * 100
-        TriggerServerEvent('rsg-appearance:server:LoadSkin')
+        TriggerServerEvent('fdb-appearance:server:LoadSkin')
         Wait(1000)
         SetEntityHealth(PlayerPedId(), currentHealth )
         Citizen.InvokeNative(0xC3D4B754C0E86B9E, PlayerPedId(), currentStamina)
@@ -182,7 +182,7 @@ function MainMenu(Target)
         local currentHealth = GetEntityHealth(PlayerPedId())
         local maxStamina = Citizen.InvokeNative(0xCB42AFE2B613EE55, PlayerPedId(), Citizen.ResultAsFloat())
         local currentStamina = Citizen.InvokeNative(0x775A1CA7893AA8B5, PlayerPedId(), Citizen.ResultAsFloat()) / maxStamina * 100
-        TriggerServerEvent('rsg-appearance:server:LoadSkin')
+        TriggerServerEvent('fdb-appearance:server:LoadSkin')
         Wait(1000)
         SetEntityHealth(PlayerPedId(), currentHealth )
         Citizen.InvokeNative(0xC3D4B754C0E86B9E, PlayerPedId(), currentStamina)

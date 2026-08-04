@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 local blipEntries = {}
 local transG = Config.DeathTimer
 lib.locale()
@@ -11,7 +11,7 @@ local GetClosestPlayer = function()
     local coords = GetEntityCoords(cache.ped)
     local closestDistance = -1
     local closestPlayer = -1
-    local closestPlayers = RSGCore.Functions.GetPlayersFromCoords()
+    local closestPlayers = FDBCore.Functions.GetPlayersFromCoords()
 
     for i = 1, #closestPlayers, 1 do
         if closestPlayers[i] ~= PlayerId() then
@@ -33,8 +33,8 @@ end
 --- EVENTS
 ------------------------
 -- Toggle On-Duty
-AddEventHandler('rsg-medic:client:ToggleDuty', function()
-    RSGCore.Functions.GetPlayerData(function(PlayerData)
+AddEventHandler('fdb-medic:client:ToggleDuty', function()
+    FDBCore.Functions.GetPlayerData(function(PlayerData)
         local PlayerJob = PlayerData.job
 
         if PlayerJob.name ~= Config.JobRequired then
@@ -42,13 +42,13 @@ AddEventHandler('rsg-medic:client:ToggleDuty', function()
             return
         end
 
-        TriggerServerEvent("RSGCore:ToggleDuty")
+        TriggerServerEvent("FDBCore:ToggleDuty")
     end)
 end)
 
 -- Medic Revive Player
-AddEventHandler('rsg-medic:client:RevivePlayer', function()
-    local hasItem = RSGCore.Functions.HasItem('firstaid', 1)
+AddEventHandler('fdb-medic:client:RevivePlayer', function()
+    local hasItem = FDBCore.Functions.HasItem('firstaid', 1)
     if not hasItem then
         lib.notify({ title = locale('cl_need_kit'), type = 'error', icon = 'fa-solid fa-kit-medical', iconAnimation = 'shake',  duration = 7000  })
         return
@@ -89,14 +89,14 @@ AddEventHandler('rsg-medic:client:RevivePlayer', function()
 
     ClearPedTasks(cache.ped)
     FreezeEntityPosition(cache.ped, false)
-    TriggerServerEvent('rsg-medic:server:RevivePlayer', playerId)
+    TriggerServerEvent('fdb-medic:server:RevivePlayer', playerId)
     transG = 0
 
 end)
 
 -- Medic Treat Wounds
-AddEventHandler('rsg-medic:client:TreatWounds', function()
-    local hasItem = RSGCore.Functions.HasItem('bandage', 1)
+AddEventHandler('fdb-medic:client:TreatWounds', function()
+    local hasItem = FDBCore.Functions.HasItem('bandage', 1)
     if not hasItem then
         lib.notify({ title = locale('cl_need_bandage'), type = 'error', icon = 'fa-solid fa-kit-medical', iconAnimation = 'shake', duration = 7000 })
         return
@@ -138,19 +138,19 @@ AddEventHandler('rsg-medic:client:TreatWounds', function()
 
     ClearPedTasks(cache.ped)
     FreezeEntityPosition(cache.ped, false)
-    TriggerServerEvent('rsg-medic:server:TreatWounds', playerId)
+    TriggerServerEvent('fdb-medic:server:TreatWounds', playerId)
     transG = 0
 
 end)
 
 -- Medic Treat Wounds
-RegisterNetEvent('rsg-medic:client:HealInjuries', function()
+RegisterNetEvent('fdb-medic:client:HealInjuries', function()
     SetAttributeCoreValue(cache.ped, 0, GetAttributeCoreValue(cache.ped, 0) + Config.MedicTreatHealth)
     ClearPedBloodDamage(cache.ped)
 end)
 
 -- Medic Alert
-RegisterNetEvent('rsg-medic:client:medicAlert', function(coords, text)
+RegisterNetEvent('fdb-medic:client:medicAlert', function(coords, text)
     lib.notify({ title = locale('cl_info'), description = text, type = 'info', duration = 7000 })
 
     local blip = BlipAddForCoords(1664425300, coords.x, coords.y, coords.z)

@@ -3,7 +3,7 @@
 ----------------------------------------------------------------------- 
 
 local resourceName = GetCurrentResourceName()
-local githubRawBase = 'https://raw.githubusercontent.com/Rexshack-RedM/rsg-versioncheckers/main/'
+local githubRawBase = 'https://raw.githubusercontent.com/Rexshack-RedM/fdb-versioncheckers/main/'
 lib.locale()
 
 local function printLog(type, message)

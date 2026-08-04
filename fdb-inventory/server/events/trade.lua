@@ -374,7 +374,7 @@ function Inventory.ExecuteTrade(trade)
     local msgItems1, msgItems2 = {}, {}
     for _, item in pairs(trade.initiatorItems) do msgItems1[#msgItems1+1] = item.name .. ' x' .. item.amount end
     for _, item in pairs(trade.targetItems) do msgItems2[#msgItems2+1] = item.name .. ' x' .. item.amount end
-    TriggerEvent('rsg-log:server:CreateLog', 'playerinventory', 'Trade Completed', 'green',
+    TriggerEvent('fdb-log:server:CreateLog', 'playerinventory', 'Trade Completed', 'green',
         ('**%s (%s)** gave: %s\n**%s (%s)** gave: %s')
             :format(getCharName(trade.initiator), trade.initiator, table.concat(msgItems1, ', '),
                     getCharName(trade.target), trade.target, table.concat(msgItems2, ', ')))

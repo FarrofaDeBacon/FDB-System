@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 🔐 rsg-lockpick
+# 🔐 fdb-lockpick
 **Simple lockpicking minigame for RedM (RSG Core).**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -11,7 +11,7 @@
 ---
 
 ## 🛠️ Dependencies
-- **rsg-core** (framework)  
+- **fdb-core** (framework)  
 - **NUI** (HTML/CSS/JS bundled with the resource)
 
 **License:** GPL‑3.0
@@ -27,12 +27,12 @@
 ---
 
 ## ⚙️ Usage (from code)
-Trigger the client event **`rsg-lockpick:client:openLockpick`** from your resource and pass a callback to receive the result:
+Trigger the client event **`fdb-lockpick:client:openLockpick`** from your resource and pass a callback to receive the result:
 
 ```lua
 -- client.lua (your resource)
 RegisterCommand('trylock', function()
-    TriggerEvent('rsg-lockpick:client:openLockpick', function(success)
+    TriggerEvent('fdb-lockpick:client:openLockpick', function(success)
         if success then
             print('Lockpick: success!')
             -- proceed with your success logic
@@ -47,7 +47,7 @@ end)
 **What the event does**
 ```lua
 -- from this resource (client/main.lua)
-AddEventHandler('rsg-lockpick:client:openLockpick', function(callback)
+AddEventHandler('fdb-lockpick:client:openLockpick', function(callback)
     lockpickCallback = callback
     openLockpick(true)
 end)
@@ -71,11 +71,11 @@ end)
 ---
 
 ## 📂 Installation
-1. Place `rsg-lockpick` in `resources/[rsg]`.  
+1. Place `fdb-lockpick` in `resources/[rsg]`.  
 2. In your `server.cfg`:
    ```cfg
-   ensure rsg-core
-   ensure rsg-lockpick
+   ensure fdb-core
+   ensure fdb-lockpick
    ```
 3. Restart your server.
 

@@ -1,4 +1,4 @@
-RSGCore = exports['rsg-core']:GetCoreObject()
+FDBCore = exports['fdb-core']:GetCoreObject()
 local isLoggedIn = false
 BucketId = GetRandomIntInRange(0, 0xffffff)
 ComponentsMale = {}
@@ -8,7 +8,7 @@ CreatorCache = {}
 
 MenuData = {}
 
-TriggerEvent("rsg-menubase:getData", function(call)
+TriggerEvent("fdb-menubase:getData", function(call)
     MenuData = call
 end)
 
@@ -24,12 +24,12 @@ local Overlays = require 'data.overlays'
 local clotheslist = require 'data.clothes_list'
 local hairs_list = require 'data.hairs_list'
 
-AddEventHandler('RSGCore:Client:OnPlayerLoaded', function()
+AddEventHandler('FDBCore:Client:OnPlayerLoaded', function()
     isLoggedIn = true
-    PlayerData = RSGCore.Functions.GetPlayerData()
+    PlayerData = FDBCore.Functions.GetPlayerData()
 end)
 
-RegisterNetEvent('RSGCore:Client:OnPlayerUnload', function()
+RegisterNetEvent('FDBCore:Client:OnPlayerUnload', function()
     isLoggedIn = false
     PlayerData = {}
 end)
@@ -201,14 +201,14 @@ end)
 
 function ApplySkin()
     local _Target = PlayerPedId()
-    local citizenid = RSGCore.Functions.GetPlayerData().citizenid
+    local citizenid = FDBCore.Functions.GetPlayerData().citizenid
     local currentHealth = LocalPlayer.state.health or GetEntityHealth(_Target)
     local dirtClothes = GetAttributeBaseRank(_Target, 16)
     local dirtHat = GetAttributeBaseRank(_Target, 17)
     local dirtSkin = GetAttributeBaseRank(_Target, 22)
 
     local promise = promise.new()
-    RSGCore.Functions.TriggerCallback('rsg-multicharacter:server:getAppearance', function(data)
+    FDBCore.Functions.TriggerCallback('fdb-multicharacter:server:getAppearance', function(data)
         local _SkinData = data.skin
         local _Clothes = data.clothes
         if _Target == PlayerPedId() then
@@ -236,7 +236,7 @@ function ApplySkin()
         Citizen.InvokeNative(0x8899C244EBCF70DE, PlayerId(), 0.0)
         Citizen.InvokeNative(0xDE1B1907A83A1550, _Target, 0)
         if _Target == PlayerPedId() then
-            TriggerEvent('rsg-appearance:client:ApplyClothes', _Clothes, _Target, _SkinData)
+            TriggerEvent('fdb-appearance:client:ApplyClothes', _Clothes, _Target, _SkinData)
         else
             for i, m in pairs(Overlays.overlay_all_layers) do
                 Overlays.overlay_all_layers[i] =
@@ -264,12 +264,12 @@ local function ApplySkinMultiChar(SkinData, Target, ClothesData)
     LoadBodyFeature(Target, SkinData.body_waist, Data.Appearance.body_waist)
     LoadBodyFeature(Target, SkinData.chest_size, Data.Appearance.chest_size)
     LoadOverlays(Target, SkinData)
-    TriggerEvent('rsg-appearance:client:ApplyClothes', ClothesData, Target, SkinData)
+    TriggerEvent('fdb-appearance:client:ApplyClothes', ClothesData, Target, SkinData)
 end
 
 exports('ApplySkinMultiChar', ApplySkinMultiChar)
 
-RegisterNetEvent('rsg-appearance:client:OpenCreator', function(data, empty)
+RegisterNetEvent('fdb-appearance:client:OpenCreator', function(data, empty)
     if data then
         Cid = data.cid
     elseif empty then
@@ -294,7 +294,7 @@ RegisterCommand('loadskin', function(source, args, raw)
     local falling = IsPedFalling(ped)
     local isJailed = 0
 
-    RSGCore.Functions.GetPlayerData(function(player)
+    FDBCore.Functions.GetPlayerData(function(player)
         isJailed = player.metadata["injail"]
     end)
 
@@ -318,7 +318,7 @@ local function checkStrings(input)
 end
 
 function StartCreator()
-    TriggerServerEvent('rsg-appearance:server:SetPlayerBucket' , BucketId)
+    TriggerServerEvent('fdb-appearance:server:SetPlayerBucket' , BucketId)
     Wait(1)
     for i, m in pairs(Overlays.overlay_all_layers) do
         Overlays.overlay_all_layers[i] =
@@ -509,8 +509,8 @@ function FirstMenu()
                 if Skinkosong then
                     MenuData.CloseAll()
                     Skinkosong = false
-                    Firstname = RSGCore.Functions.GetPlayerData().charinfo.firstname
-                    Lastname = RSGCore.Functions.GetPlayerData().charinfo.lastname
+                    Firstname = FDBCore.Functions.GetPlayerData().charinfo.firstname
+                    Lastname = FDBCore.Functions.GetPlayerData().charinfo.lastname
                     FotoMugshots()
                 elseif Firstname and Lastname and Nationality and Selectedsex and Birthdate and Cid then
                     MenuData.CloseAll()
@@ -522,7 +522,7 @@ function FirstMenu()
                         birthdate = Birthdate,
                         cid = Cid
                     }
-                    TriggerServerEvent('rsg-multicharacter:server:createCharacter', newData)
+                    TriggerServerEvent('fdb-multicharacter:server:createCharacter', newData)
                     Wait(500)
                     FotoMugshots()
                 else

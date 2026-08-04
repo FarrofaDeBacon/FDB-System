@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
 local reportCooldown = false
@@ -6,7 +6,7 @@ local reportCooldown = false
 -----------------------------------------------------------------------
 -- Main report menu (for players)
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:client:openreportmenu', function()
+RegisterNetEvent('fdb-adminmenu:client:openreportmenu', function()
     lib.registerContext({
         id = 'player_report_menu',
         title = locale('cl_report_menu_title'),
@@ -15,14 +15,14 @@ RegisterNetEvent('rsg-adminmenu:client:openreportmenu', function()
                 title = locale('cl_report_create'),
                 description = locale('cl_report_create_desc'),
                 icon = 'fa-solid fa-plus',
-                event = 'rsg-adminmenu:client:createreport',
+                event = 'fdb-adminmenu:client:createreport',
                 arrow = true
             },
             {
                 title = locale('cl_report_myreports'),
                 description = locale('cl_report_myreports_desc'),
                 icon = 'fa-solid fa-list',
-                event = 'rsg-adminmenu:client:viewmyreports',
+                event = 'fdb-adminmenu:client:viewmyreports',
                 arrow = true
             },
         }
@@ -33,7 +33,7 @@ end)
 -----------------------------------------------------------------------
 -- Create a new report
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:client:createreport', function()
+RegisterNetEvent('fdb-adminmenu:client:createreport', function()
     if reportCooldown then
         lib.notify({ 
             title = locale('cl_report_cooldown_title'), 
@@ -120,7 +120,7 @@ RegisterNetEvent('rsg-adminmenu:client:createreport', function()
         reportData.imageUrl = input[3]
     end
 
-    TriggerServerEvent('rsg-adminmenu:server:createreport', reportData)
+    TriggerServerEvent('fdb-adminmenu:server:createreport', reportData)
     
     -- Cooldown
     reportCooldown = true
@@ -132,8 +132,8 @@ end)
 -----------------------------------------------------------------------
 -- View my reports
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:client:viewmyreports', function()
-    RSGCore.Functions.TriggerCallback('rsg-adminmenu:server:getmyreports', function(reports)
+RegisterNetEvent('fdb-adminmenu:client:viewmyreports', function()
+    FDBCore.Functions.TriggerCallback('fdb-adminmenu:server:getmyreports', function(reports)
         if not reports or #reports == 0 then
             lib.notify({ 
                 title = locale('cl_report_no_reports'), 
@@ -157,7 +157,7 @@ RegisterNetEvent('rsg-adminmenu:client:viewmyreports', function()
                 title = statusColor .. ' #' .. report.id .. ' - ' .. report.title,
                 description = locale('cl_report_list_desc', typeText, statusText),
                 icon = 'fa-solid fa-file-lines',
-                event = 'rsg-adminmenu:client:viewreportdetails',
+                event = 'fdb-adminmenu:client:viewreportdetails',
                 args = { reportId = report.id },
                 arrow = true,
             }
@@ -177,8 +177,8 @@ end)
 -----------------------------------------------------------------------
 -- View report details (player)
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:client:viewreportdetails', function(data)
-    RSGCore.Functions.TriggerCallback('rsg-adminmenu:server:getreportdetails', function(report, messages, nearbyPlayers)
+RegisterNetEvent('fdb-adminmenu:client:viewreportdetails', function(data)
+    FDBCore.Functions.TriggerCallback('fdb-adminmenu:server:getreportdetails', function(report, messages, nearbyPlayers)
         if not report then
             lib.notify({ title = locale('cl_report_error'), description = locale('cl_report_not_found'), type = 'error' })
             return
@@ -225,7 +225,7 @@ RegisterNetEvent('rsg-adminmenu:client:viewreportdetails', function(data)
                 title = locale('cl_report_messages_history'),
                 description = locale('cl_report_messages_count', #messages),
                 icon = 'fa-solid fa-comments',
-                event = 'rsg-adminmenu:client:viewreportmessages',
+                event = 'fdb-adminmenu:client:viewreportmessages',
                 args = { reportId = report.id, messages = messages },
                 arrow = true,
             }
@@ -237,7 +237,7 @@ RegisterNetEvent('rsg-adminmenu:client:viewreportdetails', function(data)
                 title = locale('cl_report_reply'),
                 description = locale('cl_report_reply_desc'),
                 icon = 'fa-solid fa-reply',
-                event = 'rsg-adminmenu:client:replyreport',
+                event = 'fdb-adminmenu:client:replyreport',
                 args = { reportId = report.id },
                 arrow = true,
             }
@@ -257,7 +257,7 @@ end)
 -----------------------------------------------------------------------
 -- Reply to a report (player)
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:client:replyreport', function(data)
+RegisterNetEvent('fdb-adminmenu:client:replyreport', function(data)
     local input = lib.inputDialog(locale('cl_report_reply_title'), {
         {
             label = locale('cl_report_message'),
@@ -270,13 +270,13 @@ RegisterNetEvent('rsg-adminmenu:client:replyreport', function(data)
 
     if not input then return end
 
-    TriggerServerEvent('rsg-adminmenu:server:replyreport', data.reportId, input[1], 'player')
+    TriggerServerEvent('fdb-adminmenu:server:replyreport', data.reportId, input[1], 'player')
 end)
 
 -----------------------------------------------------------------------
 -- View message history
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:client:viewreportmessages', function(data)
+RegisterNetEvent('fdb-adminmenu:client:viewreportmessages', function(data)
     if not data or not data.messages then
         lib.notify({ 
             title = locale('cl_report_error'), 
@@ -332,8 +332,8 @@ end)
 -----------------------------------------------------------------------
 -- ADMIN SECTION - Admin report menu
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:client:adminreportsmenu', function()
-    RSGCore.Functions.TriggerCallback('rsg-adminmenu:server:getallreports', function(reports)
+RegisterNetEvent('fdb-adminmenu:client:adminreportsmenu', function()
+    FDBCore.Functions.TriggerCallback('fdb-adminmenu:server:getallreports', function(reports)
         if not reports or #reports == 0 then
             lib.notify({ 
                 title = locale('cl_report_admin_no_reports'), 
@@ -357,7 +357,7 @@ RegisterNetEvent('rsg-adminmenu:client:adminreportsmenu', function()
                 title = statusColor .. ' #' .. report.id .. ' - ' .. report.title,
                 description = locale('cl_report_admin_list_desc', typeText, report.reporter_name) .. assignedText,
                 icon = 'fa-solid fa-file-lines',
-                event = 'rsg-adminmenu:client:adminviewreport',
+                event = 'fdb-adminmenu:client:adminviewreport',
                 args = { reportId = report.id },
                 arrow = true,
             }
@@ -378,8 +378,8 @@ end)
 -----------------------------------------------------------------------
 -- Admin - View report details
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:client:adminviewreport', function(data)
-    RSGCore.Functions.TriggerCallback('rsg-adminmenu:server:getreportdetails', function(report, messages, nearbyPlayers)
+RegisterNetEvent('fdb-adminmenu:client:adminviewreport', function(data)
+    FDBCore.Functions.TriggerCallback('fdb-adminmenu:server:getreportdetails', function(report, messages, nearbyPlayers)
         if not report then
             lib.notify({ title = locale('cl_report_error'), description = locale('cl_report_not_found'), type = 'error' })
             return
@@ -408,7 +408,7 @@ RegisterNetEvent('rsg-adminmenu:client:adminviewreport', function(data)
             title = locale('cl_report_admin_actions'),
             description = locale('cl_report_admin_actions_desc'),
             icon = 'fa-solid fa-tasks',
-            event = 'rsg-adminmenu:client:reportactions',
+            event = 'fdb-adminmenu:client:reportactions',
             args = { reportId = report.id, status = report.status },
             arrow = true,
         }
@@ -418,7 +418,7 @@ RegisterNetEvent('rsg-adminmenu:client:adminviewreport', function(data)
             title = locale('cl_report_reporter_actions'),
             description = locale('cl_report_player_info', report.reporter_name, report.reporter_id),
             icon = 'fa-solid fa-user',
-            event = 'rsg-adminmenu:client:reportplayeractions',
+            event = 'fdb-adminmenu:client:reportplayeractions',
             args = { playerId = report.reporter_id, playerName = report.reporter_name },
             arrow = true,
         }
@@ -429,7 +429,7 @@ RegisterNetEvent('rsg-adminmenu:client:adminviewreport', function(data)
                 title = locale('cl_report_reported_actions'),
                 description = locale('cl_report_player_info', report.reported_player_name, report.reported_player_id),
                 icon = 'fa-solid fa-user-injured',
-                event = 'rsg-adminmenu:client:reportplayeractions',
+                event = 'fdb-adminmenu:client:reportplayeractions',
                 args = { playerId = report.reported_player_id, playerName = report.reported_player_name },
                 arrow = true,
             }
@@ -441,7 +441,7 @@ RegisterNetEvent('rsg-adminmenu:client:adminviewreport', function(data)
                 title = locale('cl_report_nearby_players'),
                 description = locale('cl_report_nearby_count', #nearbyPlayers),
                 icon = 'fa-solid fa-users',
-                event = 'rsg-adminmenu:client:viewnearbyplayers',
+                event = 'fdb-adminmenu:client:viewnearbyplayers',
                 args = { players = nearbyPlayers },
                 arrow = true,
             }
@@ -470,7 +470,7 @@ RegisterNetEvent('rsg-adminmenu:client:adminviewreport', function(data)
                 title = locale('cl_report_messages_history'),
                 description = locale('cl_report_messages_count', #messages),
                 icon = 'fa-solid fa-comments',
-                event = 'rsg-adminmenu:client:viewreportmessages',
+                event = 'fdb-adminmenu:client:viewreportmessages',
                 args = { reportId = report.id, messages = messages },
                 arrow = true,
             }
@@ -481,7 +481,7 @@ RegisterNetEvent('rsg-adminmenu:client:adminviewreport', function(data)
             title = locale('cl_report_admin_reply'),
             description = locale('cl_report_admin_reply_desc'),
             icon = 'fa-solid fa-reply',
-            event = 'rsg-adminmenu:client:adminreplyreport',
+            event = 'fdb-adminmenu:client:adminreplyreport',
             args = { reportId = report.id },
             arrow = true,
         }
@@ -500,7 +500,7 @@ end)
 -----------------------------------------------------------------------
 -- Admin - Report actions
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:client:reportactions', function(data)
+RegisterNetEvent('fdb-adminmenu:client:reportactions', function(data)
     local options = {}
 
     if data.status ~= 'closed' then
@@ -508,7 +508,7 @@ RegisterNetEvent('rsg-adminmenu:client:reportactions', function(data)
             title = locale('cl_report_claim'),
             description = locale('cl_report_claim_desc'),
             icon = 'fa-solid fa-hand',
-            serverEvent = 'rsg-adminmenu:server:claimreport',
+            serverEvent = 'fdb-adminmenu:server:claimreport',
             args = { reportId = data.reportId },
         }
     end
@@ -518,7 +518,7 @@ RegisterNetEvent('rsg-adminmenu:client:reportactions', function(data)
             title = locale('cl_report_release'),
             description = locale('cl_report_release_desc'),
             icon = 'fa-solid fa-unlock',
-            serverEvent = 'rsg-adminmenu:server:releasereport',
+            serverEvent = 'fdb-adminmenu:server:releasereport',
             args = { reportId = data.reportId },
         }
     end
@@ -528,7 +528,7 @@ RegisterNetEvent('rsg-adminmenu:client:reportactions', function(data)
             title = locale('cl_report_resolve'),
             description = locale('cl_report_resolve_desc'),
             icon = 'fa-solid fa-check',
-            serverEvent = 'rsg-adminmenu:server:resolvereport',
+            serverEvent = 'fdb-adminmenu:server:resolvereport',
             args = { reportId = data.reportId },
         }
     end
@@ -537,7 +537,7 @@ RegisterNetEvent('rsg-adminmenu:client:reportactions', function(data)
         title = locale('cl_report_delete'),
         description = locale('cl_report_delete_desc'),
         icon = 'fa-solid fa-trash',
-        event = 'rsg-adminmenu:client:deletereport',
+        event = 'fdb-adminmenu:client:deletereport',
         args = { reportId = data.reportId },
     }
 
@@ -554,7 +554,7 @@ end)
 -----------------------------------------------------------------------
 -- Admin - Delete a report
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:client:deletereport', function(data)
+RegisterNetEvent('fdb-adminmenu:client:deletereport', function(data)
     local input = lib.inputDialog(locale('cl_report_delete_title'), {
         {
             label = locale('cl_report_delete_reason'),
@@ -567,13 +567,13 @@ RegisterNetEvent('rsg-adminmenu:client:deletereport', function(data)
 
     if not input then return end
 
-    TriggerServerEvent('rsg-adminmenu:server:deletereport', data.reportId, input[1])
+    TriggerServerEvent('fdb-adminmenu:server:deletereport', data.reportId, input[1])
 end)
 
 -----------------------------------------------------------------------
 -- Admin - Reply to a report
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:client:adminreplyreport', function(data)
+RegisterNetEvent('fdb-adminmenu:client:adminreplyreport', function(data)
     local input = lib.inputDialog(locale('cl_report_admin_reply_title'), {
         {
             label = locale('cl_report_message'),
@@ -586,15 +586,15 @@ RegisterNetEvent('rsg-adminmenu:client:adminreplyreport', function(data)
 
     if not input then return end
 
-    TriggerServerEvent('rsg-adminmenu:server:replyreport', data.reportId, input[1], 'admin')
+    TriggerServerEvent('fdb-adminmenu:server:replyreport', data.reportId, input[1], 'admin')
 end)
 
 -----------------------------------------------------------------------
 -- Admin - Player actions from report
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:client:reportplayeractions', function(data)
+RegisterNetEvent('fdb-adminmenu:client:reportplayeractions', function(data)
     -- Retrieve player name from the server to ensure they're online
-    RSGCore.Functions.TriggerCallback('rsg-adminmenu:server:getplayers', function(players)
+    FDBCore.Functions.TriggerCallback('fdb-adminmenu:server:getplayers', function(players)
         local playerFound = false
         local playerName = data.playerName
         
@@ -617,7 +617,7 @@ RegisterNetEvent('rsg-adminmenu:client:reportplayeractions', function(data)
         end
         
         -- Redirect to existing player menu from admin menu
-        TriggerEvent('rsg-adminmenu:client:playermenu', {
+        TriggerEvent('fdb-adminmenu:client:playermenu', {
             name = playerName,
             player = data.playerId
         })
@@ -627,7 +627,7 @@ end)
 -----------------------------------------------------------------------
 -- Admin - View nearby players
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:client:viewnearbyplayers', function(data)
+RegisterNetEvent('fdb-adminmenu:client:viewnearbyplayers', function(data)
     local options = {}
     
     for _, player in ipairs(data.players) do
@@ -635,7 +635,7 @@ RegisterNetEvent('rsg-adminmenu:client:viewnearbyplayers', function(data)
             title = locale('cl_report_nearby_player_title', player.player_name, player.player_id),
             description = locale('cl_report_nearby_player_desc', string.format("%.2f", player.distance), player.player_license),
             icon = 'fa-solid fa-user',
-            event = 'rsg-adminmenu:client:reportplayeractions',
+            event = 'fdb-adminmenu:client:reportplayeractions',
             args = { playerId = player.player_id, playerName = player.player_name },
             arrow = true,
         }
@@ -654,7 +654,7 @@ end)
 -----------------------------------------------------------------------
 -- Notification of new report (for admins)
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:client:newreportnotification', function(reportData)
+RegisterNetEvent('fdb-adminmenu:client:newreportnotification', function(reportData)
     local typeText = locale('cl_report_type_' .. reportData.report_type)
     lib.notify({ 
         title = locale('cl_report_new_notification'), 
@@ -668,7 +668,7 @@ end)
 -----------------------------------------------------------------------
 -- Notification of new reply (for players)
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:client:reportreplynotification', function(reportData)
+RegisterNetEvent('fdb-adminmenu:client:reportreplynotification', function(reportData)
     lib.notify({ 
         title = locale('cl_report_reply_notification'), 
         description = locale('cl_report_reply_notification_desc', reportData.reportId, reportData.adminName),

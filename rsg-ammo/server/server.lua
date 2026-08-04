@@ -1,11 +1,11 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 for _itemName, _ammoType in pairs(Config.BoxAmmo) do
-    RSGCore.Functions.CreateUseableItem(_itemName, function(source, item)
+    FDBCore.Functions.CreateUseableItem(_itemName, function(source, item)
         local src = source
-        local Player = RSGCore.Functions.GetPlayer(src)
+        local Player = FDBCore.Functions.GetPlayer(src)
         if not Player then return end
-        TriggerClientEvent('rsg-ammo:client:openAmmoBox', src, item.name, _ammoType, Config.AmmoTypes[_ammoType].refill)
+        TriggerClientEvent('fdb-ammo:client:openAmmoBox', src, item.name, _ammoType, Config.AmmoTypes[_ammoType].refill)
     end)
 end
 
@@ -14,13 +14,13 @@ end
 ------------------------------------------
 local function useArrowItem(source, item, ammoType)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     local amount = Config.AmmoTypes[ammoType].refill
-    local canAddAmmo = lib.callback.await('rsg-ammo:client:CanAddAmmo', src, ammoType, amount)
+    local canAddAmmo = lib.callback.await('fdb-ammo:client:CanAddAmmo', src, ammoType, amount)
     if canAddAmmo then
-        TriggerClientEvent('rsg-ammo:client:AddAmmo', src, ammoType, amount)
+        TriggerClientEvent('fdb-ammo:client:AddAmmo', src, ammoType, amount)
         Player.Functions.RemoveItem(item.name, 1)
     end
 end
@@ -34,7 +34,7 @@ local arrowTypes = {
 }
 
 for itemName, ammoType in pairs(arrowTypes) do
-    RSGCore.Functions.CreateUseableItem(itemName, function(source, item)
+    FDBCore.Functions.CreateUseableItem(itemName, function(source, item)
         useArrowItem(source, item, ammoType)
     end)
 end
@@ -42,32 +42,32 @@ end
 ---------------------------------------------
 -- remove item
 ---------------------------------------------
-RegisterServerEvent('rsg-ammo:server:removeitem')
-AddEventHandler('rsg-ammo:server:removeitem', function(item, amount)
+RegisterServerEvent('fdb-ammo:server:removeitem')
+AddEventHandler('fdb-ammo:server:removeitem', function(item, amount)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     Player.Functions.RemoveItem(item, amount)
-    TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[item], 'remove', amount)
+    TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[item], 'remove', amount)
 end)
 
 ---------------------------------------------
 -- open ammo box
 ---------------------------------------------
-RegisterServerEvent('rsg-ammo:server:openAmmoBox')
-AddEventHandler('rsg-ammo:server:openAmmoBox', function(ammoBoxItem, ammoType, amount)
+RegisterServerEvent('fdb-ammo:server:openAmmoBox')
+AddEventHandler('fdb-ammo:server:openAmmoBox', function(ammoBoxItem, ammoType, amount)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     Player.Functions.RemoveItem(ammoBoxItem, 1)
-    TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[ammoBoxItem], 'remove', 1)
-    TriggerClientEvent('rsg-ammo:client:AddAmmo', src, ammoType, amount)
+    TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[ammoBoxItem], 'remove', 1)
+    TriggerClientEvent('fdb-ammo:client:AddAmmo', src, ammoType, amount)
 
 end)
 
-RSGCore.Functions.CreateCallback('rsg-ammo:server:initializeDb', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-ammo:server:initializeDb', function(source, cb)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     local citizenid = Player.PlayerData.citizenid
     if not citizenid then return end
@@ -87,10 +87,10 @@ RSGCore.Functions.CreateCallback('rsg-ammo:server:initializeDb', function(source
     end)
 end)
 
-RegisterServerEvent('rsg-ammo:server:updateDb')
-AddEventHandler('rsg-ammo:server:updateDb', function(update)
+RegisterServerEvent('fdb-ammo:server:updateDb')
+AddEventHandler('fdb-ammo:server:updateDb', function(update)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     if next(update) then 

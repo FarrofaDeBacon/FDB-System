@@ -2,7 +2,7 @@ fx_version 'cerulean'
 rdr3_warning 'I acknowledge that this is a prerelease build of RedM, and I am aware my resources *will* become incompatible once RedM ships.'
 game 'rdr3'
 
-description 'rsg-medic'
+description 'fdb-medic'
 version '2.1.7'
 
 shared_scripts {
@@ -25,8 +25,8 @@ files {
 }
 
 dependencies {
-    'rsg-core',
-    'rsg-bossmenu',
+    'fdb-core',
+    'fdb-bossmenu',
     'ox_lib'
 }
 

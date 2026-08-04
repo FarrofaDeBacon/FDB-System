@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 local function getGracePeriodDays()
     return Config.Fines and Config.Fines.gracePeriodDays or 7
@@ -10,7 +10,7 @@ local function calculateDueDate()
 end
 
 local function hasCreateRecordsPermission(source)
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return false end
     
     local job = player.PlayerData.job
@@ -27,10 +27,10 @@ end
 
 local function getLawOfficers()
     local officers = {}
-    local players = RSGCore.Functions.GetPlayers()
+    local players = FDBCore.Functions.GetPlayers()
     for _, playerId in ipairs(players) do
         local src = tonumber(playerId)
-        local player = RSGCore.Functions.GetPlayer(src)
+        local player = FDBCore.Functions.GetPlayer(src)
         if player and player.PlayerData.job then
             local jobName = player.PlayerData.job.name
             if Config.LawJobs[jobName] then
@@ -120,7 +120,7 @@ CreateThread(function()
     end
 end)
 
-lib.callback.register('rsg-mdt:server:getCitizenFines', function(source, citizenid)
+lib.callback.register('fdb-mdt:server:getCitizenFines', function(source, citizenid)
     if not hasCreateRecordsPermission(source) then return {} end
     
     local fines = MySQL.query.await(
@@ -137,7 +137,7 @@ lib.callback.register('rsg-mdt:server:getCitizenFines', function(source, citizen
     return fines or {}
 end)
 
-lib.callback.register('rsg-mdt:server:getUnpaidFines', function(source, citizenid)
+lib.callback.register('fdb-mdt:server:getUnpaidFines', function(source, citizenid)
     local fines = MySQL.query.await(
         "SELECT * FROM mdt_fines WHERE citizenid = ? AND status IN ('unpaid', 'overdue') ORDER BY due_date ASC",
         { citizenid }
@@ -152,13 +152,13 @@ lib.callback.register('rsg-mdt:server:getUnpaidFines', function(source, citizeni
     return fines or {}
 end)
 
-lib.callback.register('rsg-mdt:server:payFine', function(source, fineId)
+lib.callback.register('fdb-mdt:server:payFine', function(source, fineId)
     fineId = tonumber(fineId)
     if not fineId then
         return { success = false, message = locale('notification_invalid_fine_id') }
     end
     
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then
         return { success = false, message = locale('notification_player_not_found') }
     end
@@ -202,14 +202,14 @@ lib.callback.register('rsg-mdt:server:payFine', function(source, fineId)
         { 'fine_paid', 'fine', tostring(fineId), playerName, json.encode({ amount = totalAmount, fine_id = fineId }), citizenid, playerName }
     )
     
-    broadcastToOfficers('rsg-mdt:client:finePaid', {
+    broadcastToOfficers('fdb-mdt:client:finePaid', {
         fineId = fineId,
         citizenid = citizenid,
         citizenName = playerName,
         amount = totalAmount
     })
     
-    TriggerClientEvent('rsg-mdt:client:finePaymentResult', source, {
+    TriggerClientEvent('fdb-mdt:client:finePaymentResult', source, {
         success = true,
         message = locale('notification_fine_paid_success', totalAmount),
         fineId = fineId
@@ -218,8 +218,8 @@ lib.callback.register('rsg-mdt:server:payFine', function(source, fineId)
     return { success = true, message = locale('notification_fine_paid') }
 end)
 
-lib.callback.register('rsg-mdt:server:getPlayerFines', function(source)
-    local player = RSGCore.Functions.GetPlayer(source)
+lib.callback.register('fdb-mdt:server:getPlayerFines', function(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return {} end
     
     local citizenid = player.PlayerData.citizenid
@@ -239,8 +239,8 @@ lib.callback.register('rsg-mdt:server:getPlayerFines', function(source)
     return fines or {}
 end)
 
-lib.callback.register('rsg-mdt:server:hasUnpaidFines', function(source)
-    local player = RSGCore.Functions.GetPlayer(source)
+lib.callback.register('fdb-mdt:server:hasUnpaidFines', function(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return false end
     
     local result = MySQL.query.await(
@@ -251,7 +251,7 @@ lib.callback.register('rsg-mdt:server:hasUnpaidFines', function(source)
     return result and result[1] and result[1].count > 0
 end)
 
-lib.callback.register('rsg-mdt:server:getUnpaidFinesCount', function(source, citizenid)
+lib.callback.register('fdb-mdt:server:getUnpaidFinesCount', function(source, citizenid)
     local query = citizenid 
         and "SELECT COUNT(*) as count FROM mdt_fines WHERE citizenid = ? AND status IN ('unpaid', 'overdue')"
         or "SELECT COUNT(*) as count FROM mdt_fines WHERE status IN ('unpaid', 'overdue')"
@@ -262,7 +262,7 @@ lib.callback.register('rsg-mdt:server:getUnpaidFinesCount', function(source, cit
     return result and result[1] and result[1].count or 0
 end)
 
-lib.callback.register('rsg-mdt:server:getAllUnpaidFines', function(source)
+lib.callback.register('fdb-mdt:server:getAllUnpaidFines', function(source)
     if not hasCreateRecordsPermission(source) then return {} end
     
     local fines = MySQL.query.await(
@@ -278,7 +278,7 @@ lib.callback.register('rsg-mdt:server:getAllUnpaidFines', function(source)
     return fines or {}
 end)
 
-lib.callback.register('rsg-mdt:server:markFineOverdue', function(source, fineId)
+lib.callback.register('fdb-mdt:server:markFineOverdue', function(source, fineId)
     if not hasCreateRecordsPermission(source) then 
         return { success = false, message = locale('notification_no_permission') }
     end
@@ -291,7 +291,7 @@ lib.callback.register('rsg-mdt:server:markFineOverdue', function(source, fineId)
     return { success = true }
 end)
 
-lib.callback.register('rsg-mdt:server:markFinePaid', function(source, fineId)
+lib.callback.register('fdb-mdt:server:markFinePaid', function(source, fineId)
     if not hasCreateRecordsPermission(source) then
         return { success = false, message = locale('notification_no_permission_mark_fines') }
     end
@@ -312,7 +312,7 @@ lib.callback.register('rsg-mdt:server:markFinePaid', function(source, fineId)
     
     local fineData = fine[1]
     
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     local officerName = player and (player.PlayerData.charinfo.firstname .. ' ' .. player.PlayerData.charinfo.lastname) or 'Unknown'
     local officerCid = player and player.PlayerData.citizenid or 'Unknown'
     
@@ -337,14 +337,14 @@ lib.callback.register('rsg-mdt:server:markFinePaid', function(source, fineId)
         fineResult.issued_charge_ids = json.decode(fineResult.issued_charge_ids)
     end
     
-    broadcastToOfficers('rsg-mdt:client:fineStatusUpdated', {
+    broadcastToOfficers('fdb-mdt:client:fineStatusUpdated', {
         fineId = fineId,
         citizenid = fineData.citizenid,
         status = 'paid',
         fine = fineResult
     })
     
-    TriggerClientEvent('rsg-mdt:client:playerFinePaid', -1, {
+    TriggerClientEvent('fdb-mdt:client:playerFinePaid', -1, {
         fineId = fineId,
         citizenid = fineData.citizenid
     })
@@ -356,12 +356,12 @@ lib.callback.register('rsg-mdt:server:markFinePaid', function(source, fineId)
     }
 end)
 
-RegisterNetEvent('rsg-mdt:server:syncPlayerFines', function()
+RegisterNetEvent('fdb-mdt:server:syncPlayerFines', function()
     local source = source
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return end
     
     local fines = getUnpaidFines(player.PlayerData.citizenid)
     
-    TriggerClientEvent('rsg-mdt:client:updatePlayerFines', source, fines)
+    TriggerClientEvent('fdb-mdt:client:updatePlayerFines', source, fines)
 end)

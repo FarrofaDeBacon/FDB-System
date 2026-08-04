@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 -- ============================================
 -- Configuration State & Validation
@@ -8,7 +8,7 @@ local configVersion = 1
 local function validateConfig()
     if not Config.LawJobs then
         Config.LawJobs = {}
-        print('[rsg-mdt] ' .. locale('config_warning_missing'))
+        print('[fdb-mdt] ' .. locale('config_warning_missing'))
     end
     
     for jobName, jobConfig in pairs(Config.LawJobs) do
@@ -42,7 +42,7 @@ local function validateConfig()
     configVersion = configVersion + 1
     
     if Config.Settings.debug then
-        print('[rsg-mdt] ' .. locale('config_validated', configVersion))
+        print('[fdb-mdt] ' .. locale('config_validated', configVersion))
     end
 end
 
@@ -75,7 +75,7 @@ end
 -- Access Validation Functions
 -- ============================================
 local function hasAccess(source)
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return false end
     
     local job = player.PlayerData.job
@@ -91,7 +91,7 @@ local function hasAccess(source)
 end
 
 local function hasPermission(source, permission)
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return false end
     
     local job = player.PlayerData.job
@@ -101,7 +101,7 @@ local function hasPermission(source, permission)
 end
 
 local function getPermissions(source)
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return nil end
     
     local job = player.PlayerData.job
@@ -159,60 +159,60 @@ end)
 -- ============================================
 -- Server Events (Config)
 -- ============================================
-RegisterNetEvent('rsg-mdt:server:checkAccess', function()
+RegisterNetEvent('fdb-mdt:server:checkAccess', function()
     local source = source
     local access = hasAccess(source)
     local permissions = access and getPermissions(source) or nil
     
-    TriggerClientEvent('rsg-mdt:client:accessResult', source, {
+    TriggerClientEvent('fdb-mdt:client:accessResult', source, {
         hasAccess = access,
         permissions = permissions,
-        jobLabel = access and RSGCore.Functions.GetPlayer(source).PlayerData.job.label or nil
+        jobLabel = access and FDBCore.Functions.GetPlayer(source).PlayerData.job.label or nil
     })
 end)
 
-RegisterNetEvent('rsg-mdt:server:checkPermission', function(permission)
+RegisterNetEvent('fdb-mdt:server:checkPermission', function(permission)
     local source = source
-    TriggerClientEvent('rsg-mdt:client:permissionResult', source, {
+    TriggerClientEvent('fdb-mdt:client:permissionResult', source, {
         permission = permission,
         hasPermission = hasPermission(source, permission)
     })
 end)
 
-RegisterNetEvent('rsg-mdt:server:reloadConfig', function()
+RegisterNetEvent('fdb-mdt:server:reloadConfig', function()
     local source = source
     
     if not hasPermission(source, 'isAdmin') then
-        TriggerClientEvent('rsg-mdt:client:notify', source, {
+        TriggerClientEvent('fdb-mdt:client:notify', source, {
             type = 'error',
             message = locale('notification_no_permission_reload')
         })
         return
     end
     
-    local success, message = exports['rsg-mdt']:reloadConfig()
+    local success, message = exports['fdb-mdt']:reloadConfig()
     
-    TriggerClientEvent('rsg-mdt:client:notify', source, {
+    TriggerClientEvent('fdb-mdt:client:notify', source, {
         type = success and 'success' or 'error',
         message = message
     })
     
     if success then
-        local players = RSGCore.Functions.GetPlayers()
+        local players = FDBCore.Functions.GetPlayers()
         for _, playerId in ipairs(players) do
             local target = tonumber(playerId)
             if hasAccess(target) then
-                TriggerClientEvent('rsg-mdt:client:configUpdated', target, configVersion)
+                TriggerClientEvent('fdb-mdt:client:configUpdated', target, configVersion)
             end
         end
     end
 end)
 
-RegisterNetEvent('rsg-mdt:server:getConfig', function()
+RegisterNetEvent('fdb-mdt:server:getConfig', function()
     local source = source
     if not hasPermission(source, 'isAdmin') then return end
     
-    TriggerClientEvent('rsg-mdt:client:receiveConfig', source, {
+    TriggerClientEvent('fdb-mdt:client:receiveConfig', source, {
         lawJobs = Config.LawJobs,
         settings = Config.Settings,
         version = configVersion
@@ -230,7 +230,7 @@ end)
 -- ============================================
 -- Callbacks: Citizens
 -- ============================================
-lib.callback.register('rsg-mdt:server:getAllCitizens', function(source)
+lib.callback.register('fdb-mdt:server:getAllCitizens', function(source)
     if not hasAccess(source) then return {} end
 
     local results = MySQL.query.await("SELECT citizenid, charinfo, job FROM players")
@@ -274,7 +274,7 @@ lib.callback.register('rsg-mdt:server:getAllCitizens', function(source)
     return citizens
 end)
 
-lib.callback.register('rsg-mdt:server:searchCitizens', function(source, query)
+lib.callback.register('fdb-mdt:server:searchCitizens', function(source, query)
     if not hasAccess(source) then return {} end
 
     query = string.lower(query or '')
@@ -348,12 +348,12 @@ lib.callback.register('rsg-mdt:server:searchCitizens', function(source, query)
     return citizens
 end)
 
-lib.callback.register('rsg-mdt:server:getCitizen', function(source, citizenid)
+lib.callback.register('fdb-mdt:server:getCitizen', function(source, citizenid)
     if not hasAccess(source) then return nil end
 
     local citizen = nil
 
-    local target = RSGCore.Functions.GetPlayerByCitizenId(citizenid)
+    local target = FDBCore.Functions.GetPlayerByCitizenId(citizenid)
     if target then
         local data = target.PlayerData
         citizen = {
@@ -405,7 +405,7 @@ lib.callback.register('rsg-mdt:server:getCitizen', function(source, citizenid)
     return citizen
 end)
 
-lib.callback.register('rsg-mdt:server:setProfilePicture', function(source, data)
+lib.callback.register('fdb-mdt:server:setProfilePicture', function(source, data)
     if not hasAccess(source) or not hasPermission(source, 'canCreateRecords') then return false end
 
     local citizenid = data.citizenid
@@ -425,7 +425,7 @@ end)
 -- ============================================
 -- Callbacks: Criminal Records
 -- ============================================
-lib.callback.register('rsg-mdt:server:getRecords', function(source, citizenid)
+lib.callback.register('fdb-mdt:server:getRecords', function(source, citizenid)
     if not hasAccess(source) then return {} end
     
     local query = citizenid 
@@ -437,10 +437,10 @@ lib.callback.register('rsg-mdt:server:getRecords', function(source, citizenid)
     return results or {}
 end)
 
-lib.callback.register('rsg-mdt:server:addRecord', function(source, data)
+lib.callback.register('fdb-mdt:server:addRecord', function(source, data)
     if not hasAccess(source) or not hasPermission(source, 'canCreateRecords') then return false end
     
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return false end
     
     local officerName = player.PlayerData.charinfo.firstname .. ' ' .. player.PlayerData.charinfo.lastname
@@ -454,7 +454,7 @@ lib.callback.register('rsg-mdt:server:addRecord', function(source, data)
     return insertId and true or false
 end)
 
-lib.callback.register('rsg-mdt:server:deleteRecord', function(source, recordId)
+lib.callback.register('fdb-mdt:server:deleteRecord', function(source, recordId)
     if not hasAccess(source) or not hasPermission(source, 'canDeleteRecords') then return false end
     
     local affectedRows = MySQL.query.await('DELETE FROM mdt_records WHERE id = ?', { recordId })
@@ -464,17 +464,17 @@ end)
 -- ============================================
 -- Callbacks: Warrants
 -- ============================================
-lib.callback.register('rsg-mdt:server:getWarrants', function(source)
+lib.callback.register('fdb-mdt:server:getWarrants', function(source)
     if not hasAccess(source) then return {} end
     
     local results = MySQL.query.await('SELECT * FROM mdt_warrants ORDER BY created_at DESC')
     return results or {}
 end)
 
-lib.callback.register('rsg-mdt:server:addWarrant', function(source, data)
+lib.callback.register('fdb-mdt:server:addWarrant', function(source, data)
     if not hasAccess(source) or not hasPermission(source, 'canManageWarrants') then return false end
     
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return false end
     
     local officerName = player.PlayerData.charinfo.firstname .. ' ' .. player.PlayerData.charinfo.lastname
@@ -488,7 +488,7 @@ lib.callback.register('rsg-mdt:server:addWarrant', function(source, data)
     return insertId and true or false
 end)
 
-lib.callback.register('rsg-mdt:server:updateWarrant', function(source, data)
+lib.callback.register('fdb-mdt:server:updateWarrant', function(source, data)
     if not hasAccess(source) or not hasPermission(source, 'canManageWarrants') then return false end
     
     local affectedRows = MySQL.query.await(
@@ -498,7 +498,7 @@ lib.callback.register('rsg-mdt:server:updateWarrant', function(source, data)
     return affectedRows and affectedRows.affectedRows > 0
 end)
 
-lib.callback.register('rsg-mdt:server:deleteWarrant', function(source, warrantId)
+lib.callback.register('fdb-mdt:server:deleteWarrant', function(source, warrantId)
     if not hasAccess(source) or not hasPermission(source, 'canManageWarrants') then return false end
     
     local affectedRows = MySQL.query.await('DELETE FROM mdt_warrants WHERE id = ?', { warrantId })
@@ -508,17 +508,17 @@ end)
 -- ============================================
 -- Callbacks: BOLOs
 -- ============================================
-lib.callback.register('rsg-mdt:server:getBolos', function(source)
+lib.callback.register('fdb-mdt:server:getBolos', function(source)
     if not hasAccess(source) then return {} end
     
     local results = MySQL.query.await('SELECT * FROM mdt_bolos ORDER BY created_at DESC')
     return results or {}
 end)
 
-lib.callback.register('rsg-mdt:server:addBolo', function(source, data)
+lib.callback.register('fdb-mdt:server:addBolo', function(source, data)
     if not hasAccess(source) then return false end
     
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return false end
     
     local officerName = player.PlayerData.charinfo.firstname .. ' ' .. player.PlayerData.charinfo.lastname
@@ -532,7 +532,7 @@ lib.callback.register('rsg-mdt:server:addBolo', function(source, data)
     return insertId and true or false
 end)
 
-lib.callback.register('rsg-mdt:server:deleteBolo', function(source, boloId)
+lib.callback.register('fdb-mdt:server:deleteBolo', function(source, boloId)
     if not hasAccess(source) or not hasPermission(source, 'canDeleteRecords') then return false end
     
     local affectedRows = MySQL.query.await('DELETE FROM mdt_bolos WHERE id = ?', { boloId })
@@ -542,7 +542,7 @@ end)
 -- ============================================
 -- Callbacks: Reports
 -- ============================================
-lib.callback.register('rsg-mdt:server:getReports', function(source)
+lib.callback.register('fdb-mdt:server:getReports', function(source)
     if not hasAccess(source) then return {} end
     
     local results = MySQL.query.await('SELECT * FROM mdt_reports ORDER BY created_at DESC')
@@ -584,7 +584,7 @@ lib.callback.register('rsg-mdt:server:getReports', function(source)
     return results
 end)
 
-lib.callback.register('rsg-mdt:server:getReport', function(source, reportId)
+lib.callback.register('fdb-mdt:server:getReport', function(source, reportId)
     if not hasAccess(source) then return nil end
     
     local results = MySQL.query.await('SELECT * FROM mdt_reports WHERE id = ?', { reportId })
@@ -605,10 +605,10 @@ lib.callback.register('rsg-mdt:server:getReport', function(source, reportId)
     return report
 end)
 
-lib.callback.register('rsg-mdt:server:createReport', function(source, data)
+lib.callback.register('fdb-mdt:server:createReport', function(source, data)
     if not hasAccess(source) or not hasPermission(source, 'canCreateRecords') then return false end
     
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return false end
     
     local officerName = player.PlayerData.charinfo.firstname .. ' ' .. player.PlayerData.charinfo.lastname
@@ -633,7 +633,7 @@ lib.callback.register('rsg-mdt:server:createReport', function(source, data)
     return insertId and true or false
 end)
 
-lib.callback.register('rsg-mdt:server:deleteReport', function(source, reportId)
+lib.callback.register('fdb-mdt:server:deleteReport', function(source, reportId)
     if not hasAccess(source) or not hasPermission(source, 'canDeleteRecords') then return false end
     
     local affectedRows = MySQL.query.await('DELETE FROM mdt_reports WHERE id = ?', { reportId })
@@ -641,17 +641,17 @@ lib.callback.register('rsg-mdt:server:deleteReport', function(source, reportId)
 end)
 
 -- Report Comments
-lib.callback.register('rsg-mdt:server:getReportComments', function(source, reportId)
+lib.callback.register('fdb-mdt:server:getReportComments', function(source, reportId)
     if not hasAccess(source) then return {} end
     
     local results = MySQL.query.await('SELECT * FROM mdt_report_comments WHERE report_id = ? ORDER BY created_at ASC', { reportId })
     return results or {}
 end)
 
-lib.callback.register('rsg-mdt:server:addReportComment', function(source, data)
+lib.callback.register('fdb-mdt:server:addReportComment', function(source, data)
     if not hasAccess(source) or not hasPermission(source, 'canCreateRecords') then return false end
     
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return false end
     
     local officerName = player.PlayerData.charinfo.firstname .. ' ' .. player.PlayerData.charinfo.lastname
@@ -669,10 +669,10 @@ end)
 -- ============================================
 -- Callbacks: Officer Info & Stats
 -- ============================================
-lib.callback.register('rsg-mdt:server:getOfficerInfo', function(source)
+lib.callback.register('fdb-mdt:server:getOfficerInfo', function(source)
     if not hasAccess(source) then return nil end
     
-    local player = RSGCore.Functions.GetPlayer(source)
+    local player = FDBCore.Functions.GetPlayer(source)
     if not player then return nil end
     
     return {
@@ -683,7 +683,7 @@ lib.callback.register('rsg-mdt:server:getOfficerInfo', function(source)
     }
 end)
 
-lib.callback.register('rsg-mdt:server:getStats', function(source)
+lib.callback.register('fdb-mdt:server:getStats', function(source)
     if not hasAccess(source) then return nil end
     
     local recordCount = MySQL.query.await('SELECT COUNT(*) as count FROM mdt_records')
@@ -704,7 +704,7 @@ end)
 -- ============================================
 -- Callbacks: Config Data
 -- ============================================
-lib.callback.register('rsg-mdt:server:getIncidentTypes', function(source)
+lib.callback.register('fdb-mdt:server:getIncidentTypes', function(source)
     if not hasAccess(source) then return {} end
     return Config.IncidentTypes or {}
 end)

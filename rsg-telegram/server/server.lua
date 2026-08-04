@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 lib.locale()
 
@@ -36,7 +36,7 @@ local function GetJobType(jobData)
         return jobData.type
     end
 
-    local sharedJob = RSGCore.Shared.Jobs[jobData.name]
+    local sharedJob = FDBCore.Shared.Jobs[jobData.name]
     return sharedJob and sharedJob.type or nil
 end
 
@@ -110,8 +110,8 @@ local function GetJobRecipientPlayers(recipientConfig)
     end
 
     -- Online PlayerData is treated as authoritative in case the job changed after the last database save.
-    for _, playerId in ipairs(RSGCore.Functions.GetPlayers()) do
-        local onlinePlayer = RSGCore.Functions.GetPlayer(playerId)
+    for _, playerId in ipairs(FDBCore.Functions.GetPlayers()) do
+        local onlinePlayer = FDBCore.Functions.GetPlayer(playerId)
 
         if onlinePlayer and DoesJobMatchJobRecipient(onlinePlayer.PlayerData.job, recipientConfig) then
             local citizenid = onlinePlayer.PlayerData.citizenid
@@ -132,7 +132,7 @@ end
 -- Notifies currently online recipients and updates their unread count after a job telegram is created.
 local function NotifyJobRecipients(recipients)
     for _, recipient in ipairs(recipients) do
-        local targetPlayer = RSGCore.Functions.GetPlayerByCitizenId(recipient.citizenid)
+        local targetPlayer = FDBCore.Functions.GetPlayerByCitizenId(recipient.citizenid)
 
         if targetPlayer then
             local state = Player(targetPlayer.PlayerData.source).state
@@ -172,21 +172,21 @@ local function SendJobTelegram(src, sender, sendername, alias, recipientConfig, 
 end
 
 -- Make Bird Post as a Usable Item
-RSGCore.Functions.CreateUseableItem(Config.BirdPostItem, function(source)
-    TriggerClientEvent('rsg-telegram:client:WriteMessage', source)
+FDBCore.Functions.CreateUseableItem(Config.BirdPostItem, function(source)
+    TriggerClientEvent('fdb-telegram:client:WriteMessage', source)
 end)
 
 -- Delivery Success
-RegisterNetEvent('rsg-telegram:server:DeliverySuccess')
-AddEventHandler('rsg-telegram:server:DeliverySuccess', function(sID, tPName)
+RegisterNetEvent('fdb-telegram:server:DeliverySuccess')
+AddEventHandler('fdb-telegram:server:DeliverySuccess', function(sID, tPName)
     TriggerClientEvent('ox_lib:notify', sID, {title = locale("sv_title_38"), description = locale('sv_letter_delivered')..' '..tPName..' '..locale('sv_letter_delivered_suc'), type = 'success', duration = 5000 })
 end)
 
 -- Add Message to the Database
-RegisterServerEvent('rsg-telegram:server:SendMessage')
-AddEventHandler('rsg-telegram:server:SendMessage', function(senderID, sender, sendername, tgtid, subject, message, jobSenderAlias)
+RegisterServerEvent('fdb-telegram:server:SendMessage')
+AddEventHandler('fdb-telegram:server:SendMessage', function(senderID, sender, sendername, tgtid, subject, message, jobSenderAlias)
     local src = source
-    local RSGPlayer = RSGCore.Functions.GetPlayer(src)
+    local RSGPlayer = FDBCore.Functions.GetPlayer(src)
 
     if RSGPlayer == nil then return end
 
@@ -214,7 +214,7 @@ AddEventHandler('rsg-telegram:server:SendMessage', function(senderID, sender, se
     end
 
     -- local _tgtid = tonumber(tgtid)
-    local targetPlayer = RSGCore.Functions.GetPlayerByCitizenId(tgtid)
+    local targetPlayer = FDBCore.Functions.GetPlayerByCitizenId(tgtid)
     if targetPlayer == nil then
         TriggerClientEvent('ox_lib:notify', src, {title = locale("sv_title_39"), description = locale('sv_player_unavailable'), type = 'error', duration = 5000 })
         return
@@ -240,17 +240,17 @@ AddEventHandler('rsg-telegram:server:SendMessage', function(senderID, sender, se
     local state = Player(targetPlayer.PlayerData.source).state
     state.telegramUnreadMessages = (state.telegramUnreadMessages or 0) + 1
     
-    TriggerClientEvent('rsg-telegram:client:ReceiveMessage', targetPlayer.PlayerData.source, senderID, targetPlayerName)
+    TriggerClientEvent('fdb-telegram:client:ReceiveMessage', targetPlayer.PlayerData.source, senderID, targetPlayerName)
 
     if Config.ChargePlayer then
         RSGPlayer.Functions.RemoveMoney('cash', cost, 'send-post')
     end
 end)
 
-RegisterServerEvent('rsg-telegram:server:SendMessagePostOffice')
-AddEventHandler('rsg-telegram:server:SendMessagePostOffice', function(sender, sendername, citizenid, subject, message, jobSenderAlias)
+RegisterServerEvent('fdb-telegram:server:SendMessagePostOffice')
+AddEventHandler('fdb-telegram:server:SendMessagePostOffice', function(sender, sendername, citizenid, subject, message, jobSenderAlias)
     local src = source
-    local RSGPlayer = RSGCore.Functions.GetPlayer(src)
+    local RSGPlayer = FDBCore.Functions.GetPlayer(src)
     local cost = Config.CostPerLetter
     local cashBalance = RSGPlayer.PlayerData.money['cash']
     local sentDate = os.date('%x')
@@ -306,7 +306,7 @@ AddEventHandler('rsg-telegram:server:SendMessagePostOffice', function(sender, se
     exports.oxmysql:execute('INSERT INTO telegrams (`citizenid`, `recipient`, `sender`, `sendername`, `subject`, `sentDate`, `message`, `fromPostOffice`, `pickedUp`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);', {citizenid, tFullName, sender, sendername, subject, sentDate, message, 1, 0})
     
     -- Notify recipient and update their unread count (for envelope icon)
-    local targetPlayer = RSGCore.Functions.GetPlayerByCitizenId(citizenid)
+    local targetPlayer = FDBCore.Functions.GetPlayerByCitizenId(citizenid)
     if targetPlayer then
         -- Update unread count to include unpicked message
         local state = Player(targetPlayer.PlayerData.source).state
@@ -328,10 +328,10 @@ AddEventHandler('rsg-telegram:server:SendMessagePostOffice', function(sender, se
 end)
 
 -- SEND MESSAGE WITH BIRD POST ITEM (outside post office)
-RegisterServerEvent('rsg-telegram:server:SendMessageWithBirdPost')
-AddEventHandler('rsg-telegram:server:SendMessageWithBirdPost', function(sender, sendername, citizenid, subject, message, jobSenderAlias)
+RegisterServerEvent('fdb-telegram:server:SendMessageWithBirdPost')
+AddEventHandler('fdb-telegram:server:SendMessageWithBirdPost', function(sender, sendername, citizenid, subject, message, jobSenderAlias)
     local src = source
-    local RSGPlayer = RSGCore.Functions.GetPlayer(src)
+    local RSGPlayer = FDBCore.Functions.GetPlayer(src)
     local sentDate = os.date('%x')
     local jobAlias, jobRecipient = GetJobRecipient(citizenid)
 
@@ -365,7 +365,7 @@ AddEventHandler('rsg-telegram:server:SendMessageWithBirdPost', function(sender, 
     -- Job telegrams sent by bird consume one bird post item and are copied to each matching recipient.
     if jobRecipient then
         RSGPlayer.Functions.RemoveItem(Config.BirdPostItem, 1)
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[Config.BirdPostItem], 'remove', 1)
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[Config.BirdPostItem], 'remove', 1)
 
         Wait(Config.BirdArrivalDelay)
         SendJobTelegram(src, sender, sendername, jobAlias, jobRecipient, subject, message, 0, 1)
@@ -391,7 +391,7 @@ AddEventHandler('rsg-telegram:server:SendMessageWithBirdPost', function(sender, 
 
     -- Remove bird post item
     RSGPlayer.Functions.RemoveItem(Config.BirdPostItem, 1)
-    TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[Config.BirdPostItem], 'remove', 1)
+    TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[Config.BirdPostItem], 'remove', 1)
 
     -- Wait for bird arrival delay, then insert telegram
     Wait(Config.BirdArrivalDelay)
@@ -400,7 +400,7 @@ AddEventHandler('rsg-telegram:server:SendMessageWithBirdPost', function(sender, 
     exports.oxmysql:execute('INSERT INTO telegrams (`citizenid`, `recipient`, `sender`, `sendername`, `subject`, `sentDate`, `message`, `fromPostOffice`, `pickedUp`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);', {citizenid, tFullName, sender, sendername, subject, sentDate, message, 0, 1})
     
     -- Increment unread count after bird delivers
-    local targetPlayer = RSGCore.Functions.GetPlayerByCitizenId(citizenid)
+    local targetPlayer = FDBCore.Functions.GetPlayerByCitizenId(citizenid)
     if (targetPlayer) then 
         local state = Player(targetPlayer.PlayerData.source).state
         state.telegramUnreadMessages = (state.telegramUnreadMessages or 0) + 1
@@ -415,10 +415,10 @@ AddEventHandler('rsg-telegram:server:SendMessageWithBirdPost', function(sender, 
 end)
 
 -- VALIDATE BIRD POST SEND (checks item, then triggers bird spawn)
-RegisterServerEvent('rsg-telegram:server:ValidateBirdPostSend')
-AddEventHandler('rsg-telegram:server:ValidateBirdPostSend', function(sender, sendername, citizenid, subject, message, jobSenderAlias)
+RegisterServerEvent('fdb-telegram:server:ValidateBirdPostSend')
+AddEventHandler('fdb-telegram:server:ValidateBirdPostSend', function(sender, sendername, citizenid, subject, message, jobSenderAlias)
     local src = source
-    local RSGPlayer = RSGCore.Functions.GetPlayer(src)
+    local RSGPlayer = FDBCore.Functions.GetPlayer(src)
     local sentDate = os.date('%x')
     local jobAlias, jobRecipient = GetJobRecipient(citizenid)
 
@@ -460,7 +460,7 @@ AddEventHandler('rsg-telegram:server:ValidateBirdPostSend', function(sender, sen
 
         local targetCoords = vector3(-175.0, 628.0, 114.0)
         for _, recipient in ipairs(recipients) do
-            local targetPlayer = RSGCore.Functions.GetPlayerByCitizenId(recipient.citizenid)
+            local targetPlayer = FDBCore.Functions.GetPlayerByCitizenId(recipient.citizenid)
             if targetPlayer then
                 local targetPed = GetPlayerPed(targetPlayer.PlayerData.source)
                 targetCoords = GetEntityCoords(targetPed)
@@ -469,8 +469,8 @@ AddEventHandler('rsg-telegram:server:ValidateBirdPostSend', function(sender, sen
         end
 
         RSGPlayer.Functions.RemoveItem(Config.BirdPostItem, 1)
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[Config.BirdPostItem], 'remove', 1)
-        TriggerClientEvent('rsg-telegram:client:StartBirdDelivery', src, targetCoords)
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[Config.BirdPostItem], 'remove', 1)
+        TriggerClientEvent('fdb-telegram:client:StartBirdDelivery', src, targetCoords)
 
         Wait(8000)
         Wait(Config.BirdArrivalDelay)
@@ -497,7 +497,7 @@ AddEventHandler('rsg-telegram:server:ValidateBirdPostSend', function(sender, sen
     
     -- Get target coords (if online, use their coords; if offline use a default location)
     local targetCoords = vector3(-175.0, 628.0, 114.0) -- Valentine default
-    local targetPlayer = RSGCore.Functions.GetPlayerByCitizenId(citizenid)
+    local targetPlayer = FDBCore.Functions.GetPlayerByCitizenId(citizenid)
     if targetPlayer then
         local targetPed = GetPlayerPed(targetPlayer.PlayerData.source)
         targetCoords = GetEntityCoords(targetPed)
@@ -505,10 +505,10 @@ AddEventHandler('rsg-telegram:server:ValidateBirdPostSend', function(sender, sen
 
     -- Remove bird post item FIRST
     RSGPlayer.Functions.RemoveItem(Config.BirdPostItem, 1)
-    TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[Config.BirdPostItem], 'remove', 1)
+    TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[Config.BirdPostItem], 'remove', 1)
 
     -- Trigger client bird spawn and delivery animation
-    TriggerClientEvent('rsg-telegram:client:StartBirdDelivery', src, targetCoords)
+    TriggerClientEvent('fdb-telegram:client:StartBirdDelivery', src, targetCoords)
 
     -- Wait for bird to fly away + arrival delay, then insert telegram
     Wait(8000) -- Wait for bird to fly away
@@ -533,10 +533,10 @@ AddEventHandler('rsg-telegram:server:ValidateBirdPostSend', function(sender, sen
 end)
 
 -- Check for Inbox
-RegisterServerEvent('rsg-telegram:server:CheckInbox')
-AddEventHandler('rsg-telegram:server:CheckInbox', function()
+RegisterServerEvent('fdb-telegram:server:CheckInbox')
+AddEventHandler('fdb-telegram:server:CheckInbox', function()
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
 
     if Player == nil then return end
 
@@ -547,13 +547,13 @@ AddEventHandler('rsg-telegram:server:CheckInbox', function()
 
         res['list'] = result or {}
 
-        TriggerClientEvent('rsg-telegram:client:InboxList', src, res)
+        TriggerClientEvent('fdb-telegram:client:InboxList', src, res)
     end)
 end)
 
 -- Get Messages from the Database
-RegisterServerEvent('rsg-telegram:server:GetMessages')
-AddEventHandler('rsg-telegram:server:GetMessages', function(tid)
+RegisterServerEvent('fdb-telegram:server:GetMessages')
+AddEventHandler('fdb-telegram:server:GetMessages', function(tid)
     local src = source
     local telegram = {}
 
@@ -582,12 +582,12 @@ AddEventHandler('rsg-telegram:server:GetMessages', function(tid)
     local state = Player(src).state
     state.telegramUnreadMessages = (state.telegramUnreadMessages or 0) - 1
 
-    TriggerClientEvent('rsg-telegram:client:MessageData', src, telegram)
+    TriggerClientEvent('fdb-telegram:client:MessageData', src, telegram)
 end)
 
 -- Delete Message
-RegisterServerEvent('rsg-telegram:server:DeleteMessage')
-AddEventHandler('rsg-telegram:server:DeleteMessage', function(tid)
+RegisterServerEvent('fdb-telegram:server:DeleteMessage')
+AddEventHandler('fdb-telegram:server:DeleteMessage', function(tid)
     local src = source
 
     local result = MySQL.query.await('SELECT * FROM telegrams WHERE id = @id',
@@ -611,14 +611,14 @@ AddEventHandler('rsg-telegram:server:DeleteMessage', function(tid)
     })
 
     TriggerClientEvent('ox_lib:notify', src, {title = locale("sv_title_38"), description = locale('sv_delete_success'), type = 'success', duration = 5000 })
-    TriggerClientEvent('rsg-telegram:client:ReadMessages', src)
+    TriggerClientEvent('fdb-telegram:client:ReadMessages', src)
 end)
 
 -- Get Players
-RSGCore.Functions.CreateCallback('rsg-telegram:server:GetPlayers', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-telegram:server:GetPlayers', function(source, cb)
     local players = {}
     local src = source
-    local xPlayer = RSGCore.Functions.GetPlayer(src)
+    local xPlayer = FDBCore.Functions.GetPlayer(src)
     exports.oxmysql:execute('SELECT * FROM `address_book` WHERE owner = @owner  ORDER BY name ASC', {
         ['@owner'] = xPlayer.PlayerData.citizenid
     }, function(result)
@@ -630,9 +630,9 @@ RSGCore.Functions.CreateCallback('rsg-telegram:server:GetPlayers', function(sour
     end)
 end)
 
-RSGCore.Functions.CreateCallback('rsg-telegram:server:GetPlayersPostOffice', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-telegram:server:GetPlayersPostOffice', function(source, cb)
     local src = source
-    local xPlayer = RSGCore.Functions.GetPlayer(src)
+    local xPlayer = FDBCore.Functions.GetPlayer(src)
     exports.oxmysql:execute('SELECT * FROM `address_book` WHERE owner = @owner  ORDER BY name ASC', {
         ['@owner'] = xPlayer.PlayerData.citizenid
     }, function(result)
@@ -644,10 +644,10 @@ RSGCore.Functions.CreateCallback('rsg-telegram:server:GetPlayersPostOffice', fun
     end)
 end)
 
-RegisterServerEvent('rsg-telegram:server:SavePerson')
-AddEventHandler('rsg-telegram:server:SavePerson', function(name,cid)
+RegisterServerEvent('fdb-telegram:server:SavePerson')
+AddEventHandler('fdb-telegram:server:SavePerson', function(name,cid)
     local src = source
-    local xPlayer = RSGCore.Functions.GetPlayer(src)
+    local xPlayer = FDBCore.Functions.GetPlayer(src)
     while xPlayer == nil do Wait(0) end
     
     -- Check if person already exists in address book
@@ -665,10 +665,10 @@ AddEventHandler('rsg-telegram:server:SavePerson', function(name,cid)
     TriggerClientEvent('ox_lib:notify', src, {title = locale("sv_title_38"), description = locale("sv_title_40"), type = 'success', duration = 5000 })
 end)
 
-RegisterServerEvent('rsg-telegram:server:RemovePerson')
-AddEventHandler('rsg-telegram:server:RemovePerson', function(cid)
+RegisterServerEvent('fdb-telegram:server:RemovePerson')
+AddEventHandler('fdb-telegram:server:RemovePerson', function(cid)
     local src = source
-    local xPlayer = RSGCore.Functions.GetPlayer(src)
+    local xPlayer = FDBCore.Functions.GetPlayer(src)
     while xPlayer == nil do Wait(0) end
     MySQL.Async.execute('DELETE FROM address_book WHERE owner like @owner AND citizenid like @citizenid',
     {
@@ -680,14 +680,14 @@ AddEventHandler('rsg-telegram:server:RemovePerson', function(cid)
 end)
 
 -- Commands
-RSGCore.Commands.Add('telegram', locale("sv_command_telegram"), {}, false, function(source)
+FDBCore.Commands.Add('telegram', locale("sv_command_telegram"), {}, false, function(source)
     local src = source
-    TriggerClientEvent('rsg-telegram:client:OpenTelegram', src)
+    TriggerClientEvent('fdb-telegram:client:OpenTelegram', src)
 end)
 
-RSGCore.Commands.Add('addressbook', locale("sv_command"), {}, false, function(source)
+FDBCore.Commands.Add('addressbook', locale("sv_command"), {}, false, function(source)
     local src = source
-    TriggerClientEvent('rsg-telegram:client:OpenAddressbook', src)
+    TriggerClientEvent('fdb-telegram:client:OpenAddressbook', src)
 end)
 
 -- ================================
@@ -695,9 +695,9 @@ end)
 -- ================================
 
 -- Get Inbox Messages
-RSGCore.Functions.CreateCallback('rsg-telegram:server:getInbox', function(source, cb, atPostOffice)
+FDBCore.Functions.CreateCallback('fdb-telegram:server:getInbox', function(source, cb, atPostOffice)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     
     if Player == nil then
         cb({})
@@ -721,9 +721,9 @@ RSGCore.Functions.CreateCallback('rsg-telegram:server:getInbox', function(source
 end)
 
 -- Get Job Inbox Messages
-RSGCore.Functions.CreateCallback('rsg-telegram:server:getJobInbox', function(source, cb, atPostOffice)
+FDBCore.Functions.CreateCallback('fdb-telegram:server:getJobInbox', function(source, cb, atPostOffice)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
 
     -- When job mailboxes are disabled, the UI receives an empty mailbox and aliases are ignored.
     if not Config.EnableJobMailboxes then
@@ -752,7 +752,7 @@ RSGCore.Functions.CreateCallback('rsg-telegram:server:getJobInbox', function(sou
 end)
 
 -- Get configured job recipients for the compose dropdown.
-RSGCore.Functions.CreateCallback('rsg-telegram:server:getJobRecipients', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-telegram:server:getJobRecipients', function(source, cb)
     local recipients = {}
 
     if Config.EnableJobMailboxes and Config.JobRecipients then
@@ -776,9 +776,9 @@ RSGCore.Functions.CreateCallback('rsg-telegram:server:getJobRecipients', functio
 end)
 
 -- Get job mailboxes the current player is allowed to send from.
-RSGCore.Functions.CreateCallback('rsg-telegram:server:getJobSenders', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-telegram:server:getJobSenders', function(source, cb)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     local senders = {}
 
     if not Player or not Config.EnableJobMailboxes or not Config.JobRecipients then
@@ -804,9 +804,9 @@ RSGCore.Functions.CreateCallback('rsg-telegram:server:getJobSenders', function(s
 end)
 
 -- Check for waiting messages at post office
-RSGCore.Functions.CreateCallback('rsg-telegram:server:checkWaitingMessages', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-telegram:server:checkWaitingMessages', function(source, cb)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     
     if Player == nil then
         cb(0)
@@ -822,10 +822,10 @@ RSGCore.Functions.CreateCallback('rsg-telegram:server:checkWaitingMessages', fun
 end)
 
 -- Pick up messages from post office
-RegisterServerEvent('rsg-telegram:server:pickupMessages')
-AddEventHandler('rsg-telegram:server:pickupMessages', function()
+RegisterServerEvent('fdb-telegram:server:pickupMessages')
+AddEventHandler('fdb-telegram:server:pickupMessages', function()
     local src = source
-    local RSGPlayer = RSGCore.Functions.GetPlayer(src)
+    local RSGPlayer = FDBCore.Functions.GetPlayer(src)
     
     if not RSGPlayer then return end
     
@@ -862,9 +862,9 @@ AddEventHandler('rsg-telegram:server:pickupMessages', function()
 end)
 
 -- Get Addressbook Contacts
-RSGCore.Functions.CreateCallback('rsg-telegram:server:getAddressbook', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-telegram:server:getAddressbook', function(source, cb)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     
     if Player == nil then
         cb({})
@@ -877,10 +877,10 @@ RSGCore.Functions.CreateCallback('rsg-telegram:server:getAddressbook', function(
 end)
 
 -- Mark Message as Read
-RegisterServerEvent('rsg-telegram:server:MarkAsRead')
-AddEventHandler('rsg-telegram:server:MarkAsRead', function(tid)
+RegisterServerEvent('fdb-telegram:server:MarkAsRead')
+AddEventHandler('fdb-telegram:server:MarkAsRead', function(tid)
     local src = source
-    local RSGPlayer = RSGCore.Functions.GetPlayer(src)
+    local RSGPlayer = FDBCore.Functions.GetPlayer(src)
     
     if RSGPlayer == nil then return end
 
@@ -907,9 +907,9 @@ AddEventHandler('rsg-telegram:server:MarkAsRead', function(tid)
 end)
 
 -- Legacy Callbacks (kept for compatibility)
-RSGCore.Functions.CreateCallback('rsg-telegram:server:GetPlayers', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-telegram:server:GetPlayers', function(source, cb)
     local src = source
-    local xPlayer = RSGCore.Functions.GetPlayer(src)
+    local xPlayer = FDBCore.Functions.GetPlayer(src)
     exports.oxmysql:execute('SELECT * FROM `address_book` WHERE owner = @owner  ORDER BY name ASC', {
         ['@owner'] = xPlayer.PlayerData.citizenid
     }, function(result)
@@ -921,9 +921,9 @@ RSGCore.Functions.CreateCallback('rsg-telegram:server:GetPlayers', function(sour
     end)
 end)
 
-RSGCore.Functions.CreateCallback('rsg-telegram:server:GetPlayersPostOffice', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-telegram:server:GetPlayersPostOffice', function(source, cb)
     local src = source
-    local xPlayer = RSGCore.Functions.GetPlayer(src)
+    local xPlayer = FDBCore.Functions.GetPlayer(src)
     exports.oxmysql:execute('SELECT * FROM `address_book` WHERE owner = @owner  ORDER BY name ASC', {
         ['@owner'] = xPlayer.PlayerData.citizenid
     }, function(result)
@@ -936,9 +936,9 @@ RSGCore.Functions.CreateCallback('rsg-telegram:server:GetPlayersPostOffice', fun
 end)
 
 -- Count telegrams for player
-RSGCore.Functions.CreateCallback('rsg-telegram:server:getTelegramsAmount', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-telegram:server:getTelegramsAmount', function(source, cb)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if Player ~= nil then
         -- Count both: unread messages (picked up) AND unpicked post office messages
         local result = MySQL.prepare.await('SELECT COUNT(*) FROM telegrams WHERE citizenid = ? AND ((status = ? OR birdstatus = ?) OR (fromPostOffice = 1 AND pickedUp = 0))', {Player.PlayerData.citizenid, 0, 0})

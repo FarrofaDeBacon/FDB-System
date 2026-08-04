@@ -2,7 +2,7 @@ local Config = lib.require('config')
 lib.locale()
 
 local function showMultijob()
-    local PlayerData = RSGCore.Functions.GetPlayerData()
+    local PlayerData = FDBCore.Functions.GetPlayerData()
 
     if PlayerData.metadata['injail'] > 0 then
         return lib.notify({
@@ -25,14 +25,14 @@ local function showMultijob()
                 icon = dutyIcon,
                 iconColor = colorIcon,
                 onSelect = function()
-                    TriggerServerEvent('RSGCore:ToggleDuty')
+                    TriggerServerEvent('FDBCore:ToggleDuty')
                     Wait(500)
                     showMultijob()
                 end,
             },
         },
     }
-    local myJobs = lib.callback.await('rsg-multijob:server:myJobs', false)
+    local myJobs = lib.callback.await('fdb-multijob:server:myJobs', false)
     if myJobs then
         for _, job in ipairs(myJobs) do
             local isDisabled = PlayerData.job.name == job.job
@@ -42,7 +42,7 @@ local function showMultijob()
                 icon = Config.JobIcons[job.job] or 'fa-solid fa-briefcase',
                 arrow = true,
                 disabled = isDisabled,
-                event = 'rsg-multijob:client:choiceMenu',
+                event = 'fdb-multijob:client:choiceMenu',
                 args = {jobLabel = job.jobLabel, job = job.job, grade = job.grade},
             }
         end
@@ -51,7 +51,7 @@ local function showMultijob()
     end
 end
 
-AddEventHandler('rsg-multijob:client:choiceMenu', function(args)
+AddEventHandler('fdb-multijob:client:choiceMenu', function(args)
     local displayChoices = {
         id = 'choice_menu',
         title = locale('cl_job_actions'),
@@ -62,7 +62,7 @@ AddEventHandler('rsg-multijob:client:choiceMenu', function(args)
                 description = (locale('cl_switch_your_job') .. ': %s'):format(args.jobLabel),
                 icon = 'fa-solid fa-circle-check',
                 onSelect = function()
-                    TriggerServerEvent('rsg-multijob:server:changeJob', args.job)
+                    TriggerServerEvent('fdb-multijob:server:changeJob', args.job)
                     Wait(100)
                     showMultijob()
                 end,
@@ -72,7 +72,7 @@ AddEventHandler('rsg-multijob:client:choiceMenu', function(args)
                 description = (locale('cl_delete_selected_job') .. ': %s'):format(args.jobLabel),
                 icon = 'fa-solid fa-trash-can',
                 onSelect = function()
-                    TriggerServerEvent('rsg-multijob:server:deleteJob', args.job)
+                    TriggerServerEvent('fdb-multijob:server:deleteJob', args.job)
                     Wait(100)
                     showMultijob()
                 end,
@@ -83,10 +83,10 @@ AddEventHandler('rsg-multijob:client:choiceMenu', function(args)
     lib.showContext('choice_menu')
 end)
 
-RegisterNetEvent('RSGCore:Client:OnJobUpdate', function(JobInfo)
-    TriggerServerEvent('rsg-multijob:server:newJob', JobInfo)
+RegisterNetEvent('FDBCore:Client:OnJobUpdate', function(JobInfo)
+    TriggerServerEvent('fdb-multijob:server:newJob', JobInfo)
 end)
 
-RegisterNetEvent('rsg-multijob:client:openmenu', function()
+RegisterNetEvent('fdb-multijob:client:openmenu', function()
 	showMultijob()
 end)

@@ -1,4 +1,4 @@
-﻿# fdb-horses Documentation 
+# fdb-horses Documentation 
 **Framework:** RSG Core (RedM)  
 **License:** GPL-3.0
 
@@ -46,27 +46,27 @@
 ## Features
 
 ### Core Features
-- âœ… **Multiple Stables** - 9 pre-configured stable locations (Valentine, Blackwater, Saint Denis, Rhodes, Strawberry, Tumbleweed, Van Horn, Emerald Ranch, Colter)
-- âœ… **Horse Customization** - 10 customizable component categories
-- âœ… **Horse Inventory** - saddlebags with level-based weight/slots
-- âœ… **Usable Items** - brush, lantern, feed items, stimulant, reviver
-- âœ… **Dynamic Stats** - health/stamina/speed scale with XP
-- âœ… **Horse Actions** - lay down, play tricks, drink, graze (XP-gated)
-- âœ… **Horse Gender** - male (gelding) or female (mare)
-- âœ… **Fleeing** - horses can flee and optionally auto-store
-- âœ… **Blips** - horses show on map with their name
-- âœ… **Target Support** - ox_target integration for NPC horses
-- âœ… **Prompt System** - native RedM prompts for actions
+- ✅ **Multiple Stables** - 9 pre-configured stable locations (Valentine, Blackwater, Saint Denis, Rhodes, Strawberry, Tumbleweed, Van Horn, Emerald Ranch, Colter)
+- ✅ **Horse Customization** - 10 customizable component categories
+- ✅ **Horse Inventory** - saddlebags with level-based weight/slots
+- ✅ **Usable Items** - brush, lantern, feed items, stimulant, reviver
+- ✅ **Dynamic Stats** - health/stamina/speed scale with XP
+- ✅ **Horse Actions** - lay down, play tricks, drink, graze (XP-gated)
+- ✅ **Horse Gender** - male (gelding) or female (mare)
+- ✅ **Fleeing** - horses can flee and optionally auto-store
+- ✅ **Blips** - horses show on map with their name
+- ✅ **Target Support** - ox_target integration for NPC horses
+- ✅ **Prompt System** - native RedM prompts for actions
 
 ### Advanced Features
-- âœ… **Server-Side Validation** - ownership, component, and trade security
-- âœ… **Routing Buckets** - customization happens in isolated instances
-- âœ… **Upkeep System** - automatic age checking and death handling
-- âœ… **Telegram Integration** - death notifications via in-game telegrams
-- âœ… **Grace Period** - 60-second window to revive dead horses
-- âœ… **Road Spawning** - optional spawn-on-road-only mode
-- âœ… **Auto-Mount** - optional auto-mount on spawn
-- âœ… **Persistent Stock** - shop stock can persist across restarts
+- ✅ **Server-Side Validation** - ownership, component, and trade security
+- ✅ **Routing Buckets** - customization happens in isolated instances
+- ✅ **Upkeep System** - automatic age checking and death handling
+- ✅ **Telegram Integration** - death notifications via in-game telegrams
+- ✅ **Grace Period** - 60-second window to revive dead horses
+- ✅ **Road Spawning** - optional spawn-on-road-only mode
+- ✅ **Auto-Mount** - optional auto-mount on spawn
+- ✅ **Persistent Stock** - shop stock can persist across restarts
 
 ---
 
@@ -75,7 +75,7 @@
 ### Required
 | Resource | Purpose | Link |
 |----------|---------|------|
-| **rsg-core** | Core framework | [GitHub](https://github.com/Rexshack-RedM/rsg-core) |
+| **fdb-core** | Core framework | [GitHub](https://github.com/Rexshack-RedM/fdb-core) |
 | **fdb-inventory** | Inventory system & horse saddlebags | [GitHub](https://github.com/Rexshack-RedM/fdb-inventory) |
 | **ox_lib** | Menus, prompts, callbacks, locales | [GitHub](https://github.com/overextended/ox_lib) |
 | **oxmysql** | MySQL wrapper | [GitHub](https://github.com/overextended/oxmysql) |
@@ -84,7 +84,7 @@
 | Resource | Purpose |
 |----------|---------|
 | **ox_target** | Targeting for stable NPCs and horses |
-| **rsg-menubase** | Legacy menu system (used for customization UI) |
+| **fdb-menubase** | Legacy menu system (used for customization UI) |
 
 ---
 
@@ -139,7 +139,7 @@ Add these to your `fdb-inventory/shared/items.lua`:
 ```cfg
 ensure ox_lib
 ensure oxmysql
-ensure rsg-core
+ensure fdb-core
 ensure fdb-inventory
 ensure fdb-horses
 ```
@@ -327,12 +327,12 @@ Defines all customization components (saddles, blankets, etc.). Each entry has:
 
 ```
 client/
-â”œâ”€â”€ client.lua      # Main client logic (spawn, menu, prompts)
-â”œâ”€â”€ horses.lua      # Stable horse spawning & purchase
-â”œâ”€â”€ action.lua      # Interactive actions (drink, graze)
-â”œâ”€â”€ horseinfo.lua   # Horse info display
-â”œâ”€â”€ npcs.lua        # Stable NPC spawning
-â””â”€â”€ dataview.lua    # Native data handling
+├── client.lua      # Main client logic (spawn, menu, prompts)
+├── horses.lua      # Stable horse spawning & purchase
+├── action.lua      # Interactive actions (drink, graze)
+├── horseinfo.lua   # Horse info display
+├── npcs.lua        # Stable NPC spawning
+└── dataview.lua    # Native data handling
 ```
 
 ### Key Functions
@@ -360,7 +360,7 @@ Creates native prompts for horse interaction:
 - **Saddlebag** - Always available
 
 #### `MainMenu(horses, horsedata)`
-Opens customization menu using `rsg-menubase`:
+Opens customization menu using `fdb-menubase`:
 - Component selection
 - Real-time preview
 - Price calculation
@@ -380,8 +380,8 @@ Pathfinds horse to player and stops when within 7 meters.
 
 ```
 server/
-â”œâ”€â”€ server.lua          # Main server logic
-â””â”€â”€ versionchecker.lua  # Version checking
+├── server.lua          # Main server logic
+└── versionchecker.lua  # Version checking
 ```
 
 ### Security Features
@@ -443,7 +443,7 @@ Validates component data against `horse_comp.lua` to prevent exploits.
 3. Delete horse inventory
 4. Delete horse from database
 5. Send telegram notification
-6. Log to rsg-log
+6. Log to fdb-log
 
 ### Upkeep System (`UpkeepInterval()`)
 
@@ -474,7 +474,7 @@ Runs every `Config.CheckCycle` minutes:
 
 | Key | Action | Notes |
 |-----|--------|-------|
-| **H** | Call/Whistle Horse | Default RSGCore keybind |
+| **H** | Call/Whistle Horse | Default FDBCore keybind |
 | **G** | Open Horse Inventory | `Config.HorseInvKey` |
 | **J** | Alternative Call | `Config.KeyBind` (configurable) |
 | **Left/Right Arrow** | Rotate Horse | During customization |
@@ -497,7 +497,7 @@ Runs every `Config.CheckCycle` minutes:
 
 #### **horse_brush**
 ```lua
-RSGCore.Functions.CreateUseableItem('horse_brush', function(source, item)
+FDBCore.Functions.CreateUseableItem('horse_brush', function(source, item)
     TriggerClientEvent('fdb-horses:client:playerbrushhorse', source, item.name)
 end)
 ```
@@ -507,7 +507,7 @@ end)
 
 #### **horse_lantern**
 ```lua
-RSGCore.Functions.CreateUseableItem('horse_lantern', function(source, item)
+FDBCore.Functions.CreateUseableItem('horse_lantern', function(source, item)
     TriggerClientEvent('fdb-horses:client:equipHorseLantern', source, item.name)
 end)
 ```
@@ -516,7 +516,7 @@ end)
 
 #### **Feed Items** (carrot, apple, sugarcube, haysnack, horsemeal, stimulant)
 ```lua
-RSGCore.Functions.CreateUseableItem('sugarcube', function(source, item)
+FDBCore.Functions.CreateUseableItem('sugarcube', function(source, item)
     if Player.Functions.RemoveItem(item.name, 1, item.slot) then
         TriggerClientEvent('fdb-horses:client:playerfeedhorse', source, item.name)
     end
@@ -528,7 +528,7 @@ end)
 
 #### **horse_reviver**
 ```lua
-RSGCore.Functions.CreateUseableItem('horse_reviver', function(source, item)
+FDBCore.Functions.CreateUseableItem('horse_reviver', function(source, item)
     TriggerClientEvent('fdb-horses:client:revivehorse', src, item, result[1])
 end)
 ```
@@ -565,7 +565,7 @@ Health and stamina scale directly with XP value.
 
 ### XP Gain Methods
 
-**Note:** XP gain requires integration with `rsg-horsetrainer` or similar resource. Base script tracks XP but doesn't provide native earning methods.
+**Note:** XP gain requires integration with `fdb-horsetrainer` or similar resource. Base script tracks XP but doesn't provide native earning methods.
 
 **Common XP sources (via other resources):**
 - Horse trainer NPC interaction
@@ -649,9 +649,9 @@ end
 ```
 
 **Example:**
-- Change saddle (index 0 â†’ 5): $2
-- Change blanket (index 0 â†’ 3): $5
-- Change stirrups (index 2 â†’ 8): $4
+- Change saddle (index 0 → 5): $2
+- Change blanket (index 0 → 3): $5
+- Change stirrups (index 2 → 8): $4
 - **Total:** $11
 
 ---
@@ -721,7 +721,7 @@ end
 1. **Horse deleted** from database
 2. **Inventory cleared** (all items in saddlebags deleted)
 3. **Telegram sent** to owner
-4. **Log created** (via rsg-log)
+4. **Log created** (via fdb-log)
 5. **Client cleanup** (blip removed, ped deleted)
 
 ### Aging System
@@ -801,7 +801,7 @@ end
 Fetch all horses for a player.
 
 ```lua
-RSGCore.Functions.TriggerCallback('fdb-horses:server:GetAllHorses', function(horses)
+FDBCore.Functions.TriggerCallback('fdb-horses:server:GetAllHorses', function(horses)
     for i, horse in ipairs(horses) do
         print(horse.name, horse.horsexp, horse.stable)
     end
@@ -812,7 +812,7 @@ end)
 Fetch the active horse.
 
 ```lua
-RSGCore.Functions.TriggerCallback('fdb-horses:server:GetActiveHorse', function(horse)
+FDBCore.Functions.TriggerCallback('fdb-horses:server:GetActiveHorse', function(horse)
     if horse then
         print("Active horse:", horse.name)
     end
@@ -823,7 +823,7 @@ end)
 Fetch active horse components.
 
 ```lua
-RSGCore.Functions.TriggerCallback('fdb-horses:server:CheckComponents', function(horse)
+FDBCore.Functions.TriggerCallback('fdb-horses:server:CheckComponents', function(horse)
     local components = json.decode(horse.components)
     print("Saddle:", components.saddles)
 end)

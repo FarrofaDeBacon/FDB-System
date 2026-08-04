@@ -1,4 +1,4 @@
-local resourceName = 'rsg-core'
+local resourceName = 'fdb-core'
 
 if not GetResourceState(resourceName):find('start') then return end
 
@@ -7,7 +7,7 @@ SetTimeout(0, function()
 
     GetPlayer = RSG.Functions.GetPlayer
 
-    if GetResourceState('rsg-inventory') == 'missing' then
+    if GetResourceState('fdb-inventory') == 'missing' then
         function RemoveItem(playerId, item, slot)
             local player = GetPlayer(playerId)
 

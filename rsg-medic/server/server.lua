@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
 ---------------------------------
@@ -10,13 +10,13 @@ CreateThread(function()
     Wait(0)
 
     if GetResourceState('saltychat') ~= 'started' then
-        print('^1[rsg-medic] Config.SaltyChat is enabled, but saltychat is not started. Start saltychat before rsg-medic.^0')
+        print('^1[fdb-medic] Config.SaltyChat is enabled, but saltychat is not started. Start saltychat before fdb-medic.^0')
     elseif Config.Debug then
-        print('^2[rsg-medic] SaltyChat death voice integration enabled.^0')
+        print('^2[fdb-medic] SaltyChat death voice integration enabled.^0')
     end
 end)
 
-RegisterNetEvent('rsg-medic:server:setSaltyChatAlive', function(isAlive)
+RegisterNetEvent('fdb-medic:server:setSaltyChatAlive', function(isAlive)
     if not Config.SaltyChat then return end
 
     local src = source
@@ -24,7 +24,7 @@ RegisterNetEvent('rsg-medic:server:setSaltyChatAlive', function(isAlive)
 
     if GetResourceState('saltychat') ~= 'started' then
         if Config.Debug then
-            print('[rsg-medic] SaltyChat integration is enabled, but saltychat is not started')
+            print('[fdb-medic] SaltyChat integration is enabled, but saltychat is not started')
         end
         return
     end
@@ -32,88 +32,88 @@ RegisterNetEvent('rsg-medic:server:setSaltyChatAlive', function(isAlive)
     exports['saltychat']:SetPlayerAlive(src, isAlive)
 
     if Config.Debug then
-        print(('[rsg-medic] SaltyChat player %s alive state set to %s'):format(src, isAlive))
+        print(('[fdb-medic] SaltyChat player %s alive state set to %s'):format(src, isAlive))
     end
 end)
 
 -----------------------
 -- use bandage
 -----------------------
-RSGCore.Functions.CreateUseableItem('bandage', function(source, item)
+FDBCore.Functions.CreateUseableItem('bandage', function(source, item)
     local src = source
-    TriggerClientEvent('rsg-medic:client:usebandage', src, item.name)
+    TriggerClientEvent('fdb-medic:client:usebandage', src, item.name)
 end)
 
 ---------------------------------
 -- medic storage
 ---------------------------------
-RegisterNetEvent('rsg-medic:server:openstash', function(location)
+RegisterNetEvent('fdb-medic:server:openstash', function(location)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     local data = { label = locale('sv_medical_storage'), maxweight = Config.StorageMaxWeight, slots = Config.StorageMaxSlots }
     local stashName = 'medic_' .. location
-    exports['rsg-inventory']:OpenInventory(src, stashName, data)
+    exports['fdb-inventory']:OpenInventory(src, stashName, data)
 end)
 
 ----------------------------------
 -- Admin Revive Player
 ----------------------------------
-RSGCore.Commands.Add('revive', locale('sv_revive'), {{name = 'id', help = locale('sv_revive_2')}}, false, function(source, args)
+FDBCore.Commands.Add('revive', locale('sv_revive'), {{name = 'id', help = locale('sv_revive_2')}}, false, function(source, args)
     local src = source
 
     if not args[1] then
-        TriggerClientEvent('rsg-medic:client:adminRevive', src)
+        TriggerClientEvent('fdb-medic:client:adminRevive', src)
         return
     end
 
-    local Player = RSGCore.Functions.GetPlayer(tonumber(args[1]))
+    local Player = FDBCore.Functions.GetPlayer(tonumber(args[1]))
     if not Player then
         TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_no_online'), type = 'error', duration = 7000 })
         return
     end
 
-    TriggerClientEvent('rsg-medic:client:adminRevive', Player.PlayerData.source)
+    TriggerClientEvent('fdb-medic:client:adminRevive', Player.PlayerData.source)
 end, 'admin')
 
 -- Admin Kill Player
-RSGCore.Commands.Add('kill', locale('sv_kill'), {{name = 'id', help = locale('sv_kill_id')}}, true, function(source, args)
+FDBCore.Commands.Add('kill', locale('sv_kill'), {{name = 'id', help = locale('sv_kill_id')}}, true, function(source, args)
     local src = source
     local target = tonumber(args[1])
 
-    local Player = RSGCore.Functions.GetPlayer(target)
+    local Player = FDBCore.Functions.GetPlayer(target)
     if not Player then
         TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_no_online'), type = 'error', duration = 7000 })
         return
     end
 
-    TriggerClientEvent('rsg-medic:client:KillPlayer', Player.PlayerData.source)
+    TriggerClientEvent('fdb-medic:client:KillPlayer', Player.PlayerData.source)
 end, 'admin')
 
-RSGCore.Commands.Add('heal', locale('sv_heal'), {{name = 'id', help = locale('sv_heal_2')}}, false, function(source, args)
+FDBCore.Commands.Add('heal', locale('sv_heal'), {{name = 'id', help = locale('sv_heal_2')}}, false, function(source, args)
     local src = source
 
     if not args[1] then
-        TriggerClientEvent('rsg-medic:client:adminHeal', src)
+        TriggerClientEvent('fdb-medic:client:adminHeal', src)
         return
     end
 
-    local Player = RSGCore.Functions.GetPlayer(tonumber(args[1]))
+    local Player = FDBCore.Functions.GetPlayer(tonumber(args[1]))
     if not Player then
         TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_no_online'), type = 'error', duration = 7000 })
         return
     end
 
-    TriggerClientEvent('rsg-medic:client:adminHeal', Player.PlayerData.source)
+    TriggerClientEvent('fdb-medic:client:adminHeal', Player.PlayerData.source)
 end, 'admin')
 
 ----------------------
 -- EVENTS 
 -----------------------
 -- Death Actions: Remove Inventory / Cash
-RegisterNetEvent('rsg-medic:server:deathactions', function()
+RegisterNetEvent('fdb-medic:server:deathactions', function()
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
 
     if Config.WipeInventoryOnRespawn then
         Player.Functions.ClearInventory()
@@ -132,10 +132,10 @@ RegisterNetEvent('rsg-medic:server:deathactions', function()
 end)
 
 -- Medic Revive Player
-RegisterNetEvent('rsg-medic:server:RevivePlayer', function(playerId)
+RegisterNetEvent('fdb-medic:server:RevivePlayer', function(playerId)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
-    local Patient = RSGCore.Functions.GetPlayer(playerId)
+    local Player = FDBCore.Functions.GetPlayer(src)
+    local Patient = FDBCore.Functions.GetPlayer(playerId)
 
     if not Patient then return end
 
@@ -145,16 +145,16 @@ RegisterNetEvent('rsg-medic:server:RevivePlayer', function(playerId)
     end
 
     if Player.Functions.RemoveItem('firstaid', 1) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items['firstaid'], 'remove')
-        TriggerClientEvent('rsg-medic:client:playerRevive', Patient.PlayerData.source)
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items['firstaid'], 'remove')
+        TriggerClientEvent('fdb-medic:client:playerRevive', Patient.PlayerData.source)
     end
 end)
 
 -- Medic Treat Wounds
-RegisterNetEvent('rsg-medic:server:TreatWounds', function(playerId)
+RegisterNetEvent('fdb-medic:server:TreatWounds', function(playerId)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
-    local Patient = RSGCore.Functions.GetPlayer(playerId)
+    local Player = FDBCore.Functions.GetPlayer(src)
+    local Patient = FDBCore.Functions.GetPlayer(playerId)
 
     if not Patient then return end
 
@@ -164,21 +164,21 @@ RegisterNetEvent('rsg-medic:server:TreatWounds', function(playerId)
     end
 
     if Player.Functions.RemoveItem('bandage', 1) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items['bandage'], 'remove')
-        TriggerClientEvent('rsg-medic:client:HealInjuries', Patient.PlayerData.source)
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items['bandage'], 'remove')
+        TriggerClientEvent('fdb-medic:client:HealInjuries', Patient.PlayerData.source)
     end
 end)
 
 -- Medic Alert
-RegisterNetEvent('rsg-medic:server:medicAlert', function(text)
+RegisterNetEvent('fdb-medic:server:medicAlert', function(text)
     local src = source
     local ped = GetPlayerPed(src)
     local coords = GetEntityCoords(ped)
-    local players = RSGCore.Functions.GetRSGPlayers()
+    local players = FDBCore.Functions.GetRSGPlayers()
 
     for _, v in pairs(players) do
         if v.PlayerData.job.name == 'medic' and v.PlayerData.job.onduty then
-            TriggerClientEvent('rsg-medic:client:medicAlert', v.PlayerData.source, coords, text)
+            TriggerClientEvent('fdb-medic:client:medicAlert', v.PlayerData.source, coords, text)
         end
     end
 end)
@@ -186,9 +186,9 @@ end)
 --------------------------
 -- Medics On-Duty Callback
 -------------------------
-RSGCore.Functions.CreateCallback('rsg-medic:server:getmedics', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-medic:server:getmedics', function(source, cb)
     local amount = 0
-    local players = RSGCore.Functions.GetRSGPlayers()
+    local players = FDBCore.Functions.GetRSGPlayers()
     for k, v in pairs(players) do
         if v.PlayerData.job.name == Config.JobRequired and v.PlayerData.job.onduty then
             amount = amount + 1
@@ -200,10 +200,10 @@ end)
 ---------------------------------
 -- remove item
 ---------------------------------
-RegisterServerEvent('rsg-medic:server:removeitem', function(item, amount)
+RegisterServerEvent('fdb-medic:server:removeitem', function(item, amount)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     Player.Functions.RemoveItem(item, amount)
-    TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[item], 'remove', amount)
+    TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[item], 'remove', amount)
 end)

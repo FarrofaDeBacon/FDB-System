@@ -75,7 +75,7 @@ Inventory.GetIdentifier = function(inventoryId, src)
 end
 
 Inventory.CheckWeapon = function(source, item)
-    -- SECURITY/RENAME FIX: previously this fired 'rsg-weapons:client:UseWeapon',
+    -- SECURITY/RENAME FIX: previously this fired 'fdb-weapons:client:UseWeapon',
     -- which nothing listens to anymore after the fdb-weapons rename, so a weapon
     -- that left the inventory (moved, dropped, traded) never actually left the
     -- player's hand. Now we resolve the real serial (when available) and use
@@ -95,7 +95,7 @@ Inventory.CheckWeapon = function(source, item)
         else
             -- No serial available (caller only passed the item name) - warn so
             -- this gets caught in testing rather than silently doing nothing.
-            print(("^1[rsg-inventory] Inventory.CheckWeapon: no serial available for '%s' (source %s) - weapon may remain in hand^7"):format(tostring(currentWeaponName), tostring(source)))
+            print(("^1[fdb-inventory] Inventory.CheckWeapon: no serial available for '%s' (source %s) - weapon may remain in hand^7"):format(tostring(currentWeaponName), tostring(source)))
         end
     end
 end

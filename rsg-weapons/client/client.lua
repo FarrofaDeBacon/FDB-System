@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 local UsedWeapons = {}
 local weaponInHands = {}
@@ -121,12 +121,12 @@ end
 ------------------------------------------
 -- use weapon
 ------------------------------------------
-RegisterNetEvent('rsg-weapons:client:UseWeapon', function(weaponData)
+RegisterNetEvent('fdb-weapons:client:UseWeapon', function(weaponData)
     local weaponName = tostring(weaponData.name)
     local hash = joaat(weaponData.name)
     local wepSerial = tostring(weaponData.info.serie)
     local wepQuality = weaponData.info.quality
-    local EquippedWeapons = exports['rsg-weapons']:EquippedWeapons() or {}
+    local EquippedWeapons = exports['fdb-weapons']:EquippedWeapons() or {}
     local isWeaponAGun = Citizen.InvokeNative(0x705BE297EEBDB95D, hash)
     local isWeaponOneHanded = Citizen.InvokeNative(0xD955FEE4B87AFA07, hash)
 
@@ -167,11 +167,11 @@ RegisterNetEvent('rsg-weapons:client:UseWeapon', function(weaponData)
             currentWeaponSerial = wepSerial
             weaponInHands[hash] = wepSerial
             if Config.SaveEquippedWeapons then
-                TriggerServerEvent('rsg-weapons:server:saveEquippedWeapon', weaponData, true)
+                TriggerServerEvent('fdb-weapons:server:saveEquippedWeapon', weaponData, true)
             end
 
             if Config.WeaponComponents then
-                TriggerServerEvent('rsg-weaponcomp:server:check_comps')
+                TriggerServerEvent('fdb-weaponcomp:server:check_comps')
             end
         else
             if Config.Debug then
@@ -180,7 +180,7 @@ RegisterNetEvent('rsg-weapons:client:UseWeapon', function(weaponData)
             WeaponAPI.RemoveWeaponFromPeds(weaponName, wepSerial)
             UsedWeapons[wepSerial] = nil
             if Config.SaveEquippedWeapons then
-                TriggerServerEvent('rsg-weapons:server:saveEquippedWeapon', weaponData, false)
+                TriggerServerEvent('fdb-weapons:server:saveEquippedWeapon', weaponData, false)
             end
         end
 
@@ -200,12 +200,12 @@ RegisterNetEvent('rsg-weapons:client:UseWeapon', function(weaponData)
     else
         WeaponAPI.RemoveWeaponFromPeds(weaponName, wepSerial)
         UsedWeapons[wepSerial] = nil
-        TriggerEvent('rsg-weapons:client:brokenweapon', wepSerial)
+        TriggerEvent('fdb-weapons:client:brokenweapon', wepSerial)
 
         if Config.WeaponComponents then -- false need /loadweapon load
-            TriggerServerEvent("rsg-weaponcomp:server:removeComponents", "DEFAULT", weaponName, wepSerial)
+            TriggerServerEvent("fdb-weaponcomp:server:removeComponents", "DEFAULT", weaponName, wepSerial)
             Wait(0)
-            TriggerServerEvent('rsg-weaponcomp:server:check_comps')
+            TriggerServerEvent('fdb-weaponcomp:server:check_comps')
         end
 
         lib.notify({ title = locale('cl_weapon_degraded'), type = 'error', duration = 5000 })
@@ -213,11 +213,11 @@ RegisterNetEvent('rsg-weapons:client:UseWeapon', function(weaponData)
     end
 end)
 
-RegisterNetEvent('rsg-weapons:client:UseThrownWeapon', function(weaponData) 
+RegisterNetEvent('fdb-weapons:client:UseThrownWeapon', function(weaponData) 
     local weaponName = tostring(weaponData.name)
     local hash = joaat(weaponData.name)
     local ammoType = Config.ThrowableWeaponAmmoTypes[weaponName]
-    local ammoDefinition = exports['rsg-ammo']:GetAmmoTypes()[ammoType]
+    local ammoDefinition = exports['fdb-ammo']:GetAmmoTypes()[ammoType]
     if not ammoDefinition then 
         --notify
         lib.print.info('neni defi', ammoType, weaponName)
@@ -237,10 +237,10 @@ RegisterNetEvent('rsg-weapons:client:UseThrownWeapon', function(weaponData)
 
     AddAmmoToPedByType(cache.ped, ammoDefinition.hash, ammoDefinition.refill)
     SetCurrentPedWeapon(cache.ped, hash, true)
-    TriggerServerEvent('rsg-weapons:server:removeitem', weaponName, 1)
+    TriggerServerEvent('fdb-weapons:server:removeitem', weaponName, 1)
 end)
 
-RegisterNetEvent('rsg-weapons:client:UseEquipment', function(weaponData) 
+RegisterNetEvent('fdb-weapons:client:UseEquipment', function(weaponData) 
     local weaponName = tostring(weaponData.name)
     local hash = joaat(weaponData.name)
 
@@ -248,7 +248,7 @@ RegisterNetEvent('rsg-weapons:client:UseEquipment', function(weaponData)
         if not HasPedGotWeapon(cache.ped, hash) then
             GiveWeaponToPed(cache.ped, hash, 0, false, true)
             SetCurrentPedWeapon(cache.ped, hash, true)
-            TriggerServerEvent('rsg-weapons:server:removeitem', weaponName, 1)
+            TriggerServerEvent('fdb-weapons:server:removeitem', weaponName, 1)
         end
 
         return
@@ -258,12 +258,12 @@ RegisterNetEvent('rsg-weapons:client:UseEquipment', function(weaponData)
         GiveWeaponToPed(cache.ped, hash, 0, false, true)
         SetCurrentPedWeapon(cache.ped, hash, true)
         if Config.SaveEquippedWeapons then
-            TriggerServerEvent('rsg-weapons:server:saveEquippedKnife', weaponName, true)
+            TriggerServerEvent('fdb-weapons:server:saveEquippedKnife', weaponName, true)
         end
     else
         RemoveWeaponFromPed(cache.ped, hash)
         if Config.SaveEquippedWeapons then
-            TriggerServerEvent('rsg-weapons:server:saveEquippedKnife', weaponName, false)
+            TriggerServerEvent('fdb-weapons:server:saveEquippedKnife', weaponName, false)
         end
     end
 end)
@@ -288,7 +288,7 @@ CreateThread(function()
     while true do
         Wait(Config.UpdateDegrade) 
         if next(degradeQueue) ~= nil then
-            TriggerServerEvent('rsg-weapons:server:degradeWeapon', degradeQueue)
+            TriggerServerEvent('fdb-weapons:server:degradeWeapon', degradeQueue)
             degradeQueue = {}
         end
     end
@@ -337,10 +337,10 @@ end)
 ------------------------------------------
 -- repair weapon
 ------------------------------------------
-RegisterNetEvent('rsg-weapons:client:repairweapon', function()
+RegisterNetEvent('fdb-weapons:client:repairweapon', function()
     local heldWeapon = Citizen.InvokeNative(0x8425C5F057012DAB, cache.ped) -- GetPedCurrentHeldWeapon(
     local currentSerial = weaponInHands[heldWeapon]
-    local hasItem = RSGCore.Functions.HasItem('weapon_repair_kit', 1)
+    local hasItem = FDBCore.Functions.HasItem('weapon_repair_kit', 1)
     if hasItem and currentSerial ~= nil and heldWeapon ~= -1569615261 then
         LocalPlayer.state:set("inv_busy", true, true) -- lock inventory
         lib.progressBar({
@@ -354,7 +354,7 @@ RegisterNetEvent('rsg-weapons:client:repairweapon', function()
             },
             label = locale('cl_repairing_weapon'),
         })
-        TriggerServerEvent('rsg-weapons:server:repairweapon', currentSerial)
+        TriggerServerEvent('fdb-weapons:server:repairweapon', currentSerial)
         LocalPlayer.state:set("inv_busy", false, true) -- unlock inventory
     else
         lib.notify({ title = locale('cl_no_weapon_found'), description = locale('cl_no_weapon_found_desc'), type = 'inform', icon = 'fa-solid fa-gun', iconAnimation = 'shake', duration = 7000 })
@@ -364,7 +364,7 @@ end)
 ------------------------------------------
 -- broken repair weapon choice yes/no
 ------------------------------------------
-RegisterNetEvent('rsg-weapons:client:brokenweapon', function(serial)
+RegisterNetEvent('fdb-weapons:client:brokenweapon', function(serial)
     local input = lib.inputDialog(locale('cl_weapon_repair'), {
         {
             type = 'select',
@@ -378,16 +378,16 @@ RegisterNetEvent('rsg-weapons:client:brokenweapon', function(serial)
     })
     if not input then return end
     if input[1] == 'yes' then
-        TriggerEvent('rsg-weapons:client:repairbrokenweapon', serial)
+        TriggerEvent('fdb-weapons:client:repairbrokenweapon', serial)
     end
 end)
 
 ------------------------------------------
 -- repair broken weapon
 ------------------------------------------
-RegisterNetEvent('rsg-weapons:client:repairbrokenweapon', function(serial)
+RegisterNetEvent('fdb-weapons:client:repairbrokenweapon', function(serial)
 
-    local hasItem = RSGCore.Functions.HasItem('weapon_repair_kit', 1)
+    local hasItem = FDBCore.Functions.HasItem('weapon_repair_kit', 1)
     if hasItem and serial ~= nil then
         LocalPlayer.state:set("inv_busy", true, true) -- lock inventory
         lib.progressBar({
@@ -401,7 +401,7 @@ RegisterNetEvent('rsg-weapons:client:repairbrokenweapon', function(serial)
             },
             label = locale('cl_repairing_weapon'),
         })
-        TriggerServerEvent('rsg-weapons:server:repairweapon', serial)
+        TriggerServerEvent('fdb-weapons:server:repairweapon', serial)
         LocalPlayer.state:set("inv_busy", false, true) -- unlock inventory
     else
         lib.notify({ title = locale('cl_item_need'), description = locale('cl_item_need_desc'), type = 'inform', icon = 'fa-solid fa-gun', iconAnimation = 'shake', duration = 7000 } )
@@ -414,10 +414,10 @@ end)
 local infinityOn = false
 
 RegisterCommand('infinityammo', function()
-    TriggerServerEvent('rsg-weapons:requestToggle')
+    TriggerServerEvent('fdb-weapons:requestToggle')
 end, false)
 
-RegisterNetEvent('rsg-weapons:toggle', function()
+RegisterNetEvent('fdb-weapons:toggle', function()
     local ped = PlayerPedId()
     local hasWeapon, weaponHash = GetCurrentPedWeapon(ped, true)
     if hasWeapon and weaponHash ~= `WEAPON_UNARMED` then
@@ -455,32 +455,32 @@ CreateThread(function()
     end
 end)
 
-RegisterNetEvent('RSGCore:Client:OnPlayerLoaded', function()
+RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', function()
     if not Config.SaveEquippedWeapons then return end
     CreateThread(function()
-        while not RSGCore.Functions.GetPlayerData().citizenid or not RSGCore.Functions.GetPlayerData().items do
+        while not FDBCore.Functions.GetPlayerData().citizenid or not FDBCore.Functions.GetPlayerData().items do
             Wait(100)
         end
         Wait(5000)
-        RSGCore.Functions.TriggerCallback('rsg-weapons:server:getEquippedWeapons', function(equippedWeapons)
+        FDBCore.Functions.TriggerCallback('fdb-weapons:server:getEquippedWeapons', function(equippedWeapons)
             if equippedWeapons and next(equippedWeapons) ~= nil then
                 for serial, _ in pairs(equippedWeapons) do
-                    RSGCore.Functions.TriggerCallback('rsg-weapons:server:getWeaponBySerial', function(weaponData)
+                    FDBCore.Functions.TriggerCallback('fdb-weapons:server:getWeaponBySerial', function(weaponData)
                         if weaponData and weaponData.info and weaponData.info.quality > 1 then
                             Wait(500)
-                            TriggerEvent('rsg-weapons:client:UseWeapon', weaponData)
+                            TriggerEvent('fdb-weapons:client:UseWeapon', weaponData)
                         end
                     end, serial)
                     Wait(1000)
                 end
             end
         end)
-        RSGCore.Functions.TriggerCallback('rsg-weapons:server:getEquippedKnives', function(equippedKnives)
+        FDBCore.Functions.TriggerCallback('fdb-weapons:server:getEquippedKnives', function(equippedKnives)
             if equippedKnives and next(equippedKnives) ~= nil then
                 for knifeName, _ in pairs(equippedKnives) do
                     Wait(500)
                     local fakeWeaponData = { name = knifeName, info = {} }
-                    TriggerEvent('rsg-weapons:client:UseEquipment', fakeWeaponData)
+                    TriggerEvent('fdb-weapons:client:UseEquipment', fakeWeaponData)
                     Wait(1000)
                 end
             end
@@ -509,7 +509,7 @@ AddEventHandler('onResourceStop', function(name)
     end
     if Config.SaveEquippedWeapons then
         for serial, data in pairs(UsedWeapons) do
-            TriggerServerEvent('rsg-weapons:server:saveEquippedWeapon', data.data, false)
+            TriggerServerEvent('fdb-weapons:server:saveEquippedWeapon', data.data, false)
         end
     end
 end)

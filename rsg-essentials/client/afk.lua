@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 local isLoggedIn = LocalPlayer.state.isLoggedIn
 local ignoredGroups = {
@@ -21,7 +21,7 @@ local timeMinutes = {
 }
 
 local function updatePermissionLevel()
-    RSGCore.Functions.TriggerCallback('rsg-afkkick:server:GetPermissions', function(userGroups)
+    FDBCore.Functions.TriggerCallback('fdb-afkkick:server:GetPermissions', function(userGroups)
         for k in pairs(userGroups) do
             if ignoredGroups[k] then
                 checkUser = false
@@ -32,16 +32,16 @@ local function updatePermissionLevel()
     end)
 end
 
-RegisterNetEvent('RSGCore:Client:OnPlayerLoaded', function()
+RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', function()
     updatePermissionLevel()
     isLoggedIn = true
 end)
 
-RegisterNetEvent('RSGCore:Client:OnPlayerUnload', function()
+RegisterNetEvent('FDBCore:Client:OnPlayerUnload', function()
     isLoggedIn = false
 end)
 
-RegisterNetEvent('RSGCore:Client:OnPermissionUpdate', function()
+RegisterNetEvent('FDBCore:Client:OnPermissionUpdate', function()
     updatePermissionLevel()
 end)
 

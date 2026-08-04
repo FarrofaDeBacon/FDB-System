@@ -1,5 +1,5 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
-local sharedWeapons = exports['rsg-core']:GetWeapons()
+local FDBCore = exports['fdb-core']:GetCoreObject()
+local sharedWeapons = exports['fdb-core']:GetWeapons()
 local createdEntries = {}
 local isLoggedIn = false
 local deathSecondsRemaining = 0
@@ -26,7 +26,7 @@ local deathTimer = function()
         while deathSecondsRemaining > 0 do
             Wait(1000)
             deathSecondsRemaining = deathSecondsRemaining - 1
-            TriggerEvent("rsg-medic:client:GetMedicsOnDuty")
+            TriggerEvent("fdb-medic:client:GetMedicsOnDuty")
         end
     end)
 end
@@ -181,7 +181,7 @@ local deathLog = function()
     local playername = GetPlayerName(player)
     local msgDiscordA = playername..' ('..playerid..') '.. locale('cl_death_log_title')
     local msgDiscordB = killerName..' '.. locale('cl_death_log_message')..' '..playername.. ' '..locale('cl_death_log_message_b')..' **'..weaponLabel..'** ('..weaponName..')'
-    TriggerServerEvent('rsg-log:server:CreateLog', 'death', msgDiscordA, 'red', msgDiscordB)
+    TriggerServerEvent('fdb-log:server:CreateLog', 'death', msgDiscordA, 'red', msgDiscordB)
 
 end
 
@@ -234,10 +234,10 @@ CreateThread(function()
     for i = 1, #Config.MedicJobLocations do
         local loc = Config.MedicJobLocations[i]
 
-        exports['rsg-core']:createPrompt(loc.prompt, loc.coords, RSGCore.Shared.Keybinds['J'], locale('cl_open') .. loc.name,
+        exports['fdb-core']:createPrompt(loc.prompt, loc.coords, FDBCore.Shared.Keybinds['J'], locale('cl_open') .. loc.name,
         {
             type = 'client',
-            event = 'rsg-medic:client:mainmenu',
+            event = 'fdb-medic:client:mainmenu',
             args = {loc.prompt, loc.name}
         })
 
@@ -260,10 +260,10 @@ local function PlayerDeath()
     deathTimer()
     deathLog()
     deathactive = true
-    TriggerServerEvent('rsg-medic:server:setSaltyChatAlive', false)
-    TriggerServerEvent("RSGCore:Server:SetMetaData", "isdead", true)
+    TriggerServerEvent('fdb-medic:server:setSaltyChatAlive', false)
+    TriggerServerEvent("FDBCore:Server:SetMetaData", "isdead", true)
     LocalPlayer.state:set('isDead', true, true)
-    TriggerEvent('rsg-medic:client:DeathCam')
+    TriggerEvent('fdb-medic:client:DeathCam')
 end
 
 CreateThread(function()
@@ -295,8 +295,8 @@ end)
 ---------------------------------------------------------------------
 -- player combat log check
 ---------------------------------------------------------------------
-RegisterNetEvent('RSGCore:Client:OnPlayerLoaded', function()
-    local PlayerData = RSGCore.Functions.GetPlayerData()
+RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', function()
+    local PlayerData = FDBCore.Functions.GetPlayerData()
     local health = GetEntityHealth(cache.ped)
     if PlayerData.metadata['isdead'] then
         if health ~= 0 and deathactive == false then
@@ -332,18 +332,18 @@ CreateThread(function()
                 end
             end
 
-            if deathTimerStarted and deathSecondsRemaining == 0 and IsControlPressed(0, RSGCore.Shared.Keybinds['E']) then
+            if deathTimerStarted and deathSecondsRemaining == 0 and IsControlPressed(0, FDBCore.Shared.Keybinds['E']) then
                 deathTimerStarted = false
 
-                TriggerEvent('rsg-medic:client:revive')
-                TriggerServerEvent('rsg-medic:server:deathactions')
+                TriggerEvent('fdb-medic:client:revive')
+                TriggerServerEvent('fdb-medic:server:deathactions')
                 if Config.WipeInventoryOnRespawn then
                     RemoveAllPedWeapons(cache.ped, true)
                     RemoveAllPedAmmo(cache.ped)
                 end
             end
 
-            if deathactive and deathTimerStarted and deathSecondsRemaining < Config.DeathTimer and IsControlPressed(0, RSGCore.Shared.Keybinds['G']) and not medicCalled then
+            if deathactive and deathTimerStarted and deathSecondsRemaining < Config.DeathTimer and IsControlPressed(0, FDBCore.Shared.Keybinds['G']) and not medicCalled then
                 medicCalled = true
 
                 if medicsonduty == 0 then
@@ -354,7 +354,7 @@ CreateThread(function()
 
                 local text = locale('cl_medical_help')
 
-                TriggerServerEvent('rsg-medic:server:medicAlert', text)
+                TriggerServerEvent('fdb-medic:server:medicAlert', text)
 
                 lib.notify({ title = locale('cl_medical_called'), type = 'success', icon = 'fa-solid fa-kit-medical', iconAnimation = 'shake', duration = 7000 })
 
@@ -379,8 +379,8 @@ end)
 ---------------------------------------------------------------------
 -- medic menu
 ---------------------------------------------------------------------
-AddEventHandler('rsg-medic:client:mainmenu', function(location, name)
-    local job = RSGCore.Functions.GetPlayerData().job.name
+AddEventHandler('fdb-medic:client:mainmenu', function(location, name)
+    local job = FDBCore.Functions.GetPlayerData().job.name
     if job ~= Config.JobRequired then
         lib.notify({ title = locale('cl_not_medic'), type = 'error', icon = 'fa-solid fa-kit-medical', iconAnimation = 'shake', duration = 7000 })
         return
@@ -394,17 +394,17 @@ AddEventHandler('rsg-medic:client:mainmenu', function(location, name)
         options = {
             {   title = locale('cl_duty'),
                 icon = 'fa-solid fa-shield-heart',
-                event = 'rsg-medic:client:ToggleDuty',
+                event = 'fdb-medic:client:ToggleDuty',
                 arrow = true
             },
             {   title = locale('cl_medical_supplies'),
                 icon = 'fa-solid fa-pills',
-                event = 'rsg-medic:client:OpenMedicSupplies',
+                event = 'fdb-medic:client:OpenMedicSupplies',
                 arrow = true
             },
             {   title = locale('cl_medical_storage'),
                 icon = 'fa-solid fa-box-open',
-                event = 'rsg-medic:client:storage',
+                event = 'fdb-medic:client:storage',
                 arrow = true
             },
         }
@@ -415,16 +415,16 @@ end)
 ---------------------------------------------------------------------
 -- medic supplies
 ---------------------------------------------------------------------
-AddEventHandler('rsg-medic:client:OpenMedicSupplies', function()
-    local job = RSGCore.Functions.GetPlayerData().job.name
+AddEventHandler('fdb-medic:client:OpenMedicSupplies', function()
+    local job = FDBCore.Functions.GetPlayerData().job.name
     if job ~= Config.JobRequired then return end
-    TriggerServerEvent('rsg-shops:server:openstore', 'medic', 'medic', locale('cl_medical_supplies'))
+    TriggerServerEvent('fdb-shops:server:openstore', 'medic', 'medic', locale('cl_medical_supplies'))
 end)
 
 ---------------------------------------------------------------------
 -- death cam
 ---------------------------------------------------------------------
-AddEventHandler('rsg-medic:client:DeathCam', function()
+AddEventHandler('fdb-medic:client:DeathCam', function()
     CreateThread(function()
         while true do
             Wait(1000)
@@ -465,15 +465,15 @@ end)
 ---------------------------------------------------------------------
 -- get medics on-duty
 ---------------------------------------------------------------------
-AddEventHandler('rsg-medic:client:GetMedicsOnDuty', function()
-    RSGCore.Functions.TriggerCallback('rsg-medic:server:getmedics', function(mediccount)
+AddEventHandler('fdb-medic:client:GetMedicsOnDuty', function()
+    FDBCore.Functions.TriggerCallback('fdb-medic:server:getmedics', function(mediccount)
         medicsonduty = mediccount
     end)
 end)
 ---------------------------------------------------------------------
 -- player revive after pressing [E]
 ---------------------------------------------------------------------
-AddEventHandler('rsg-medic:client:revive', function()
+AddEventHandler('fdb-medic:client:revive', function()
     SetClosestRespawn()
 
     if deathactive then
@@ -491,7 +491,7 @@ AddEventHandler('rsg-medic:client:revive', function()
 
         -- Reset Outlaw Status on respawn
         if Config.ResetOutlawStatus then
-            TriggerServerEvent('rsg-prison:server:resetoutlawstatus')
+            TriggerServerEvent('fdb-prison:server:resetoutlawstatus')
         end
 
         -- Reset Death Timer
@@ -506,8 +506,8 @@ AddEventHandler('rsg-medic:client:revive', function()
         AnimpostfxPlay("PlayerWakeUpInterrogation", 0, false)
         Wait(19000)
 
-        TriggerServerEvent("RSGCore:Server:SetMetaData", "isdead", false)
-        TriggerServerEvent('rsg-medic:server:setSaltyChatAlive', true)
+        TriggerServerEvent("FDBCore:Server:SetMetaData", "isdead", false)
+        TriggerServerEvent('fdb-medic:server:setSaltyChatAlive', true)
         LocalPlayer.state:set('isDead', false, true)
     end
 end)
@@ -515,7 +515,7 @@ end)
 ---------------------------------------------------------------------
 -- admin revive
 ---------------------------------------------------------------------
-RegisterNetEvent('rsg-medic:client:adminRevive', function()
+RegisterNetEvent('fdb-medic:client:adminRevive', function()
     local pos = GetEntityCoords(cache.ped, true)
 
     DoScreenFadeOut(500)
@@ -532,7 +532,7 @@ RegisterNetEvent('rsg-medic:client:adminRevive', function()
 
     -- Reset Outlaw Status on respawn
     if Config.ResetOutlawStatus then
-        TriggerServerEvent('rsg-prison:server:resetoutlawstatus')
+        TriggerServerEvent('fdb-prison:server:resetoutlawstatus')
     end
 
     -- Reset Death Timer
@@ -545,15 +545,15 @@ RegisterNetEvent('rsg-medic:client:adminRevive', function()
 
     DoScreenFadeIn(1800)
 
-    TriggerServerEvent("RSGCore:Server:SetMetaData", "isdead", false)
-    TriggerServerEvent('rsg-medic:server:setSaltyChatAlive', true)
+    TriggerServerEvent("FDBCore:Server:SetMetaData", "isdead", false)
+    TriggerServerEvent('fdb-medic:server:setSaltyChatAlive', true)
     LocalPlayer.state:set('isDead', false, true)
 end)
 
 ---------------------------------------------------------------------
 -- player revive
 ---------------------------------------------------------------------
-RegisterNetEvent('rsg-medic:client:playerRevive', function()
+RegisterNetEvent('fdb-medic:client:playerRevive', function()
     local pos = GetEntityCoords(cache.ped, true)
 
     DoScreenFadeOut(500)
@@ -569,7 +569,7 @@ RegisterNetEvent('rsg-medic:client:playerRevive', function()
 
     -- Reset Outlaw Status on respawn
     if Config.ResetOutlawStatus then
-        TriggerServerEvent('rsg-prison:server:resetoutlawstatus')
+        TriggerServerEvent('fdb-prison:server:resetoutlawstatus')
     end
 
     -- Reset Death Timer
@@ -582,15 +582,15 @@ RegisterNetEvent('rsg-medic:client:playerRevive', function()
 
     DoScreenFadeIn(1800)
 
-    TriggerServerEvent("RSGCore:Server:SetMetaData", "isdead", false)
-    TriggerServerEvent('rsg-medic:server:setSaltyChatAlive', true)
+    TriggerServerEvent("FDBCore:Server:SetMetaData", "isdead", false)
+    TriggerServerEvent('fdb-medic:server:setSaltyChatAlive', true)
     LocalPlayer.state:set('isDead', false, true)
 end)
 
 ---------------------------------------------------------------------
 -- admin Heal
 ---------------------------------------------------------------------
-RegisterNetEvent('rsg-medic:client:adminHeal', function()
+RegisterNetEvent('fdb-medic:client:adminHeal', function()
     local pos = GetEntityCoords(cache.ped, true)
     Wait(1000)
     NetworkResurrectLocalPlayer(pos.x, pos.y, pos.z, GetEntityHeading(cache.ped), true, false)
@@ -607,31 +607,31 @@ end
 ---------------------------------------------------------------------
 -- medic storage
 ---------------------------------------------------------------------
-AddEventHandler('rsg-medic:client:storage', function()
-    local job = RSGCore.Functions.GetPlayerData().job.name
+AddEventHandler('fdb-medic:client:storage', function()
+    local job = FDBCore.Functions.GetPlayerData().job.name
     local stashloc = mediclocation
 
     if job ~= Config.JobRequired then return end
-    TriggerServerEvent('rsg-medic:server:openstash', stashloc)
+    TriggerServerEvent('fdb-medic:server:openstash', stashloc)
 end)
 
 ---------------------------------------------------------------------
 -- kill player
 ---------------------------------------------------------------------
-RegisterNetEvent('rsg-medic:client:KillPlayer')
-AddEventHandler('rsg-medic:client:KillPlayer', function()
+RegisterNetEvent('fdb-medic:client:KillPlayer')
+AddEventHandler('fdb-medic:client:KillPlayer', function()
     SetEntityHealth(cache.ped, 0)
-    TriggerServerEvent('RSGCore:Server:SetMetaData', 'isdead', true)
+    TriggerServerEvent('FDBCore:Server:SetMetaData', 'isdead', true)
     LocalPlayer.state:set('isDead', true, true)
 end)
 
 ---------------------------------------------------------------------
 -- use bandage
 ---------------------------------------------------------------------
-RegisterNetEvent('rsg-medic:client:usebandage', function()
+RegisterNetEvent('fdb-medic:client:usebandage', function()
     if isBusy then return end
-    local hasItem = RSGCore.Functions.HasItem('bandage', 1)
-    local PlayerData = RSGCore.Functions.GetPlayerData()
+    local hasItem = FDBCore.Functions.HasItem('bandage', 1)
+    local PlayerData = FDBCore.Functions.GetPlayerData()
     if not PlayerData.metadata['isdead'] and not PlayerData.metadata['ishandcuffed'] and not IsPedOnMount(cache.ped) then
         if hasItem then
             isBusy = true
@@ -660,7 +660,7 @@ RegisterNetEvent('rsg-medic:client:usebandage', function()
             local newhealth = lib.math.clamp(math.round(currenthealth + (600 * (Config.BandageHealth / 100))), 0, 600)
             SetEntityHealth(cache.ped, newhealth)
 
-            TriggerServerEvent('rsg-medic:server:removeitem', 'bandage', 1)
+            TriggerServerEvent('fdb-medic:server:removeitem', 'bandage', 1)
             LocalPlayer.state:set('inv_busy', false, true)
             isBusy = false
         else
@@ -688,7 +688,7 @@ AddEventHandler("onResourceStop", function(resourceName)
 
         if createdEntries[i].type == "PROMPT" then
             if createdEntries[i].handle then
-                exports['rsg-core']:deletePrompt(createdEntries[i].handle)
+                exports['fdb-core']:deletePrompt(createdEntries[i].handle)
             end
         end
     end

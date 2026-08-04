@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
 
@@ -6,22 +6,22 @@ local function initBait()
     for i = 1, #Config.Baits do
         local bait = Config.Baits[i]
 
-        RSGCore.Functions.CreateUseableItem(bait, function(source, item)
+        FDBCore.Functions.CreateUseableItem(bait, function(source, item)
             local src = source
-            local Player = RSGCore.Functions.GetPlayer(src) -- why do we need this?
-            TriggerClientEvent('rsg-fishing:client:usebait', src, item.name)
+            local Player = FDBCore.Functions.GetPlayer(src) -- why do we need this?
+            TriggerClientEvent('fdb-fishing:client:usebait', src, item.name)
         end)
     end
 end
 -- end of make bait useable
 
 -- remove bait when used on fishing rod
-RegisterServerEvent('rsg-fishing:server:removeBaitItem')
-AddEventHandler('rsg-fishing:server:removeBaitItem', function(item)
+RegisterServerEvent('fdb-fishing:server:removeBaitItem')
+AddEventHandler('fdb-fishing:server:removeBaitItem', function(item)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     Player.Functions.RemoveItem(item, 1)
-    TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[item], 'remove', 1)
+    TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[item], 'remove', 1)
 end)
 
 local fishEntity = {
@@ -85,10 +85,10 @@ local fishNames = {
 }
 
 -- add fish caught to inventory
-RegisterServerEvent('rsg-fishing:FishToInventory')
-AddEventHandler('rsg-fishing:FishToInventory', function(fishModel, weight)
+RegisterServerEvent('fdb-fishing:FishToInventory')
+AddEventHandler('fdb-fishing:FishToInventory', function(fishModel, weight)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     local fish = fishEntity[fishModel]
     local fish_name = fishNames[fishModel]
     local fish_weight = string.format('%.2f%%', (weight * 54.25)):gsub('%%', '')
@@ -99,10 +99,10 @@ AddEventHandler('rsg-fishing:FishToInventory', function(fishModel, weight)
     local lastname = charinfo.lastname
 
     Player.Functions.AddItem(fish, 1, nil, { weight = fish_weight })
-    TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[fish], 'add', 1)
+    TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[fish], 'add', 1)
     TriggerClientEvent('ox_lib:notify', src,
         { title = locale('sv_you_got_fish_name') .. ' ' .. fish_name, type = 'success', duration = 5000 })
-    TriggerEvent('rsg-log:server:CreateLog', 'fishing', locale('sv_discord_b'), 'green',
+    TriggerEvent('fdb-log:server:CreateLog', 'fishing', locale('sv_discord_b'), 'green',
         firstname .. ' ' .. lastname .. ' ' .. locale('sv_discord_c') .. ' ' .. fish_weight .. 'KG ' .. fish_name)
 end)
 

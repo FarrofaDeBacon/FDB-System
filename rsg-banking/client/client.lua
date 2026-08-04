@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 local BankOpen = false
 local SpawnedBankBlips = {}
 lib.locale()
@@ -9,9 +9,9 @@ lib.locale()
 CreateThread(function()
     for _,v in pairs(Config.BankLocations) do
         if not Config.UseTarget then
-            exports['rsg-core']:createPrompt(v.bankid, v.coords, RSGCore.Shared.Keybinds[Config.Keybind], locale('cl_lang_1'), {
+            exports['fdb-core']:createPrompt(v.bankid, v.coords, FDBCore.Shared.Keybinds[Config.Keybind], locale('cl_lang_1'), {
                 type = 'client',
-                event = 'rsg-banking:client:OpenBanking',
+                event = 'fdb-banking:client:OpenBanking',
                 args = { v.moneytype },
             })
         end
@@ -46,7 +46,7 @@ local OpenBank = function(moneytype)
             return
         end
     end
-    RSGCore.Functions.TriggerCallback('rsg-banking:getBankingInformation', function(banking)
+    FDBCore.Functions.TriggerCallback('fdb-banking:getBankingInformation', function(banking)
         if banking ~= nil then
             SendNUIMessage({action = "OPEN_BANK", balance = banking.bank, cash = banking.cash, id = moneytype, withdrawChargeRate = Config.WithdrawChargeRate or 0})
             SetNuiFocus(true, true)
@@ -82,7 +82,7 @@ end
 ---------------------------------
 -- get bank hours on player loading
 ---------------------------------
-RegisterNetEvent('RSGCore:Client:OnPlayerLoaded', function()
+RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', function()
     GetBankHours()
 end)
 
@@ -116,23 +116,23 @@ end)
 
 RegisterNUICallback('SafeDeposit', function()
     CloseBank()
-    TriggerEvent('rsg-banking:client:safedeposit')
+    TriggerEvent('fdb-banking:client:safedeposit')
 end)
 
-AddEventHandler('rsg-banking:client:OpenBanking', function(moneytype)
+AddEventHandler('fdb-banking:client:OpenBanking', function(moneytype)
     OpenBank(moneytype)
 end)
 
 RegisterNUICallback('Transact', function(data)
-    TriggerServerEvent('rsg-banking:server:transact', data.type, data.amount, data.id)
+    TriggerServerEvent('fdb-banking:server:transact', data.type, data.amount, data.id)
 end)
 
 ---------------------------------
 -- update bank balance
 ---------------------------------
-RegisterNetEvent('rsg-banking:client:UpdateBanking', function(newbalance, moneytype)
+RegisterNetEvent('fdb-banking:client:UpdateBanking', function(newbalance, moneytype)
     if not BankOpen then return end
-    local Player = RSGCore.Functions.GetPlayerData()
+    local Player = FDBCore.Functions.GetPlayerData()
     local cash = Player.money['cash']
     SendNUIMessage({action = "UPDATE_BALANCE", balance = newbalance, cash = cash, id = moneytype})
 end)
@@ -140,7 +140,7 @@ end)
 ---------------------------------
 -- bank safe deposit box
 ---------------------------------
-RegisterNetEvent('rsg-banking:client:safedeposit', function()
+RegisterNetEvent('fdb-banking:client:safedeposit', function()
     local ZoneTypeId = 1
     local x,y,z =  table.unpack(GetEntityCoords(cache.ped))
     local town = GetMapZoneAtCoords(x,y,z, ZoneTypeId)
@@ -161,7 +161,7 @@ RegisterNetEvent('rsg-banking:client:safedeposit', function()
         town = 'Valentine'
     end
 
-    TriggerServerEvent('rsg-banking:server:opensafedeposit', town)
+    TriggerServerEvent('fdb-banking:server:opensafedeposit', town)
 end)
 
 ---------------------------------
@@ -209,7 +209,7 @@ function OpenGiveMoneyMenu(targetPlayerId)
     local amount = tonumber(input[1])
 
     if amount and amount > 0 then
-        TriggerServerEvent('rsg-banking:server:givemoney', targetPlayerId, amount)
+        TriggerServerEvent('fdb-banking:server:givemoney', targetPlayerId, amount)
     else
         lib.notify({ title = locale('cl_lang_10'), type = 'error' })
     end

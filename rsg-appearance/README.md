@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 👱 rsg-appearance
+# 👱 fdb-appearance
 **Character creator and clothing system for RedM using RSG Core.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -12,9 +12,9 @@
 ---
 
 ## 🛠️ Dependencies
-- [**rsg-core**](https://github.com/Rexshack-RedM/rsg-core) 🤠
+- [**fdb-core**](https://github.com/Rexshack-RedM/fdb-core) 🤠
 - [**ox_lib**](https://github.com/Rexshack-RedM/ox_lib) ⚙️ *(for notifications and UI)*
-- [**rsg-menubase**](https://github.com/Rexshack-RedM/rsg-menubase) 🎨 *(for in-game menus)*
+- [**fdb-menubase**](https://github.com/Rexshack-RedM/fdb-menubase) 🎨 *(for in-game menus)*
 - [**oxmysql**](https://github.com/overextended/oxmysql) 🗄️ *(for player skins storage)*
 
 **Data files:** The `/data` folder includes lists for hair, overlays, features, and clothing variations.  
@@ -28,7 +28,7 @@
 ### 🧍 Character Creation
 - Fully interactive **character creator**.
 - Select **gender, first name, last name, nationality, birthdate**.
-- Adjust all appearance details using menus powered by **rsg-menubase**.
+- Adjust all appearance details using menus powered by **fdb-menubase**.
 - Real-time preview while creating your character.
 
 ### 👕 Clothing System
@@ -40,13 +40,13 @@
 ### 💾 Server-Side Persistence
 - Automatically saves appearance and clothing to SQL.
 - Commands/events handled server-side for security:
-  - `rsg-appearance:server:SaveSkin`
-  - `rsg-appearance:server:saveOutfit`
+  - `fdb-appearance:server:SaveSkin`
+  - `fdb-appearance:server:saveOutfit`
 - Uses table `playerskins` with columns: `citizenid`, `skin`, `clothes`.
 
 ### 💰 Price Calculation
 - Automatic cost calculation when changing clothes.
-- Deducts in-game cash using RSGCore’s economy system:
+- Deducts in-game cash using FDBCore’s economy system:
   ```lua
   Player.Functions.RemoveMoney('cash', price, 'buy-clothes')
   ```
@@ -63,8 +63,8 @@
 ---
 
 ## 📂 Installation
-1. Place `rsg-appearance` inside your `resources/[rsg]` folder.
-2. Ensure `rsg-core`, `ox_lib`, `rsg-menubase`, and `oxmysql` are installed.
+1. Place `fdb-appearance` inside your `resources/[rsg]` folder.
+2. Ensure `fdb-core`, `ox_lib`, `fdb-menubase`, and `oxmysql` are installed.
 3. Import the SQL for player skins if not already present:
    ```sql
    CREATE TABLE IF NOT EXISTS `playerskins` (
@@ -77,9 +77,9 @@
 4. Start in your `server.cfg`:
    ```cfg
    ensure ox_lib
-   ensure rsg-core
-   ensure rsg-menubase
-   ensure rsg-appearance
+   ensure fdb-core
+   ensure fdb-menubase
+   ensure fdb-appearance
    ```
 5. Restart your server and create a new character.
 
@@ -94,16 +94,16 @@ The `/data` folder defines which clothes, hairstyles, and overlays are available
 ## 💾 Example Server Events
 ```lua
 -- Save full skin + clothing
-TriggerServerEvent('rsg-appearance:server:SaveSkin', skinData, clothesData, true)
+TriggerServerEvent('fdb-appearance:server:SaveSkin', skinData, clothesData, true)
 
 -- Save outfit only
-TriggerServerEvent('rsg-appearance:server:saveOutfit', clothesData, isMale, outfitName)
+TriggerServerEvent('fdb-appearance:server:saveOutfit', clothesData, isMale, outfitName)
 ```
 
 ---
 
 ## 🧠 Notes
-- The script integrates deeply with **RSGCore** player data (`citizenid`, `money`, etc.).  
+- The script integrates deeply with **FDBCore** player data (`citizenid`, `money`, etc.).  
 - Designed to be modular and expandable with new data sets.
 
 ---

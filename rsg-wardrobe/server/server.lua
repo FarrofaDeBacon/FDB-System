@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
 local function hasAcePerms(player)
@@ -6,9 +6,9 @@ local function hasAcePerms(player)
     return IsPlayerAceAllowed(player, 'command.' .. Config.RequiredPermission)
 end
 
-RSGCore.Functions.CreateCallback('rsg-wardrobe:server:getPlayerSkin', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-wardrobe:server:getPlayerSkin', function(source, cb)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then cb(nil) return end
     local cid = Player.PlayerData.citizenid
     local skins = MySQL.Sync.fetchAll('SELECT * FROM playerskins WHERE citizenid = ?', {cid})
@@ -16,10 +16,10 @@ RSGCore.Functions.CreateCallback('rsg-wardrobe:server:getPlayerSkin', function(s
 end)
 
 local function registerClothingCommand(cmdName, clothingName, desc)
-    RSGCore.Commands.Add(cmdName, desc, {}, false, function(source)
+    FDBCore.Commands.Add(cmdName, desc, {}, false, function(source)
         local src = source
         if not hasAcePerms(src) then return end
-        TriggerClientEvent('rsg-wardrobe:client:OnOffClothing', src, clothingName)
+        TriggerClientEvent('fdb-wardrobe:client:OnOffClothing', src, clothingName)
     end)
 end
 
@@ -63,20 +63,20 @@ for _, c in ipairs(toggleCommands) do
     registerClothingCommand(c.cmd, c.name, locale(c.desc))
 end
 
-RSGCore.Commands.Add('undress', locale('sv_text_35'), {}, false, function(source)
+FDBCore.Commands.Add('undress', locale('sv_text_35'), {}, false, function(source)
     local src = source
     if not hasAcePerms(src) then return end
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     local jailed = Player.PlayerData.metadata['injail']
     if jailed > 0 then return end
-    TriggerClientEvent('rsg-wardrobe:client:removeAllClothing', src)
+    TriggerClientEvent('fdb-wardrobe:client:removeAllClothing', src)
 end)
 
-RSGCore.Commands.Add('dress', locale('sv_text_34'), {}, false, function(source)
+FDBCore.Commands.Add('dress', locale('sv_text_34'), {}, false, function(source)
     local src = source
     if not hasAcePerms(src) then return end
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     local jailed = Player.PlayerData.metadata['injail']
     if jailed > 0 then return end
@@ -88,20 +88,20 @@ RSGCore.Commands.Add('dress', locale('sv_text_34'), {}, false, function(source)
         _clothes = {}
     end
     if _clothes and next(_clothes) then
-        TriggerClientEvent('rsg-appearance:client:ApplyClothes', src, _clothes)
+        TriggerClientEvent('fdb-appearance:client:ApplyClothes', src, _clothes)
     end
 end)
 
 exports('TogglePlayerClothing', function(source, name)
-    TriggerClientEvent('rsg-wardrobe:client:OnOffClothing', source, name)
+    TriggerClientEvent('fdb-wardrobe:client:OnOffClothing', source, name)
 end)
 
 exports('RemovePlayerClothing', function(source)
-    TriggerClientEvent('rsg-wardrobe:client:removeAllClothing', source)
+    TriggerClientEvent('fdb-wardrobe:client:removeAllClothing', source)
 end)
 
 exports('DressPlayer', function(source)
-    local Player = RSGCore.Functions.GetPlayer(source)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return end
     local citizenid = Player.PlayerData.citizenid
     local _clothes = MySQL.Sync.fetchAll('SELECT * FROM playerskins WHERE citizenid = ?', { citizenid })
@@ -111,6 +111,6 @@ exports('DressPlayer', function(source)
         _clothes = {}
     end
     if _clothes and next(_clothes) then
-        TriggerClientEvent('rsg-appearance:client:ApplyClothes', source, _clothes)
+        TriggerClientEvent('fdb-appearance:client:ApplyClothes', source, _clothes)
     end
 end)

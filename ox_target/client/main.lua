@@ -7,7 +7,7 @@ local state = require 'client.state'
 local options = require 'client.api'.getTargetOptions()
 
 require 'client.debug'
-require 'client.compat.rsg-target'
+require 'client.compat.fdb-target'
 
 local SendNuiMessage = SendNuiMessage
 local GetEntityCoords = GetEntityCoords

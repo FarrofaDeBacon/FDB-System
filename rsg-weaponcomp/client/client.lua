@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
 local SpawnedProps   = {}
@@ -135,8 +135,8 @@ local function StartCamOnWeapon(obj, fov)
     PointCamAtCoord(camera, origin.x, origin.y, origin.z + 0.1)
 end
 
-RegisterNetEvent('rsg-weaponcomp:client:ExitCam')
-AddEventHandler('rsg-weaponcomp:client:ExitCam', function()
+RegisterNetEvent('fdb-weaponcomp:client:ExitCam')
+AddEventHandler('fdb-weaponcomp:client:ExitCam', function()
     ClearFocus()
     RenderScriptCams(false, false, 0, true, false)
     if camera then DestroyCam(camera,true) end
@@ -179,8 +179,8 @@ local function StartCamClean(zoom, offset)
     RenderScriptCams(true, true, 1000, true, false)
 end
 
-RegisterNetEvent("rsg-weaponcomp:client:animationSaved")
-AddEventHandler("rsg-weaponcomp:client:animationSaved", function(objecthash, serial)
+RegisterNetEvent("fdb-weaponcomp:client:animationSaved")
+AddEventHandler("fdb-weaponcomp:client:animationSaved", function(objecthash, serial)
     SetCurrentPedWeapon(cache.ped, objecthash, true)
 
     if camera then DestroyCam(camera,true) end
@@ -243,8 +243,8 @@ AddEventHandler("rsg-weaponcomp:client:animationSaved", function(objecthash, ser
         end
     end
 
-    TriggerServerEvent("rsg-weaponcomp:server:check_comps")
-    TriggerEvent('rsg-weaponcomp:client:ExitCam')
+    TriggerServerEvent("fdb-weaponcomp:server:check_comps")
+    TriggerEvent('fdb-weaponcomp:client:ExitCam')
 end)
 
 local function SetRandomCameraAroundWeapon()
@@ -393,7 +393,7 @@ end
 ----------------------------------------
 -- Menu
 ----------------------------------------
-TriggerEvent('rsg-menubase:getData', function(call)
+TriggerEvent('fdb-menubase:getData', function(call)
     MenuData = call
 end)
 
@@ -671,7 +671,7 @@ function MainWeaponMenu(wname, wHash, serial, propid)
                     },
                 })
                 if alert ~= 'confirm' then return end
-                TriggerServerEvent('rsg-weaponcomp:server:setComponents',
+                TriggerServerEvent('fdb-weaponcomp:server:setComponents',
                     wHash, serial, selectedCache, selectedLabels
                 )
                 menu.close()
@@ -679,22 +679,22 @@ function MainWeaponMenu(wname, wHash, serial, propid)
                 lib.notify({ title=locale('cl_notify_10'), type="error" })
             end
         elseif data.current.value == 'packup' then
-            TriggerEvent('rsg-weaponcomp:client:confirmpackup', propid)
-            TriggerEvent('rsg-weaponcomp:client:ExitCam')
+            TriggerEvent('fdb-weaponcomp:client:confirmpackup', propid)
+            TriggerEvent('fdb-weaponcomp:client:ExitCam')
             selectedCache  = {}
             selectedLabels = {}
             savedComponents = {}
             menu.close()
 
         elseif data.current.value == 'cancel' then
-            TriggerEvent('rsg-weaponcomp:client:ExitCam')
+            TriggerEvent('fdb-weaponcomp:client:ExitCam')
             selectedCache  = {}
             selectedLabels = {}
             savedComponents = {}
             menu.close()
         end
     end, function(_, menu)
-        TriggerEvent('rsg-weaponcomp:client:ExitCam')
+        TriggerEvent('fdb-weaponcomp:client:ExitCam')
         selectedCache  = {}
         selectedLabels = {}
         savedComponents = {}
@@ -705,7 +705,7 @@ end
 ----------------------------------------
 -- START CUSTOM EVENT
 ----------------------------------------
-RegisterNetEvent('rsg-weaponcomp:client:startcustom', function(propid, wHash, serial, weaponName)
+RegisterNetEvent('fdb-weaponcomp:client:startcustom', function(propid, wHash, serial, weaponName)
     if isBusy then return end
     isBusy = true
 
@@ -717,7 +717,7 @@ RegisterNetEvent('rsg-weaponcomp:client:startcustom', function(propid, wHash, se
     FreezePlayer()
     Wait(500)
 
-    RSGCore.Functions.TriggerCallback('rsg-weaponcomp:server:getPlayerWeaponComponents', function(result)
+    FDBCore.Functions.TriggerCallback('fdb-weaponcomp:server:getPlayerWeaponComponents', function(result)
         local comps = result and result.components or {}
         local labels = result and result.labels or {}
         savedComponents = {}
@@ -804,12 +804,12 @@ Citizen.CreateThread(function()
                                 if wHash == `WEAPON_UNARMED` then
                                     return lib.notify({ title = locale('cl_notify_13'), description=locale('cl_notify_14'), type='error' })
                                 end
-                                local serial = exports['rsg-weapons']:weaponInHands()[wHash]
+                                local serial = exports['fdb-weapons']:weaponInHands()[wHash]
                                 local weaponName = Citizen.InvokeNative(0x89CF5FF3D363311E, wHash, Citizen.ResultAsString())
                                 if not serial then
                                     return lib.notify({ title = locale('cl_notify_13'), description=locale('cl_notify_14'), type='error' })
                                 end
-                                TriggerEvent('rsg-weaponcomp:client:startcustom', v.propid, wHash, serial, weaponName)
+                                TriggerEvent('fdb-weaponcomp:client:startcustom', v.propid, wHash, serial, weaponName)
                             end,
                             distance = 2.0
                         },
@@ -818,7 +818,7 @@ Citizen.CreateThread(function()
                             icon     = 'fas fa-box',
                             label    = locale('cl_lang_12'),
                             onSelect = function()
-                                TriggerEvent('rsg-weaponcomp:client:confirmpackup', v.propid)
+                                TriggerEvent('fdb-weaponcomp:client:confirmpackup', v.propid)
                             end,
                             distance = 2.0
                         },
@@ -835,15 +835,15 @@ Citizen.CreateThread(function()
 end)
 
 -- update props
-RegisterNetEvent('rsg-weaponcomp:client:updatePropData')
-AddEventHandler('rsg-weaponcomp:client:updatePropData', function(data)
+RegisterNetEvent('fdb-weaponcomp:client:updatePropData')
+AddEventHandler('fdb-weaponcomp:client:updatePropData', function(data)
     Config.PlayerProps = data
 end)
 
 -- setup new gunsite
-RegisterNetEvent('rsg-weaponcomp:client:setupgunzone')
-AddEventHandler('rsg-weaponcomp:client:setupgunzone', function(propmodel, item, coords, heading)
-    RSGCore.Functions.TriggerCallback('rsg-weaponcomp:server:countprop', function(result)
+RegisterNetEvent('fdb-weaponcomp:client:setupgunzone')
+AddEventHandler('fdb-weaponcomp:client:setupgunzone', function(propmodel, item, coords, heading)
+    FDBCore.Functions.TriggerCallback('fdb-weaponcomp:server:countprop', function(result)
         -- distance check
         local playercoords = GetEntityCoords(cache.ped)
         if #(playercoords - coords) > Config.PlaceDistance then
@@ -873,7 +873,7 @@ AddEventHandler('rsg-weaponcomp:client:setupgunzone', function(propmodel, item, 
             Wait(10000)
             ClearPedTasks(cache.ped)
             FreezeEntityPosition(cache.ped, false)
-            TriggerServerEvent('rsg-weaponcomp:server:createnewprop', propmodel, item, coords, heading)
+            TriggerServerEvent('fdb-weaponcomp:server:createnewprop', propmodel, item, coords, heading)
             isBusy = false
             return
         end
@@ -881,7 +881,7 @@ AddEventHandler('rsg-weaponcomp:client:setupgunzone', function(propmodel, item, 
 end)
 
 -- confirm gunsite packup
-RegisterNetEvent('rsg-weaponcomp:client:confirmpackup', function(propid)
+RegisterNetEvent('fdb-weaponcomp:client:confirmpackup', function(propid)
     local alert = lib.alertDialog({
         header = locale('cl_lang_23'),
         content = locale('cl_lang_25'),
@@ -909,13 +909,13 @@ RegisterNetEvent('rsg-weaponcomp:client:confirmpackup', function(propid)
     })
 
     LocalPlayer.state:set('inv_busy', false, true)
-    TriggerEvent('rsg-weaponcomp:client:packupgunsite', propid)
+    TriggerEvent('fdb-weaponcomp:client:packupgunsite', propid)
 end)
 
 -- packup gunsite
-RegisterNetEvent('rsg-weaponcomp:client:packupgunsite', function(propid)
+RegisterNetEvent('fdb-weaponcomp:client:packupgunsite', function(propid)
 
-    TriggerServerEvent('rsg-weaponcomp:server:removegunsiteprops', propid)
+    TriggerServerEvent('fdb-weaponcomp:server:removegunsiteprops', propid)
 
     PackingUpProps[propid] = true
     local propData = SpawnedProps[propid]
@@ -937,7 +937,7 @@ RegisterNetEvent('rsg-weaponcomp:client:packupgunsite', function(propid)
         ingunZone = false
     end
     PackingUpProps[propid] = false
-    TriggerServerEvent('rsg-weaponcomp:server:additem')
+    TriggerServerEvent('fdb-weaponcomp:server:additem')
 end)
 
 ---------------------------------------------
@@ -945,7 +945,7 @@ end)
 ---------------------------------------------
 AddEventHandler('onClientResourceStart', function(resourceName)
     if resourceName ~= GetCurrentResourceName() then return end
-    TriggerServerEvent('rsg-weaponcomp:server:requestPropData')
+    TriggerServerEvent('fdb-weaponcomp:server:requestPropData')
 end)
 
 ---------------------------------------------

@@ -1,6 +1,6 @@
-# rsg-menubase
+# fdb-menubase
 
-A lightweight menu framework for RedM, built for the RSG-Core ecosystem. It gives other resources a simple export/API for opening styled, keyboard-navigable menus (lists, sliders, and icon grids) without having to build their own NUI.
+A lightweight menu framework for RedM, built for the fdb-core ecosystem. It gives other resources a simple export/API for opening styled, keyboard-navigable menus (lists, sliders, and icon grids) without having to build their own NUI.
 
 ---
 
@@ -22,22 +22,22 @@ A lightweight menu framework for RedM, built for the RSG-Core ecosystem. It give
 
 ## Installation
 
-1. Download or clone this resource into your server's `resources` folder as `rsg-menubase`.
+1. Download or clone this resource into your server's `resources` folder as `fdb-menubase`.
 2. Add it to your `server.cfg`, **above** any resource that will call its exports:
    ```
-   ensure rsg-menubase
+   ensure fdb-menubase
    ```
-3. Make sure `rsg-core` is installed and started before `rsg-menubase`.
+3. Make sure `fdb-core` is installed and started before `fdb-menubase`.
 
 **Requirements:**
 - A RedM server (`rdr3`)
-- [`rsg-core`](https://github.com/Rexshack-RedM) framework
+- [`fdb-core`](https://github.com/Rexshack-RedM) framework
 
 ---
 
 ## Configuration
 
-`rsg-menubase` has no standalone config file — everything is configured per-menu through the `data` table passed to `MenuData.Open`. The main options available on that table:
+`fdb-menubase` has no standalone config file — everything is configured per-menu through the `data` table passed to `MenuData.Open`. The main options available on that table:
 
 | Option | Type | Description |
 |---|---|---|
@@ -77,7 +77,7 @@ For full usage examples — including confirm dialogs, multi-page menus, live up
 ## Quick Start
 
 ```lua
-local MenuData = exports['rsg-menubase']:GetMenuData()
+local MenuData = exports['fdb-menubase']:GetMenuData()
 
 local menuData = {
     title = "Shop Menu",
@@ -116,7 +116,7 @@ MenuData.Open("default", "myshop", "main", menuData,
 
 ## Version Checking
 
-On startup, `rsg-menubase` checks its current version (from `fxmanifest.lua`) against the latest release published to the [Rexshack-RedM version checkers repo](https://github.com/Rexshack-RedM/rsg-versioncheckers) and prints a warning to the server console if you're out of date.
+On startup, `fdb-menubase` checks its current version (from `fxmanifest.lua`) against the latest release published to the [Rexshack-RedM version checkers repo](https://github.com/Rexshack-RedM/fdb-versioncheckers) and prints a warning to the server console if you're out of date.
 
 ---
 

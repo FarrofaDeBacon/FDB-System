@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 🧾 rsg-playerinfo
+# 🧾 fdb-playerinfo
 **Player information / quick stats display for RedM (RSG Core).**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -12,7 +12,7 @@
 ---
 
 ## 🛠️ Dependencies
-- **rsg-core** (framework & player data)  
+- **fdb-core** (framework & player data)  
 - **ox_lib** (context menu & locale)
 
 **Locales included:** `en`, `fr`, `es`, `it`, `de`, `el`, `ro`  
@@ -24,7 +24,7 @@
 - 🔎 **/info command** opens a context menu showing player details.  
 - 📋 Configurable fields: outlaw status, job, job grade, cash, bloodmoney, multiple bank balances, Citizen ID and Server ID.  
 - 🧭 Uses `lib.registerContext` (`ox_lib`) to display the menu in the top-right.  
-- 🔁 Server callback (`rsg-playerstats:server:getPlayerData`) provides data to the client.  
+- 🔁 Server callback (`fdb-playerstats:server:getPlayerData`) provides data to the client.  
 - 🌍 Multi-language support via `lib.locale()`.
 
 ---
@@ -56,20 +56,20 @@ Toggle any of these to show/hide the corresponding row in the `/info` context me
 ---
 
 ## 🔁 How it works
-- `RSGCore.Commands.Add('info', ...)` registers the `/info` command which triggers the client event `rsg-playerstats:client:openPlayerStats`.  
-- The client calls the server callback `rsg-playerstats:server:getPlayerData` to receive a table with fields such as `outlawstatus`, `job`, `grade`, `cash`, `bloodmoney`, `bank`, `valbank`, `rhobank`, `blkbank`, `armbank`, and `citizenid`.  
+- `FDBCore.Commands.Add('info', ...)` registers the `/info` command which triggers the client event `fdb-playerstats:client:openPlayerStats`.  
+- The client calls the server callback `fdb-playerstats:server:getPlayerData` to receive a table with fields such as `outlawstatus`, `job`, `grade`, `cash`, `bloodmoney`, `bank`, `valbank`, `rhobank`, `blkbank`, `armbank`, and `citizenid`.  
 - The client builds `optionsArray` depending on `Config.PlayerInfoSetup` flags and displays the result through `lib.showContext('player_info')`.
 
 ---
 
 ## 📂 Installation
-1. Place `rsg-playerinfo` in your `resources/[rsg]` folder.  
-2. Ensure `rsg-core` and `ox_lib` are installed.  
+1. Place `fdb-playerinfo` in your `resources/[rsg]` folder.  
+2. Ensure `fdb-core` and `ox_lib` are installed.  
 3. Add to your `server.cfg`:
 ```cfg
 ensure ox_lib
-ensure rsg-core
-ensure rsg-playerinfo
+ensure fdb-core
+ensure fdb-playerinfo
 ```
 4. Restart your server.
 

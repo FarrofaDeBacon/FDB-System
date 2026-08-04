@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
 local STATE_MACHINE = -813354801
@@ -283,34 +283,34 @@ local function buildCleanCallbacks(weaponHash)
     return {
         onCleanStart = function()
             local cleanItem = getCleanItem()
-            if not RSGCore.Functions.HasItem(cleanItem) then
+            if not FDBCore.Functions.HasItem(cleanItem) then
                 return false
             end
 
-            if GetResourceState('rsg-weapons') ~= 'started' then
+            if GetResourceState('fdb-weapons') ~= 'started' then
                 return false
             end
 
-            local serial = exports['rsg-weapons']:weaponInHands()[weaponHash]
+            local serial = exports['fdb-weapons']:weaponInHands()[weaponHash]
             if not serial then return false end
 
             local ok, consumed = pcall(function()
-                return lib.callback.await('rsg-weapons:server:consumeGunOil', false, serial)
+                return lib.callback.await('fdb-weapons:server:consumeGunOil', false, serial)
             end)
             if ok and consumed then
                 return true
             end
 
-            TriggerServerEvent('rsg-weapons:server:removeitem', cleanItem, 1)
+            TriggerServerEvent('fdb-weapons:server:removeitem', cleanItem, 1)
             return true
         end,
         onCleanComplete = function(weaponObject)
-            local serial = exports['rsg-weapons']:weaponInHands()[weaponHash]
+            local serial = exports['fdb-weapons']:weaponInHands()[weaponHash]
             if not serial then return end
 
             local permanent = GetWeaponPermanentDegradation(weaponObject)
             local cleanedQuality = math.floor((1.0 - permanent) * 10000 + 0.5) / 100
-            TriggerServerEvent('rsg-weapons:server:syncCleanedWeapon', serial, cleanedQuality)
+            TriggerServerEvent('fdb-weapons:server:syncCleanedWeapon', serial, cleanedQuality)
         end,
     }
 end
@@ -460,9 +460,9 @@ local function startWeaponInspection(hasCleanItem, cleanCallbacks, weaponHashOve
     return ok
 end
 
-RegisterNetEvent('rsg-weaponcomp:client:InspectionWeapon', function()
+RegisterNetEvent('fdb-weaponcomp:client:InspectionWeapon', function()
     local _, weaponHash = GetCurrentPedWeapon(cache.ped, true, 0, true)
-    local hasCleanItem = RSGCore.Functions.HasItem(getCleanItem())
+    local hasCleanItem = FDBCore.Functions.HasItem(getCleanItem())
     startWeaponInspection(hasCleanItem, buildCleanCallbacks(weaponHash))
 end)
 
@@ -485,7 +485,7 @@ CreateThread(function()
                     CloseUiappByHash(HUD_QUICK_SELECT)
                     Wait(150)
 
-                    local hasCleanItem = RSGCore.Functions.HasItem(getCleanItem())
+                    local hasCleanItem = FDBCore.Functions.HasItem(getCleanItem())
                     startWeaponInspection(hasCleanItem, buildCleanCallbacks(highlighted), highlighted)
                 end
             end

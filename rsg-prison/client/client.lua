@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 local jailtimeMinsRemaining = 0
 local inJail = false
@@ -35,7 +35,7 @@ CreateThread(function()
 
         Zones[k]:onPlayerInOut(function(isPointInside)
             inJailZone = isPointInside
-            TriggerEvent('rsg-prison:client:jailZoneInOut', isPointInside)
+            TriggerEvent('fdb-prison:client:jailZoneInOut', isPointInside)
         end)
     end
 end)
@@ -43,7 +43,7 @@ end)
 --------------------------
 -- prison menu
 --------------------------
-RegisterNetEvent('rsg-prison:client:menu', function(id)
+RegisterNetEvent('fdb-prison:client:menu', function(id)
     lib.registerContext(
         {
             id = 'prison_menu',
@@ -54,13 +54,13 @@ RegisterNetEvent('rsg-prison:client:menu', function(id)
                     title = locale('cl_prison_shop'),
                     description = locale('cl_keep'),
                     icon = 'fas fa-shopping-basket',
-                    event = 'rsg-prison:client:shop',
+                    event = 'fdb-prison:client:shop',
                 },
                 {
                     title = locale('cl_post_office'),
                     description = locale('cl_keep_in'),
                     icon = 'far fa-envelope-open',
-                    event = 'rsg-prison:client:telegrammenu'
+                    event = 'fdb-prison:client:telegrammenu'
                 },
             }
         }
@@ -71,7 +71,7 @@ end)
 --------------------------
 -- prison telegram
 --------------------------
-RegisterNetEvent('rsg-prison:client:telegrammenu', function()
+RegisterNetEvent('fdb-prison:client:telegrammenu', function()
     lib.registerContext(
         {
             id = 'telegram_menu',
@@ -84,13 +84,13 @@ RegisterNetEvent('rsg-prison:client:telegrammenu', function()
                     title = locale('cl_read'),
                     description = locale('cl_read_your'),
                     icon = 'far fa-envelope-open',
-                    event = 'rsg-telegram:client:ReadMessages'
+                    event = 'fdb-telegram:client:ReadMessages'
                 },
                 {
                     title = locale('cl_send'),
                     description = locale('cl_send_a'),
                     icon = 'far fa-envelope-open',
-                    event = 'rsg-telegram:client:WriteMessagePostOffice'
+                    event = 'fdb-telegram:client:WriteMessagePostOffice'
                 },
             }
         }
@@ -101,18 +101,18 @@ end)
 --------------------------
 -- prison shop
 --------------------------
-RegisterNetEvent('rsg-prison:client:shop')
-AddEventHandler('rsg-prison:client:shop', function()
-    TriggerServerEvent('rsg-shops:server:openstore', 'prison', 'prison', locale('cl_prison_shop'))
+RegisterNetEvent('fdb-prison:client:shop')
+AddEventHandler('fdb-prison:client:shop', function()
+    TriggerServerEvent('fdb-shops:server:openstore', 'prison', 'prison', locale('cl_prison_shop'))
 end)
 
 --------------------------
 -- check onload player
 --------------------------
-RegisterNetEvent('RSGCore:Client:OnPlayerLoaded', function()
-    RSGCore.Functions.GetPlayerData(function(PlayerData)
+RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', function()
+    FDBCore.Functions.GetPlayerData(function(PlayerData)
         if PlayerData.metadata["injail"] > 0 then
-            TriggerEvent("rsg-prison:client:Enter", PlayerData.metadata["injail"])
+            TriggerEvent("fdb-prison:client:Enter", PlayerData.metadata["injail"])
         end
     end)
 end)
@@ -124,15 +124,15 @@ AddEventHandler('onResourceStart', function(resource)
     if resource ~= GetCurrentResourceName() then return end
     Wait(100)
     if LocalPlayer.state['isLoggedIn'] then
-        RSGCore.Functions.GetPlayerData(function(PlayerData)
+        FDBCore.Functions.GetPlayerData(function(PlayerData)
             if PlayerData.metadata["injail"] > 0 then
-                TriggerEvent("rsg-prison:client:Enter", PlayerData.metadata["injail"])
+                TriggerEvent("fdb-prison:client:Enter", PlayerData.metadata["injail"])
             end
         end)
     end
 end)
 
-RegisterNetEvent('RSGCore:Client:OnPlayerUnload', function()
+RegisterNetEvent('FDBCore:Client:OnPlayerUnload', function()
     inJail = false
     jailtimeMinsRemaining = 0
     lib.hideTextUI()
@@ -141,17 +141,17 @@ end)
 --------------------------
 -- send to jail
 --------------------------
-RegisterNetEvent('rsg-prison:client:Enter', function(time)
+RegisterNetEvent('fdb-prison:client:Enter', function(time)
     jailTime = time -- in mins
     local RandomStartPosition = Config.Locations.spawns[math.random(1, #Config.Locations.spawns)]
     SetEntityCoords(cache.ped, RandomStartPosition.coords.x, RandomStartPosition.coords.y, RandomStartPosition.coords.z - 0.9, 0, 0, 0, false)
     SetEntityHeading(cache.ped, RandomStartPosition.coords.w)
     Wait(500)
-    TriggerServerEvent('rsg-prison:server:SaveJailItems')
+    TriggerServerEvent('fdb-prison:server:SaveJailItems')
 
     lib.notify( { title = locale('cl_property'), type = 'inform', icon = 'fa-solid fa-handcuffs', iconAnimation = 'shake', duration = 7000 } )
-    TriggerEvent('rsg-prison:client:prisonclothes')
-    TriggerServerEvent('rsg-prison:server:RemovePlayerJob')
+    TriggerEvent('fdb-prison:client:prisonclothes')
+    TriggerServerEvent('fdb-prison:server:RemovePlayerJob')
     TriggerServerEvent('InteractSound_SV:PlayWithinDistance', 5, 'jail', 0.6)
     inJail = true
     handleJailtime()
@@ -160,8 +160,8 @@ end)
 --------------------------
 -- set prison clothing
 --------------------------
-RegisterNetEvent("rsg-prison:client:prisonclothes") -- prison outfit event
-AddEventHandler("rsg-prison:client:prisonclothes", function()
+RegisterNetEvent("fdb-prison:client:prisonclothes") -- prison outfit event
+AddEventHandler("fdb-prison:client:prisonclothes", function()
     RemoveShopItemFromPedByCategory(cache.ped, 0x9925C067, true, true, true)
     RemoveShopItemFromPedByCategory(cache.ped, 0x485EE834, true, true, true)
     RemoveShopItemFromPedByCategory(cache.ped, 0x18729F39, true, true, true)
@@ -218,7 +218,7 @@ function handleJailtime()
                         color = 'white'
                     },
                 })
-                TriggerServerEvent('rsg-prison:server:updateSentance', jailtimeMinsRemaining)
+                TriggerServerEvent('fdb-prison:server:updateSentance', jailtimeMinsRemaining)
             elseif jailtimeMinsRemaining == 1 then
                 lib.showTextUI(locale('cl_getting'), {
                     position = "top-center",
@@ -229,7 +229,7 @@ function handleJailtime()
                         color = 'white'
                     }
                 })
-                TriggerServerEvent('rsg-prison:server:updateSentance', jailtimeMinsRemaining)
+                TriggerServerEvent('fdb-prison:server:updateSentance', jailtimeMinsRemaining)
             end
             jailtimeMinsRemaining = jailtimeMinsRemaining - 1
             Wait(1000 * 60)
@@ -237,7 +237,7 @@ function handleJailtime()
 
         -- Release by schedule time
         if inJail then
-            TriggerEvent('rsg-prison:client:freedom')
+            TriggerEvent('fdb-prison:client:freedom')
         end
     end)
 end
@@ -245,7 +245,7 @@ end
 --------------------------
 -- prevent player escape
 --------------------------
-AddEventHandler('rsg-prison:client:jailZoneInOut', function(isPointInside)
+AddEventHandler('fdb-prison:client:jailZoneInOut', function(isPointInside)
     if inJail and jailtimeMinsRemaining > 0 then
         if not inJailZone then
             lib.notify( { title = locale('cl_returning'), type = 'inform', icon = 'fa-solid fa-handcuffs', iconAnimation = 'shake', duration = 7000 } )
@@ -263,14 +263,14 @@ end)
 --------------------------
 -- released from jail
 --------------------------
-RegisterNetEvent('rsg-prison:client:freedom', function()
+RegisterNetEvent('fdb-prison:client:freedom', function()
     inJail = false
     jailtimeMinsRemaining = 0
     lib.hideTextUI()
 
-    TriggerServerEvent('rsg-prison:server:FreePlayer')
-    TriggerServerEvent('rsg-prison:server:GiveJailItems')
-    TriggerServerEvent('rsg-prison:server:resetoutlawstatus')
+    TriggerServerEvent('fdb-prison:server:FreePlayer')
+    TriggerServerEvent('fdb-prison:server:GiveJailItems')
+    TriggerServerEvent('fdb-prison:server:resetoutlawstatus')
     Wait(500)
     DoScreenFadeOut(1000)
     Wait(3000)
@@ -282,7 +282,7 @@ RegisterNetEvent('rsg-prison:client:freedom', function()
     local maxStamina = GetPedMaxStamina(playerPed, Citizen.ResultAsFloat())
     local currentStamina = GetPedStamina(playerPed, Citizen.ResultAsFloat()) / maxStamina * 100
     
-    exports['rsg-appearance']:ApplySkin()
+    exports['fdb-appearance']:ApplySkin()
 
     local playerPed = PlayerPedId()
     SetEntityHealth(playerPed, currentHealth )

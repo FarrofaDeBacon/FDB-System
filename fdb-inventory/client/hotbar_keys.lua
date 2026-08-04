@@ -1,4 +1,4 @@
-print('[rsg-inventory] Carregando modulo client/hotbar_keys.lua (Modo Loop)...')
+print('[fdb-inventory] Carregando modulo client/hotbar_keys.lua (Modo Loop)...')
 
 local HotbarKeys = {
     [1] = 0xE6F612E4, -- 1
@@ -13,7 +13,7 @@ local HotbarKeys = {
 
 local function UseHotbarSlot(slot)
     if Inventory.CanPlayerUseInventory() then
-        print(('[rsg-inventory] Comando hotbar slot %d executado via Loop! (Fase H6)'):format(slot))
+        print(('[fdb-inventory] Comando hotbar slot %d executado via Loop! (Fase H6)'):format(slot))
         TriggerServerEvent('fdb-inventory:server:UseHotbarSlot', slot)
     end
 end

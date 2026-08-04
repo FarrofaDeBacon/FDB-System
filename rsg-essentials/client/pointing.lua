@@ -1,8 +1,8 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 local pointing = false
 
 CreateThread(function()
-    local keybind = RSGCore.Shared.Keybinds['B']
+    local keybind = FDBCore.Shared.Keybinds['B']
     while true do
         Wait(7)
 

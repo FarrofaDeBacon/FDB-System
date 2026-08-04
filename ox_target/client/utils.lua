@@ -190,7 +190,7 @@ SetTimeout(0, function()
         end)
     end
 
-    if utils.hasExport('rsg-core.GetCoreObject') then
+    if utils.hasExport('fdb-core.GetCoreObject') then
         require 'client.framework.rsg'
     end
 end)

@@ -1,17 +1,17 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 -- add money
-RegisterNetEvent('rsg-adminmenu:server:financeadd', function(player, money, amount)
+RegisterNetEvent('fdb-adminmenu:server:financeadd', function(player, money, amount)
     local src = source
-    if RSGCore.Functions.HasPermission(src, permissions['givemoney']) or IsPlayerAceAllowed(src, 'command') then
-        local Player = RSGCore.Functions.GetPlayer(player)
+    if FDBCore.Functions.HasPermission(src, permissions['givemoney']) or IsPlayerAceAllowed(src, 'command') then
+        local Player = FDBCore.Functions.GetPlayer(player)
         Player.Functions.AddMoney(money, amount)
     end
 end)
 
 -- remove money
-RegisterNetEvent('rsg-adminmenu:server:financeremove', function(player, money, amount)
-    local Player = RSGCore.Functions.GetPlayer(player)
+RegisterNetEvent('fdb-adminmenu:server:financeremove', function(player, money, amount)
+    local Player = FDBCore.Functions.GetPlayer(player)
 
     if money == 'bank' and Player.PlayerData.money.bank >= amount then
         Player.Functions.RemoveMoney(money, amount)
@@ -32,9 +32,9 @@ RegisterNetEvent('rsg-adminmenu:server:financeremove', function(player, money, a
     end
 end)
 
-RSGCore.Functions.CreateCallback('rsg-adminmenu:server:getPlayerData', function(player, cb)
+FDBCore.Functions.CreateCallback('fdb-adminmenu:server:getPlayerData', function(player, cb)
 
-    local Player     = RSGCore.Functions.GetPlayer(player)
+    local Player     = FDBCore.Functions.GetPlayer(player)
     local bank       = Player.PlayerData.money['bank']
     local valbank    = Player.PlayerData.money['valbank']
     local rhobank    = Player.PlayerData.money['rhobank']

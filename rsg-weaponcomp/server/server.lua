@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
 -- Build valid component name lookup for server-side validation
@@ -23,8 +23,8 @@ end
 local ValidComponents = buildValidComponentNames()
 
 -- When player uses the gunsmith item, open the prop placer
-RSGCore.Functions.CreateUseableItem(Config.Gunsmithitem, function(source)
-  TriggerClientEvent('rsg-weaponcomp:client:createprop', source, {
+FDBCore.Functions.CreateUseableItem(Config.Gunsmithitem, function(source)
+  TriggerClientEvent('fdb-weaponcomp:client:createprop', source, {
     propmodel = Config.Gunsmithprop,
     item      = Config.Gunsmithitem
   })
@@ -33,14 +33,14 @@ end)
 --------------------------------------------
 -- COMMAND 
 --------------------------------------------
-RSGCore.Commands.Add(Config.Commandinspect, locale('cl_lang_30'), {}, false, function(source)
+FDBCore.Commands.Add(Config.Commandinspect, locale('cl_lang_30'), {}, false, function(source)
     local src = source
-    TriggerClientEvent('rsg-weaponcomp:client:InspectionWeapon', src)
+    TriggerClientEvent('fdb-weaponcomp:client:InspectionWeapon', src)
 end)
 
-RSGCore.Commands.Add(Config.Commandloadweapon, locale('cl_lang_31'), {}, false, function(source)
+FDBCore.Commands.Add(Config.Commandloadweapon, locale('cl_lang_31'), {}, false, function(source)
     local src = source
-    TriggerEvent('rsg-weaponcomp:server:check_comps', src)
+    TriggerEvent('fdb-weaponcomp:server:check_comps', src)
 end)
 
 -- Helper para buscar el item de arma por serie
@@ -57,8 +57,8 @@ local function GetWeaponItemEntry(Player, serial)
 end
 
 -- EQUIPAR SCOPE
-RSGCore.Functions.CreateCallback('rsg-weaponcomp:server:equipScope', function(source, cb, serial)
-    local Player = RSGCore.Functions.GetPlayer(source)
+FDBCore.Functions.CreateCallback('fdb-weaponcomp:server:equipScope', function(source, cb, serial)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return cb(false) end
 
     local weaponItem = GetWeaponItemEntry(Player, serial)
@@ -77,8 +77,8 @@ RSGCore.Functions.CreateCallback('rsg-weaponcomp:server:equipScope', function(so
 end)
 
 -- REMOVER SCOPE
-RSGCore.Functions.CreateCallback('rsg-weaponcomp:server:unequipScope', function(source, cb, serial)
-    local Player = RSGCore.Functions.GetPlayer(source)
+FDBCore.Functions.CreateCallback('fdb-weaponcomp:server:unequipScope', function(source, cb, serial)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return cb(false) end
 
     local weaponItem = GetWeaponItemEntry(Player, serial)
@@ -100,16 +100,16 @@ end)
 -- Callback
 --------------------------------------------
 -- Count how many sites player has
-RSGCore.Functions.CreateCallback('rsg-weaponcomp:server:countprop', function(source, cb, proptype)
-  local ply = RSGCore.Functions.GetPlayer(source)
+FDBCore.Functions.CreateCallback('fdb-weaponcomp:server:countprop', function(source, cb, proptype)
+  local ply = FDBCore.Functions.GetPlayer(source)
   local res = MySQL.prepare.await( "SELECT COUNT(*) as count FROM player_weapons_custom WHERE citizenid = ? AND item = ?",
     { ply.PlayerData.citizenid, proptype }
   )
   cb(res or 0)
 end)
 
-RSGCore.Functions.CreateCallback('rsg-weaponcomp:server:getItemBySerial', function(source, cb, serial)
-    local Player = RSGCore.Functions.GetPlayer(source)
+FDBCore.Functions.CreateCallback('fdb-weaponcomp:server:getItemBySerial', function(source, cb, serial)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then cb(nil); return end
 
     for _, item in pairs(Player.PlayerData.items) do
@@ -122,8 +122,8 @@ RSGCore.Functions.CreateCallback('rsg-weaponcomp:server:getItemBySerial', functi
     cb(nil)
 end)
 
-RSGCore.Functions.CreateCallback('rsg-weaponcomp:server:getPlayerWeaponComponents', function(source, cb, serial)
-    local Player = RSGCore.Functions.GetPlayer(source)
+FDBCore.Functions.CreateCallback('fdb-weaponcomp:server:getPlayerWeaponComponents', function(source, cb, serial)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then cb(nil); return end
 
     for _, item in pairs(Player.PlayerData.items) do
@@ -193,10 +193,10 @@ local function MarkPropsDirty()
     PropsDirty = true
 end
 
-RegisterServerEvent('rsg-weaponcomp:server:createnewprop')
-AddEventHandler('rsg-weaponcomp:server:createnewprop', function(propmodel, item, coords, heading)
+RegisterServerEvent('fdb-weaponcomp:server:createnewprop')
+AddEventHandler('fdb-weaponcomp:server:createnewprop', function(propmodel, item, coords, heading)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     -- Server-side distance validation
@@ -240,8 +240,8 @@ AddEventHandler('rsg-weaponcomp:server:createnewprop', function(propmodel, item,
 
     table.insert(Config.PlayerProps, PropData)
     Player.Functions.RemoveItem(Config.Gunsmithitem, 1)
-    lib.notify(src, { title = 'Gunsmith', description = '1 x ' .. RSGCore.Shared.Items[Config.Gunsmithitem].label, type = 'success' })
-    TriggerEvent('rsg-weaponcomp:server:updateProps', src)
+    lib.notify(src, { title = 'Gunsmith', description = '1 x ' .. FDBCore.Shared.Items[Config.Gunsmithitem].label, type = 'success' })
+    TriggerEvent('fdb-weaponcomp:server:updateProps', src)
     MarkPropsDirty()
 
 end)
@@ -249,17 +249,17 @@ end)
 ---------------------------------------------
 -- update props
 ---------------------------------------------
-RegisterServerEvent('rsg-weaponcomp:server:updateProps')
-AddEventHandler('rsg-weaponcomp:server:updateProps', function()
+RegisterServerEvent('fdb-weaponcomp:server:updateProps')
+AddEventHandler('fdb-weaponcomp:server:updateProps', function()
     local src = source
-    TriggerClientEvent('rsg-weaponcomp:client:updatePropData', src, Config.PlayerProps)
+    TriggerClientEvent('fdb-weaponcomp:client:updatePropData', src, Config.PlayerProps)
 end)
 
 -- Client requests prop data on resource start (handles server-restart / late-join)
-RegisterNetEvent('rsg-weaponcomp:server:requestPropData')
-AddEventHandler('rsg-weaponcomp:server:requestPropData', function()
+RegisterNetEvent('fdb-weaponcomp:server:requestPropData')
+AddEventHandler('fdb-weaponcomp:server:requestPropData', function()
     local src = source
-    TriggerClientEvent('rsg-weaponcomp:client:updatePropData', src, Config.PlayerProps)
+    TriggerClientEvent('fdb-weaponcomp:client:updatePropData', src, Config.PlayerProps)
 end)
 
 -- update prop
@@ -267,19 +267,19 @@ CreateThread(function()
     while true do
         Wait(5000)
         if PropsLoaded and PropsDirty then
-            TriggerClientEvent('rsg-weaponcomp:client:updatePropData', -1, Config.PlayerProps)
+            TriggerClientEvent('fdb-weaponcomp:client:updatePropData', -1, Config.PlayerProps)
             PropsDirty = false
         end
     end
 end)
 
 CreateThread(function()
-    TriggerEvent('rsg-weaponcomp:server:getProps')
+    TriggerEvent('fdb-weaponcomp:server:getProps')
     PropsLoaded = true
 end)
 
-RegisterServerEvent('rsg-weaponcomp:server:getProps')
-AddEventHandler('rsg-weaponcomp:server:getProps', function()
+RegisterServerEvent('fdb-weaponcomp:server:getProps')
+AddEventHandler('fdb-weaponcomp:server:getProps', function()
     local result = MySQL.query.await('SELECT * FROM player_weapons_custom')
     if not result[1] then return end
     for i = 1, #result do
@@ -299,31 +299,31 @@ end)
 -- items
 ---------------------------------------------
 -- add item
-RegisterServerEvent('rsg-weaponcomp:server:additem')
-AddEventHandler('rsg-weaponcomp:server:additem', function()
+RegisterServerEvent('fdb-weaponcomp:server:additem')
+AddEventHandler('fdb-weaponcomp:server:additem', function()
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     local item, amount = Config.Gunsmithitem, 1
     Player.Functions.AddItem(item, amount)
-    lib.notify(src, { title = 'Gunsmith', description = amount .. ' x ' .. RSGCore.Shared.Items[item].label, type = 'success' })
+    lib.notify(src, { title = 'Gunsmith', description = amount .. ' x ' .. FDBCore.Shared.Items[item].label, type = 'success' })
 end)
 
 -- remove
-RegisterServerEvent('rsg-weaponcomp:server:removeitem')
-AddEventHandler('rsg-weaponcomp:server:removeitem', function(item, amount)
+RegisterServerEvent('fdb-weaponcomp:server:removeitem')
+AddEventHandler('fdb-weaponcomp:server:removeitem', function(item, amount)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     Player.Functions.RemoveItem(item, amount)
-    lib.notify(src, { title = 'Gunsmith', description = amount .. ' x ' .. RSGCore.Shared.Items[item].label, type = 'error' })
+    lib.notify(src, { title = 'Gunsmith', description = amount .. ' x ' .. FDBCore.Shared.Items[item].label, type = 'error' })
 end)
 
 -- remove gunsite props
-RegisterServerEvent('rsg-weaponcomp:server:removegunsiteprops')
-AddEventHandler('rsg-weaponcomp:server:removegunsiteprops', function(propid)
+RegisterServerEvent('fdb-weaponcomp:server:removegunsiteprops')
+AddEventHandler('fdb-weaponcomp:server:removegunsiteprops', function(propid)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     local citizenid = Player.PlayerData.citizenid
     local result = MySQL.query.await('SELECT * FROM player_weapons_custom WHERE propid = ?', { propid })
@@ -343,8 +343,8 @@ AddEventHandler('rsg-weaponcomp:server:removegunsiteprops', function(propid)
 
     -- print((locale('sv_lang_4').. " %s ".. locale('sv_lang_5') .." %s"):format(citizenid, propid))
 
-    TriggerClientEvent('rsg-weaponcomp:client:updatePropData', -1, Config.PlayerProps)
-    TriggerClientEvent('rsg-weaponcomp:client:ExitCam', src)
+    TriggerClientEvent('fdb-weaponcomp:client:updatePropData', -1, Config.PlayerProps)
+    TriggerClientEvent('fdb-weaponcomp:client:ExitCam', src)
     MarkPropsDirty()
 end)
 
@@ -370,7 +370,7 @@ local function saveWeaponComponents(serial, comps, compslabel, Player)
         locale('sv_lang_8') .. ':** '..serial..'**',
         locale('sv_lang_9') .. ':** '..json.encode(comps)
     }, '\n')
-    TriggerEvent('rsg-log:server:CreateLog', Config.WebhookName, Config.WebhookTitle, Config.WebhookColour, msg)
+    TriggerEvent('fdb-log:server:CreateLog', Config.WebhookName, Config.WebhookTitle, Config.WebhookColour, msg)
 end
 
 local function CalculatePrice(selection)
@@ -381,9 +381,9 @@ local function CalculatePrice(selection)
     return total
 end
 
-RegisterServerEvent('rsg-weaponcomp:server:setComponents', function(objecthash, serial, selectedCache, selectedLabels)
+RegisterServerEvent('fdb-weaponcomp:server:setComponents', function(objecthash, serial, selectedCache, selectedLabels)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     -- Validate components server-side
@@ -418,7 +418,7 @@ RegisterServerEvent('rsg-weaponcomp:server:setComponents', function(objecthash, 
             description = locale('sv_lang_11'),
             type = 'error'
         })
-        TriggerClientEvent('rsg-weaponcomp:client:ExitCam', src)
+        TriggerClientEvent('fdb-weaponcomp:client:ExitCam', src)
         return
     end
     
@@ -426,7 +426,7 @@ RegisterServerEvent('rsg-weaponcomp:server:setComponents', function(objecthash, 
         Player.Functions.RemoveMoney(Config.PaymentType, price)
     end
     saveWeaponComponents(serial, selectedCache, selectedLabels, Player)
-    TriggerClientEvent('rsg-weaponcomp:client:animationSaved', src, objecthash, serial)
+    TriggerClientEvent('fdb-weaponcomp:client:animationSaved', src, objecthash, serial)
     
     TriggerClientEvent('ox_lib:notify', src, {
         title = locale('cl_notify_9'),
@@ -436,9 +436,9 @@ RegisterServerEvent('rsg-weaponcomp:server:setComponents', function(objecthash, 
     })
 end)
 
-RegisterNetEvent('rsg-weaponcomp:server:removeComponents', function(objecthash, serial)
+RegisterNetEvent('fdb-weaponcomp:server:removeComponents', function(objecthash, serial)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     
     local item = GetWeaponItemEntry(Player, serial)
@@ -456,13 +456,13 @@ RegisterNetEvent('rsg-weaponcomp:server:removeComponents', function(objecthash, 
             description = locale('sv_lang_11'),
             type = 'error'
         })
-        TriggerClientEvent('rsg-weaponcomp:client:ExitCam', src)
+        TriggerClientEvent('fdb-weaponcomp:client:ExitCam', src)
         return
     end
     
     Player.Functions.RemoveMoney(Config.PaymentType, price)
     saveWeaponComponents(serial, nil, nil, Player)
-    TriggerClientEvent('rsg-weaponcomp:client:animationSaved', src, objecthash, serial)
+    TriggerClientEvent('fdb-weaponcomp:client:animationSaved', src, objecthash, serial)
     
     TriggerClientEvent('ox_lib:notify', src, {
         title = locale('cl_notify_11'),
@@ -472,10 +472,10 @@ RegisterNetEvent('rsg-weaponcomp:server:removeComponents', function(objecthash, 
     })
 end)
 
-RegisterNetEvent('rsg-weaponcomp:server:check_comps') -- EQUIPED
-AddEventHandler('rsg-weaponcomp:server:check_comps', function()
+RegisterNetEvent('fdb-weaponcomp:server:check_comps') -- EQUIPED
+AddEventHandler('fdb-weaponcomp:server:check_comps', function()
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
-    TriggerClientEvent('rsg-weaponcomp:client:reloadWeapon', src)
+    TriggerClientEvent('fdb-weaponcomp:client:reloadWeapon', src)
 end)

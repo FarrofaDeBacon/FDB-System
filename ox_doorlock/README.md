@@ -68,7 +68,7 @@ TriggerEvent('ox_doorlock:setState', mrpd_locker_rooms.id, state)
 AddEventHandler('ox_doorlock:stateChanged', function(source, doorId, state, usedItem)
     if usedItem == 'trainticket' then
         local src = source
-        local Player = RSGCore.Functions.GetPlayer(src)
+        local Player = FDBCore.Functions.GetPlayer(src)
         Player.Functions.RemoveItem(usedItem, 1)
     end
 end)

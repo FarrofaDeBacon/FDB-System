@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 💰 rsg-banking
+# 💰 fdb-banking
 **Town banking with deposits, withdrawals, safe deposit boxes, money clips, and NPC clerks — for RSG Core.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -12,9 +12,9 @@
 ---
 
 ## 🛠️ Dependencies
-- **rsg-core** (framework & prompts)  
+- **fdb-core** (framework & prompts)  
 - **ox_lib** (locales, dialogs, notifications)  
-- **rsg-inventory** (safe deposit box & items)
+- **fdb-inventory** (safe deposit box & items)
 
 **Locales included:** `en`, `fr`, `es`, `it`, `pt-br`, `el`, `ro`  
 **License:** GPL‑3.0
@@ -54,7 +54,7 @@ Config.Keybind    = 'J'
 Config.OpenTime   = 9     -- 24h
 Config.CloseTime  = 17    -- 24h
 Config.AlwaysOpen = true  -- force banks open
-Config.UseTarget  = false -- use rsg-core prompts if false
+Config.UseTarget  = false -- use fdb-core prompts if false
 
 -- Optional fee when withdrawing (percent)
 Config.WithdrawChargeRate = 0
@@ -112,7 +112,7 @@ Config.BankDoors = {
 
 - **Prompts or Target:** If `UseTarget = false`, rsg‑core prompts are created at each bank to open the UI and to **Give Money**.  
 - **Per‑bank money type:** The UI operates on the `moneytype` configured for that bank (e.g., `valbank`).  
-- **Transactions:** Server event `rsg-banking:server:transact` handles:  
+- **Transactions:** Server event `fdb-banking:server:transact` handles:  
   1) **Withdraw**, 2) **Deposit**, 3) **Create Money Clip** (deducts from bank and adds `money_clip` with `info.money`).  
 - **Money Clips:** `money_clip` (and blood variant) are usable items; on use, the contained amount is paid out and the item is removed.  
 - **Give Money:** Client shows an input (PlayerID + amount) → server validates and transfers cash.  
@@ -164,15 +164,15 @@ blood_money_clip = { name = 'blood_money_clip', label = 'Blood Money Clip',  wei
 ---
 
 ## 📋 Installation
-1. Add `rsg-banking` to `resources/[rsg]`.  
-2. Ensure `rsg-core`, `ox_lib`, and `rsg-inventory` are installed.  
+1. Add `fdb-banking` to `resources/[rsg]`.  
+2. Ensure `fdb-core`, `ox_lib`, and `fdb-inventory` are installed.  
 3. (Optional) Add item images to your inventory UI (`money_clip.png`, `blood_money_clip.png`).  
 4. In `server.cfg`:
    ```cfg
    ensure ox_lib
-   ensure rsg-core
-   ensure rsg-inventory
-   ensure rsg-banking
+   ensure fdb-core
+   ensure fdb-inventory
+   ensure fdb-banking
    ```
 5. Restart the server.
 

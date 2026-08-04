@@ -239,7 +239,7 @@ local function handleConsumption(itemName, type)
             alcoholCount = math.max(0, alcoholCount + data.alcohol)
         end
     end
-    TriggerServerEvent('rsg-consume:server:removeitem', data.item, 1)
+    TriggerServerEvent('fdb-consume:server:removeitem', data.item, 1)
     if data.hunger then
         TriggerEvent('hud:client:UpdateHunger', LocalPlayer.state.hunger + data.hunger)
     end
@@ -249,7 +249,7 @@ local function handleConsumption(itemName, type)
     if data.stress and data.stress > 0 then
         TriggerEvent('hud:client:RelieveStress', data.stress)
     end
-    TriggerEvent('rsg-consume:client:onConsume', data)
+    TriggerEvent('fdb-consume:client:onConsume', data)
     LocalPlayer.state:set("inv_busy", false, true)
     isBusy = false
 end
@@ -260,30 +260,30 @@ end
 
 ---Consumes a food item.
 ---@param itemName string The name of the food item.
-RegisterNetEvent('rsg-consume:client:eat', function(itemName)
+RegisterNetEvent('fdb-consume:client:eat', function(itemName)
     handleConsumption(itemName, "Eat")
 end)
 
 ---Consumes a drink item.
 ---@param itemName string The name of the drink item.
-RegisterNetEvent('rsg-consume:client:drink', function(itemName)
+RegisterNetEvent('fdb-consume:client:drink', function(itemName)
     handleConsumption(itemName, "Drink")
 end)
 
 ---Consumes a stew.
 ---@param itemName string The name of the stew item.
-RegisterNetEvent('rsg-consume:client:stew', function(itemName)
+RegisterNetEvent('fdb-consume:client:stew', function(itemName)
     handleConsumption(itemName, "Stew")
 end)
 
 ---Consumes a hot drink (e.g., coffee).
 ---@param itemName string The name of the hot drink item.
-RegisterNetEvent('rsg-consume:client:drinkcoffee', function(itemName)
+RegisterNetEvent('fdb-consume:client:drinkcoffee', function(itemName)
     handleConsumption(itemName, "Hotdrinks")
 end)
 
 ---Consumes a canned food item.
 ---@param itemName string The name of the canned food item.
-RegisterNetEvent('rsg-consume:client:eatcanned', function(itemName)
+RegisterNetEvent('fdb-consume:client:eatcanned', function(itemName)
     handleConsumption(itemName, "Eatcanned")
 end)

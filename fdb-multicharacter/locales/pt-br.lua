@@ -71,7 +71,7 @@ ui = {
 }
 }
 
-if GetConvar('rsg_locale', 'en') == 'pt-br' then
+if GetConvar('fdb_locale', 'en') == 'pt-br' then
     Lang = Locale:new({
         phrases = Translations,
         warnOnMissing = true,

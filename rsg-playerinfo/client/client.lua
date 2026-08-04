@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
 -- Field definitions for dynamic menu generation
@@ -45,8 +45,8 @@ local function buildOptionsArray(data)
     return optionsArray
 end
 
-RegisterNetEvent('rsg-playerstats:client:openPlayerStats', function()
-    RSGCore.Functions.TriggerCallback('rsg-playerstats:server:getPlayerData', function(data)
+RegisterNetEvent('fdb-playerstats:client:openPlayerStats', function()
+    FDBCore.Functions.TriggerCallback('fdb-playerstats:server:getPlayerData', function(data)
         if not data then
             return
         end

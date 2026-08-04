@@ -1,2 +1,2 @@
 # progressbar
-Progressbar for RedM RSGCore
+Progressbar for RedM FDBCore

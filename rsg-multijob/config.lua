@@ -1,4 +1,4 @@
-RSGCore = exports['rsg-core']:GetCoreObject()
+FDBCore = exports['fdb-core']:GetCoreObject()
 
 return {
     MaxJobs = 2,

@@ -1,4 +1,4 @@
-local Core = exports['rsg-core']:GetCoreObject()
+local Core = exports['fdb-core']:GetCoreObject()
 
 local success, result = pcall(function()
     return Core.Functions.GetPlayerData()
@@ -24,12 +24,12 @@ if not usingOxInventory then
     setPlayerItems()
 end
 
-AddEventHandler('RSGCore:Client:OnPlayerLoaded', function()
+AddEventHandler('FDBCore:Client:OnPlayerLoaded', function()
     playerData = Core.Functions.GetPlayerData()
     if not usingOxInventory then setPlayerItems() end
 end)
 
-RegisterNetEvent('RSGCore:Player:SetPlayerData', function(val)
+RegisterNetEvent('FDBCore:Player:SetPlayerData', function(val)
     if source == '' then return end
 
     playerData = val

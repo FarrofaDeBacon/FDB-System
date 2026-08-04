@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
 -- example:
@@ -17,7 +17,7 @@ local function LoadAnimationDic(dict)
 end
 
 -- anim input
-RegisterNetEvent('rsg-adminmenu:client:testanimation', function()
+RegisterNetEvent('fdb-adminmenu:client:testanimation', function()
     local input = lib.inputDialog(locale('cl_anim_test'), {
         {
             label = locale('cl_anim_dictionary'),
@@ -43,11 +43,11 @@ RegisterNetEvent('rsg-adminmenu:client:testanimation', function()
     })
     if not input then return end
 
-    TriggerEvent('rsg-adminmenu:client:startanimation', input[1], input[2], input[3], input[4])
+    TriggerEvent('fdb-adminmenu:client:startanimation', input[1], input[2], input[3], input[4])
 
 end)
 
-RegisterNetEvent('rsg-adminmenu:client:startanimation', function(dict, name, flag, length)
+RegisterNetEvent('fdb-adminmenu:client:startanimation', function(dict, name, flag, length)
     LoadAnimationDic(dict)
     TaskPlayAnim(cache.ped, dict, name, 2.0, 0, -1, flag, 0, 0, 0, 0)
     Wait(length)

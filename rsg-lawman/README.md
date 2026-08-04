@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# ⭐ rsg-lawman
+# ⭐ fdb-lawman
 **Law enforcement and sheriff management system for RedM using RSG Core.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -12,10 +12,10 @@
 ---
 
 ## 🛠️ Dependencies
-- [**rsg-core**](https://github.com/Rexshack-RedM/rsg-core) 🤠
+- [**fdb-core**](https://github.com/Rexshack-RedM/fdb-core) 🤠
 - [**ox_lib**](https://github.com/Rexshack-RedM/ox_lib) ⚙️ *(for menus and notifications)*
 - [**oxmysql**](https://github.com/overextended/oxmysql) 🗄️ *(for database storage)*
-- [**rsg-inventory**](https://github.com/Rexshack-RedM/rsg-inventory) 🎒 *(for player search & confiscation)*
+- [**fdb-inventory**](https://github.com/Rexshack-RedM/fdb-inventory) 🎒 *(for player search & confiscation)*
 
 **Interaction:** Prompts are automatically created at each law office defined in `Config.LawOfficeLocations`.  
 **Keybind:** Default interaction key = `'J'`.  
@@ -88,15 +88,15 @@ Config.LawOfficeLocations = {
 ---
 
 ## 📂 Installation
-1. Place `rsg-lawman` inside your `resources/[rsg]` folder.
-2. Ensure **rsg-core**, **ox_lib**, **rsg-inventory**, and **oxmysql** are installed.
+1. Place `fdb-lawman` inside your `resources/[rsg]` folder.
+2. Ensure **fdb-core**, **ox_lib**, **fdb-inventory**, and **oxmysql** are installed.
 3. Adjust settings and locations in `config.lua`.
 4. Add to your `server.cfg`:
    ```cfg
    ensure ox_lib
-   ensure rsg-core
-   ensure rsg-inventory
-   ensure rsg-lawman
+   ensure fdb-core
+   ensure fdb-inventory
+   ensure fdb-lawman
    ```
 5. Restart your server.
 

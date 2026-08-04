@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
 permissions = {
@@ -21,12 +21,12 @@ permissions = {
 -----------------------------------------------------------------------
 -- get players function
 -----------------------------------------------------------------------
-RSGCore.Functions.CreateCallback('rsg-adminmenu:server:getplayers', function(source, cb)
+FDBCore.Functions.CreateCallback('fdb-adminmenu:server:getplayers', function(source, cb)
     local src = source
     local players = {}
-    for k, v in pairs(RSGCore.Functions.GetPlayers()) do
+    for k, v in pairs(FDBCore.Functions.GetPlayers()) do
         local target = GetPlayerPed(v)
-        local ped = RSGCore.Functions.GetPlayer(v)
+        local ped = FDBCore.Functions.GetPlayer(v)
         players[#players + 1] = {
             name = ped.PlayerData.charinfo.firstname ..
             ' ' .. ped.PlayerData.charinfo.lastname .. ' | (' .. GetPlayerName(v) .. ')',
@@ -52,24 +52,24 @@ local function BanPlayer(src)
     MySQL.insert('INSERT INTO bans (name, license, discord, ip, reason, expire, bannedby) VALUES (?, ?, ?, ?, ?, ?, ?)',
         {
             GetPlayerName(src),
-            RSGCore.Functions.GetIdentifier(src, 'license'),
-            RSGCore.Functions.GetIdentifier(src, 'discord'),
-            RSGCore.Functions.GetIdentifier(src, 'ip'),
+            FDBCore.Functions.GetIdentifier(src, 'license'),
+            FDBCore.Functions.GetIdentifier(src, 'discord'),
+            FDBCore.Functions.GetIdentifier(src, 'ip'),
             'system banned you',
             2524608000,
-            'rsg-adminmenu'
+            'fdb-adminmenu'
         })
-    TriggerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('sv_a'), 'red',
-        string.format(locale('sv_b'), GetPlayerName(src), 'rsg-adminmenu', locale('sv_c')), true)
+    TriggerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('sv_a'), 'red',
+        string.format(locale('sv_b'), GetPlayerName(src), 'fdb-adminmenu', locale('sv_c')), true)
     DropPlayer(src, locale('sv_105'))
 end
 
 -----------------------------------------------------------------------
 -- admin menu command
 -----------------------------------------------------------------------
-RSGCore.Commands.Add('adminmenu', locale('sv_100'), {}, false, function(source)
+FDBCore.Commands.Add('adminmenu', locale('sv_100'), {}, false, function(source)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player or not Player.PlayerData or not Player.PlayerData.charinfo then
         return
     end
@@ -77,11 +77,11 @@ RSGCore.Commands.Add('adminmenu', locale('sv_100'), {}, false, function(source)
     local lastname = Player.PlayerData.charinfo.lastname
     local citizenid = Player.PlayerData.citizenid
 
-    if RSGCore.Functions.HasPermission(src, permissions['adminmenu']) or IsPlayerAceAllowed(src, 'command') then
-        TriggerClientEvent('rsg-adminmenu:client:openadminmenu', src)
+    if FDBCore.Functions.HasPermission(src, permissions['adminmenu']) or IsPlayerAceAllowed(src, 'command') then
+        TriggerClientEvent('fdb-adminmenu:client:openadminmenu', src)
     else
         --BanPlayer(src)
-        TriggerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('sv_d'), 'red',
+        TriggerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('sv_d'), 'red',
             firstname .. ' ' .. lastname .. ' ' .. locale('sv_e') .. ' ' .. citizenid .. ' ' .. locale('sv_f'), true)
         TriggerClientEvent('ox_lib:notify', source,
             { title = locale('sv_101'), description = locale('sv_102'), type = 'inform' })
@@ -91,20 +91,20 @@ end)
 -----------------------------------------------------------------------
 -- revive player
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:server:playerrevive', function(player)
+RegisterNetEvent('fdb-adminmenu:server:playerrevive', function(player)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     local firstname = Player.PlayerData.charinfo.firstname
     local lastname = Player.PlayerData.charinfo.lastname
     local citizenid = Player.PlayerData.citizenid
 
-    if RSGCore.Functions.HasPermission(src, permissions['revive']) or IsPlayerAceAllowed(src, 'command') then
-        TriggerClientEvent('rsg-medic:client:adminRevive', player.id)
+    if FDBCore.Functions.HasPermission(src, permissions['revive']) or IsPlayerAceAllowed(src, 'command') then
+        TriggerClientEvent('fdb-medic:client:adminRevive', player.id)
     else
         BanPlayer(src)
         TriggerClientEvent('ox_lib:notify', source,
             { title = locale('sv_101'), description = locale('sv_102'), type = 'inform' })
-        TriggerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
+        TriggerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
             firstname .. ' ' .. lastname .. ' ' .. locale('sv_h') .. ' ' .. citizenid .. ' ' .. locale('sv_i'), true)
     end
 end)
@@ -112,18 +112,18 @@ end)
 -----------------------------------------------------------------------
 -- open players inventory
 -----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:server:openinventory', function(player)
+RegisterNetEvent('fdb-adminmenu:server:openinventory', function(player)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     local firstname = Player.PlayerData.charinfo.firstname
     local lastname = Player.PlayerData.charinfo.lastname
     local citizenid = Player.PlayerData.citizenid
 
-    if RSGCore.Functions.HasPermission(src, permissions['inventory']) or IsPlayerAceAllowed(src, 'command') then
-        exports['rsg-inventory']:OpenInventoryById(src, tonumber(player.id))
+    if FDBCore.Functions.HasPermission(src, permissions['inventory']) or IsPlayerAceAllowed(src, 'command') then
+        exports['fdb-inventory']:OpenInventoryById(src, tonumber(player.id))
     else
         BanPlayer(src)
-        TriggerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
+        TriggerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
             firstname .. ' ' .. lastname .. ' ' .. locale('sv_h') .. ' ' .. citizenid .. ' ' .. locale('sv_j'), true)
         TriggerClientEvent('ox_lib:notify', source,
             { title = locale('sv_101'), description = locale('sv_102'), type = 'inform' })
@@ -133,21 +133,21 @@ end)
 -----------------------------------------------------------------------
 -- kick player
 ----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:server:kickplayer', function(player, reason)
+RegisterNetEvent('fdb-adminmenu:server:kickplayer', function(player, reason)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     local firstname = Player.PlayerData.charinfo.firstname
     local lastname = Player.PlayerData.charinfo.lastname
     local citizenid = Player.PlayerData.citizenid
 
-    if RSGCore.Functions.HasPermission(src, permissions['kick']) or IsPlayerAceAllowed(src, 'command') then
-        TriggerEvent('rsg-log:server:CreateLog', 'bans', locale('sv_kicked'), 'red',
+    if FDBCore.Functions.HasPermission(src, permissions['kick']) or IsPlayerAceAllowed(src, 'command') then
+        TriggerEvent('fdb-log:server:CreateLog', 'bans', locale('sv_kicked'), 'red',
             string.format(locale('sv_kicked_a'), GetPlayerName(player), GetPlayerName(src), reason), true)
         DropPlayer(player,
-            locale('sv_103') .. ':\n' .. reason .. '\n\n' .. locale('sv_104') .. RSGCore.Config.Server.Discord)
+            locale('sv_103') .. ':\n' .. reason .. '\n\n' .. locale('sv_104') .. FDBCore.Config.Server.Discord)
     else
         BanPlayer(src)
-        TriggerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
+        TriggerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
             firstname .. ' ' .. lastname .. ' ' .. locale('sv_h') .. ' ' .. citizenid .. ' ' .. locale('sv_kicked_b'),
             true)
         TriggerClientEvent('ox_lib:notify', source,
@@ -155,9 +155,9 @@ RegisterNetEvent('rsg-adminmenu:server:kickplayer', function(player, reason)
     end
 end)
 
-RegisterNetEvent('rsg-adminmenu:server:banplayer', function(player, time, reason)
+RegisterNetEvent('fdb-adminmenu:server:banplayer', function(player, time, reason)
     local src = source
-    if RSGCore.Functions.HasPermission(src, permissions['ban']) or IsPlayerAceAllowed(src, 'command') then
+    if FDBCore.Functions.HasPermission(src, permissions['ban']) or IsPlayerAceAllowed(src, 'command') then
         time = tonumber(time)
         local banTime = tonumber(os.time() + time)
         if banTime > 2524608000 then
@@ -167,9 +167,9 @@ RegisterNetEvent('rsg-adminmenu:server:banplayer', function(player, time, reason
         MySQL.insert(
         'INSERT INTO bans (name, license, discord, ip, reason, expire, bannedby) VALUES (?, ?, ?, ?, ?, ?, ?)', {
             GetPlayerName(player),
-            RSGCore.Functions.GetIdentifier(player, 'license'),
-            RSGCore.Functions.GetIdentifier(player, 'discord'),
-            RSGCore.Functions.GetIdentifier(player, 'ip'),
+            FDBCore.Functions.GetIdentifier(player, 'license'),
+            FDBCore.Functions.GetIdentifier(player, 'discord'),
+            FDBCore.Functions.GetIdentifier(player, 'ip'),
             reason,
             banTime,
             GetPlayerName(src)
@@ -179,12 +179,12 @@ RegisterNetEvent('rsg-adminmenu:server:banplayer', function(player, time, reason
             locale('sv_ban') .. " | {0}" .. locale('sv_ban_a') .. ":</strong> {1}</div>",
             args = { GetPlayerName(player), reason }
         })
-        TriggerEvent('rsg-log:server:CreateLog', 'bans', locale('sv_a'), 'red',
+        TriggerEvent('fdb-log:server:CreateLog', 'bans', locale('sv_a'), 'red',
             string.format(locale('sv_b'), GetPlayerName(player), GetPlayerName(src), reason), true)
         if banTime >= 2524608000 then
             DropPlayer(player,
                 locale('sv_106') ..
-                '\n' .. reason .. '\n\n' .. locale('sv_107') .. '\n' .. locale('sv_108') .. RSGCore.Config.Server
+                '\n' .. reason .. '\n\n' .. locale('sv_107') .. '\n' .. locale('sv_108') .. FDBCore.Config.Server
                 .Discord)
         else
             DropPlayer(player,
@@ -199,7 +199,7 @@ RegisterNetEvent('rsg-adminmenu:server:banplayer', function(player, time, reason
                 '/' ..
                 timeTable['year'] ..
                 ' ' ..
-                timeTable['hour'] .. ':' .. timeTable['min'] .. '\n' .. locale('sv_110') .. RSGCore.Config.Server
+                timeTable['hour'] .. ':' .. timeTable['min'] .. '\n' .. locale('sv_110') .. FDBCore.Config.Server
                 .Discord)
         end
     else
@@ -210,20 +210,20 @@ end)
 -----------------------------------------------------------------------
 -- goto player
 ----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:server:gotoplayer', function(player)
+RegisterNetEvent('fdb-adminmenu:server:gotoplayer', function(player)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     local firstname = Player.PlayerData.charinfo.firstname
     local lastname = Player.PlayerData.charinfo.lastname
     local citizenid = Player.PlayerData.citizenid
 
-    if RSGCore.Functions.HasPermission(src, permissions['goto']) or IsPlayerAceAllowed(src, 'command') then
+    if FDBCore.Functions.HasPermission(src, permissions['goto']) or IsPlayerAceAllowed(src, 'command') then
         local admin = GetPlayerPed(src)
         local coords = GetEntityCoords(GetPlayerPed(player.id))
         SetEntityCoords(admin, coords)
     else
         BanPlayer(src)
-        TriggerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
+        TriggerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
             firstname .. ' ' .. lastname .. ' ' .. locale('sv_h') .. ' ' .. citizenid .. ' ' .. locale('sv_ban_c'), true)
         TriggerClientEvent('ox_lib:notify', source,
             { title = locale('sv_101'), description = locale('sv_102'), type = 'inform' })
@@ -233,21 +233,21 @@ end)
 -----------------------------------------------------------------------
 -- bring player
 ----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:server:bringplayer', function(player)
+RegisterNetEvent('fdb-adminmenu:server:bringplayer', function(player)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     local firstname = Player.PlayerData.charinfo.firstname
     local lastname = Player.PlayerData.charinfo.lastname
     local citizenid = Player.PlayerData.citizenid
 
-    if RSGCore.Functions.HasPermission(src, permissions['bring']) or IsPlayerAceAllowed(src, 'command') then
+    if FDBCore.Functions.HasPermission(src, permissions['bring']) or IsPlayerAceAllowed(src, 'command') then
         local admin = GetPlayerPed(src)
         local coords = GetEntityCoords(admin)
         local target = GetPlayerPed(player.id)
         SetEntityCoords(target, coords)
     else
         BanPlayer(src)
-        TriggerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
+        TriggerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
             firstname .. ' ' .. lastname .. ' ' .. locale('sv_h') .. ' ' .. citizenid .. ' ' .. locale('sv_ban_d'), true)
         TriggerClientEvent('ox_lib:notify', source,
             { title = locale('sv_101'), description = locale('sv_102'), type = 'inform' })
@@ -257,14 +257,14 @@ end)
 -----------------------------------------------------------------------
 -- freeze player
 ----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:server:freezeplayer', function(player)
+RegisterNetEvent('fdb-adminmenu:server:freezeplayer', function(player)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     local firstname = Player.PlayerData.charinfo.firstname
     local lastname = Player.PlayerData.charinfo.lastname
     local citizenid = Player.PlayerData.citizenid
 
-    if RSGCore.Functions.HasPermission(src, permissions['freeze']) or IsPlayerAceAllowed(src, 'command') then
+    if FDBCore.Functions.HasPermission(src, permissions['freeze']) or IsPlayerAceAllowed(src, 'command') then
         local target = GetPlayerPed(player.id)
         if not frozen then
             frozen = true
@@ -279,7 +279,7 @@ RegisterNetEvent('rsg-adminmenu:server:freezeplayer', function(player)
         end
     else
         BanPlayer(src)
-        TriggerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
+        TriggerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
             firstname .. ' ' .. lastname .. ' ' .. locale('sv_h') .. ' ' .. citizenid .. ' ' .. locale('sv_ban_e'), true)
         TriggerClientEvent('ox_lib:notify', source,
             { title = locale('sv_101'), description = locale('sv_102'), type = 'inform' })
@@ -289,20 +289,20 @@ end)
 -----------------------------------------------------------------------
 -- spectate player
 ----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:server:spectateplayer', function(player)
+RegisterNetEvent('fdb-adminmenu:server:spectateplayer', function(player)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     local firstname = Player.PlayerData.charinfo.firstname
     local lastname = Player.PlayerData.charinfo.lastname
     local citizenid = Player.PlayerData.citizenid
 
-    if RSGCore.Functions.HasPermission(src, permissions['spectate']) or IsPlayerAceAllowed(src, 'command') then
+    if FDBCore.Functions.HasPermission(src, permissions['spectate']) or IsPlayerAceAllowed(src, 'command') then
         local targetped = GetPlayerPed(player.id)
         local coords = GetEntityCoords(targetped)
-        TriggerClientEvent('rsg-adminmenu:client:spectateplayer', src, player.id, coords)
+        TriggerClientEvent('fdb-adminmenu:client:spectateplayer', src, player.id, coords)
     else
         BanPlayer(src)
-        TriggerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
+        TriggerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
             firstname .. ' ' .. lastname .. ' ' .. locale('sv_h') .. ' ' .. citizenid .. ' ' .. locale('sv_ban_f'), true)
         TriggerClientEvent('ox_lib:notify', source,
             { title = locale('sv_101'), description = locale('sv_102'), type = 'inform' })
@@ -312,18 +312,18 @@ end)
 -----------------------------------------------------------------------
 -- wild attack
 ----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:server:wildattack', function(player)
+RegisterNetEvent('fdb-adminmenu:server:wildattack', function(player)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     local firstname = Player.PlayerData.charinfo.firstname
     local lastname = Player.PlayerData.charinfo.lastname
     local citizenid = Player.PlayerData.citizenid
 
-    if RSGCore.Functions.HasPermission(src, permissions['wildattack']) or IsPlayerAceAllowed(src, 'command') then
-        TriggerClientEvent('rsg-adminmenu:client:wildattack', src, player.id)
+    if FDBCore.Functions.HasPermission(src, permissions['wildattack']) or IsPlayerAceAllowed(src, 'command') then
+        TriggerClientEvent('fdb-adminmenu:client:wildattack', src, player.id)
     else
         BanPlayer(src)
-        TriggerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
+        TriggerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
             firstname .. ' ' .. lastname .. ' ' .. locale('sv_h') .. ' ' .. citizenid .. ' ' .. locale('sv_ban_g'), true)
         TriggerClientEvent('ox_lib:notify', source,
             { title = locale('sv_101'), description = locale('sv_102'), type = 'inform' })
@@ -333,18 +333,18 @@ end)
 -----------------------------------------------------------------------
 -- set player on fire
 ----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:server:playerfire', function(player)
+RegisterNetEvent('fdb-adminmenu:server:playerfire', function(player)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     local firstname = Player.PlayerData.charinfo.firstname
     local lastname = Player.PlayerData.charinfo.lastname
     local citizenid = Player.PlayerData.citizenid
 
-    if RSGCore.Functions.HasPermission(src, permissions['setonfire']) or IsPlayerAceAllowed(src, 'command') then
-        TriggerClientEvent('rsg-adminmenu:client:playerfire', src, player.id)
+    if FDBCore.Functions.HasPermission(src, permissions['setonfire']) or IsPlayerAceAllowed(src, 'command') then
+        TriggerClientEvent('fdb-adminmenu:client:playerfire', src, player.id)
     else
         BanPlayer(src)
-        TriggerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
+        TriggerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
             firstname .. ' ' .. lastname .. ' ' .. locale('sv_h') .. ' ' .. citizenid .. ' ' .. locale('sv_ban_h'), true)
         TriggerClientEvent('ox_lib:notify', source,
             { title = locale('sv_101'), description = locale('sv_102'), type = 'inform' })
@@ -354,23 +354,23 @@ end)
 -----------------------------------------------------------------------
 -- give item
 ----------------------------------------------------------------------
-RegisterNetEvent('rsg-adminmenu:server:giveitem', function(player, item, amount)
+RegisterNetEvent('fdb-adminmenu:server:giveitem', function(player, item, amount)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     local firstname = Player.PlayerData.charinfo.firstname
     local lastname = Player.PlayerData.charinfo.lastname
     local citizenid = Player.PlayerData.citizenid
 
-    if RSGCore.Functions.HasPermission(src, permissions['giveitem']) or IsPlayerAceAllowed(src, 'command') then
+    if FDBCore.Functions.HasPermission(src, permissions['giveitem']) or IsPlayerAceAllowed(src, 'command') then
         local id = player
-        local Player_a = RSGCore.Functions.GetPlayer(id)
+        local Player_a = FDBCore.Functions.GetPlayer(id)
         local amount_a = amount
         Player_a.Functions.AddItem(item, amount_a)
         TriggerClientEvent('ox_lib:notify', src,
             { title = locale('sv_135'), description = locale('sv_136'), type = 'inform' })
     else
         BanPlayer(src)
-        TriggerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
+        TriggerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
             firstname .. ' ' .. lastname .. ' ' .. locale('sv_h') .. ' ' .. citizenid .. ' ' .. locale('sv_ban_i'), true)
         TriggerClientEvent('ox_lib:notify', src,
             { title = locale('sv_101'), description = locale('sv_102'), type = 'inform' })
@@ -380,16 +380,16 @@ end)
 -----------------------------------------------------------------------
 -- player info
 ----------------------------------------------------------------------
-RSGCore.Functions.CreateCallback('rsg-adminmenu:server:getplayerinfo', function(source, cb, player)
+FDBCore.Functions.CreateCallback('fdb-adminmenu:server:getplayerinfo', function(source, cb, player)
     local src = source
-    local adminPlayer = RSGCore.Functions.GetPlayer(src)
+    local adminPlayer = FDBCore.Functions.GetPlayer(src)
     local firstname = adminPlayer.PlayerData.charinfo.firstname
     local lastname = adminPlayer.PlayerData.charinfo.lastname
     local citizenid = adminPlayer.PlayerData.citizenid
 
-    if RSGCore.Functions.HasPermission(src, permissions['playerinfo']) or IsPlayerAceAllowed(src, 'command') then
+    if FDBCore.Functions.HasPermission(src, permissions['playerinfo']) or IsPlayerAceAllowed(src, 'command') then
         local id               = player.id
-        local targetPlayer     = RSGCore.Functions.GetPlayer(id)
+        local targetPlayer     = FDBCore.Functions.GetPlayer(id)
         local targetfirstname  = targetPlayer.PlayerData.charinfo.firstname
         local targetlastname   = targetPlayer.PlayerData.charinfo.lastname
         local targetjob        = targetPlayer.PlayerData.job.label
@@ -421,7 +421,7 @@ RSGCore.Functions.CreateCallback('rsg-adminmenu:server:getplayerinfo', function(
         })
     else
         BanPlayer(src)
-        TriggerEvent('rsg-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
+        TriggerEvent('fdb-log:server:CreateLog', 'adminmenu', locale('sv_g'), 'red',
             firstname .. ' ' .. lastname .. ' ' .. locale('sv_h') .. ' ' .. citizenid .. ' ' .. locale('sv_ban_j'), true)
         TriggerClientEvent('ox_lib:notify', src,
             { title = locale('sv_101'), description = locale('sv_102'), type = 'inform' })
@@ -431,7 +431,7 @@ end)
 -----------------------------------------------------------------------
 -- Command to open the report menu
 -----------------------------------------------------------------------
-RSGCore.Commands.Add('report', locale('sv_report_command_desc'), {}, false, function(source)
+FDBCore.Commands.Add('report', locale('sv_report_command_desc'), {}, false, function(source)
     local src = source
-    TriggerClientEvent('rsg-adminmenu:client:openreportmenu', src)
+    TriggerClientEvent('fdb-adminmenu:client:openreportmenu', src)
 end)

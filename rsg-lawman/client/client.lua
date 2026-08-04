@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 local blipEntries = {}
 local timer = Config.AlertTimer
 local badge = false
@@ -13,10 +13,10 @@ lib.locale()
 ------------------------------------
 CreateThread(function()
     for _, v in pairs(Config.LawOfficeLocations) do
-        exports['rsg-core']:createPrompt(v.prompt, v.coords, RSGCore.Shared.Keybinds[Config.Keybind], locale('cl_open'),
+        exports['fdb-core']:createPrompt(v.prompt, v.coords, FDBCore.Shared.Keybinds[Config.Keybind], locale('cl_open'),
             {
                 type = 'client',
-                event = 'rsg-lawman:client:mainmenu',
+                event = 'fdb-lawman:client:mainmenu',
                 args = { v.jobaccess, v.prompt },
             })
         if v.showblip == true then
@@ -31,8 +31,8 @@ end)
 ------------------------------------------
 -- main job menu
 ------------------------------------------
-RegisterNetEvent('rsg-lawman:client:mainmenu', function(jobaccess, name)
-    local PlayerData = RSGCore.Functions.GetPlayerData()
+RegisterNetEvent('fdb-lawman:client:mainmenu', function(jobaccess, name)
+    local PlayerData = FDBCore.Functions.GetPlayerData()
     local playerjob = PlayerData.job.name
     if playerjob == jobaccess then
         lib.registerContext({
@@ -42,7 +42,7 @@ RegisterNetEvent('rsg-lawman:client:mainmenu', function(jobaccess, name)
                 {
                     title = locale('cl_duty'),
                     icon = 'fa-solid fa-shield-heart',
-                    event = 'rsg-lawman:client:ToggleDuty',
+                    event = 'fdb-lawman:client:ToggleDuty',
                     arrow = true
                 },
                 {
@@ -50,7 +50,7 @@ RegisterNetEvent('rsg-lawman:client:mainmenu', function(jobaccess, name)
                     description = locale('cl_armo_a'),
                     icon = 'fa-solid fa-person-rifle',
                     onSelect = function()
-                        TriggerEvent('rsg-lawman:client:openarmoury', name)
+                        TriggerEvent('fdb-lawman:client:openarmoury', name)
                     end,
                     arrow = true
                 },
@@ -58,7 +58,7 @@ RegisterNetEvent('rsg-lawman:client:mainmenu', function(jobaccess, name)
                     title = locale('cl_trash'),
                     description = locale('cl_trash_a'),
                     icon = 'fa-solid fa-box-archive',
-                    event = 'rsg-lawman:client:openstorage',
+                    event = 'fdb-lawman:client:openstorage',
                     arrow = true
                 },
             }
@@ -72,11 +72,11 @@ end)
 ------------------------------------------
 -- law office armoury
 ------------------------------------------
-RegisterNetEvent('rsg-lawman:client:openarmoury')
-AddEventHandler('rsg-lawman:client:openarmoury', function(id)
-    RSGCore.Functions.GetPlayerData(function(PlayerData)
+RegisterNetEvent('fdb-lawman:client:openarmoury')
+AddEventHandler('fdb-lawman:client:openarmoury', function(id)
+    FDBCore.Functions.GetPlayerData(function(PlayerData)
         if PlayerData.job.type == "leo" and PlayerData.job.grade.level >= Config.ArmouryAccessGrade then
-            TriggerServerEvent('rsg-shops:server:openstore', 'armoury', 'armoury', locale('cl_shop'))
+            TriggerServerEvent('fdb-shops:server:openstore', 'armoury', 'armoury', locale('cl_shop'))
         else
             lib.notify({ title = locale('cl_no_rank'), type = 'error', duration = 7000 })
         end
@@ -86,16 +86,16 @@ end)
 ------------------------------------------
 -- send player to jail
 ------------------------------------------
-RegisterNetEvent('rsg-lawman:client:jailplayer', function(playerId, time)
+RegisterNetEvent('fdb-lawman:client:jailplayer', function(playerId, time)
     if playerId and time then
         -- Jail specific player
-        TriggerServerEvent('rsg-lawman:server:jailplayer', playerId, tonumber(time))
+        TriggerServerEvent('fdb-lawman:server:jailplayer', playerId, tonumber(time))
     else
         -- Jail closest player
         if not IsPedRagdoll(cache.ped) then
             local distanceRequirement = 1.5
 
-            local player, distance = RSGCore.Functions.GetClosestPlayer()
+            local player, distance = FDBCore.Functions.GetClosestPlayer()
             if player == -1 or distance >= distanceRequirement then
                 lib.notify({ title = locale('cl_nearby'), type = 'error', duration = 5000 })
                 return
@@ -114,31 +114,31 @@ RegisterNetEvent('rsg-lawman:client:jailplayer', function(playerId, time)
             end
 
             local time = tonumber(input[1])
-            local player, distance = RSGCore.Functions.GetClosestPlayer()
+            local player, distance = FDBCore.Functions.GetClosestPlayer()
             if player == -1 or distance >= distanceRequirement or GetPlayerServerId(player) ~= playerId then
                 lib.notify({ title = locale('cl_nearby'), type = 'error', duration = 5000 })
                 return
             end
 
-            TriggerServerEvent('rsg-lawman:server:jailplayer', playerId, time)
+            TriggerServerEvent('fdb-lawman:server:jailplayer', playerId, time)
         end
     end
 end)
 
-RegisterNetEvent('rsg-lawman:client:sendtojail', function(time)
-    TriggerServerEvent('rsg-lawman:server:sethandcuffstatus', false)
+RegisterNetEvent('fdb-lawman:client:sendtojail', function(time)
+    TriggerServerEvent('fdb-lawman:server:sethandcuffstatus', false)
     isHandcuffed = false
     isEscorted = false
     ClearPedTasks(cache.ped)
     DetachEntity(cache.ped, true, false)
-    TriggerEvent('rsg-prison:client:Enter', time)
+    TriggerEvent('fdb-prison:client:Enter', time)
 end)
 
 ------------------------------------------
 -- lawman alert
 ------------------------------------------
-RegisterNetEvent('rsg-lawman:client:lawmanAlert', function(coords, text)
-    RSGCore.Functions.GetPlayerData(function(PlayerData)
+RegisterNetEvent('fdb-lawman:client:lawmanAlert', function(coords, text)
+    FDBCore.Functions.GetPlayerData(function(PlayerData)
         if PlayerData.job.type == "leo" then
             local blip = BlipAddForCoords(joaat('BLIP_STYLE_CREATOR_DEFAULT'), coords.x, coords.y, coords.z)
             local blip2 = BlipAddForCoords(joaat('BLIP_STYLE_COP_PERSISTENT'), coords.x, coords.y, coords.z)
@@ -212,15 +212,15 @@ end)
 ------------------------------------------
 -- handcuff player
 ------------------------------------------
-RegisterNetEvent('rsg-lawman:client:cuffplayer', function()
+RegisterNetEvent('fdb-lawman:client:cuffplayer', function()
     if not IsPedRagdoll(cache.ped) then
-        local player, distance = RSGCore.Functions.GetClosestPlayer()
+        local player, distance = FDBCore.Functions.GetClosestPlayer()
         if player ~= -1 and distance < 1.5 then
-            local result = RSGCore.Functions.HasItem('handcuffs')
+            local result = FDBCore.Functions.HasItem('handcuffs')
             if result then
                 local playerId = GetPlayerServerId(player)
                 if not IsPedInAnyVehicle(GetPlayerPed(player)) and not IsPedInAnyVehicle(cache.ped) then
-                    TriggerServerEvent('rsg-lawman:server:cuffplayer', playerId, false)
+                    TriggerServerEvent('fdb-lawman:server:cuffplayer', playerId, false)
                     -- HandCuffAnimation()
                 else
                     lib.notify({ title = locale('cl_failed'), description = locale('cl_failed_a'), type = 'error', duration = 5000 })
@@ -239,10 +239,10 @@ end)
 ------------------------------------------
 -- do handcuff player
 ------------------------------------------
-RegisterNetEvent('rsg-lawman:client:getcuffed', function(playerId, isSoftcuff)
+RegisterNetEvent('fdb-lawman:client:getcuffed', function(playerId, isSoftcuff)
     if not isHandcuffed then
         isHandcuffed = true
-        TriggerServerEvent('rsg-lawman:server:sethandcuffstatus', true)
+        TriggerServerEvent('fdb-lawman:server:sethandcuffstatus', true)
         TriggerServerEvent('InteractSound_SV:PlayWithinDistance', 5, 'cuff', 0.6)
         ClearPedTasksImmediately(cache.ped)
         if GetPedCurrentHeldWeapon(cache.ped) ~= joaat("WEAPON_UNARMED") then
@@ -260,7 +260,7 @@ RegisterNetEvent('rsg-lawman:client:getcuffed', function(playerId, isSoftcuff)
         isEscorted = false
         TriggerEvent('hospital:client:isEscorted', isEscorted)
         DetachEntity(cache.ped, true, false)
-        TriggerServerEvent('rsg-lawman:server:sethandcuffstatus', false)
+        TriggerServerEvent('fdb-lawman:server:sethandcuffstatus', false)
         TriggerServerEvent('InteractSound_SV:PlayWithinDistance', 5, 'uncuff', 0.6)
         ClearPedTasksImmediately(cache.ped)
         SetEnableHandcuffs(cache.ped, false)
@@ -331,10 +331,10 @@ end)
 ------------------------------------------
 -- Toggle On-Duty
 ------------------------------------------
-AddEventHandler('rsg-lawman:client:ToggleDuty', function()
-    RSGCore.Functions.GetPlayerData(function(PlayerData)
+AddEventHandler('fdb-lawman:client:ToggleDuty', function()
+    FDBCore.Functions.GetPlayerData(function(PlayerData)
         if PlayerData.job.type == "leo" then
-            TriggerServerEvent("RSGCore:ToggleDuty")
+            TriggerServerEvent("FDBCore:ToggleDuty")
             return
         end
     end)
@@ -343,12 +343,12 @@ end)
 ------------------------------------------
 -- escort player
 ------------------------------------------
-RegisterNetEvent('rsg-lawman:client:escortplayer', function()
-    local player, distance = RSGCore.Functions.GetClosestPlayer()
+RegisterNetEvent('fdb-lawman:client:escortplayer', function()
+    local player, distance = FDBCore.Functions.GetClosestPlayer()
     if player ~= -1 and distance < 2.5 then
         local playerId = GetPlayerServerId(player)
         if not isHandcuffed and not isEscorted then
-            TriggerServerEvent("rsg-lawman:server:escortplayer", playerId)
+            TriggerServerEvent("fdb-lawman:server:escortplayer", playerId)
         end
     else
         lib.notify({ title = locale('cl_nearby'), type = 'error', duration = 5000 })
@@ -358,12 +358,12 @@ end)
 ------------------------------------------
 -- do escort player
 ------------------------------------------
-RegisterNetEvent('rsg-lawman:client:getescorted', function(playerId)
-    RSGCore.Functions.GetPlayerData(function(PlayerData)
+RegisterNetEvent('fdb-lawman:client:getescorted', function(playerId)
+    FDBCore.Functions.GetPlayerData(function(PlayerData)
         if PlayerData.metadata["isdead"] or isHandcuffed then
             if not isEscorted then
                 isEscorted = true
-                TriggerServerEvent('rsg-lawman:server:setescortstatus', true)
+                TriggerServerEvent('fdb-lawman:server:setescortstatus', true)
                 draggerId = playerId
                 local dragger = GetPlayerPed(GetPlayerFromServerId(playerId))
                 SetEntityCoords(cache.ped, GetOffsetFromEntityInWorldCoords(dragger, 0.0, 0.45, 0.0))
@@ -371,7 +371,7 @@ RegisterNetEvent('rsg-lawman:client:getescorted', function(playerId)
                     false, 2, true)
             else
                 isEscorted = false
-                TriggerServerEvent('rsg-lawman:server:setescortstatus', false)
+                TriggerServerEvent('fdb-lawman:server:setescortstatus', false)
                 DetachEntity(cache.ped, true, false)
             end
         end
@@ -381,8 +381,8 @@ end)
 ------------------------------------------
 -- law badge
 ------------------------------------------
-RegisterNetEvent('rsg-lawman:client:lawbadge', function()
-    RSGCore.Functions.GetPlayerData(function(PlayerData)
+RegisterNetEvent('fdb-lawman:client:lawbadge', function()
+    FDBCore.Functions.GetPlayerData(function(PlayerData)
         local jobname = PlayerData.job.name
         if Config.LawJobs[jobname] then
             if badge == false then
@@ -415,9 +415,9 @@ end)
 ------------------------------------------
 -- search other players inventory
 ------------------------------------------
-RegisterNetEvent('rsg-lawman:client:searchplayer', function()
+RegisterNetEvent('fdb-lawman:client:searchplayer', function()
     if not IsPedRagdoll(cache.ped) then
-        local player, distance = RSGCore.Functions.GetClosestPlayer()
+        local player, distance = FDBCore.Functions.GetClosestPlayer()
         if player ~= -1 and distance < Config.SearchDistance then
             local playerPed = GetPlayerPed(player)
             local playerId = GetPlayerServerId(player)
@@ -427,7 +427,7 @@ RegisterNetEvent('rsg-lawman:client:searchplayer', function()
             local lassoed = Citizen.InvokeNative(0x9682F850056C9ADE, playerPed)
             local ragdoll = IsPedRagdoll(playerPed)
             if isdead or cuffed or hogtied or lassoed or ragdoll or IsEntityPlayingAnim(playerPed, "script_proc@robberies@homestead@lonnies_shack@deception", "hands_up_loop", 3) then
-                TriggerServerEvent('rsg-lawman:server:SearchPlayer')
+                TriggerServerEvent('fdb-lawman:server:SearchPlayer')
             else
                 lib.notify({ title = locale('cl_search'), type = 'inform', position = 'center-right', duration = 5000 })
             end
@@ -442,11 +442,11 @@ end)
 ------------------------------------------
 -- open law trashcan
 ------------------------------------------
-RegisterNetEvent('rsg-lawman:client:openstorage', function()
-    RSGCore.Functions.GetPlayerData(function(PlayerData)
+RegisterNetEvent('fdb-lawman:client:openstorage', function()
+    FDBCore.Functions.GetPlayerData(function(PlayerData)
         if PlayerData.job.type == 'leo' then
             local jobname = PlayerData.job.name
-            TriggerServerEvent('rsg-lawman:server:storage', jobname)
+            TriggerServerEvent('fdb-lawman:server:storage', jobname)
         end
     end)
 end)
@@ -532,7 +532,7 @@ CreateThread(function()
 
                 -- Cooldown system to prevent spam
                 if GetGameTimer() - lastAlertTime > alertCooldown then
-                    TriggerServerEvent('rsg-lawman:server:lawmanAlert', alertText, coords)
+                    TriggerServerEvent('fdb-lawman:server:lawmanAlert', alertText, coords)
                     lastAlertTime = GetGameTimer()
                 end
             end
@@ -577,7 +577,7 @@ CreateThread(function()
 
                             -- Cooldown system to prevent spam
                             if GetGameTimer() - lastAlertTime > alertCooldown then
-                                TriggerServerEvent('rsg-lawman:server:lawmanAlert', alertText, pedCoords)
+                                TriggerServerEvent('fdb-lawman:server:lawmanAlert', alertText, pedCoords)
                                 lastAlertTime = GetGameTimer()
                             end
                         end

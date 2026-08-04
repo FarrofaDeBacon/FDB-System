@@ -101,12 +101,12 @@ RSG.Texts = {
     Distance = locale('texts.distance'),
     Angle = locale('texts.angle'),
     Clarity = locale('texts.clarity'),
-    Color1 = "<img src='nui://rsg-appearance/img/skin1.png' height='20'>",
-    Color2 = "<img src='nui://rsg-appearance/img/skin2.png' height='20'>",
-    Color3 = "<img src='nui://rsg-appearance/img/skin3.png' height='20'>",
-    Color4 = "<img src='nui://rsg-appearance/img/skin4.png' height='20'>",
-    Color5 = "<img src='nui://rsg-appearance/img/skin5.png' height='20'>",
-    Color6 = "<img src='nui://rsg-appearance/img/skin6.png' height='20'>",
+    Color1 = "<img src='nui://fdb-appearance/img/skin1.png' height='20'>",
+    Color2 = "<img src='nui://fdb-appearance/img/skin2.png' height='20'>",
+    Color3 = "<img src='nui://fdb-appearance/img/skin3.png' height='20'>",
+    Color4 = "<img src='nui://fdb-appearance/img/skin4.png' height='20'>",
+    Color5 = "<img src='nui://fdb-appearance/img/skin5.png' height='20'>",
+    Color6 = "<img src='nui://fdb-appearance/img/skin6.png' height='20'>",
     Creator = locale('texts.creator'),
 
     firsmenu = {

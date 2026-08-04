@@ -36,7 +36,7 @@ Config.BankLocations = {
     {
         name = 'Valentine Bank', -- map blip text
         bankid = 'valbank', -- internal identifier, do not change
-        moneytype = 'valbank', -- type of money that bank handles (RSGCore.Config.Money.MoneyTypes)
+        moneytype = 'valbank', -- type of money that bank handles (FDBCore.Config.Money.MoneyTypes)
         coords = vector3(-308.4189, 775.8842, 118.7017),
         npcmodel = 'S_M_M_BankClerk_01',
         npccoords = vector4(-308.14, 773.98, 118.7, 4.75),

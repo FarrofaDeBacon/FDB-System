@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 👥 rsg-npcs
+# 👥 fdb-npcs
 **Dynamic NPC spawner and ambient sound system for RedM using RSG Core.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -12,7 +12,7 @@
 ---
 
 ## 🛠️ Dependencies
-- **rsg-core** (framework)  
+- **fdb-core** (framework)  
 - **xsound** (for positional audio playback)  
 - **ox_lib** (optional for locale support)
 
@@ -51,7 +51,7 @@ Config.PedList = {
         blipScale = 0.2,                          -- blip scale
         scenario = "WORLD_HUMAN_WRITE_NOTEBOOK",  -- animation or idle scenario
         audio = {
-            -- 'nui://rsg-npcs/sounds/doctor_exemple.ogg',  -- local sound example
+            -- 'nui://fdb-npcs/sounds/doctor_exemple.ogg',  -- local sound example
             'https://youtu.be/RZEPIvX5G10',                -- remote sound example
         },
         audioDistance = 4.0,     -- distance to start hearing audio
@@ -80,14 +80,14 @@ Config.PedList = {
 ---
 
 ## 📂 Installation
-1. Place `rsg-npcs` inside your `resources/[rsg]` folder.  
+1. Place `fdb-npcs` inside your `resources/[rsg]` folder.  
 2. Install **xsound** for proximity audio support.  
 3. Add to your `server.cfg`:
    ```cfg
    ensure ox_lib
-   ensure rsg-core
+   ensure fdb-core
    ensure xsound
-   ensure rsg-npcs
+   ensure fdb-npcs
    ```
 4. (Optional) Edit `config.lua` to define new NPCs and audio behavior.  
 5. Restart your server.
@@ -106,7 +106,7 @@ A single barber NPC in Valentine who writes in a notebook and plays an ambient s
     blipSprite = 'blip_shop_barber',
     blipScale = 0.2,
     scenario = "WORLD_HUMAN_WRITE_NOTEBOOK",
-    audio = { 'nui://rsg-npcs/sounds/doctor_exemple.ogg' },
+    audio = { 'nui://fdb-npcs/sounds/doctor_exemple.ogg' },
     audioDistance = 4.0,
     audioStopDistance = 10.0,
     audioDuration = 10000,

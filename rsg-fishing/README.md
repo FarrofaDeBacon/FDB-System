@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 🎣 rsg-fishing
+# 🎣 fdb-fishing
 **Interactive fishing system for RedM using RSG Core.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -12,9 +12,9 @@
 ---
 
 ## 🛠️ Dependencies
-- [**rsg-core**](https://github.com/Rexshack-RedM/rsg-core) 🤠  
+- [**fdb-core**](https://github.com/Rexshack-RedM/fdb-core) 🤠  
 - [**ox_lib**](https://github.com/overextended/ox_lib) ⚙️ *(locales, notifications)*  
-- [**rsg-inventory**](https://github.com/Rexshack-RedM/rsg-inventory) 🎒 *(items & ItemBox)*  
+- [**fdb-inventory**](https://github.com/Rexshack-RedM/fdb-inventory) 🎒 *(items & ItemBox)*  
 
 **Locales included:** `en`, `fr`, `es`, `it`, `pt-br`, `el`  
 **License:** GPL-3.0
@@ -28,7 +28,7 @@
 - 🐟 **Species & Sizes**: pickerel, trout, bass, catfish, salmon, perch, chain pickerel… with **SM/MS/ML/LG** variants.
 - ⚖️ **Weight metadata** saved on the fish item (e.g., `metadata = { weight = "2.13" }`).
 - 🧺 **Keep or Throw**: choose to keep fish (add item) or throw it back.
-- 🔔 **Discord logging** (if `rsg-log` present): embeds with player name, species and weight.
+- 🔔 **Discord logging** (if `fdb-log` present): embeds with player name, species and weight.
 - 🌐 **Multi-language** prompts/buttons via `ox_lib` locales.
 - 🧩 **JS helper** (`client_js.js`) to **get/set native fishing data** for a smoother minigame.
 
@@ -70,7 +70,7 @@ Config.Baits = {
 ```
 All bait items are automatically registered as **usable** on the server and call the client event:
 ```lua
-TriggerClientEvent('rsg-fishing:client:usebait', src, item.name)
+TriggerClientEvent('fdb-fishing:client:usebait', src, item.name)
 ```
 
 ### Fish database
@@ -88,7 +88,7 @@ A_C_FISHCHANNELCATFISH_01_LG = {"Channel Catfish (Large)","PROVISION_FISH_CHANNE
 -- ...
 ```
 
-> ✅ Ensure **every item key** (e.g., `PROVISION_FISH_BLUEGILL`) **exists in `rsg-inventory`** with a proper item definition.
+> ✅ Ensure **every item key** (e.g., `PROVISION_FISH_BLUEGILL`) **exists in `fdb-inventory`** with a proper item definition.
 
 ---
 
@@ -121,14 +121,14 @@ PROVISION_FISH_STEELHEAD_TROUT  = { name = 'PROVISION_FISH_STEELHEAD_TROUT',  la
 ---
 
 ## 📂 Installation
-1. Put `rsg-fishing` in `resources/[rsg]`.  
-2. Ensure `rsg-core`, `ox_lib`, and `rsg-inventory` are installed.  
+1. Put `fdb-fishing` in `resources/[rsg]`.  
+2. Ensure `fdb-core`, `ox_lib`, and `fdb-inventory` are installed.  
 3. Add to `server.cfg`:
    ```cfg
    ensure ox_lib
-   ensure rsg-core
-   ensure rsg-inventory
-   ensure rsg-fishing
+   ensure fdb-core
+   ensure fdb-inventory
+   ensure fdb-fishing
    ```
 4. Restart your server.
 

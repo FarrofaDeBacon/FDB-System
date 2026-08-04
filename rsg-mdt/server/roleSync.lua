@@ -3,7 +3,7 @@
 -- Server-side role management using Config.LawJobs
 -- ============================================
 
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 -- Authoritative server state for player roles
 local PlayerRoles = {}
@@ -15,27 +15,27 @@ local ConfigValidated = false
 -- ============================================
 local function validateLawJobsConfig()
     if not Config.LawJobs then
-        print('[rsg-mdt] ERROR: Config.LawJobs is not defined!')
+        print('[fdb-mdt] ERROR: Config.LawJobs is not defined!')
         return false
     end
     
     if type(Config.LawJobs) ~= 'table' then
-        print('[rsg-mdt] ERROR: Config.LawJobs must be a table!')
+        print('[fdb-mdt] ERROR: Config.LawJobs must be a table!')
         return false
     end
     
     local validCount = 0
     for jobName, jobConfig in pairs(Config.LawJobs) do
         if type(jobName) ~= 'string' then
-            print('[rsg-mdt] WARNING: LawJob key must be a string, skipping: ' .. tostring(jobName))
+            print('[fdb-mdt] WARNING: LawJob key must be a string, skipping: ' .. tostring(jobName))
         elseif not jobConfig.label then
-            print('[rsg-mdt] WARNING: LawJob "' .. jobName .. '" missing label')
+            print('[fdb-mdt] WARNING: LawJob "' .. jobName .. '" missing label')
         elseif not jobConfig.grades or type(jobConfig.grades) ~= 'table' then
-            print('[rsg-mdt] WARNING: LawJob "' .. jobName .. '" missing grades table')
+            print('[fdb-mdt] WARNING: LawJob "' .. jobName .. '" missing grades table')
         else
             for gradeLevel, gradeConfig in pairs(jobConfig.grades) do
                 if type(gradeLevel) ~= 'number' then
-                    print('[rsg-mdt] WARNING: LawJob "' .. jobName .. '" has non-numeric grade key: ' .. tostring(gradeLevel))
+                    print('[fdb-mdt] WARNING: LawJob "' .. jobName .. '" has non-numeric grade key: ' .. tostring(gradeLevel))
                 end
             end
             validCount = validCount + 1
@@ -43,11 +43,11 @@ local function validateLawJobsConfig()
     end
     
     if validCount == 0 then
-        print('[rsg-mdt] ERROR: No valid LawJobs defined in Config.LawJobs!')
+        print('[fdb-mdt] ERROR: No valid LawJobs defined in Config.LawJobs!')
         return false
     end
     
-    print('[rsg-mdt] Config.LawJobs validated: ' .. validCount .. ' law job(s) defined')
+    print('[fdb-mdt] Config.LawJobs validated: ' .. validCount .. ' law job(s) defined')
     return true
 end
 
@@ -55,7 +55,7 @@ end
 -- Player Role Management
 -- ============================================
 local function getPlayerRoleData(src)
-    local player = RSGCore.Functions.GetPlayer(src)
+    local player = FDBCore.Functions.GetPlayer(src)
     if not player then return nil end
     
     local job = player.PlayerData.job
@@ -97,14 +97,14 @@ local function updatePlayerRole(src)
         
         if previousRole then
             if previousRole.job.name ~= roleData.job.name or previousRole.job.grade ~= roleData.job.grade then
-                TriggerClientEvent('rsg-mdt:roleSync:roleUpdated', -1, {
+                TriggerClientEvent('fdb-mdt:roleSync:roleUpdated', -1, {
                     source = src,
                     roleData = roleData,
                     changeType = 'update'
                 })
             end
         else
-            TriggerClientEvent('rsg-mdt:roleSync:roleUpdated', -1, {
+            TriggerClientEvent('fdb-mdt:roleSync:roleUpdated', -1, {
                 source = src,
                 roleData = roleData,
                 changeType = 'add'
@@ -116,7 +116,7 @@ local function updatePlayerRole(src)
         if PlayerRoles[src] then
             local oldData = PlayerRoles[src]
             PlayerRoles[src] = nil
-            TriggerClientEvent('rsg-mdt:roleSync:roleUpdated', -1, {
+            TriggerClientEvent('fdb-mdt:roleSync:roleUpdated', -1, {
                 source = src,
                 roleData = oldData,
                 changeType = 'remove'
@@ -130,7 +130,7 @@ local function removePlayerRole(src)
     if PlayerRoles[src] then
         local oldData = PlayerRoles[src]
         PlayerRoles[src] = nil
-        TriggerClientEvent('rsg-mdt:roleSync:roleUpdated', -1, {
+        TriggerClientEvent('fdb-mdt:roleSync:roleUpdated', -1, {
             source = src,
             roleData = oldData,
             changeType = 'remove'
@@ -159,30 +159,30 @@ local function forceRefreshAllRoles()
         updatePlayerRole(source)
     end
     
-    TriggerClientEvent('rsg-mdt:roleSync:forceRefresh', -1, {
+    TriggerClientEvent('fdb-mdt:roleSync:forceRefresh', -1, {
         configVersion = ConfigVersion,
         roles = getAllPlayerRoles()
     })
     
-    print('[rsg-mdt] Force refreshed all roles, new config version: ' .. ConfigVersion)
+    print('[fdb-mdt] Force refreshed all roles, new config version: ' .. ConfigVersion)
 end
 
-RegisterNetEvent('rsg-mdt:roleSync:requestRoles', function()
+RegisterNetEvent('fdb-mdt:roleSync:requestRoles', function()
     local src = source
-    TriggerClientEvent('rsg-mdt:roleSync:receiveRoles', src, {
+    TriggerClientEvent('fdb-mdt:roleSync:receiveRoles', src, {
         configVersion = ConfigVersion,
         roles = getAllPlayerRoles(),
         yourRole = PlayerRoles[src]
     })
 end)
 
-RegisterNetEvent('rsg-mdt:roleSync:requestMyRole', function()
+RegisterNetEvent('fdb-mdt:roleSync:requestMyRole', function()
     local src = source
     local roleData = PlayerRoles[src]
-    TriggerClientEvent('rsg-mdt:roleSync:receiveMyRole', src, roleData)
+    TriggerClientEvent('fdb-mdt:roleSync:receiveMyRole', src, roleData)
 end)
 
-RegisterNetEvent('rsg-mdt:roleSync:validateLocalState', function(localRole)
+RegisterNetEvent('fdb-mdt:roleSync:validateLocalState', function(localRole)
     local src = source
     local serverRole = PlayerRoles[src]
     
@@ -190,20 +190,20 @@ RegisterNetEvent('rsg-mdt:roleSync:validateLocalState', function(localRole)
         if localRole.job.name ~= serverRole.job.name or 
            localRole.job.grade ~= serverRole.job.grade or
            localRole.configVersion ~= serverRole.configVersion then
-            TriggerClientEvent('rsg-mdt:roleSync:stateMismatch', src, {
+            TriggerClientEvent('fdb-mdt:roleSync:stateMismatch', src, {
                 localState = localRole,
                 serverState = serverRole,
                 message = locale('role_state_mismatch')
             })
         end
     elseif localRole and not serverRole then
-        TriggerClientEvent('rsg-mdt:roleSync:stateMismatch', src, {
+        TriggerClientEvent('fdb-mdt:roleSync:stateMismatch', src, {
             localState = localRole,
             serverState = nil,
             message = locale('role_local_no_server')
         })
     elseif not localRole and serverRole then
-        TriggerClientEvent('rsg-mdt:roleSync:stateMismatch', src, {
+        TriggerClientEvent('fdb-mdt:roleSync:stateMismatch', src, {
             localState = nil,
             serverState = serverRole,
             message = locale('role_server_no_local')
@@ -211,19 +211,19 @@ RegisterNetEvent('rsg-mdt:roleSync:validateLocalState', function(localRole)
     end
 end)
 
-RegisterNetEvent('rsg-mdt:roleSync:adminForceRefresh', function()
+RegisterNetEvent('fdb-mdt:roleSync:adminForceRefresh', function()
     local src = source
     local roleData = PlayerRoles[src]
     
     if roleData and roleData.permissions.isAdmin then
         forceRefreshAllRoles()
-        TriggerClientEvent('rsg-mdt:roleSync:refreshComplete', src, {
+        TriggerClientEvent('fdb-mdt:roleSync:refreshComplete', src, {
             success = true,
             message = locale('role_refresh_success'),
             configVersion = ConfigVersion
         })
     else
-        TriggerClientEvent('rsg-mdt:roleSync:refreshComplete', src, {
+        TriggerClientEvent('fdb-mdt:roleSync:refreshComplete', src, {
             success = false,
             message = locale('role_refresh_denied')
         })
@@ -233,7 +233,7 @@ end)
 -- ============================================
 -- Player Connection Handlers
 -- ============================================
-RegisterNetEvent('RSGCore:Server:PlayerLoaded', function(Player)
+RegisterNetEvent('FDBCore:Server:PlayerLoaded', function(Player)
     if not Player then return end
     Wait(1000)
     updatePlayerRole(Player.PlayerData.source)
@@ -244,7 +244,7 @@ AddEventHandler('playerDropped', function(reason)
     removePlayerRole(src)
 end)
 
-RegisterNetEvent('RSGCore:Server:OnJobUpdate', function(job)
+RegisterNetEvent('FDBCore:Server:OnJobUpdate', function(job)
     local src = source
     Wait(500)
     updatePlayerRole(src)
@@ -253,19 +253,19 @@ end)
 -- ============================================
 -- Callbacks
 -- ============================================
-lib.callback.register('rsg-mdt:roleSync:getRoles', function(source)
+lib.callback.register('fdb-mdt:roleSync:getRoles', function(source)
     return getAllPlayerRoles()
 end)
 
-lib.callback.register('rsg-mdt:roleSync:getMyRole', function(source)
+lib.callback.register('fdb-mdt:roleSync:getMyRole', function(source)
     return PlayerRoles[source]
 end)
 
-lib.callback.register('rsg-mdt:roleSync:getConfigVersion', function(source)
+lib.callback.register('fdb-mdt:roleSync:getConfigVersion', function(source)
     return ConfigVersion
 end)
 
-lib.callback.register('rsg-mdt:roleSync:getValidatedJobs', function(source)
+lib.callback.register('fdb-mdt:roleSync:getValidatedJobs', function(source)
     local jobs = {}
     for jobName, jobConfig in pairs(Config.LawJobs) do
         jobs[jobName] = {
@@ -276,7 +276,7 @@ lib.callback.register('rsg-mdt:roleSync:getValidatedJobs', function(source)
     return jobs
 end)
 
-lib.callback.register('rsg-mdt:server:getConfigRoles', function(source)
+lib.callback.register('fdb-mdt:server:getConfigRoles', function(source)
     local roles = {}
     for jobName, jobConfig in pairs(Config.LawJobs) do
         local grades = {}
@@ -332,7 +332,7 @@ exports('hasPermission', function(source, permission)
 end)
 
 exports('isAdmin', function(source)
-    return exports['rsg-mdt']:hasPermission(source, 'isAdmin')
+    return exports['fdb-mdt']:hasPermission(source, 'isAdmin')
 end)
 
 exports('forceRefreshRoles', forceRefreshAllRoles)
@@ -346,10 +346,10 @@ CreateThread(function()
     ConfigValidated = validateLawJobsConfig()
     
     if ConfigValidated then
-        local players = RSGCore.Functions.GetPlayers()
+        local players = FDBCore.Functions.GetPlayers()
         for _, src in ipairs(players) do
             updatePlayerRole(src)
         end
-        print('[rsg-mdt] Role sync initialized with ' .. #getAllPlayerRoles() .. ' active law officers')
+        print('[fdb-mdt] Role sync initialized with ' .. #getAllPlayerRoles() .. ' active law officers')
     end
 end)

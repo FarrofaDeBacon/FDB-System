@@ -1,6 +1,6 @@
 <img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
 
-# 🚪 rsg-doorlock
+# 🚪 fdb-doorlock
 **Advanced, fully synchronized door locking system for RedM using RSG Core.**
 
 ![Platform](https://img.shields.io/badge/platform-RedM-darkred)
@@ -12,7 +12,7 @@
 ---
 
 ## 🛠️ Dependencies
-- [**rsg-core**](https://github.com/Rexshack-RedM/rsg-core) 🤠  
+- [**fdb-core**](https://github.com/Rexshack-RedM/fdb-core) 🤠  
 - [**ox_lib**](https://github.com/overextended/ox_lib) ⚙️ *(notifications & locales)*  
 
 **Locales:** `en`, `fr`, `es`, `it`, `pt-br`, `el`  
@@ -39,13 +39,13 @@
 - Disables interaction if player is **dead, cuffed, hogtied or lassoed**.
 - Shows current **Door Status: Locked/Unlocked** (localized).
 - Plays **unlock key animation** and attaches prop (`P_KEY02X`) before sending update.
-- Calls `TriggerServerEvent('rsg-doorlock:updatedoorsv', idx, newState)` on hold-complete.
-- Receives `rsg-doorlock:setState` to update local `Config.DoorList[idx].locked`.
+- Calls `TriggerServerEvent('fdb-doorlock:updatedoorsv', idx, newState)` on hold-complete.
+- Receives `fdb-doorlock:setState` to update local `Config.DoorList[idx].locked`.
 
 **Server**  
 - Verifies permission using `authorizedJobs` and the player’s `job.name`.
-- If authorized, broadcasts `rsg-doorlock:setState` to **all clients**.
-- Otherwise, only plays the **client-side animation** via `rsg-doorlock:changedoor` response.
+- If authorized, broadcasts `fdb-doorlock:setState` to **all clients**.
+- Otherwise, only plays the **client-side animation** via `fdb-doorlock:changedoor` response.
 
 ---
 
@@ -110,29 +110,29 @@ You normally **don’t need** to call these yourself — just configure `Config.
 ### Client → Server
 ```lua
 -- after playing key animation (hold prompt complete)
-TriggerServerEvent('rsg-doorlock:updatedoorsv', doorIndex, newState)
+TriggerServerEvent('fdb-doorlock:updatedoorsv', doorIndex, newState)
 ```
 
 ### Server → Client
 ```lua
 -- authorize and broadcast new state
-TriggerClientEvent('rsg-doorlock:setState', -1, doorIndex, newState)
+TriggerClientEvent('fdb-doorlock:setState', -1, doorIndex, newState)
 
 -- fallback: play animation only (no state change) for the caller
-TriggerClientEvent('rsg-doorlock:changedoor', src, doorIndex, newState)
+TriggerClientEvent('fdb-doorlock:changedoor', src, doorIndex, newState)
 ```
 
 ### Client (handlers)
 ```lua
-RegisterNetEvent('rsg-doorlock:changedoor')  -- plays key animation, then requests update
-RegisterNetEvent('rsg-doorlock:setState')    -- applies locked/unlocked status locally
+RegisterNetEvent('fdb-doorlock:changedoor')  -- plays key animation, then requests update
+RegisterNetEvent('fdb-doorlock:setState')    -- applies locked/unlocked status locally
 ```
 
 ---
 
 ## 🔐 Permissions
 Access is controlled per door via `authorizedJobs`.  
-Jobs are resolved from `RSGCore.Functions.GetPlayer(src).PlayerData.job.name`.
+Jobs are resolved from `FDBCore.Functions.GetPlayer(src).PlayerData.job.name`.
 
 **Examples:**  
 - Sheriff stations: `vallaw`, `rholaw`, `blklaw`, `stdenlaw`, etc.  
@@ -141,13 +141,13 @@ Jobs are resolved from `RSGCore.Functions.GetPlayer(src).PlayerData.job.name`.
 ---
 
 ## 📂 Installation
-1. Place `rsg-doorlock` inside your `resources/[rsg]` folder.  
-2. Ensure `rsg-core` and `ox_lib` are installed.  
+1. Place `fdb-doorlock` inside your `resources/[rsg]` folder.  
+2. Ensure `fdb-core` and `ox_lib` are installed.  
 3. Add to your `server.cfg`:
    ```cfg
    ensure ox_lib
-   ensure rsg-core
-   ensure rsg-doorlock
+   ensure fdb-core
+   ensure fdb-doorlock
    ```
 4. Restart your server.
 

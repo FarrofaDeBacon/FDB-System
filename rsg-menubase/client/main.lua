@@ -328,7 +328,7 @@ CreateThread(function()
 	end
 end)
 
-AddEventHandler("rsg-menubase:getData", function(cb)
+AddEventHandler("fdb-menubase:getData", function(cb)
 	return cb(MenuData)
 end)
 
