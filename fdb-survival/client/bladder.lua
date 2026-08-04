@@ -137,10 +137,17 @@ end)
 CreateThread(function()
     if not Config.PeeModels or #Config.PeeModels == 0 then return end
 
+    -- Esperar um pouco para garantir que o player spawnou e o modelo foi carregado
+    Wait(2000)
+    
+    local ped = PlayerPedId()
+    local isFemale = GetEntityModel(ped) == `mp_female`
+    local targetLabel = isFemale and (locale('target_pee_female') or 'Fazer Xixi') or (locale('target_pee_male') or 'Mijar')
+
     exports.ox_target:addModel(Config.PeeModels, {
         {
             name = 'pee_action_target',
-            label = 'Mijar',
+            label = targetLabel,
             icon = 'fa-solid fa-droplet',
             onSelect = function() TriggerEvent('fdb-survival:client:PeeTarget') end,
             distance = 2.0

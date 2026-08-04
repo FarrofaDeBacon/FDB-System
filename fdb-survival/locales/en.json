@@ -1,4 +1,6 @@
 {
+  "target_pee_male": "Pee",
+  "target_pee_female": "Pee",
   "notify_bladder_full_title": "Full Bladder!",
   "notify_bladder_full_desc": "You need to relieve yourself urgently (find a tree or outhouse).",
   "notify_pee_error_title": "Error",
