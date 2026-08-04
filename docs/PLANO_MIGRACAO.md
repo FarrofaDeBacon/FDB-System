@@ -34,19 +34,22 @@ Fora do escopo deste plano (existem na fonte mas não fazem parte do roteiro atu
 A ordem segue a cadeia de dependências: primeiro a infraestrutura transversal, depois os recursos que a consomem, por último a revalidação do que já estava certo.
 
 ### Fase 0 — Preparação
-- [ ] Criar branch dedicada a partir de `fix/companion-inventory-audit` (ex: `feat/ecosystem-integration`) para isolar essa migração de outras correções em andamento
-- [ ] Congelar mudanças em `fdb-horses` e `fdb-inventory` durante a migração (já estão corretos, não mexer)
-- [ ] Fazer backup/tag do estado atual do FDB-System antes de remover qualquer coisa
+- [x] Criar branch dedicada a partir de `fix/companion-inventory-audit` (ex: `feat/ecosystem-integration`) para isolar essa migração de outras correções em andamento
+- [x] Congelar mudanças em `fdb-horses` e `fdb-inventory` durante a migração (já estão corretos, não mexer)
+- [x] Fazer backup/tag do estado atual do FDB-System antes de remover qualquer coisa
 
-### Fase 1 — Infraestrutura transversal
-- [ ] Adicionar `fdb-configui` (motor de KVP) — nenhum outro recurso novo deve subir sem essa base
-- [ ] Validar `fxmanifest.lua` do `fdb-core` para garantir que expõe os exports que `fdb-configui` e os demais esperam
+### Fase 1 — Infraestrutura transversal (CONCLUÍDO)
+- [x] Adicionar `fdb-configui` (motor de KVP) — nenhum outro recurso novo deve subir sem essa base
+- [x] Validar `fxmanifest.lua` do `fdb-core` para garantir que expõe os exports que `fdb-configui` e os demais esperam
+- [x] **Adendo:** Adicionado `fdb-backpacks` e restaurado inventário limpo da base original, além de corrigir o bug crítico de rename no inventário.
 
-### Fase 2 — Substituições (remover stock, subir custom)
-- [ ] Remover `fdb-consume` (stock) → adicionar `fdb-consume` (build real, 2.184 linhas)
-- [ ] Remover `fdb-medic` (stock) → adicionar `fdb-medic` (build real, 8.910 linhas) **+** `fdb-medical-core` (novo, não existia antes)
+### Fase 2A — Fundações Visuais e Consumo (PRÓXIMO PASSO)
 - [ ] Remover `fdb-hud` (nome antigo/stock) → adicionar `fdb-hudpremium` (Vite+Svelte)
   - [ ] Atualizar qualquer referência cruzada a `fdb-hud` em outros resources (fxmanifest `dependencies`, exports chamados)
+- [ ] Remover `fdb-consume` (stock) → adicionar `fdb-consume` (build real, 2.184 linhas)
+
+### Fase 2B — Sistema Médico
+- [ ] Remover `fdb-medic` (stock) → adicionar `fdb-medic` (build real, 8.910 linhas) **+** `fdb-medical-core` (novo, não existia antes)
 
 ### Fase 3 — Adições puras (não existiam antes)
 - [ ] Adicionar `fdb-survival` (Maestro / sistema de movimento)
