@@ -3,10 +3,12 @@ $onesync: on
 name: FDB-System RedM Build
 version: 1.0.0
 author: Farrofa De Bacon
-description: FDB-System RedM Server Build
+description: FDB-System RedM Server Build (fork completo RSG)
 
 tasks:
-  # Download all FDB-System files from our repository
+  # ================================================
+  #  Download FDB-System repo (contains everything)
+  # ================================================
   - action: download_github
     src: https://github.com/FarrofaDeBacon/FDB-System
     ref: fix/companion-inventory-audit
@@ -17,13 +19,17 @@ tasks:
     src: ./tmp/FDBSystem/server.cfg
     dest: ./server.cfg
 
+  - action: move_path
+    src: ./tmp/FDBSystem/myLogo.png
+    dest: ./myLogo.png
+
   # Prepare Database
   - action: connect_database
   - action: query_database
-    file: ./tmp/FDBSystem/fdbcore.sql
+    file: ./tmp/FDBSystem/rsgcore_original.sql
 
   # ================================================
-  #  External Standalone Resources
+  #  External Resources (not in our repo)
   # ================================================
 
   # Base FXServer resources
@@ -32,7 +38,7 @@ tasks:
     subpath: resources
     dest: ./resources/[cfx-default]
 
-  # oxmysql (database driver)
+  # oxmysql
   - action: download_file
     path: ./tmp/files/oxmysql.zip
     url: https://github.com/CommunityOx/oxmysql/releases/latest/download/oxmysql.zip
@@ -40,11 +46,17 @@ tasks:
     dest: ./resources/[standalone]
     src: ./tmp/files/oxmysql.zip
 
-  # pma-voice (voice chat)
+  # pma-voice
   - action: download_github
     dest: ./resources/[standalone]/pma-voice
     ref: main
     src: https://github.com/AvarianKnight/pma-voice
+
+  # xsound
+  - action: download_github
+    dest: ./resources/[standalone]/xsound
+    ref: master
+    src: https://github.com/Xogy/xsound
 
   # redm-female-fix
   - action: download_github
@@ -56,7 +68,7 @@ tasks:
     seconds: 10
 
   # ================================================
-  #  FDB Standalone Resources (from our repo)
+  #  Standalone Resources (from our repo)
   # ================================================
 
   - action: move_path
@@ -80,32 +92,184 @@ tasks:
     dest: ./resources/[standalone]/interact-sound
 
   - action: move_path
+    src: ./tmp/FDBSystem/menu_base
+    dest: ./resources/[standalone]/menu_base
+
+  - action: move_path
+    src: ./tmp/FDBSystem/chat-redm
+    dest: ./resources/[standalone]/chat-redm
+
+  - action: move_path
     src: ./tmp/FDBSystem/rNotify
     dest: ./resources/[standalone]/rNotify
 
+  - action: move_path
+    src: ./tmp/FDBSystem/ox_target
+    dest: ./resources/[standalone]/ox_target
+
+  - action: move_path
+    src: ./tmp/FDBSystem/ox_doorlock
+    dest: ./resources/[standalone]/ox_doorlock
+
   # ================================================
-  #  FDB Framework Resources (from our repo)
+  #  Framework Resources (from our repo)
   # ================================================
 
   - action: move_path
-    src: ./tmp/FDBSystem/FDB-Core
-    dest: ./resources/[framework]/fdb-core
+    src: ./tmp/FDBSystem/rsg-core
+    dest: ./resources/[framework]/rsg-core
 
   - action: move_path
-    src: ./tmp/FDBSystem/fdb-inventory
-    dest: ./resources/[framework]/fdb-inventory
+    src: ./tmp/FDBSystem/rsg-inventory
+    dest: ./resources/[framework]/rsg-inventory
 
   - action: move_path
-    src: ./tmp/FDBSystem/fdb-multicharacter
-    dest: ./resources/[framework]/fdb-multicharacter
+    src: ./tmp/FDBSystem/rsg-multicharacter
+    dest: ./resources/[framework]/rsg-multicharacter
 
   - action: move_path
-    src: ./tmp/FDBSystem/fdb-spawn
-    dest: ./resources/[framework]/fdb-spawn
+    src: ./tmp/FDBSystem/rsg-appearance
+    dest: ./resources/[framework]/rsg-appearance
 
   - action: move_path
-    src: ./tmp/FDBSystem/fdb-horses
-    dest: ./resources/[framework]/fdb-horses
+    src: ./tmp/FDBSystem/rsg-wardrobe
+    dest: ./resources/[framework]/rsg-wardrobe
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-medic
+    dest: ./resources/[framework]/rsg-medic
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-lawman
+    dest: ./resources/[framework]/rsg-lawman
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-prison
+    dest: ./resources/[framework]/rsg-prison
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-doorlock
+    dest: ./resources/[framework]/rsg-doorlock
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-banking
+    dest: ./resources/[framework]/rsg-banking
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-spawn
+    dest: ./resources/[framework]/rsg-spawn
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-weapons
+    dest: ./resources/[framework]/rsg-weapons
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-ammo
+    dest: ./resources/[framework]/rsg-ammo
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-shops
+    dest: ./resources/[framework]/rsg-shops
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-radialmenu
+    dest: ./resources/[framework]/rsg-radialmenu
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-essentials
+    dest: ./resources/[framework]/rsg-essentials
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-telegram
+    dest: ./resources/[framework]/rsg-telegram
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-horses
+    dest: ./resources/[framework]/rsg-horses
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-hud
+    dest: ./resources/[framework]/rsg-hud
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-menubase
+    dest: ./resources/[framework]/rsg-menubase
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-playerinfo
+    dest: ./resources/[framework]/rsg-playerinfo
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-bossmenu
+    dest: ./resources/[framework]/rsg-bossmenu
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-gangmenu
+    dest: ./resources/[framework]/rsg-gangmenu
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-npcs
+    dest: ./resources/[framework]/rsg-npcs
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-canteen
+    dest: ./resources/[framework]/rsg-canteen
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-barbers
+    dest: ./resources/[framework]/rsg-barbers
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-bathing
+    dest: ./resources/[framework]/rsg-bathing
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-lockpick
+    dest: ./resources/[framework]/rsg-lockpick
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-adminmenu
+    dest: ./resources/[framework]/rsg-adminmenu
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-animations
+    dest: ./resources/[framework]/rsg-animations
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-multijob
+    dest: ./resources/[framework]/rsg-multijob
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-consume
+    dest: ./resources/[framework]/rsg-consume
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-fishing
+    dest: ./resources/[framework]/rsg-fishing
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-weaponcomp
+    dest: ./resources/[framework]/rsg-weaponcomp
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-loading
+    dest: ./resources/[framework]/rsg-loading
+
+  - action: move_path
+    src: ./tmp/FDBSystem/rsg-mdt
+    dest: ./resources/[framework]/rsg-mdt
+
+  # ================================================
+  #  Map Mods (from our repo)
+  # ================================================
+
+  - action: move_path
+    src: ./tmp/FDBSystem/redm-ipls
+    dest: ./resources/[mapmods]/redm-ipls
+
+  - action: move_path
+    src: ./tmp/FDBSystem/redm-ymaps
+    dest: ./resources/[mapmods]/redm-ymaps
 
   # ================================================
   #  Cleanup

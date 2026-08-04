@@ -1,0 +1,235 @@
+Config = {}
+
+----------------------------------
+-- needs settings
+----------------------------------
+Config.StatusInterval = 5000 -- how often to update hunger/thirst status in milliseconds
+Config.HungerRate = 0.01 -- Rate at which hunger goes down.
+Config.ThirstRate = 0.01 -- Rate at which thirst goes down.
+Config.CleanlinessRate = 0.01 -- Rate at which cleanliness goes down.
+
+----------------------------------
+-- stress settings
+----------------------------------
+Config.StressChance = 0.1 -- Default: 10% -- Percentage Stress Chance When Shooting (0-1)
+Config.MinimumStress = 50 -- Minimum Stress Level For Screen Shaking
+Config.MinimumSpeed = 100 -- Going Over This Speed Will Cause Stress
+Config.StressDecayRate = 0.01 -- Rate at which stress goes down.
+
+----------------------------------
+-- hud player display settings
+----------------------------------
+Config.HidePlayerHealthNative  = true
+Config.HidePlayerStaminaNative = true
+Config.HidePlayerDeadEyeNative = true
+
+----------------------------------
+-- hud horse display settings
+----------------------------------
+Config.HideHorseHealthNative  = true
+Config.HideHorseStaminaNative = true
+Config.HideHorseCourageNative = true
+
+----------------------------------
+-- voice icon settings
+----------------------------------
+Config.VoiceAlwaysVisible = true  -- true = always visible, false = only when talking
+
+----------------------------------
+-- minimap / compass settings
+----------------------------------
+Config.OnFootMinimap = false -- set to true/false to disable/enable minimap when on foot
+Config.OnFootCompass = false -- true = have the minimap set to a compass instead of off or normal minimap
+Config.MountMinimap = true  -- set to false if you want to disable the minimap when on mount
+Config.MountCompass  = false -- set to true if you want to have a compass instead of normal minimap while on a mount
+
+----------------------------------
+-- turn health damage on/off
+----------------------------------
+Config.DoHealthDamage = true
+
+----------------------------------
+-- turn screen effect on/off
+----------------------------------
+Config.DoHealthDamageFx = false
+
+----------------------------------
+-- turn health damage sound on/off
+----------------------------------
+Config.DoHealthPainSound = true
+
+----------------------------------
+-- temp settings (only one setting)
+----------------------------------
+Config.TempFormat = 'celsius'
+--Config.TempFormat = 'fahrenheit'
+
+----------------------------------
+-- temp feature (does damage to player if too hot or cold)
+----------------------------------
+Config.TempFeature = false
+
+----------------------------------
+-- warmth add while wearing (temp feature must be enabled)
+----------------------------------
+Config.WearingHat      = 0
+Config.WearingShirt    = 0
+Config.WearingPants    = 0
+Config.WearingBoots    = 0
+Config.WearingCoat     = 15
+Config.WearingOpenCoat = 15
+Config.WearingGloves   = 0
+Config.WearingVest     = 0
+Config.WearingPoncho   = 0
+Config.WearingSkirt    = 0
+Config.WearingChaps    = 0
+
+----------------------------------
+-- job type warmth exemptions (temp feature must be enabled)
+----------------------------------
+Config.EnableNoWarmthJobs = true  -- set to true/false to enable/disable the feature
+
+Config.NoWarmthJobs = {
+    'leo',      -- Law enforcement (sheriff, deputy, marshal, etc.)
+    'medic',    -- Medical jobs (doctor, surgeon, etc.)
+    -- add more job types here
+}
+
+----------------------------------
+-- warmth limit before impacts health  (temp feature must be enabled)
+----------------------------------
+Config.MinTemp = -5
+Config.MaxTemp = 40
+
+----------------------------------
+-- cleanliness limit before impacts health
+----------------------------------
+Config.FlyEffect = true -- toggle flies on/off
+Config.MinCleanliness = 30
+
+----------------------------------
+-- amount of health to remove if min/max temp reached
+----------------------------------
+Config.RemoveHealth = 5
+
+----------------------------------
+-- stress settings
+----------------------------------
+Config.Intensity = {
+    ["shake"] = {
+        [1] = {
+            min = 50,
+            max = 60,
+            intensity = 0.12,
+        },
+        [2] = {
+            min = 60,
+            max = 70,
+            intensity = 0.17,
+        },
+        [3] = {
+            min = 70,
+            max = 80,
+            intensity = 0.22,
+        },
+        [4] = {
+            min = 80,
+            max = 90,
+            intensity = 0.28,
+        },
+        [5] = {
+            min = 90,
+            max = 100,
+            intensity = 0.32,
+        },
+    }
+}
+
+Config.EffectInterval = {
+    [1] = {
+        min = 50,
+        max = 60,
+        timeout = math.random(50000, 60000)
+    },
+    [2] = {
+        min = 60,
+        max = 70,
+        timeout = math.random(40000, 50000)
+    },
+    [3] = {
+        min = 70,
+        max = 80,
+        timeout = math.random(30000, 40000)
+    },
+    [4] = {
+        min = 80,
+        max = 90,
+        timeout = math.random(20000, 30000)
+    },
+    [5] = {
+        min = 90,
+        max = 100,
+        timeout = math.random(15000, 20000)
+    }
+}
+
+----------------------------------
+-- HUD icon colors configuration
+----------------------------------
+Config.IconColors = {
+    -- Player Status Icons
+    ['voice'] = {
+        normal = '#FFFFFF',      -- White when not talking
+        active = '#FF0000'       -- Red when talking
+    },
+    ['health'] = {
+        normal = '#FFFFFF',      -- White when healthy
+        low = '#FF0000'          -- Red when low health (<=30%)
+    },
+    ['stamina'] = {
+        normal = '#FFFFFF',      -- White when full
+        low = '#FF0000'          -- Red when low stamina (<=30%)
+    },
+    ['hunger'] = {
+        normal = '#FFFFFF',      -- White when full
+        low = '#FF0000'          -- Red when low hunger (<=30%)
+    },
+    ['thirst'] = {
+        normal = '#FFFFFF',      -- White when full
+        low = '#FF0000'          -- Red when low thirst (<=30%)
+    },
+    ['cleanliness'] = {
+        normal = '#FFFFFF',      -- White when clean
+        low = '#FF0000'          -- Red when dirty (<=30%)
+    },
+    ['stress'] = {
+        normal = '#FFFFFF',      -- White (stress icon color)
+        low = '#FF0000'          -- Red when stressed (>=70%)
+    },
+    ['temp'] = {
+        cold = '#FDD021',        -- Yellow when cold (<=30)
+        normal = '#CFBCAE'       -- Light brown when normal
+    },
+    ['mail'] = {
+        normal = '#FFFFFF',      -- White when no mail
+        hasmail = '#FFD700'      -- Gold when has mail
+    },
+    ['outlaw'] = {
+        normal = '#00FF00',      -- Green when not outlaw
+        active = '#FF0000'       -- Red when outlaw
+    },
+    
+    -- Horse Status Icons
+    ['horse_health'] = {
+        normal = '#a16600',      -- Brown/orange for horse health
+        low = '#FF0000'          -- Red when low
+    },
+    ['horse_stamina'] = {
+        normal = '#a16600',      -- Brown/orange for horse stamina
+        low = '#FF0000'          -- Red when low
+    },
+    ['horse_clean'] = {
+        normal = '#a16600',      -- Brown/orange for horse cleanliness
+        low = '#FF0000'          -- Red when dirty
+    }
+}

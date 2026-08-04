@@ -1,7 +1,23 @@
+# Servidor local (instalacao txAdmin)
 SERVIDOR/
-*.dmp
-*.dll
-*.exe
+
+# Node
 node_modules/
-.vscode/
+package-lock.json
+
+# Binarios e dumps
+*.dll
+*.dmp
+*.exe
+
+# Temp
 tmp/
+_clone_tmp/
+
+# Script de clone (temporario)
+clone_rsg.ps1
+
+# OS files
+Thumbs.db
+desktop.ini
+.DS_Store

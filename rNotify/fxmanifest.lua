@@ -18,7 +18,7 @@ shared_scripts {
 }
 
 dependencies {
-    'fdb-core',
+    'rsg-core',
 }
 
 lua54 'yes'
