@@ -118,19 +118,28 @@ RegisterCommand("mijar", function()
 end, false)
 
 CreateThread(function()
-    exports.ox_target:addGlobalObject({
+    -- Lista inicial de árvores. O dono do servidor pode expandir essa lista depois.
+    local treeModels = {
+        `p_tree_pine01x`,
+        `p_tree_pine02x`,
+        `p_tree_pine03x`,
+        `p_tree_pine04x`,
+        `p_tree_pine05x`,
+        `p_tree_pine06x`,
+        `p_tree_oak01x`,
+        `p_tree_oak02x`,
+        `p_tree_oak03x`,
+        `p_tree_birch01x`,
+        `p_tree_birch02x`,
+        `p_tree_birch03x`,
+        `p_tree_birch04x`,
+        `p_tree_cypress01x`,
+        `p_tree_palm01x`
+    }
+
+    exports.ox_target:addModel(treeModels, {
         {
-            name = 'pee_action_object',
-            label = 'Mijar',
-            icon = 'fa-solid fa-droplet',
-            onSelect = function() ExecuteCommand('mijar') end,
-            distance = 2.0
-        }
-    })
-    
-    exports.ox_target:addGlobalVehicle({
-        {
-            name = 'pee_action_vehicle',
+            name = 'pee_action_tree',
             label = 'Mijar',
             icon = 'fa-solid fa-droplet',
             onSelect = function() ExecuteCommand('mijar') end,
