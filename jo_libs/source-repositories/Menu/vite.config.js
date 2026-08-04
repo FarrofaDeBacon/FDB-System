@@ -1,0 +1,43 @@
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import { nuiSharedFonts } from '../_shared/vite/nuiSharedFonts.js'
+
+const outDir = './../../jo_libs/nui/menu'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  base: './',
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
+  },
+  plugins: [
+    vue(),
+    nuiSharedFonts({
+      rootUrl: new URL('.', import.meta.url),
+    }),
+  ],
+  resolve: {
+    alias: {
+      util: "util/",
+    }
+  },
+  build: {
+    define: {
+      'process.env.NODE_ENV': '"production"'
+    },
+    outDir,
+    emptyOutDir: true,
+    assetsInlineLimit: 0,
+    rollupOptions: {
+      output: {
+        assetFileNames: () => {
+          return `assets/[name][extname]`;
+        },
+        chunkFileNames: 'assets/[name].js',
+        entryFileNames: 'assets/[name].js',
+      }
+    },
+  },
+})
+
+
