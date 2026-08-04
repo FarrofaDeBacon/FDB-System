@@ -75,7 +75,7 @@ end)
 
 -- Thread de bloqueio de corrida movida para movement.lua (Maestro)
 
-RegisterCommand("mijar", function()
+RegisterNetEvent('fdb-survival:client:PeeTarget', function()
     local ped = PlayerPedId()
     if IsPedOnMount(ped) or IsPedInAnyVehicle(ped, false) then
         exports['ox_lib']:notify({ title = locale('notify_pee_error_title'), description = locale('notify_pee_mount_error'), type = 'error' })
@@ -85,8 +85,6 @@ RegisterCommand("mijar", function()
     local coords = GetEntityCoords(ped)
 
     -- 1. Regra de Etiqueta (RP): Não mijar na frente de damas
-    -- Nota: Verificamos se o próprio jogador é homem antes de aplicar a regra?
-    -- Se for mulher, a animação de mijar em pé nem faz sentido, mas vamos assumir que o sistema permite.
     local players = GetActivePlayers()
     for _, player in ipairs(players) do
         local targetPed = GetPlayerPed(player)
@@ -99,14 +97,6 @@ RegisterCommand("mijar", function()
                 end
             end
         end
-    end
-
-    -- 2. Regra de Civilidade: Não mijar nas cidades
-    -- 0x43AD8FC02B429D33 = GetTownName(hash)
-    local townHash = Citizen.InvokeNative(0x43AD8FC02B429D33, coords, 1)
-    if townHash ~= false and townHash ~= 0 then
-        exports['ox_lib']:notify({ title = 'Multa Evitada', description = 'Encontre um lugar mais discreto fora da cidade para se aliviar.', type = 'error', duration = 5000 })
-        return
     end
     
     ClearPedTasks(ped)
@@ -142,11 +132,12 @@ RegisterCommand("mijar", function()
     FDB.Survival.bladder = 0
     FDB.BroadcastState('bladder', 0)
     TriggerServerEvent('fdb-survival:server:EmptyBladder')
-end, false)
+end)
 
 CreateThread(function()
-    -- Lista inicial de árvores. O dono do servidor pode expandir essa lista depois.
-    local treeModels = {
+    -- Lista inicial de árvores e fossas
+    local validModels = {
+        -- Árvores
         `p_tree_pine01x`,
         `p_tree_pine02x`,
         `p_tree_pine03x`,
@@ -161,15 +152,23 @@ CreateThread(function()
         `p_tree_birch03x`,
         `p_tree_birch04x`,
         `p_tree_cypress01x`,
-        `p_tree_palm01x`
+        `p_tree_palm01x`,
+        -- Fossas (Outhouses)
+        `p_outhouse01x`,
+        `p_outhouse02x`,
+        `p_privy01x`,
+        `p_privy02x`,
+        `p_toilet01x`,
+        `p_toilet02x`,
+        `p_cs_outhouse01x`
     }
 
-    exports.ox_target:addModel(treeModels, {
+    exports.ox_target:addModel(validModels, {
         {
-            name = 'pee_action_tree',
+            name = 'pee_action_target',
             label = 'Mijar',
             icon = 'fa-solid fa-droplet',
-            onSelect = function() ExecuteCommand('mijar') end,
+            onSelect = function() TriggerEvent('fdb-survival:client:PeeTarget') end,
             distance = 2.0
         }
     })
