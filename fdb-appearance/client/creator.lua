@@ -546,27 +546,19 @@ function OpenBodyMenu()
     })
 
     local function addBodySlider(title, category, min, max, hop)
-        hop = hop or 1
-        local values = {}
-        local valueToIndex = {}
-        local idx = 1
-        for i = min, max, hop do
-            table.insert(values, i)
-            valueToIndex[i] = idx
-            idx = idx + 1
-        end
-
         local currentVal = CreatorCache[category] or min
-        local currentIndex = valueToIndex[currentVal] or 1
-
         menu:addItem({
             title = title,
             sliders = {
-                { values = values, current = currentIndex }
+                { 
+                    type = "grid", 
+                    values = { 
+                        { current = currentVal, min = min, max = max } 
+                    } 
+                }
             },
             onChange = function(currentData)
-                local slider = currentData.item.sliders[1]
-                local val = slider.values[slider.current]
+                local val = currentData.item.sliders[1].values[1].current
                 if CreatorCache[category] ~= val then
                     CreatorCache[category] = val
                     BodyFunctions[category](PlayerPedId(), CreatorCache)
