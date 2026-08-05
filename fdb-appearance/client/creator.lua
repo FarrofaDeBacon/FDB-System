@@ -549,7 +549,7 @@ function OpenBodyMenu()
         menu:addItem({
             title = title,
             sliders = {
-                { type = "grid", current = CreatorCache[category] or min, min = min, max = max }
+                { type = "slider", current = CreatorCache[category] or min, min = min, max = max }
             },
             onChange = function(currentData)
                 local val = currentData.item.sliders[1].current
