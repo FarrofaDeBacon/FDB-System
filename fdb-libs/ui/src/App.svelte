@@ -67,13 +67,13 @@
         overflow: hidden;
         user-select: none;
         /* Default generic fallbacks if theme isn't set */
-        --fdb-accent-color: #c9a15a;
-        --fdb-background-color: rgba(10, 10, 10, 0.85);
-        --fdb-border-radius: 8px;
-        --fdb-border-width: 1px;
-        --fdb-border-color: rgba(255, 255, 255, 0.1);
-        --fdb-font: 'Roboto Condensed', sans-serif;
-        --fdb-blur-amount: 12px;
+        --fdb-accent-color: #a87946;
+        --fdb-background-color: rgba(20, 15, 10, 0.98);
+        --fdb-border-radius: 2px;
+        --fdb-border-width: 2px;
+        --fdb-border-color: #4a3320;
+        --fdb-font: 'Rye', serif;
+        --fdb-blur-amount: 0px;
         
         font-family: var(--fdb-font);
         background: transparent;

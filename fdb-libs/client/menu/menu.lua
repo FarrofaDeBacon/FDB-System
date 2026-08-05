@@ -15,9 +15,11 @@ function fdb.menu.open(data)
     currentMenuId = data.id
     isMenuOpen = true
     
-    -- Aplica tema customizado caso tenha vindo na chamada
+    -- Aplica tema customizado caso tenha vindo na chamada, senão manda o global
     if data.theme then
         fdb.theme.applyOverride(data.theme)
+    else
+        fdb.theme.sync()
     end
     
     SetNuiFocus(true, true)
