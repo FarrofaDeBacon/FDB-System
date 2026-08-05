@@ -116,21 +116,24 @@
     .range-input::-webkit-slider-thumb {
         -webkit-appearance: none;
         appearance: none;
-        width: 14px;
-        height: 14px;
+        width: 30px;
+        height: 30px;
         border-radius: 50%;
-        background: #fff;
+        background-color: transparent;
+        background-image: var(--fdb-thumb-image);
+        background-size: 100%;
+        background-position: center;
+        background-repeat: no-repeat;
         cursor: pointer;
-        box-shadow: 0 0 10px rgba(0,0,0,0.5);
         transition: transform 0.1s ease;
+        margin-top: -12px; /* Center it vertically since thumb is larger than track */
     }
     
     .range-input::-webkit-slider-thumb:hover {
-        transform: scale(1.2);
+        transform: scale(1.1);
     }
 
     .range-input::-webkit-slider-thumb:active {
-        transform: scale(1.1);
-        background: var(--fdb-accent-color);
+        transform: scale(1.05);
     }
 </style>

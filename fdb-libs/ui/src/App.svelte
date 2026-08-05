@@ -59,6 +59,11 @@
 </main>
 
 <style>
+    @font-face {
+        font-family: Crock;
+        src: url(./assets/crock.ttf) format("truetype");
+    }
+
     :global(html, body) {
         margin: 0;
         padding: 0;
@@ -67,12 +72,15 @@
         overflow: hidden;
         user-select: none;
         /* Default generic fallbacks if theme isn't set */
-        --fdb-accent-color: #a87946;
-        --fdb-background-color: rgba(20, 15, 10, 0.98);
-        --fdb-border-radius: 2px;
-        --fdb-border-width: 2px;
-        --fdb-border-color: #4a3320;
-        --fdb-font: 'Rye', serif;
+        --fdb-accent-color: #d80419;
+        --fdb-background-color: transparent;
+        --fdb-background-image: url(./assets/background.png);
+        --fdb-header-image: url(./assets/menu_header.png);
+        --fdb-thumb-image: url(./assets/circle.png);
+        --fdb-border-radius: 0px;
+        --fdb-border-width: 0px;
+        --fdb-border-color: transparent;
+        --fdb-font: 'Crock', serif;
         --fdb-blur-amount: 0px;
         
         font-family: var(--fdb-font);

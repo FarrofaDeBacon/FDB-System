@@ -18,8 +18,9 @@
 </script>
 
 <div class="menu-container">
+    <div class="background-layer"></div>
     <div class="header">
-        <h1 class="title">{menuData.title || 'FDB MENU'}</h1>
+        <h1 class="title">{menuData.title || 'FDB LIBS'}</h1>
         {#if menuData.subtitle}
             <h2 class="subtitle">{menuData.subtitle}</h2>
         {/if}
@@ -54,7 +55,7 @@
         position: absolute;
         top: 5vh;
         left: 3vw;
-        width: 25vw;
+        width: 540px;
         max-height: 90vh;
         display: flex;
         flex-direction: column;
@@ -63,15 +64,33 @@
         border-radius: var(--fdb-border-radius);
         backdrop-filter: blur(var(--fdb-blur-amount));
         color: white;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         overflow: hidden;
+    }
+
+    .background-layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background-image: var(--fdb-background-image);
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        filter: invert(100%);
     }
 
     .header {
         padding: 2vh;
         border-bottom: var(--fdb-border-width) solid var(--fdb-border-color);
         text-align: center;
-        background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+        background-image: var(--fdb-header-image);
+        background-size: cover;
+        background-repeat: no-repeat;
+        min-height: 108px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 
     .title {
