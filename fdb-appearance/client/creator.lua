@@ -503,7 +503,6 @@ function MainMenu()
     menu:addItem({
         title = RSG.Texts.Body,
         onClick = function()
-            jo.menu.show(false)
             OpenBodyMenu()
         end
     })
