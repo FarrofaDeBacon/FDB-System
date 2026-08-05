@@ -59,11 +59,6 @@
 </main>
 
 <style>
-    @font-face {
-        font-family: Crock;
-        src: url(./assets/crock.ttf) format("truetype");
-    }
-
     :global(html, body) {
         margin: 0;
         padding: 0;
