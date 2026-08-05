@@ -71,19 +71,32 @@
         height: 100vh;
         overflow: hidden;
         user-select: none;
-        /* Default generic fallbacks if theme isn't set */
-        --fdb-accent-color: #d80419;
-        --fdb-background-color: transparent;
-        --fdb-background-image: url(./assets/background.png);
-        --fdb-header-image: url(./assets/menu_header.png);
-        --fdb-thumb-image: url(./assets/circle.png);
-        --fdb-border-radius: 0px;
-        --fdb-border-width: 0px;
-        --fdb-border-color: transparent;
-        --fdb-font: 'Crock', serif;
-        --fdb-blur-amount: 0px;
         
-        font-family: var(--fdb-font);
+        /* New Rustic/ox_lib consistent semantic palette fallbacks */
+        --fdb-font-body: 'RDR Lino Regular', 'Roboto Condensed', serif;
+        --fdb-font-display: 'RDR Lino Regular', 'Playfair Display', serif;
+        --fdb-text-primary: #d4c5b0;
+        --fdb-text-secondary: #a89878;
+        --fdb-text-on-paper: #2b1d14;
+        
+        --fdb-accent-color: #c9a15a;
+        --fdb-accent-color-dark: #8a6a35;
+        
+        --fdb-background-color: rgba(10, 10, 10, 0.88);
+        --fdb-background-paper: #d8c9a3;
+        --fdb-background-wood: #2b1d14;
+        
+        --fdb-border-color: rgba(255, 255, 255, 0.1);
+        --fdb-border-color-wood: #4a2e1a;
+        --fdb-border-radius: 4px;
+
+        --fdb-status-good: #27ae60;
+        --fdb-status-warning: #c98a3a;
+        --fdb-status-critical: #c0392b;
+        --fdb-status-info: #2980b9;
+        
+        font-family: var(--fdb-font-body);
+        color: var(--fdb-text-primary);
         background: transparent;
     }
 </style>

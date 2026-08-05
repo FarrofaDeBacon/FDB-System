@@ -75,6 +75,6 @@
         min-width: 80px;
         text-align: center;
         font-size: 0.9rem;
-        color: white;
+        color: var(--fdb-text-primary);
     }
 </style>

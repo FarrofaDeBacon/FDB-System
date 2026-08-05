@@ -18,7 +18,6 @@
 </script>
 
 <div class="menu-container">
-    <div class="background-layer"></div>
     <div class="header">
         <h1 class="title">{menuData.title || 'FDB LIBS'}</h1>
         {#if menuData.subtitle}
@@ -60,51 +59,37 @@
         display: flex;
         flex-direction: column;
         background-color: var(--fdb-background-color);
-        border: var(--fdb-border-width) solid var(--fdb-border-color);
+        border: 1px solid var(--fdb-border-color);
         border-radius: var(--fdb-border-radius);
-        backdrop-filter: blur(var(--fdb-blur-amount));
-        color: white;
+        color: var(--fdb-text-primary);
         overflow: hidden;
-    }
-
-    .background-layer {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: -1;
-        background-image: var(--fdb-background-image);
-        background-size: 100% 100%;
-        background-repeat: no-repeat;
-        filter: invert(100%);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
 
     .header {
-        padding: 2vh;
-        border-bottom: var(--fdb-border-width) solid var(--fdb-border-color);
+        padding: 2.5vh 2vh;
+        border-bottom: 1px solid var(--fdb-border-color);
         text-align: center;
-        background-image: var(--fdb-header-image);
-        background-size: cover;
-        background-repeat: no-repeat;
-        min-height: 108px;
         display: flex;
         flex-direction: column;
         justify-content: center;
+        background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%);
     }
 
     .title {
         margin: 0;
-        font-size: 1.5rem;
+        font-size: 1.8rem;
         font-weight: 700;
         letter-spacing: 2px;
         text-transform: uppercase;
+        font-family: var(--fdb-font-display);
+        color: var(--fdb-accent-color);
     }
 
     .subtitle {
         margin: 0.5vh 0 0 0;
         font-size: 0.9rem;
-        color: var(--fdb-accent-color);
+        color: var(--fdb-text-secondary);
         text-transform: uppercase;
         letter-spacing: 1px;
     }
@@ -136,7 +121,7 @@
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid var(--fdb-border-color);
         border-radius: calc(var(--fdb-border-radius) / 2);
-        color: white;
+        color: var(--fdb-text-primary);
         font-family: inherit;
         font-size: 1rem;
         cursor: pointer;
