@@ -57,5 +57,11 @@ O repositório `FDB-System` evoluiu massivamente. Não presuma mais que "apenas 
 - `fdb-survival` (Motor base de atributos vitais)
 - `fdb-horses` e `fdb-ammo`
 - `fdb-canteen` (Integrado à sede)
+- `fdb-appearance` (Refatoração em andamento, transição de UI)
+
+### 5.3 Refatoração do `fdb-appearance` e o Dilema da Interface (Atualizado)
+Iniciamos a reescrita estrutural do criador de personagens (`fdb-appearance`) para abandonar menus defasados.
+- **O Problema:** A interface genérica fornecida pelo `jo_libs` (menus de opções em lista) funciona bem para lojas, mas é demasiadamente rústica ("bruta") para um Character Creator moderno, onde precisamos de sliders visuais finos, paletas de cor intuitivas e um design premium ("delicado"). 
+- **O que sugerimos / Próximo Passo Proposto:** Decidimos explorar um pivô arquitetural. Em vez de depender do `jo_libs` para a interface de criação de personagens, a proposta é construir um NUI dedicado em **Svelte + Vite** exclusivamente para o `fdb-appearance`. Isso nos dará controle total do visual (glassmorphism, sliders reais) mantendo intacta toda a poderosa lógica de cache e persistência (Lua) já construída no back-end.
 
 Sempre consulte os manifestos e códigos-fonte desses recursos antes de inferir o comportamento deles. O ecossistema está ganhando vida de forma estruturada.
