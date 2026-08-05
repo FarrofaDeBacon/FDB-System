@@ -1,18 +1,21 @@
 <script>
+    import { createEventDispatcher } from 'svelte';
     import Slider from './Slider.svelte';
     import List from './List.svelte';
+    import ColorGrid from './ColorGrid.svelte';
+    import Checkbox from './Checkbox.svelte';
+    import Separator from './Separator.svelte';
 
     export let menuData = {};
 
+    const dispatch = createEventDispatcher();
+
     function handleItemChange(event, item) {
-        // Send the change to the Lua side
-        fetch(`https://${GetParentResourceName()}/onMenuChange`, {
-            method: 'POST',
-            body: JSON.stringify({
-                menuId: menuData.id,
-                itemId: item.id,
-                value: event.detail.value
-            })
+        // Dispara evento para o componente pai (App.svelte)
+        dispatch('itemChange', {
+            menuId: menuData.id,
+            itemId: item.id,
+            value: event.detail.value
         });
     }
 </script>
@@ -38,9 +41,21 @@
                         {...item}
                         on:change={(e) => handleItemChange(e, item)}
                     />
+                {:else if item.type === 'color'}
+                    <ColorGrid 
+                        {...item}
+                        on:change={(e) => handleItemChange(e, item)}
+                    />
+                {:else if item.type === 'checkbox'}
+                    <Checkbox 
+                        {...item}
+                        on:change={(e) => handleItemChange(e, item)}
+                    />
+                {:else if item.type === 'separator'}
+                    <Separator {...item} />
                 {:else}
                     <!-- Fallback generic button -->
-                    <button class="generic-btn">
+                    <button class="generic-btn" on:click={() => handleItemChange({detail: {value: true}}, item)}>
                         {item.label}
                     </button>
                 {/if}
