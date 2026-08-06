@@ -18,6 +18,18 @@
             value: event.detail.value
         });
     }
+
+    // Validação reativa de tipos de itens no menu
+    $: {
+        if (menuData && menuData.items) {
+            const validTypes = ['slider', 'list', 'color', 'checkbox', 'separator', 'button'];
+            menuData.items.forEach(item => {
+                if (item.type && !validTypes.includes(item.type)) {
+                    console.warn(`[fdb-libs] Tipo de item inválido/desconhecido: "${item.type}" no item "${item.id || item.label}"`);
+                }
+            });
+        }
+    }
 </script>
 
 <div class="menu-container">
@@ -53,8 +65,7 @@
                     />
                 {:else if item.type === 'separator'}
                     <Separator {...item} />
-                {:else}
-                    <!-- Fallback generic button -->
+                {:else if item.type === 'button'}
                     <button class="generic-btn" on:click={() => handleItemChange({detail: {value: true}}, item)}>
                         {item.label}
                     </button>

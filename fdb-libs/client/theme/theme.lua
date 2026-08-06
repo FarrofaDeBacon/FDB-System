@@ -1,20 +1,30 @@
 fdb = fdb or {}
 fdb.theme = {}
 
--- Inicializa o tema global e envia para o NUI assim que ele estiver pronto
-Citizen.CreateThread(function()
-    -- Em um cenário ideal, o NUI manda uma mensagem de "ready", 
-    -- mas vamos enviar o tema inicial no boot.
-    Wait(1000)
+-- Inicializa o tema global assim que o NUI sinaliza que está pronto
+RegisterNUICallback('nuiReady', function(data, cb)
     fdb.theme.sync()
+    cb('ok')
 end)
 
 function fdb.theme.sync()
-    if not Config or not Config.Theme then return end
+    if not Config then return end
+    
+    local theme = nil
+    if Config.ThemePresets and Config.ActiveTheme then
+        theme = Config.ThemePresets[Config.ActiveTheme]
+    end
+    
+    -- Fallback se o preset selecionado for inválido
+    if not theme then
+        theme = Config.ThemePresets and Config.ThemePresets.western_gold or Config.Theme
+    end
+    
+    if not theme then return end
     
     SendNUIMessage({
         action = "SET_THEME",
-        theme = Config.Theme
+        theme = theme
     })
 end
 

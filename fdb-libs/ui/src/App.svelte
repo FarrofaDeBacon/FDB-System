@@ -45,6 +45,14 @@
         };
         window.addEventListener('keydown', handleKey);
 
+        // Let Lua know NUI is ready to receive theme
+        if (window.GetParentResourceName) {
+            fetch(`https://${GetParentResourceName()}/nuiReady`, {
+                method: 'POST',
+                body: JSON.stringify({})
+            }).catch(() => {});
+        }
+
         return () => {
             window.removeEventListener('message', handleMessage);
             window.removeEventListener('keydown', handleKey);
