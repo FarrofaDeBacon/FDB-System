@@ -62,8 +62,12 @@ RegisterCommand('testlibs', function()
         title = "FDB LIBS",
         subtitle = "TEMA 100% CONFIGURÁVEL",
         items = {
+            { type = "separator", label = "Testes Svelte" },
             { type = "slider", id = "test_slider", label = "Opacidade", min = 0, max = 100, step = 1, value = 50 },
             { type = "list", id = "test_list", label = "Cores", values = {"Vermelho", "Verde", "Azul"}, current = 1 },
+            { type = "separator" },
+            { type = "color", id = "test_color", label = "Batom", min = 1, max = 15, value = 1 },
+            { type = "checkbox", id = "test_check", label = "Sardas", checked = true },
             { type = "button", id = "test_btn", label = "Botão Genérico" }
         }
     })

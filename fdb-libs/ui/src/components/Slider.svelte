@@ -53,16 +53,16 @@
         flex-direction: column;
         gap: 0.8vh;
         width: 100%;
-        padding: 1.5vh;
-        background: rgba(0, 0, 0, 0.2);
-        border: 1px solid var(--fdb-border-color);
-        border-radius: calc(var(--fdb-border-radius) / 2);
+        padding: 1.5vh 0;
+        background: transparent;
+        border: none;
     }
 
     .slider-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        padding: 0 1.5vh;
     }
 
     .label {
@@ -73,20 +73,20 @@
 
     .number-input {
         width: 50px;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: var(--fdb-accent-color);
-        border-radius: 4px;
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid var(--fdb-accent-color);
+        color: var(--fdb-text-primary);
+        font-family: var(--fdb-font-display);
+        border-radius: 0;
         padding: 0.3vh 0.5vh;
         text-align: center;
-        font-family: inherit;
-        font-size: 0.9rem;
+        font-size: 1rem;
         outline: none;
-        transition: border-color 0.2s;
     }
 
     .number-input:focus {
-        border-color: var(--fdb-accent-color);
+        border-bottom-color: #fff;
     }
 
     .number-input::-webkit-inner-spin-button,
@@ -100,37 +100,50 @@
         width: 100%;
         display: flex;
         align-items: center;
-        height: 2vh;
+        height: 3vh;
+        padding: 0 1.5vh;
     }
 
     .range-input {
         -webkit-appearance: none;
         width: 100%;
-        height: 6px;
-        background: linear-gradient(to right, var(--fdb-accent-color) var(--progress), rgba(255, 255, 255, 0.1) var(--progress));
-        border-radius: 3px;
+        height: 10px;
+        background-color: rgba(0, 0, 0, 0.4);
+        background-image: url('/assets/swatch_bg_1a.png');
+        background-size: 30px 100%;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 2px;
         outline: none;
         margin: 0;
+        position: relative;
     }
 
     .range-input::-webkit-slider-thumb {
         -webkit-appearance: none;
         appearance: none;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
+        width: 20px;
+        height: 30px;
+        border-radius: 0;
         background-color: var(--fdb-accent-color);
+        -webkit-mask-image: url('/assets/tank_meter_marker.png');
+        mask-image: url('/assets/tank_meter_marker.png');
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
         cursor: pointer;
-        transition: transform 0.1s ease, box-shadow 0.1s ease;
-        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        transition: transform 0.1s ease;
+        box-shadow: none;
+        margin-top: -10px; /* Offset to center the thumb over the track */
     }
     
     .range-input::-webkit-slider-thumb:hover {
-        transform: scale(1.2);
-        box-shadow: 0 0 15px var(--fdb-accent-color);
+        transform: scale(1.1);
     }
 
     .range-input::-webkit-slider-thumb:active {
-        transform: scale(1.1);
+        transform: scale(0.9);
     }
 </style>

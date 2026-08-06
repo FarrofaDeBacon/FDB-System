@@ -34,7 +34,7 @@
                 on:click={() => selectValue(item)}
             >
                 {#if !colors[item]}
-                    {item}
+                    <span>{item}</span>
                 {/if}
             </div>
         {/each}
@@ -91,29 +91,67 @@
     }
 
     .grid-item {
-        width: 28px;
-        height: 28px;
+        position: relative;
+        width: 37px;
+        height: 37px;
         display: flex;
         justify-content: center;
         align-items: center;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 2px;
-        font-size: 0.75rem;
+        background: transparent;
+        border: none;
+        font-size: 0.85rem;
         color: var(--fdb-text-primary);
         cursor: pointer;
         transition: all 0.1s;
+        margin-bottom: 5px;
     }
 
-    .grid-item:hover {
-        border-color: var(--fdb-accent-color);
+    .grid-item::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/assets/swatch_box.png');
+        background-size: cover;
+        background-position: center;
+        z-index: 1;
+        opacity: 0.8;
+    }
+
+    .grid-item:hover::before {
+        opacity: 1;
         transform: scale(1.1);
     }
 
-    .grid-item.active {
-        background: var(--fdb-accent-color);
-        border-color: var(--fdb-accent-color);
+    .grid-item span {
+        position: relative;
+        z-index: 2;
+        font-family: var(--fdb-font-display);
+    }
+
+    .grid-item.active span {
         color: var(--fdb-background-color);
         font-weight: bold;
+    }
+
+    .grid-item.active::after {
+        content: "";
+        position: absolute;
+        top: -8px;
+        left: -7px;
+        width: calc(100% + 14px);
+        height: calc(100% + 14px);
+        background-color: var(--fdb-accent-color);
+        -webkit-mask-image: url('/assets/selection_box_square.png');
+        mask-image: url('/assets/selection_box_square.png');
+        -webkit-mask-size: 100%;
+        mask-size: 100%;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        z-index: 0;
     }
 </style>

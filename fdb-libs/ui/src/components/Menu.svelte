@@ -73,22 +73,39 @@
         max-height: 90vh;
         display: flex;
         flex-direction: column;
-        background-color: var(--fdb-background-color);
-        border: 1px solid var(--fdb-border-color);
-        border-radius: var(--fdb-border-radius);
         color: var(--fdb-text-primary);
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        /* Removendo a cor de fundo sólida para usar a textura de papel rasgado abaixo */
+    }
+
+    /* O Fundo de Papel Amassado do RDR2 */
+    .menu-container::before {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background-image: url('/assets/background.png');
+        filter: invert(100%);
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        z-index: -1;
+        opacity: 0.95;
     }
 
     .header {
-        padding: 2.5vh 2vh;
-        border-bottom: 1px solid var(--fdb-border-color);
-        text-align: center;
+        background-image: url('/assets/menu_header.png');
+        background-repeat: no-repeat;
+        background-size: cover;
+        width: 100%;
+        height: 108px;
+        min-height: 108px;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+        align-items: center;
+        text-align: center;
+        margin-bottom: 5px;
     }
 
     .title {

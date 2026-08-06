@@ -18,7 +18,7 @@
     
     <div class="box {checked ? 'checked' : ''}">
         {#if checked}
-            <span class="checkmark">✓</span>
+            <span class="checkmark"></span>
         {/if}
     </div>
 </div>
@@ -30,42 +30,56 @@
         align-items: center;
         width: 100%;
         padding: 1.5vh;
-        background: rgba(0, 0, 0, 0.2);
-        border: 1px solid var(--fdb-border-color);
-        border-radius: calc(var(--fdb-border-radius) / 2);
+        background: transparent;
+        position: relative;
         cursor: pointer;
-        transition: background 0.1s;
+        margin-bottom: 5px;
     }
 
-    .checkbox-container:hover {
-        background: rgba(255, 255, 255, 0.05);
+    .checkbox-container::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-image: url('/assets/selection_box_bg_1d.png');
+        background-size: 100% 100%;
+        filter: invert(75%);
+        z-index: -1;
+        opacity: 0.3;
+        transition: opacity 0.2s;
+    }
+
+    .checkbox-container:hover::before {
+        opacity: 0.6;
     }
 
     .label {
         font-size: 0.95rem;
         font-weight: 500;
         letter-spacing: 0.5px;
+        z-index: 5;
     }
 
     .box {
-        width: 24px;
-        height: 24px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-radius: 4px;
+        width: 32px;
+        height: 32px;
+        background-image: url('/assets/tick_box.png');
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
         display: flex;
         justify-content: center;
         align-items: center;
         transition: all 0.2s;
-    }
-
-    .box.checked {
-        border-color: var(--fdb-accent-color);
-        background: var(--fdb-accent-color);
+        z-index: 5;
     }
 
     .checkmark {
-        color: var(--fdb-background-color);
-        font-size: 1rem;
-        font-weight: bold;
+        width: 24px;
+        height: 24px;
+        background-image: url('/assets/tick.png');
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        filter: invert(1);
     }
 </style>
