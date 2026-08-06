@@ -6,7 +6,7 @@ lua54 'yes'
 description 'fdb-libs - Custom UI and Utilities Library for FDB System'
 version '1.0.0'
 
-ui_page 'ui/dist/index.html'
+ui_page 'ui/build/index.html'
 
 shared_scripts {
     'config.lua',
@@ -25,6 +25,6 @@ server_scripts {
 }
 
 files {
-    'ui/dist/index.html',
-    'ui/dist/assets/*'
+    'ui/build/index.html',
+    'ui/build/assets/*'
 }
