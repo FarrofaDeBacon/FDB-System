@@ -7,13 +7,12 @@ description 'fdb-appearance'
 version '2.5.4'
 
 shared_scripts {
-    '@jo_libs/init.lua',
     '@ox_lib/init.lua',
     'config.lua',
     'shared/functions.lua',
 }
 
-ui_page 'nui://jo_libs/nui/index.html'
+ui_page 'ui/build/index.html'
 
 client_scripts {
     'client/*.lua',
@@ -32,6 +31,7 @@ files {
     'data/hairs_list.lua',
     'data/clothes_list.lua',
     'locales/*.json',
+    'ui/build/**/*',
 }
 
 ox_libs {
@@ -42,5 +42,5 @@ dependencies {
     'fdb-core',
     'ox_lib',
     'fdb-menubase',
-    'jo_libs'
+    'fdb-libs'
 }

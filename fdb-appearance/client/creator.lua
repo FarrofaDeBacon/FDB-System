@@ -332,661 +332,160 @@ function StartCreator()
     SpawnPeds()
 end
 
-function FirstMenu()
-    local menu = jo.menu.create('FirstMenu', { 
-        title = RSG.Texts.Creator, 
-        subtitle = RSG.Texts.Options 
+
+    CreatorCache = CreatorCache or {}
+    ClothesCache = ClothesCache or {}
+
+    -- Enviar mensagem para abrir NUI do Criador em Svelte
+    SendNUIMessage({
+        action = 'openCreator',
+        sex = IsPedMale(PlayerPedId()) and 'male' or 'female',
+        cache = CreatorCache
     })
-
-    if Skinkosong then
-        Labelsave = RSG.Texts.firsmenu.Start
-        Valuesave = 'save'
-    end
-
-    if (IsInCharCreation or Skinkosong) then
-        menu:addItem({
-            title = locale('creator.appearance.label'),
-            description = locale('creator.appearance.desc'),
-            onClick = function()
-                MainMenu()
-            end
-        })
-        menu:addItem({
-            title = locale('creator.clothing.label'),
-            description = locale('creator.clothing.desc'),
-            onClick = function()
-                jo.menu.show(false)
-                OpenClothingMenu()
-            end
-        })
-    end
-
-    if IsInCharCreation and not Skinkosong then
-        menu:addItem({
-            title = Firstname or RSG.Texts.firsmenu.label_firstname,
-            textRight = Firstname and "" or RSG.Texts.firsmenu.none,
-            description = locale('creator.firstname.desc'),
-            onClick = function()
-                local dialog = lib.inputDialog(locale('creator.firstname.input.header'), {
-                    {
-                        type = 'input',
-                        required = true,
-                        icon = 'user-pen',
-                        label = locale('creator.firstname.input.label'),
-                        placeholder = locale('creator.firstname.input.placeholder')
-                    },
-                })
-                if dialog and checkStrings(dialog[1]) then
-                    Firstname = dialog[1]
-                    FirstMenu() -- Re-render menu
-                end
-            end
-        })
-        
-        menu:addItem({
-            title = Lastname or RSG.Texts.firsmenu.label_lastname,
-            textRight = Lastname and "" or RSG.Texts.firsmenu.none,
-            description = locale('creator.lastname.desc'),
-            onClick = function()
-                local dialog = lib.inputDialog(locale('creator.lastname.input.header'), {
-                    {
-                        type = 'input',
-                        required = true,
-                        icon = 'user-pen',
-                        label = locale('creator.lastname.input.label'),
-                        placeholder = locale('creator.lastname.input.placeholder')
-                    },
-                })
-                if dialog and checkStrings(dialog[1]) then
-                    Lastname = dialog[1]
-                    FirstMenu()
-                end
-            end
-        })
-
-        menu:addItem({
-            title = Nationality or RSG.Texts.firsmenu.Nationality,
-            textRight = Nationality and "" or RSG.Texts.firsmenu.none,
-            description = locale('creator.nationality.desc'),
-            onClick = function()
-                local dialog = lib.inputDialog(locale('creator.nationality.input.header'), {
-                    {
-                        type = 'input',
-                        required = true,
-                        icon = 'user-shield',
-                        label = locale('creator.nationality.input.label'),
-                        placeholder = locale('creator.nationality.input.placeholder')
-                    },
-                })
-                if dialog and checkStrings(dialog[1]) then
-                    Nationality = dialog[1]
-                    FirstMenu()
-                end
-            end
-        })
-
-        menu:addItem({
-            title = Birthdate or RSG.Texts.firsmenu.Birthdate,
-            textRight = Birthdate and "" or RSG.Texts.firsmenu.none,
-            description = locale('creator.birthdate.desc'),
-            onClick = function()
-                local dialog = lib.inputDialog(locale('creator.birthdate.input.header'), {
-                    {
-                        type = 'date',
-                        required = true,
-                        icon = 'calendar-days',
-                        label = locale('creator.birthdate.input.label'),
-                        format = 'YYYY-MM-DD',
-                        returnString = true,
-                        min = '1750-01-01',
-                        max = '1900-01-01',
-                        default = '1870-01-01'
-                    }
-                })
-                if dialog then
-                    Birthdate = dialog[1]
-                    Labelsave = RSG.Texts.firsmenu.Start
-                    Valuesave = 'save'
-                    FirstMenu()
-                end
-            end
-        })
-    end
-
-    menu:addItem({
-        title = Labelsave or RSG.Texts.firsmenu.Start,
-        textRight = (not Labelsave) and RSG.Texts.firsmenu.empty or "",
-        disabled = (not Valuesave),
-        onClick = function()
-            if Valuesave == 'save' then
-                LoadedComponents = CreatorCache
-                if Skinkosong then
-                    jo.menu.show(false)
-                    Skinkosong = false
-                    Firstname = FDBCore.Functions.GetPlayerData().charinfo.firstname
-                    Lastname = FDBCore.Functions.GetPlayerData().charinfo.lastname
-                    FotoMugshots()
-                elseif Firstname and Lastname and Nationality and Selectedsex and Birthdate and Cid then
-                    jo.menu.show(false)
-                    local newData = {
-                        firstname = Firstname,
-                        lastname = Lastname,
-                        nationality = Nationality,
-                        gender = Selectedsex == 1 and 0 or 1,
-                        birthdate = Birthdate,
-                        cid = Cid
-                    }
-                    TriggerServerEvent('fdb-multicharacter:server:createCharacter', newData)
-                    Wait(500)
-                    FotoMugshots()
-                else
-                    lib.notify({ title = locale('missing_character_info.title'), description = locale('missing_character_info.description'), type = 'error', duration = 7000 })
-                end
-            end
-        end
-    })
-
-    jo.menu.send('FirstMenu')
-    jo.menu.setCurrentMenu('FirstMenu')
-    jo.menu.show(true, true) -- true for keepInput so we can test camera rotation
+    SetNuiFocus(true, true)
 end
 
-function MainMenu()
-    local menu = jo.menu.create('main_character_creator_menu', { 
-        title = RSG.Texts.Appearance, 
-        subtitle = RSG.Texts.Options,
-        onBack = function()
-            FirstMenu()
-        end
-    })
+-- Helper local para puxar hash do vestuário cacheado
+local clothing = require 'data.clothing'
+local function GetClothingHash(category, model, texture)
+    if not model or model == 0 then return nil end
+    texture = texture or 0
+    local sex = IsPedMale(PlayerPedId()) and 'male' or 'female'
+    local list = clothing[sex][category]
+    if list and list[model] and list[model][texture] then
+        return list[model][texture].hash
+    end
+    return nil
+end
 
-    menu:addItem({
-        title = RSG.Texts.Body,
-        onClick = function()
-            OpenBodyMenu()
-        end
-    })
+-- NUI Callbacks
+
+RegisterNUICallback('nuiReady', function(data, cb)
+    cb('ok')
+end)
+
+RegisterNUICallback('rotatePed', function(data, cb)
+    local rotation = tonumber(data.rotation)
+    if rotation then
+        SetEntityHeading(PlayerPedId(), pedloc.w + rotation)
+    end
+    cb('ok')
+end)
+
+RegisterNUICallback('changeCamera', function(data, cb)
+    local cameraType = data.camera
+    local ped = PlayerPedId()
+    local pedCoords = GetEntityCoords(ped)
     
-    menu:addItem({
-        title = RSG.Texts.Face,
-        onClick = function()
-            jo.menu.show(false)
-            OpenFaceMenu()
-        end
-    })
-
-    menu:addItem({
-        title = RSG.Texts.Hair_beard,
-        onClick = function()
-            jo.menu.show(false)
-            OpenHairMenu()
-        end
-    })
-
-    menu:addItem({
-        title = RSG.Texts.Makeup,
-        onClick = function()
-            jo.menu.show(false)
-            OpenMakeupMenu()
-        end
-    })
-
-    jo.menu.send('main_character_creator_menu')
-    jo.menu.setCurrentMenu('main_character_creator_menu')
-    jo.menu.show(true, true) -- keepInput=true for testing camera
-end
-
-function OpenBodyMenu()
-    local menu = jo.menu.create('body_character_creator_menu', { 
-        title = RSG.Texts.Appearance, 
-        subtitle = RSG.Texts.Body,
-        onBack = function()
-            MainMenu()
-        end
-    })
-
-    local function addBodySlider(title, category, min, max, hop)
-        local currentVal = CreatorCache[category] or min
-        menu:addItem({
-            title = title,
-            sliders = {
-                { 
-                    type = "grid", 
-                    values = { 
-                        { current = currentVal, min = min, max = max } 
-                    } 
-                }
-            },
-            onChange = function(currentData)
-                local val = currentData.item.sliders[1].values[1].current
-                if CreatorCache[category] ~= val then
-                    CreatorCache[category] = val
-                    BodyFunctions[category](PlayerPedId(), CreatorCache)
-                end
-            end
-        })
+    local targetZ = pedCoords.z
+    local fov = 60.0
+    
+    if cameraType == 'face' then
+        targetZ = pedCoords.z + 0.65
+        fov = 32.0
+    elseif cameraType == 'torso' then
+        targetZ = pedCoords.z + 0.2
+        fov = 45.0
+    elseif cameraType == 'legs' then
+        targetZ = pedCoords.z - 0.5
+        fov = 38.0
+    elseif cameraType == 'full' then
+        targetZ = pedCoords.z + 0.15
+        fov = 60.0
     end
+    
+    if CharacterCreatorCamera then
+        SetCamFov(CharacterCreatorCamera, fov)
+        PointCamAtCoord(CharacterCreatorCamera, pedCoords.x, pedCoords.y, targetZ)
+    end
+    cb('ok')
+end)
 
-    addBodySlider(RSG.Texts.Face, "head", 1, 120)
-    addBodySlider(RSG.Texts.Width, "face_width", -100, 100)
-    addBodySlider(RSG.Texts.SkinTone, "skin_tone", 1, 6)
-    addBodySlider(RSG.Texts.Size, "body_size", 1, #Data.Appearance.body_size)
-    addBodySlider(RSG.Texts.Waist, "body_waist", 1, #Data.Appearance.body_waist)
-    addBodySlider(RSG.Texts.Chest, "chest_size", 1, #Data.Appearance.chest_size)
-    addBodySlider(RSG.Texts.Height, "height", 95, 105)
-
-    jo.menu.send('body_character_creator_menu')
-    jo.menu.setCurrentMenu('body_character_creator_menu')
-    jo.menu.show(true, true)
-end
-
-function OpenFaceMenu()
-    MenuData.CloseAll()
-    local elements = {
-        {label = RSG.Texts.Eyes,       value = 'eyes',       desc = ""},
-        {label = RSG.Texts.Eyelids,    value = 'eyelids',    desc = ""},
-        {label = RSG.Texts.Eyebrows,   value = 'eyebrows',   desc = ""},
-        {label = RSG.Texts.Nose,       value = 'nose',       desc = ""},
-        {label = RSG.Texts.Mouth,      value = 'mouth',      desc = ""},
-        {label = RSG.Texts.Cheekbones, value = 'cheekbones', desc = ""},
-        {label = RSG.Texts.Jaw,        value = 'jaw',        desc = ""},
-        {label = RSG.Texts.Ears,       value = 'ears',       desc = ""},
-        {label = RSG.Texts.Chin,       value = 'chin',       desc = ""},
-        {label = RSG.Texts.Defects,    value = 'defects',    desc = ""}
-    }
-    MenuData.Open('default', GetCurrentResourceName(), 'face_main_character_creator_menu',
-        {title = RSG.Texts.Face, subtext = RSG.Texts.Options, align = RSG.Texts.align, elements = elements, itemHeight = "4vh"}, function(data, menu)
-        FaceFunctions[data.current.value]()
-    end, function(data, menu)
-        MainMenu()
-    end)
-end
-
-function OpenHairMenu()
-    MenuData.CloseAll()
-    local elements = {}
-    if IsPedMale(PlayerPedId()) then
-        local a = 1
-        if CreatorCache["hair"] == nil or type(CreatorCache["hair"]) ~= "table" then
-            CreatorCache["hair"] = {}
-            CreatorCache["hair"].model = 0
-            CreatorCache["hair"].texture = 1
+RegisterNUICallback('onChange', function(data, cb)
+    local category = data.type
+    local key = data.key
+    local value = data.value
+    
+    CreatorCache[key] = value
+    local playerPed = PlayerPedId()
+    
+    if category == 'feature' then
+        local hash = Data.features[key]
+        if hash then
+            local floatVal = (value / 100) * 1.0
+            NativeSetPedFaceFeature(playerPed, hash, floatVal)
+            Citizen.InvokeNative(0xCC8CA3E88256E58F, playerPed, false, true, true, true, false)
         end
-        if CreatorCache["beard"] == nil or type(CreatorCache["beard"]) ~= "table" then
-            CreatorCache["beard"] = {}
-            CreatorCache["beard"].model = 0
-            CreatorCache["beard"].texture = 1
+    elseif category == 'overlay' then
+        LoadOverlays(playerPed, CreatorCache)
+        if key == 'hair' then
+            LoadHair(playerPed, CreatorCache)
+        elseif key == 'beard' then
+            LoadBeard(playerPed, CreatorCache)
         end
-        elements[#elements + 1] = {
-            label = RSG.Texts.HairStyle,
-            value = CreatorCache["hair"].model or 0,
-            category = "hair",
-            desc = "",
-            type = "slider",
-            min = 0,
-            max = #hairs_list["male"]["hair"],
-            change_type = "model",
-            id = a,
+    elseif category == 'clothing' then
+        ClothesCache[key] = { model = value, texture = 0 }
+        
+        -- Mapeia a key simplificada da UI para as categorias do clothing.lua
+        local componentName
+        if key == 'shirt' then
+            componentName = "shirts_full"
+        elseif key == 'pants' then
+            componentName = "pants"
+        elseif key == 'boots' then
+            componentName = "boots"
+        elseif key == 'vest' then
+            componentName = "vests"
+        elseif key == 'hat' then
+            componentName = "hats"
+        end
+        
+        if componentName then
+            local hashVal = GetClothingHash(componentName, value, 1)
+            if hashVal and hashVal ~= 0 then
+                exports['fdb-libs']:ApplyComponent(playerPed, componentName, hashVal, true)
+            else
+                exports['fdb-libs']:RemoveComponent(playerPed, componentName)
+            end
+        end
+    elseif category == 'genetics' then
+        if key == 'head' or key == 'skin_tone' then
+            LoadBoody(playerPed, CreatorCache)
+        end
+    end
+    
+    cb('ok')
+end)
+
+RegisterNUICallback('saveCreator', function(data, cb)
+    SetNuiFocus(false, false)
+    SendNUIMessage({ action = 'closeCreator' })
+    
+    LoadedComponents = CreatorCache
+    
+    if Skinkosong then
+        Skinkosong = false
+        Firstname = FDBCore.Functions.GetPlayerData().charinfo.firstname
+        Lastname = FDBCore.Functions.GetPlayerData().charinfo.lastname
+        FotoMugshots()
+    elseif Firstname and Lastname and Nationality and Selectedsex and Birthdate and Cid then
+        local newData = {
+            firstname = Firstname,
+            lastname = Lastname,
+            nationality = Nationality,
+            gender = Selectedsex == 1 and 0 or 1,
+            birthdate = Birthdate,
+            cid = Cid
         }
-        a = a + 1
-        elements[#elements + 1] = {
-            label = RSG.Texts.HairColor,
-            value = CreatorCache["hair"].texture or 1,
-            category = "hair",
-            desc = "",
-            type = "slider",
-            min = 1,
-            max = GetMaxTexturesForModel("hair", CreatorCache["hair"].model or 1, false),
-            change_type = "texture",
-            id = a,
-        }
-        a = a + 1
-        elements[#elements + 1] = {
-            label = RSG.Texts.BeardStyle,
-            value = CreatorCache["beard"].model or 0,
-            category = "beard",
-            desc = "",
-            type = "slider",
-            min = 0,
-            max = #hairs_list["male"]["beard"],
-            change_type = "model",
-            id = a,
-        }
-        a = a + 1
-        elements[#elements + 1] = {
-            label = RSG.Texts.BeardColor,
-            value = CreatorCache["beard"].texture or 1,
-            category = "beard",
-            desc = "",
-            type = "slider",
-            min = 1,
-            max = GetMaxTexturesForModel("beard", CreatorCache["beard"].model or 1, false),
-            change_type = "texture",
-            id = a,
-        }
-        a = a + 1
+        TriggerServerEvent('fdb-multicharacter:server:createCharacter', newData)
+        Wait(500)
+        FotoMugshots()
     else
-        local a = 1
-        if CreatorCache["hair"] == nil or type(CreatorCache["hair"]) ~= "table" then
-            CreatorCache["hair"] = {}
-            CreatorCache["hair"].model = 0
-            CreatorCache["hair"].texture = 1
-        end
-        elements[#elements + 1] = {
-            label = RSG.Texts.Hair,
-            value = CreatorCache["hair"].model or 0,
-            category = "hair",
-            desc = "",
-            type = "slider",
-            min = 0,
-            max = #hairs_list["female"]["hair"],
-            change_type = "model",
-            id = a,
-        }
-        a = a + 1
-        elements[#elements + 1] = {
-            label = RSG.Texts.HairColor,
-            value = CreatorCache["hair"].texture or 1,
-            category = "hair",
-            desc = "",
-            type = "slider",
-            min = 1,
-            max = GetMaxTexturesForModel("hair", CreatorCache["hair"].model or 1),
-            change_type = "texture",
-            id = a,
-        }
-        a = a + 1
+        -- Fallback de teste ou salvamento direto
+        FotoMugshots()
     end
-    MenuData.Open('default', GetCurrentResourceName(), 'hair_main_character_creator_menu',
-        {title = RSG.Texts.Hair_beard, subtext = RSG.Texts.Options, align = RSG.Texts.align, elements = elements, itemHeight = "4vh"}, function(data, menu)
-    end, function(data, menu)
-        MainMenu()
-    end, function(data, menu)
-        if data.current.change_type == "model" then
-            if CreatorCache[data.current.category].model ~= data.current.value then
-                CreatorCache[data.current.category].texture = 1
-                CreatorCache[data.current.category].model = data.current.value
-                if data.current.value > 0 then
-                    menu.setElement(data.current.id + 1, "max", GetMaxTexturesForModel(data.current.category, data.current.value, false))
-                    menu.setElement(data.current.id + 1, "min", 1)
-                    menu.setElement(data.current.id + 1, "value", 1)
-                    menu.refresh()
-                else
-                    menu.setElement(data.current.id + 1, "max", 0)
-                    menu.setElement(data.current.id + 1, "min", 0)
-                    menu.setElement(data.current.id + 1, "value", 0)
-                    menu.refresh()
-                end
-                HairFunctions[data.current.category](PlayerPedId(), CreatorCache)
-            end
-         elseif data.current.change_type == "texture" then
-            if CreatorCache[data.current.category].texture ~= data.current.value then
-                CreatorCache[data.current.category].texture = data.current.value
-                HairFunctions[data.current.category](PlayerPedId(), CreatorCache)
-            end
-        else
-            if CreatorCache[data.current.category] ~= data.current.value then
-                CreatorCache[data.current.category] = data.current.value
-                HairFunctions[data.current.category](PlayerPedId(), CreatorCache)
-            end
-        end
-    end)
-end
-
-function OpenEyesMenu()
-    MenuData.CloseAll()
-    local elements = {
-        {label = RSG.Texts.Color,    value = CreatorCache["eyes_color"] or 1,    category = "eyes_color",    desc = "", type = "slider", min = 1,max = 18},
-        {label = RSG.Texts.Depth,    value = CreatorCache["eyes_depth"] or 0,    category = "eyes_depth",    desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Angle,    value = CreatorCache["eyes_angle"] or 0,    category = "eyes_angle",    desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Distance, value = CreatorCache["eyes_distance"] or 0, category = "eyes_distance", desc = "", type = "slider", min = -100, max = 100, hop = 5}
-    }
-    MenuData.Open('default', GetCurrentResourceName(), 'eyes_character_creator_menu',
-    {title = RSG.Texts.Eyes, subtext = RSG.Texts.Options, align = RSG.Texts.align, elements = elements, itemHeight = "4vh"}, function(data, menu)
-    end, function(data, menu)
-        OpenFaceMenu()
-    end, function(data, menu)
-        if CreatorCache[data.current.category] ~= data.current.value then
-            CreatorCache[data.current.category] = data.current.value
-            EyesFunctions[data.current.category](PlayerPedId(), CreatorCache)
-        end
-    end)
-end
-
-function OpenEyelidsMenu()
-    MenuData.CloseAll()
-    local elements = {
-        {label = RSG.Texts.Height, value = CreatorCache["eyelid_height"] or 0, category = "eyelid_height", desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Width,  value = CreatorCache["eyelid_width"] or 0,  category = "eyelid_width",  desc = "", type = "slider", min = -100, max = 100, hop = 5}
-    }
-    MenuData.Open('default', GetCurrentResourceName(), 'eyelid_character_creator_menu',
-        {title = RSG.Texts.Eyelids, subtext = RSG.Texts.Options, align = RSG.Texts.align, elements = elements, itemHeight = "4vh"}, function(data, menu)
-    end, function(data, menu)
-        OpenFaceMenu()
-    end, function(data, menu)
-        if CreatorCache[data.current.category] ~= data.current.value then
-            CreatorCache[data.current.category] = data.current.value
-            EyelidsFunctions[data.current.category](PlayerPedId(), CreatorCache)
-        end
-    end)
-end
-
-function OpenEyebrowsMenu()
-    MenuData.CloseAll()
-    local elements = {
-        {label = RSG.Texts.Height,         value = CreatorCache["eyebrow_height"] or 0, category = "eyebrow_height", desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Width,          value = CreatorCache["eyebrow_width"] or 0,  category = "eyebrow_width",  desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Depth,          value = CreatorCache["eyebrow_depth"] or 0,  category = "eyebrow_depth",  desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Type,           value = CreatorCache["eyebrows_t"] or 1,     category = "eyebrows_t",     desc = "", type = "slider", min = 1, max = 15},
-        {label = RSG.Texts.Visibility,     value = CreatorCache["eyebrows_op"] or 100,  category = "eyebrows_op",    desc = "", type = "slider", min = 0, max = 100,    hop = 5},
-        {label = RSG.Texts.ColorPalette,   value = CreatorCache["eyebrows_id"] or 10,   category = "eyebrows_id",    desc = "", type = "slider", min = 1, max = 25},
-        {label = RSG.Texts.ColorFirstrate, value = CreatorCache["eyebrows_c1"] or 0,    category = "eyebrows_c1",    desc = "", type = "slider", min = 0, max = 64}
-    }
-    MenuData.Open('default', GetCurrentResourceName(), 'eyebrows_character_creator_menu',
-        {title = RSG.Texts.Eyebrows, subtext = RSG.Texts.Options, align = RSG.Texts.align, elements = elements, itemHeight = "4vh"}, function(data, menu)
-    end, function(data, menu)
-        OpenFaceMenu()
-    end, function(data, menu)
-        if CreatorCache[data.current.category] ~= data.current.value then
-            CreatorCache[data.current.category] = data.current.value
-            EyebrowsFunctions[data.current.category](PlayerPedId(), CreatorCache)
-        end
-    end)
-end
-
-function OpenNoseMenu()
-    MenuData.CloseAll()
-    local elements = {
-        {label = RSG.Texts.Width,         value = CreatorCache["nose_width"] or 0,        category = "nose_width",        desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Size,          value = CreatorCache["nose_size"] or 0,         category = "nose_size",         desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Height,        value = CreatorCache["nose_height"] or 0,       category = "nose_height",       desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Angle,         value = CreatorCache["nose_angle"] or 0,        category = "nose_angle",        desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.NoseCurvature, value = CreatorCache["nose_curvature"] or 0,    category = "nose_curvature",    desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Distance,      value = CreatorCache["nostrils_distance"] or 0, category = "nostrils_distance", desc = "", type = "slider", min = -100, max = 100, hop = 5}
-    }
-    MenuData.Open('default', GetCurrentResourceName(), 'nose_character_creator_menu',
-        {title = RSG.Texts.Nose, subtext = RSG.Texts.Options, align = RSG.Texts.align, elements = elements, itemHeight = "4vh"}, function(data, menu)
-    end, function(data, menu)
-        OpenFaceMenu()
-    end, function(data, menu)
-        if CreatorCache[data.current.category] ~= data.current.value then
-            CreatorCache[data.current.category] = data.current.value
-            LoadFeatures(PlayerPedId(), CreatorCache)
-        end
-    end)
-end
-
-function OpenMouthMenu()
-    MenuData.CloseAll()
-
-    RequestAnimDict("FACE_HUMAN@GEN_MALE@BASE")
-
-    while not HasAnimDictLoaded("FACE_HUMAN@GEN_MALE@BASE") do
-        Wait(100)
-    end
-
-    TaskPlayAnim(PlayerPedId(), "FACE_HUMAN@GEN_MALE@BASE", "Face_Dentistry_Loop", 1090519040, -4, -1, 17, 0, 0, 0, 0, 0, 0)
-
-    local elements = {
-        {label = RSG.Texts.Teeth,          value = CreatorCache["teeth"] or 1,      category = "teeth",      desc = "", type = "slider", min = 1, max = 7},
-        {label = RSG.Texts.Width,          value = CreatorCache["mouth_width"] or 0,      category = "mouth_width",      desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Depth,          value = CreatorCache["mouth_depth"] or 0,      category = "mouth_depth",      desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.UP_DOWN,        value = CreatorCache["mouth_x_pos"] or 0,      category = "mouth_x_pos",      desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.left_right,     value = CreatorCache["mouth_y_pos"] or 0,      category = "mouth_y_pos",      desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.UpperLipHeight, value = CreatorCache["upper_lip_height"] or 0, category = "upper_lip_height", desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.UpperLipWidth,  value = CreatorCache["upper_lip_width"] or 0,  category = "upper_lip_width",  desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.UpperLipDepth,  value = CreatorCache["upper_lip_depth"] or 0,  category = "upper_lip_depth",  desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.LowerLipHeight, value = CreatorCache["lower_lip_height"] or 0, category = "lower_lip_height", desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.LowerLipWidth,  value = CreatorCache["lower_lip_width"] or 0,  category = "lower_lip_width",  desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.LowerLipDepth,  value = CreatorCache["lower_lip_depth"] or 0,  category = "lower_lip_depth",  desc = "", type = "slider", min = -100, max = 100, hop = 5}
-    }
-    MenuData.Open('default', GetCurrentResourceName(), 'mouth_character_creator_menu',
-        {title = RSG.Texts.Mouth, subtext = RSG.Texts.Options, align = RSG.Texts.align, elements = elements, itemHeight = "4vh"}, function(data, menu)
-    end, function(data, menu)
-        ClearPedTasks(PlayerPedId())
-        OpenFaceMenu()
-    end, function(data, menu)
-        if CreatorCache[data.current.category] ~= data.current.value then
-            CreatorCache[data.current.category] = data.current.value
-            LoadFeatures(PlayerPedId(), CreatorCache)
-        end
-    end)
-end
-
-function OpenCheekbonesMenu()
-    MenuData.CloseAll()
-    local elements = {
-        {label = RSG.Texts.Height, value = CreatorCache["cheekbones_height"] or 0, category = "cheekbones_height", desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Width,  value = CreatorCache["cheekbones_width"] or 0,  category = "cheekbones_width",  desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Depth,  value = CreatorCache["cheekbones_depth"] or 0,  category = "cheekbones_depth",  desc = "", type = "slider", min = -100, max = 100, hop = 5}
-    }
-    MenuData.Open('default', GetCurrentResourceName(), 'cheekbones_character_creator_menu',
-        {title = 'Cheek Bones', subtext = RSG.Texts.Options, align = RSG.Texts.align, elements = elements, itemHeight = "4vh"}, function(data, menu)
-    end, function(data, menu)
-        OpenFaceMenu()
-    end, function(data, menu)
-        if CreatorCache[data.current.category] ~= data.current.value then
-            CreatorCache[data.current.category] = data.current.value
-            LoadFeatures(PlayerPedId(), CreatorCache)
-        end
-    end)
-end
-
-function OpenJawMenu()
-    MenuData.CloseAll()
-    local elements = {
-        {label = RSG.Texts.Height, value = CreatorCache["jaw_height"] or 0, category = "jaw_height", desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Width,  value = CreatorCache["jaw_width"] or 0,  category = "jaw_width",  desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Depth,  value = CreatorCache["jaw_depth"] or 0,  category = "jaw_depth",  desc = "", type = "slider", min = -100, max = 100, hop = 5}
-    }
-    MenuData.Open('default', GetCurrentResourceName(), 'jaw_character_creator_menu',
-        {title = RSG.Texts.Jaw, subtext = RSG.Texts.Options, align = RSG.Texts.align, elements = elements}, function(data, menu)
-    end, function(data, menu)
-        OpenFaceMenu()
-    end, function(data, menu)
-        if CreatorCache[data.current.category] ~= data.current.value then
-            CreatorCache[data.current.category] = data.current.value
-            LoadFeatures(PlayerPedId(), CreatorCache)
-        end
-    end)
-end
-
-function OpenEarsMenu()
-    MenuData.CloseAll()
-    local elements = {
-        {label = RSG.Texts.Width,  value = CreatorCache["ears_width"] or 0,   category = "ears_width",   desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Angle,  value = CreatorCache["ears_angle"] or 0,   category = "ears_angle",   desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Height, value = CreatorCache["ears_height"] or 0,  category = "ears_height",  desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Size,   value = CreatorCache["earlobe_size"] or 0, category = "earlobe_size", desc = "", type = "slider", min = -100, max = 100, hop = 5}
-    }
-    MenuData.Open('default', GetCurrentResourceName(), 'ears_character_creator_menu',
-        {title = RSG.Texts.Ears, subtext = RSG.Texts.Options, align = RSG.Texts.align, elements = elements, itemHeight = "4vh"}, function(data, menu)
-    end, function(data, menu)
-        OpenFaceMenu()
-    end, function(data, menu)
-        if CreatorCache[data.current.category] ~= data.current.value then
-            CreatorCache[data.current.category] = data.current.value
-            LoadFeatures(PlayerPedId(), CreatorCache)
-        end
-    end)
-end
-
-function OpenChinMenu()
-    MenuData.CloseAll()
-    local elements = {
-        {label = RSG.Texts.Height, value = CreatorCache["chin_height"] or 0, category = "chin_height", desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Width,  value = CreatorCache["chin_width"] or 0,  category = "chin_width",  desc = "", type = "slider", min = -100, max = 100, hop = 5},
-        {label = RSG.Texts.Depth,  value = CreatorCache["chin_depth"] or 0,  category = "chin_depth",  desc = "", type = "slider", min = -100, max = 100, hop = 5}}
-    MenuData.Open('default', GetCurrentResourceName(), 'chin_character_creator_menu',
-        {title = RSG.Texts.Chin, subtext = RSG.Texts.Options, align = RSG.Texts.align, elements = elements, itemHeight = "4vh"}, function(data, menu)
-    end, function(data, menu)
-        OpenFaceMenu()
-    end, function(data, menu)
-        if CreatorCache[data.current.category] ~= data.current.value then
-            CreatorCache[data.current.category] = data.current.value
-            LoadFeatures(PlayerPedId(), CreatorCache)
-        end
-    end)
-end
-
-function OpenDefectsMenu()
-    MenuData.CloseAll()
-    local elements = {
-        {label = RSG.Texts.Scars,    value = CreatorCache["scars_t"] or 1,     category = "scars_t",     desc = "", type = "slider", min = 1, max = 16,  options = nil},
-        {label = RSG.Texts.Clarity,  value = CreatorCache["scars_op"] or 50,    category = "scars_op",    desc = "", type = "slider", min = 0, max = 100, hop = 5},
-        {label = RSG.Texts.Older,    value = CreatorCache["ageing_t"] or 1,    category = "ageing_t",    desc = "", type = "slider", min = 1, max = 24,  options = nil},
-        {label = RSG.Texts.Clarity,  value = CreatorCache["ageing_op"] or 50,   category = "ageing_op",   desc = "", type = "slider", min = 0, max = 100, hop = 5},
-        {label = RSG.Texts.Freckles, value = CreatorCache["freckles_t"] or 1,  category = "freckles_t",  desc = "", type = "slider", min = 1, max = 15,  options = nil},
-        {label = RSG.Texts.Clarity,  value = CreatorCache["freckles_op"] or 50, category = "freckles_op", desc = "", type = "slider", min = 0, max = 100, hop = 5},
-        {label = RSG.Texts.Moles,    value = CreatorCache["moles_t"] or 1,     category = "moles_t",     desc = "", type = "slider", min = 1, max = 16,  options = nil},
-        {label = RSG.Texts.Clarity,  value = CreatorCache["moles_op"] or 50,    category = "moles_op",    desc = "", type = "slider", min = 0, max = 100, hop = 5},
-        {label = RSG.Texts.Spots,    value = CreatorCache["spots_t"] or 1,     category = "spots_t",     desc = "", type = "slider", min = 1, max = 16,  options = nil},
-        {label = RSG.Texts.Clarity,  value = CreatorCache["spots_op"] or 50,    category = "spots_op",    desc = "", type = "slider", min = 0, max = 100, hop = 5}
-    }
-    MenuData.Open('default', GetCurrentResourceName(), 'defects_character_creator_menu',
-        {title = RSG.Texts.Disadvantages, subtext = RSG.Texts.Options, align = RSG.Texts.align, elements = elements, itemHeight = "4vh"}, function(data, menu)
-    end, function(data, menu)
-        OpenFaceMenu()
-    end, function(data, menu)
-        if CreatorCache[data.current.category] ~= data.current.value then
-            CreatorCache[data.current.category] = data.current.value
-            LoadOverlays(PlayerPedId(), CreatorCache)
-        end
-    end)
-end
-
-function OpenMakeupMenu()
-    MenuData.CloseAll()
-    local elements = {
-        {label = RSG.Texts.Shadow,           value = CreatorCache["shadows_t"] or 1,    category = "shadows_t",    desc = "", type = "slider", min = 1, max = 5},
-        {label = RSG.Texts.Clarity,          value = CreatorCache["shadows_op"] or 0,   category = "shadows_op",   desc = "", type = "slider", min = 0, max = 100, hop = 5},
-        {label = RSG.Texts.ColorShadow,      value = CreatorCache["shadows_id"] or 1,   category = "shadows_id",   desc = "", type = "slider", min = 1, max = 25},
-        {label = RSG.Texts.ColorFirst_Class, value = CreatorCache["shadows_c1"] or 0,   category = "shadows_c1",   desc = "", type = "slider", min = 0, max = 64},
-        {label = RSG.Texts.Blushing_Cheek,   value = CreatorCache["blush_t"] or 1,      category = "blush_t",      desc = "", type = "slider", min = 1, max = 4},
-        {label = RSG.Texts.Clarity,          value = CreatorCache["blush_op"] or 0,     category = "blush_op",     desc = "", type = "slider", min = 0, max = 100, hop = 5},
-        {label = RSG.Texts.blush_id,         value = CreatorCache["blush_id"] or 1,     category = "blush_id",     desc = "", type = "slider", min = 1, max = 25},
-        {label = RSG.Texts.blush_c1,         value = CreatorCache["blush_c1"] or 0,     category = "blush_c1",     desc = "", type = "slider", min = 0, max = 64},
-        {label = RSG.Texts.Lipstick,         value = CreatorCache["lipsticks_t"] or 1,  category = "lipsticks_t",  desc = "", type = "slider", min = 1, max = 7},
-        {label = RSG.Texts.Clarity,          value = CreatorCache["lipsticks_op"] or 0, category = "lipsticks_op", desc = "", type = "slider", min = 0, max = 100, hop = 5},
-        {label = RSG.Texts.ColorLipstick,    value = CreatorCache["lipsticks_id"] or 1, category = "lipsticks_id", desc = "", type = "slider", min = 1, max = 25},
-        {label = RSG.Texts.lipsticks_c1,     value = CreatorCache["lipsticks_c1"] or 0, category = "lipsticks_c1", desc = "", type = "slider", min = 0, max = 64},
-        {label = RSG.Texts.lipsticks_c2,     value = CreatorCache["lipsticks_c2"] or 0, category = "lipsticks_c2", desc = "", type = "slider", min = 0, max = 64},
-        {label = RSG.Texts.Eyeliners,        value = CreatorCache["eyeliners_t"] or 1,  category = "eyeliners_t",  desc = "", type = "slider", min = 1, max = 15},
-        {label = RSG.Texts.Clarity,          value = CreatorCache["eyeliners_op"] or 0, category = "eyeliners_op", desc = "", type = "slider", min = 0, max = 100, hop = 5},
-        {label = RSG.Texts.eyeliners_id,     value = CreatorCache["eyeliners_id"] or 1, category = "eyeliners_id", desc = "", type = "slider", min = 1, max = 25},
-        {label = RSG.Texts.eyeliners_c1,     value = CreatorCache["eyeliners_c1"] or 0, category = "eyeliners_c1", desc = "", type = "slider", min = 0, max = 64}
-    }
-    MenuData.Open('default', GetCurrentResourceName(), 'makeup_character_creator_menu',
-        {title = RSG.Texts.Make_up, subtext = RSG.Texts.Options, align = RSG.Texts.align, elements = elements, itemHeight = "4vh"}, function(data, menu)
-    end, function(data, menu)
-        MainMenu()
-    end, function(data, menu)
-        if CreatorCache[data.current.category] ~= data.current.value then
-            CreatorCache[data.current.category] = data.current.value
-            LoadOverlays(PlayerPedId(), CreatorCache)
-        end
-    end)
-end
+    cb('ok')
+end)
 
 exports('GetComponentId', function(name)
     return LoadedComponents[name]
