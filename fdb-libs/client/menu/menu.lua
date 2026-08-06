@@ -80,5 +80,6 @@ RegisterCommand('testnotify', function()
     fdb.notify("Isto é um aviso de atenção.", "warning", 6000)
     fdb.notify("Seu cavalo criou um laço mais forte com você!", "info", 5000, "toast_horse_bond", "Laço de Cavalo")
     fdb.notify("Você recebeu $100 dólares de recompensa.", "success", 6000, "dollar", "Dinheiro Recebido")
+    fdb.notify("Cor de fundo e borda roxa customizada via Lua!", "info", 8000, "star", "Estilo Custom", "rgba(30, 10, 50, 0.95)", "#aa00ff")
 end, false)
 

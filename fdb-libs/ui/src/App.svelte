@@ -38,7 +38,10 @@
                     type: data.type || 'info',
                     title: data.title || '',
                     message: data.message || '',
-                    duration: data.duration || 5000
+                    duration: data.duration || 5000,
+                    icon: data.icon || '',
+                    customBg: data.customBg || '',
+                    customBorder: data.customBorder || ''
                 }];
             }
         };
