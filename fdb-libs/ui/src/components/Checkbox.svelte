@@ -62,7 +62,7 @@
     .box {
         width: 32px;
         height: 32px;
-        background-image: url('/assets/tick_box.png');
+        background-image: var(--fdb-bg-image-tick-box);
         background-size: contain;
         background-position: center;
         background-repeat: no-repeat;
@@ -77,7 +77,7 @@
     .checkmark {
         width: 24px;
         height: 24px;
-        background-image: url('/assets/tick.png');
+        background-image: var(--fdb-bg-image-tick);
         background-size: contain;
         background-position: center;
         background-repeat: no-repeat;

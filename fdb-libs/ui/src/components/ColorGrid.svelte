@@ -113,7 +113,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-image: url('/assets/swatch_box.png');
+        background-image: var(--fdb-bg-image-swatch-box);
         background-size: cover;
         background-position: center;
         z-index: 1;

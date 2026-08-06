@@ -241,6 +241,7 @@
         --fdb-bg-image-arrow-right: url('/assets/selection_arrow_right.png');
         --fdb-bg-image-tick-box: url('/assets/tick_box.png');
         --fdb-bg-image-tick: url('/assets/tick.png');
+        --fdb-bg-image-swatch-box: url('/assets/swatch_box.png');
         
         font-family: var(--fdb-font-body);
         color: var(--fdb-text-primary);

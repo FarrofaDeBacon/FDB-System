@@ -102,8 +102,8 @@
         filter: invert(1);
     }
     
-    .arrow-btn.left { background-image: url('/assets/selection_arrow_left.png'); }
-    .arrow-btn.right { background-image: url('/assets/selection_arrow_right.png'); }
+    .arrow-btn.left { background-image: var(--fdb-bg-image-arrow-left); }
+    .arrow-btn.right { background-image: var(--fdb-bg-image-arrow-right); }
 
     .arrow-btn:hover {
         transform: scale(1.3);
