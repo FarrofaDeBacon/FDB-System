@@ -39,7 +39,8 @@ Citizen.CreateThread(function()
         local sleep = 1000
 
         for name, zone in pairs(activeZones) do
-            local dist = #(playerCoords - zone.coords)
+            local zoneCoords = vector3(zone.coords.x, zone.coords.y, zone.coords.z)
+            local dist = #(playerCoords - zoneCoords)
 
             -- Se estiver perto de alguma zona, diminui o tempo do loop
             if dist < zone.radius + 15.0 then
