@@ -16,6 +16,7 @@ Este documento registra todas as alterações estruturais, correções de segura
 | **Fase 5** | Jobs, Gangs & Permissões | ✅ APROVADA | Validação de target online, auditoria via `fdb-log`, permissão `'god'` para `addpermission`/`removepermission` e `'admin'` para `/setjob`/`/setgang`. (Commit: `30a6cb92d16d4eb381edbc652da4b10ef2936bfd`) |
 | **Fase 6** | Performance & StateBags | ✅ APROVADA | Eliminação de polling inativo no PVP, cache de handle em `ShowMe3D`, zero queries MySQL em tick e direcionamento estrito de broadcast. (Commit: `baf45263fbdbd69471a57587970585e4fa036a06`) |
 | **Fase 7** | Documentação Final & Wiki | ✅ APROVADA | Criação de `WIKI.md`, READMEs em `server/` e `client/` e consolidação final do estado do fork. |
+| **Fase 8** | Biblioteca Central de UI (`fdb-libs`) | 🔄 EM EXECUÇÃO | Desenvolvimento da UI rústica compilada em Svelte+Vite, integração de texturas RDR2 e quebra de cache CEF. |
 
 ---
 
@@ -115,8 +116,14 @@ Este documento registra todas as alterações estruturais, correções de segura
 ### 7. Documentação Final & Wiki (`FDB-Core/`)
 - **Central WIKI (`FDB-Core/WIKI.md`)**:
   - Criada a documentação central da API de exports (Server & Client) e matriz de eventos de rede com payloads e restrições.
-- **READMEs por Módulo (`FDB-Core/server/README.md` & `FDB-Core/client/README.md`)**:
-  - Estrutura de arquivos, responsabilidade dos módulos e diretrizes de autoridade e performance registradas diretamente nas pastas.
+### 8. Biblioteca Central de UI (`fdb-libs/`)
+- **Arquitetura Base**:
+  - **Backend/Ponte LUA**: Fornece as exports globais (`fdb.menu.open`, `fdb.menu.close`) e gerencia os callbacks do NUI.
+  - **Frontend Svelte + Vite**: A interface gráfica foi construída inteiramente utilizando o framework Svelte compilado através do Vite.
+- **Histórico de Problemas Críticos e Resoluções**:
+  - **Bloqueio de Segurança (CORS) no CEF do FiveM**: O Vite compila scripts JS utilizando `<script type="module" crossorigin>`. O CEF do FiveM trata o protocolo local `nui://` com políticas estritas de segurança, bloqueando a execução do script com o atributo `crossorigin`. A solução foi intervir no processo de build e no arquivo `index.html` para remover manualmente a tag `crossorigin`, permitindo que o `nui://` executasse o módulo JS sem bloqueios.
+  - **Cache Agressivo do NUI (FiveM)**: Ao rebuildar o projeto Svelte na pasta padrão `dist/`, o NUI do FiveM cacheava a rota `ui/dist/index.html`. Comandos de restart não forçavam os clientes a baixarem a nova versão da UI. A solução foi alterar o `vite.config.js` para compilar o código de saída para a pasta `build/` e atualizar o `fxmanifest.lua` para apontar para `ui/build/index.html`, forçando a quebra de cache.
+  - **Integração de Texturas Rústicas (Aesthetic RDR2)**: O visual padrão de "app moderno" foi substituído por uma imersão completa: fundos de pergaminho/papel envelhecido (`background.png`), divisórias texturizadas para Sliders e ColorGrids (`tank_meter_marker`, `swatch_box`) e ocultação de elementos Unicode substituídos por assets de imagens (`tick.png`, setas estilizadas).
 
 ---
 
