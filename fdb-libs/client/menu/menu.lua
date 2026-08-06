@@ -230,3 +230,24 @@ RegisterCommand('testzone', function()
     })
 end, false)
 
+-- COMANDO DE TESTE PARA MENU DE CONTEXTO
+RegisterCommand('testcontext', function()
+    exports['fdb-libs']:OpenContextMenu({
+        title = "Menu do Cidadão",
+        options = {
+            { label = "Revistar Jogador", icon = "eye", description = "Verifica os pertences físicos", action = function() fdb.notify("Você revistou o jogador!", "success", 4000) end },
+            { label = "Algemar / Soltar", icon = "lock", description = "Prende ou liberta as mãos", action = function() fdb.notify("Ação de algemar executada!", "warning", 4000) end },
+            { label = "Opção Bloqueada", icon = "ban", disabled = true }
+        }
+    })
+end, false)
+
+-- COMANDO DE TESTE PARA AJUSTES COMPONENT
+RegisterCommand('testcomp', function()
+    local playerPed = PlayerPedId()
+    -- Ajusta o nariz do jogador para empinado (índice 0, valor 1.0)
+    exports['fdb-libs']:SetFaceFeature(playerPed, 0, 1.0)
+    fdb.notify("Feição facial do nariz ajustada para 1.0!", "success", 4000)
+end, false)
+
+
