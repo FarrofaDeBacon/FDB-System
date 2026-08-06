@@ -75,9 +75,10 @@ end, false)
 
 -- COMANDO DE TESTE PARA NOTIFICAÇÕES SIMULTÂNEAS
 RegisterCommand('testnotify', function()
-    fdb.notify("Ação concluída com sucesso!", "success", 5000, "Sucesso")
-    fdb.notify("Ocorreu um erro crítico!", "error", 7000, "Erro")
-    fdb.notify("Isto é um aviso de atenção.", "warning", 6000, "Aviso")
-    fdb.notify("Isto é uma informação comum.", "info", 5000, "Informação")
+    fdb.notify("Ação concluída com sucesso!", "success", 5000)
+    fdb.notify("Ocorreu um erro crítico!", "error", 7000)
+    fdb.notify("Isto é um aviso de atenção.", "warning", 6000)
+    fdb.notify("Seu cavalo criou um laço mais forte com você!", "info", 5000, "toast_horse_bond", "Laço de Cavalo")
+    fdb.notify("Você recebeu $100 dólares de recompensa.", "success", 6000, "dollar", "Dinheiro Recebido")
 end, false)
 
