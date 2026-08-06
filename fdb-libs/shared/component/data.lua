@@ -138,7 +138,3 @@ end
 function fdb.component.getPaletteNameFromHash(hash)
     return fdb.component.data.palettesHash[hash] or "metaped_tint_generic"
 end
-
--- CAMADA DE COMPATIBILIDADE RETROATIVA
-if not jo then jo = {} end
-jo.component = fdb.component

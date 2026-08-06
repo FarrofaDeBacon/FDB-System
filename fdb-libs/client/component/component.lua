@@ -79,10 +79,3 @@ exports('ApplyComponent', fdb.component.Apply)
 exports('RemoveComponent', fdb.component.Remove)
 exports('SetFaceFeature', fdb.component.SetFaceFeature)
 exports('SetOverlay', fdb.component.SetOverlay)
-
--- CAMADA DE COMPATIBILIDADE RETROATIVA
-if not jo then jo = {} end
-jo.component.apply = fdb.component.Apply
-jo.component.remove = fdb.component.Remove
-jo.component.refreshPed = fdb.component.RefreshPed
-jo.component.waitPedLoaded = fdb.component.WaitPedLoaded
