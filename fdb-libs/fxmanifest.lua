@@ -21,11 +21,14 @@ client_scripts {
     'client/progress/progress.lua',
     'client/input/input.lua',
     'client/minigame/minigame.lua',
+    'client/callback/callback.lua',
+    'client/blip/blip.lua',
+    'client/zones/zones.lua',
 }
 
 server_scripts {
     'server/notify/notify.lua',
-    -- 'server/callback/*.lua',
+    'server/callback/callback.lua',
 }
 
 files {

@@ -154,3 +154,67 @@ RegisterCommand('testminigame', function(source, args)
     end)
 end, false)
 
+-- COMANDO DE TESTE PARA CALLBACKS
+RegisterCommand('testcallback', function(source, args)
+    local testData = args[1] or "Dados padrão de teste"
+    
+    -- 1. Exemplo Assíncrono (com função de callback)
+    exports['fdb-libs']:TriggerServerCallback('fdb-libs:server:test', function(response)
+        fdb.notify("Callback assíncrono retornado: " .. tostring(response), "info", 5000)
+    end, testData)
+
+    -- 2. Exemplo Síncrono (usando await / yielding de thread)
+    Citizen.CreateThread(function()
+        fdb.notify("Disparando callback síncrono...", "info", 2000)
+        Wait(1000)
+        local response = exports['fdb-libs']:TriggerServerCallbackAsync('fdb-libs:server:test', testData .. " (SÍNCRONO)")
+        fdb.notify("Callback síncrono retornado: " .. tostring(response), "success", 5000)
+    end)
+end, false)
+
+-- COMANDO DE TESTE PARA BLIPS
+RegisterCommand('testblip', function()
+    local playerPed = PlayerPedId()
+    local coords = GetEntityCoords(playerPed)
+
+    fdb.notify("Criando Blip temporário de teste no mapa...", "info", 3000)
+    
+    -- Cria um blip de estrela (sprite blip_mp_star ou hash correspondente)
+    local blip = exports['fdb-libs']:CreateBlip(coords, "Teste FDB Libs", "blip_ambient_bounty_hunter", nil, "COLOR_RED")
+
+    if blip then
+        Citizen.CreateThread(function()
+            Wait(10000) -- espera 10 segundos
+            fdb.notify("Removendo Blip de teste...", "warning", 3000)
+            exports['fdb-libs']:RemoveBlip(blip)
+        end)
+    else
+        fdb.notify("Falha ao criar o Blip!", "error", 4000)
+    end
+end, false)
+
+-- COMANDO DE TESTE PARA ZONAS (GEOFENCE)
+local activeTestZone = nil
+RegisterCommand('testzone', function()
+    local playerPed = PlayerPedId()
+    local coords = GetEntityCoords(playerPed)
+
+    if activeTestZone then
+        fdb.notify("Removendo zona de teste anterior...", "warning", 3000)
+        exports['fdb-libs']:RemoveZone(activeTestZone)
+        activeTestZone = nil
+        return
+    end
+
+    fdb.notify("Criando zona de teste (Raio 5 metros) no seu pé! Mova-se para testar.", "info", 5000)
+    
+    activeTestZone = exports['fdb-libs']:CreateZone("zona_teste_fdb", coords, 5.0, {
+        onEnter = function()
+            fdb.notify("Você entrou na área de teste!", "success", 4000)
+        end,
+        onExit = function()
+            fdb.notify("Você saiu da área de teste!", "error", 4000)
+        end
+    })
+end, false)
+
