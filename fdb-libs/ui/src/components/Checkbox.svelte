@@ -40,7 +40,7 @@
         content: "";
         position: absolute;
         top: 0; left: 0; width: 100%; height: 100%;
-        background-image: url('/assets/selection_box_bg_1d.png');
+        background-image: var(--fdb-bg-image-card);
         background-size: 100% 100%;
         filter: invert(75%);
         z-index: -1;

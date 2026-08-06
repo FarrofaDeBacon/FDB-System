@@ -47,7 +47,7 @@
         content: "";
         position: absolute;
         top: 0; left: 0; width: 100%; height: 100%;
-        background-image: url('/assets/selection_box_bg_1d.png');
+        background-image: var(--fdb-bg-image-card);
         background-size: 100% 100%;
         filter: invert(75%);
         z-index: -1;
@@ -63,7 +63,7 @@
         content: "";
         position: absolute;
         top: -3px; bottom: -3px; left: 0px; right: 0px;
-        border-image-source: url('/assets/hover.png');
+        border-image-source: var(--fdb-bg-image-hover);
         border-image-slice: 10 10 10 10 fill;
         border-image-repeat: round;
         border-style: solid;

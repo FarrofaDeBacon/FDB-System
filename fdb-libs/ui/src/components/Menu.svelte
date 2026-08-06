@@ -96,7 +96,7 @@
         height: 100%;
         top: 0;
         left: 0;
-        background-image: url('/assets/background.png');
+        background-image: var(--fdb-bg-image-menu);
         filter: invert(100%);
         background-repeat: no-repeat;
         background-size: 100% 100%;
@@ -105,7 +105,7 @@
     }
 
     .header {
-        background-image: url('/assets/menu_header.png');
+        background-image: var(--fdb-bg-image-header);
         background-repeat: no-repeat;
         background-size: 100% 100%;
         width: 100%;

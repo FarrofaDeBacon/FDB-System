@@ -184,6 +184,12 @@
         --fdb-status-warning: #c98a3a;
         --fdb-status-critical: #c0392b;
         --fdb-status-info: #2980b9;
+
+        /* Imagens de Fundo Customizáveis */
+        --fdb-bg-image-menu: url('./assets/background.png');
+        --fdb-bg-image-header: url('./assets/menu_header.png');
+        --fdb-bg-image-card: url('./assets/selection_box_bg_1d.png');
+        --fdb-bg-image-hover: url('./assets/hover.png');
         
         font-family: var(--fdb-font-body);
         color: var(--fdb-text-primary);
