@@ -233,14 +233,14 @@
         --fdb-status-info: #2980b9;
 
         /* Imagens de Fundo Customizáveis */
-        --fdb-bg-image-menu: url('./assets/background.png');
-        --fdb-bg-image-header: url('./assets/menu_header.png');
-        --fdb-bg-image-card: url('./assets/selection_box_bg_1d.png');
-        --fdb-bg-image-hover: url('./assets/hover.png');
-        --fdb-bg-image-arrow-left: url('./assets/selection_arrow_left.png');
-        --fdb-bg-image-arrow-right: url('./assets/selection_arrow_right.png');
-        --fdb-bg-image-tick-box: url('./assets/tick_box.png');
-        --fdb-bg-image-tick: url('./assets/tick.png');
+        --fdb-bg-image-menu: url('/assets/background.png');
+        --fdb-bg-image-header: url('/assets/menu_header.png');
+        --fdb-bg-image-card: url('/assets/selection_box_bg_1d.png');
+        --fdb-bg-image-hover: url('/assets/hover.png');
+        --fdb-bg-image-arrow-left: url('/assets/selection_arrow_left.png');
+        --fdb-bg-image-arrow-right: url('/assets/selection_arrow_right.png');
+        --fdb-bg-image-tick-box: url('/assets/tick_box.png');
+        --fdb-bg-image-tick: url('/assets/tick.png');
         
         font-family: var(--fdb-font-body);
         color: var(--fdb-text-primary);
