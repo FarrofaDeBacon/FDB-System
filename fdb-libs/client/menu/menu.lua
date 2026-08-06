@@ -49,14 +49,18 @@ end)
 
 -- Callback para mudança de valores em sliders/listas
 RegisterNUICallback('onMenuChange', function(data, cb)
-    print(string.format("[fdb-libs:menu] NUI Callback 'onMenuChange' recebido: menuId=%s, itemId=%s, value=%s", tostring(data.menuId), tostring(data.itemId), tostring(data.value)))
+    if Config.Debug then
+        print(string.format("[fdb-libs:menu] NUI Callback 'onMenuChange' recebido: menuId=%s, itemId=%s, value=%s", tostring(data.menuId), tostring(data.itemId), tostring(data.value)))
+    end
     TriggerEvent('fdb-libs:menu:onChange', data)
     cb('ok')
 end)
 
 -- Listener de teste para confirmar o disparo do evento Lua
 AddEventHandler('fdb-libs:menu:onChange', function(data)
-    print(string.format("[fdb-libs:menu] Evento 'fdb-libs:menu:onChange' disparado no Lua: itemId=%s, value=%s", tostring(data.itemId), tostring(data.value)))
+    if Config.Debug then
+        print(string.format("[fdb-libs:menu] Evento 'fdb-libs:menu:onChange' disparado no Lua: itemId=%s, value=%s", tostring(data.itemId), tostring(data.value)))
+    end
 end)
 
 -- COMANDO DE TESTE TEMPORÁRIO PARA O DESENVOLVEDOR

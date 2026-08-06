@@ -1,6 +1,7 @@
 Config = {}
 
 Config.ActiveTheme = "western_gold" -- opções: "western_gold", "dark_coal", "blood_red", "custom"
+Config.Debug = true -- Habilita logs de rastreamento no F8 console do cliente
 
 Config.ThemePresets = {
     western_gold = {

@@ -50,7 +50,9 @@ function fdb.component.SetFaceFeature(ped, index, value)
     local floatValue = (value or 0.0) * 1.0
     floatValue = math.max(-1.0, math.min(1.0, floatValue))
     Citizen.InvokeNative(0xE74D7AA96489BC4D, ped, index, floatValue) -- SetCharExpression (SetPedFaceFeature)
-    print(string.format("[fdb-libs:component] SetFaceFeature(ped=%s, index=%d, value=%.2f) chamado com sucesso!", tostring(ped), index, floatValue))
+    if Config.Debug then
+        print(string.format("[fdb-libs:component] SetFaceFeature(ped=%s, index=%d, value=%.2f) chamado com sucesso!", tostring(ped), index, floatValue))
+    end
     fdb.component.RefreshPed(ped)
 end
 
@@ -68,7 +70,9 @@ function fdb.component.SetOverlay(ped, overlayId, textureId, opacity, tint0, tin
 
     -- Aplica o overlay nativo do RedM
     Citizen.InvokeNative(0xBC6DF00D7A4A6819, ped, overlayId, textureId, opacity, tint0, tint1, tint2)
-    print(string.format("[fdb-libs:component] SetOverlay(ped=%s, overlayId=%d, textureId=%s, opacity=%.2f) chamado com sucesso!", tostring(ped), overlayId, tostring(textureId), opacity))
+    if Config.Debug then
+        print(string.format("[fdb-libs:component] SetOverlay(ped=%s, overlayId=%d, textureId=%s, opacity=%.2f) chamado com sucesso!", tostring(ped), overlayId, tostring(textureId), opacity))
+    end
     fdb.component.RefreshPed(ped)
 end
 
