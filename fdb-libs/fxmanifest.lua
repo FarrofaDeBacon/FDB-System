@@ -18,6 +18,7 @@ client_scripts {
     'client/theme/theme.lua',
     'client/menu/menu.lua',
     'client/notify/notify.lua',
+    'client/progress/progress.lua',
 }
 
 server_scripts {

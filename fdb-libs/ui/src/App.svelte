@@ -2,10 +2,20 @@
     import { onMount } from 'svelte';
     import Menu from './components/Menu.svelte';
     import Notify from './components/Notify.svelte';
+    import ProgressBar from './components/ProgressBar.svelte';
 
     let menuData = null;
     let isOpen = false;
     let notifications = [];
+
+    // Estado da barra de progresso
+    let progressActive = false;
+    let progressLabel = 'PROGREDINDO...';
+    let progressPercent = 0;
+    let progressIcon = '';
+    let progressDuration = 0;
+    let progressStartTime = 0;
+    let progressInterval = null;
 
     // Apply theme to the :root element
     function applyTheme(themeObj) {
@@ -20,6 +30,27 @@
 
     function removeNotification(id) {
         notifications = notifications.filter(n => n.id !== id);
+    }
+
+    function startProgress() {
+        clearInterval(progressInterval);
+        progressStartTime = Date.now();
+        progressInterval = setInterval(() => {
+            const elapsed = Date.now() - progressStartTime;
+            progressPercent = Math.min(100, (elapsed / progressDuration) * 100);
+            if (progressPercent >= 100) {
+                clearInterval(progressInterval);
+                finishProgress();
+            }
+        }, 16);
+    }
+
+    function finishProgress() {
+        progressActive = false;
+        fetch(`https://${GetParentResourceName()}/progressComplete`, {
+            method: 'POST',
+            body: JSON.stringify({})
+        }).catch(() => {});
     }
 
     onMount(() => {
@@ -43,6 +74,16 @@
                     customBg: data.customBg || '',
                     customBorder: data.customBorder || ''
                 }];
+            } else if (data.action === 'START_PROGRESS') {
+                progressActive = true;
+                progressLabel = data.label || 'PROGREDINDO...';
+                progressDuration = data.duration || 3000;
+                progressIcon = data.icon || '';
+                progressPercent = 0;
+                startProgress();
+            } else if (data.action === 'CANCEL_PROGRESS') {
+                clearInterval(progressInterval);
+                progressActive = false;
             }
         };
 
@@ -73,6 +114,7 @@
         return () => {
             window.removeEventListener('message', handleMessage);
             window.removeEventListener('keydown', handleKey);
+            clearInterval(progressInterval);
         };
     });
 </script>
@@ -90,6 +132,13 @@
             />
         {/each}
     </div>
+
+    <ProgressBar 
+        active={progressActive} 
+        label={progressLabel} 
+        percent={progressPercent} 
+        icon={progressIcon}
+    />
 </main>
 
 <style>
