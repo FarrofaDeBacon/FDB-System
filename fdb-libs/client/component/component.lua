@@ -50,6 +50,7 @@ function fdb.component.SetFaceFeature(ped, index, value)
     local floatValue = (value or 0.0) * 1.0
     floatValue = math.max(-1.0, math.min(1.0, floatValue))
     Citizen.InvokeNative(0xE74D7AA96489BC4D, ped, index, floatValue) -- SetCharExpression (SetPedFaceFeature)
+    print(string.format("[fdb-libs:component] SetFaceFeature(ped=%s, index=%d, value=%.2f) chamado com sucesso!", tostring(ped), index, floatValue))
     fdb.component.RefreshPed(ped)
 end
 
@@ -67,6 +68,7 @@ function fdb.component.SetOverlay(ped, overlayId, textureId, opacity, tint0, tin
 
     -- Aplica o overlay nativo do RedM
     Citizen.InvokeNative(0xBC6DF00D7A4A6819, ped, overlayId, textureId, opacity, tint0, tint1, tint2)
+    print(string.format("[fdb-libs:component] SetOverlay(ped=%s, overlayId=%d, textureId=%s, opacity=%.2f) chamado com sucesso!", tostring(ped), overlayId, tostring(textureId), opacity))
     fdb.component.RefreshPed(ped)
 end
 
@@ -78,7 +80,7 @@ exports('RemoveComponent', fdb.component.Remove)
 exports('SetFaceFeature', fdb.component.SetFaceFeature)
 exports('SetOverlay', fdb.component.SetOverlay)
 
--- RETROCOMPATIBILIDADE COM JO_LIBS
+-- CAMADA DE COMPATIBILIDADE RETROATIVA
 if not jo then jo = {} end
 jo.component.apply = fdb.component.Apply
 jo.component.remove = fdb.component.Remove

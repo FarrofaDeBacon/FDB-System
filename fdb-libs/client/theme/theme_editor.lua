@@ -13,8 +13,8 @@ end, false)
 RegisterNUICallback('saveThemeEditor', function(data, cb)
     SetNuiFocus(false, false)
     if data and data.theme then
-        -- Salva no KVP local do recurso
-        SetResourceKvp("fdb-theme", json.encode(data.theme))
+        -- Salva no themeStore (KVP persistente)
+        fdb.themeStore.Set("active_override", data.theme)
         
         -- Atualiza dinamicamente as variáveis CSS na NUI
         SendNUIMessage({
@@ -35,20 +35,7 @@ end)
 -- Resetar tema para o padrão do config.lua
 RegisterNUICallback('resetThemeEditor', function(data, cb)
     SetNuiFocus(false, false)
-    DeleteResourceKvp("fdb-theme")
+    fdb.themeStore.Set("active_override", nil)
     fdb.notify("Tema resetado para as definições do config.lua!", "info", 5000)
     cb('ok')
-end)
-
--- Aplicar o tema salvo no KVP ao carregar
-CreateThread(function()
-    Wait(1500)
-    local savedTheme = GetResourceKvpString("fdb-theme")
-    if savedTheme then
-        local themeData = json.decode(savedTheme)
-        SendNUIMessage({
-            action = "SET_THEME_OVERRIDE",
-            theme = themeData
-        })
-    end
 end)

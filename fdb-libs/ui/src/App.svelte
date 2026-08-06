@@ -92,6 +92,14 @@
         }).catch(() => {});
     }
 
+    function handleMenuItemChange(event) {
+        fetch(`https://${GetParentResourceName()}/onMenuChange`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(event.detail)
+        }).catch(() => {});
+    }
+
     onMount(() => {
         const handleMessage = (event) => {
             const data = event.data;
@@ -184,7 +192,7 @@
 
 <main>
     {#if isOpen && menuData}
-        <Menu {menuData} />
+        <Menu {menuData} on:itemChange={handleMenuItemChange} />
     {/if}
 
     <div class="notifications-layer">

@@ -49,10 +49,14 @@ end)
 
 -- Callback para mudança de valores em sliders/listas
 RegisterNUICallback('onMenuChange', function(data, cb)
-    -- Trigger evento interno para o resource que chamou escutar
-    -- data contém: menuId, itemId, value
+    print(string.format("[fdb-libs:menu] NUI Callback 'onMenuChange' recebido: menuId=%s, itemId=%s, value=%s", tostring(data.menuId), tostring(data.itemId), tostring(data.value)))
     TriggerEvent('fdb-libs:menu:onChange', data)
     cb('ok')
+end)
+
+-- Listener de teste para confirmar o disparo do evento Lua
+AddEventHandler('fdb-libs:menu:onChange', function(data)
+    print(string.format("[fdb-libs:menu] Evento 'fdb-libs:menu:onChange' disparado no Lua: itemId=%s, value=%s", tostring(data.itemId), tostring(data.value)))
 end)
 
 -- COMANDO DE TESTE TEMPORÁRIO PARA O DESENVOLVEDOR
@@ -245,9 +249,14 @@ end, false)
 -- COMANDO DE TESTE PARA AJUSTES COMPONENT
 RegisterCommand('testcomp', function()
     local playerPed = PlayerPedId()
-    -- Ajusta o nariz do jogador para empinado (índice 0, valor 1.0)
+    
+    -- 1. Ajusta o nariz do jogador para empinado (índice 0, valor 1.0)
     exports['fdb-libs']:SetFaceFeature(playerPed, 0, 1.0)
-    fdb.notify("Feição facial do nariz ajustada para 1.0!", "success", 4000)
+    
+    -- 2. Ajusta a maquiagem/batom (overlay ID 9, textura 1, opacidade 1.0)
+    exports['fdb-libs']:SetOverlay(playerPed, 9, 1, 1.0, 135, 0, 0)
+    
+    fdb.notify("Componentes faciais e batom ajustados com sucesso!", "success", 4000)
 end, false)
 
 

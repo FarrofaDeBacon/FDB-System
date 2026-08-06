@@ -7,12 +7,43 @@ RegisterNUICallback('nuiReady', function(data, cb)
     cb('ok')
 end)
 
+fdb.themeStore = {}
+
+-- Obtém valor persistido de forma segura do KVP
+function fdb.themeStore.Get(key, default)
+    local prefix = "fdb_theme_"
+    local val = GetResourceKvpString(prefix .. key)
+    if not val then return default end
+    
+    local success, decoded = pcall(json.decode, val)
+    if success then
+        return decoded
+    else
+        return val
+    end
+end
+
+-- Persiste ou remove valor no KVP de forma segura
+function fdb.themeStore.Set(key, value)
+    local prefix = "fdb_theme_"
+    if value == nil then
+        DeleteResourceKvp(prefix .. key)
+    else
+        SetResourceKvp(prefix .. key, json.encode(value))
+    end
+end
+
 function fdb.theme.sync()
     if not Config then return end
     
-    local theme = nil
-    if Config.ThemePresets and Config.ActiveTheme then
-        theme = Config.ThemePresets[Config.ActiveTheme]
+    -- Tenta obter o tema persistido do KVP primeiro
+    local theme = fdb.themeStore.Get('active_override')
+    
+    -- Se não houver override salvo, usa as predefinições estáticas
+    if not theme then
+        if Config.ThemePresets and Config.ActiveTheme then
+            theme = Config.ThemePresets[Config.ActiveTheme]
+        end
     end
     
     -- Fallback se o preset selecionado for inválido
