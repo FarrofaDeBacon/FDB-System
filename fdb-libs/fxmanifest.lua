@@ -12,6 +12,7 @@ shared_scripts {
     'config.lua',
     'shared/locales/*.lua',
     'shared/framework-bridge/bridge.lua',
+    'shared/component/data.lua',
 }
 
 client_scripts {
@@ -24,6 +25,7 @@ client_scripts {
     'client/callback/callback.lua',
     'client/blip/blip.lua',
     'client/zones/zones.lua',
+    'client/component/component.lua',
 }
 
 server_scripts {
