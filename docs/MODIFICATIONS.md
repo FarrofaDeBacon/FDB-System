@@ -16,7 +16,7 @@ Este documento registra todas as alterações estruturais, correções de segura
 | **Fase 5** | Jobs, Gangs & Permissões | ✅ APROVADA | Validação de target online, auditoria via `fdb-log`, permissão `'god'` para `addpermission`/`removepermission` e `'admin'` para `/setjob`/`/setgang`. (Commit: `30a6cb92d16d4eb381edbc652da4b10ef2936bfd`) |
 | **Fase 6** | Performance & StateBags | ✅ APROVADA | Eliminação de polling inativo no PVP, cache de handle em `ShowMe3D`, zero queries MySQL em tick e direcionamento estrito de broadcast. (Commit: `baf45263fbdbd69471a57587970585e4fa036a06`) |
 | **Fase 7** | Documentação Final & Wiki | ✅ APROVADA | Criação de `WIKI.md`, READMEs em `server/` e `client/` e consolidação final do estado do fork. |
-| **Fase 8** | Biblioteca Central de UI (`fdb-libs`) | 🔄 EM EXECUÇÃO | Desenvolvimento da UI rústica compilada em Svelte+Vite, integração de texturas RDR2 e quebra de cache CEF. |
+| **Fase 8** | Biblioteca Central de UI (`fdb-libs`) | ✅ APROVADA | Desenvolvimento da UI rústica compilada em Svelte+Vite, integração de cores sólidas e HUD de RDR2. (Commit: `52bfb20`) |
 
 ---
 
@@ -130,6 +130,10 @@ Este documento registra todas as alterações estruturais, correções de segura
   - **Validação e Branch do tipo `button`**: Inserida lógica de validação reativa no Svelte (`Menu.svelte`) que emite um `console.warn` em runtime no console do Chromium NUI para alertar sobre tipos de itens inválidos ou digitados incorretamente. Adicionado branch explícito `{:else if item.type === 'button'}` eliminando o fallback silencioso genérico.
   - **Presets de Temas**: O `config.lua` foi estendido para suportar `Config.ThemePresets` e a chave de controle `Config.ActiveTheme`. A biblioteca agora vem com presets embutidos (`western_gold` como padrão rústico, `dark_coal` como modo escuro, `blood_red` para tons vermelhos, e `custom`), processados dinamicamente com fallback no Lua.
   - **Re-compilação e Sincronismo**: Compilação atualizada apontando para `ui/build`, com script pós-build para expurgar a tag `crossorigin` no `index.html` visando adequação às regras locais do protocolo `nui://`. Copiado integralmente para `D:\SERVIDOR\server\resources\[framework]\fdb-libs`.
+  - **Módulo `component` (Peds, Roupas e Caracterização)**: Implementação do controle do MetaPed do RDR3 com `SetFaceFeature` (expressões faciais), `ApplyComponent` (vestimentas via hashes de Shop Items originais do RDR2) e `SetOverlay` (controle de sobreposição de barbas, cabelos e maquiagens) nos 17 canais de overlay nativos do jogo.
+  - **Módulo `context` (Menu de Contexto)**: Adicionado Menu de Contexto flutuante em Svelte (`ContextMenu.svelte`) e Lua (`context.lua`) com suporte a ícones, descrições e ações clicáveis com ajuste de coordenadas para evitar transbordar os limites da tela.
+  - **Módulo `ThemeEditor` (Customização de Temas)**: Adicionada a ferramenta de edição `/libseditor` permitindo alterar cores in-game em tempo real com Live Preview de componentes de teste. As modificações são salvas de forma persistente e segura nos KVPs locais do recurso via interface `fdb.themeStore.Get/Set` e aplicadas dinamicamente na inicialização do NUI.
+  - **Correção do Bug do Evento `onChange`**: Corrigido o bug visual no Svelte onde interações do menu clássico (como sliders e checkboxes) eram modificadas na interface mas não retornavam feedback ao Lua. Conectamos o manipulador `itemChange` no `App.svelte` permitindo o envio correto do payload para o NUI callback `/onMenuChange` e o disparo do respectivo evento Lua `fdb-libs:menu:onChange`.
 
 ---
 
