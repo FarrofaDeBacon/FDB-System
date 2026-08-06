@@ -107,11 +107,9 @@
     .range-input {
         -webkit-appearance: none;
         width: 100%;
-        height: 10px;
-        background-color: rgba(0, 0, 0, 0.4);
-        background-image: url('/assets/swatch_bg_1a.png');
-        background-size: 30px 100%;
-        border: 1px solid rgba(255,255,255,0.1);
+        height: 6px;
+        background-color: rgba(255, 255, 255, 0.15);
+        border: none;
         border-radius: 2px;
         outline: none;
         margin: 0;

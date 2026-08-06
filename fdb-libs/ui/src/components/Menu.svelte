@@ -96,7 +96,7 @@
     .header {
         background-image: url('/assets/menu_header.png');
         background-repeat: no-repeat;
-        background-size: cover;
+        background-size: 100% 100%;
         width: 100%;
         height: 108px;
         min-height: 108px;

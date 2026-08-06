@@ -71,6 +71,7 @@
         align-items: center;
         transition: all 0.2s;
         z-index: 5;
+        filter: brightness(1.2);
     }
 
     .checkmark {
@@ -80,6 +81,7 @@
         background-size: contain;
         background-position: center;
         background-repeat: no-repeat;
-        filter: invert(1);
+        /* Tick preto escuro natural para contrastar com a caixa branca/dourada */
+        filter: brightness(0);
     }
 </style>
