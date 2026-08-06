@@ -109,3 +109,23 @@ RegisterCommand('testprogress', function(source, args)
     end)
 end, false)
 
+-- COMANDO DE TESTE PARA DIÁLOGO DE INPUTS
+RegisterCommand('testinput', function()
+    Citizen.CreateThread(function()
+        local data = exports['fdb-libs']:InputDialog("Registro de Cidadão", {
+            { type = "text", label = "Nome Completo", placeholder = "Arthur Morgan" },
+            { type = "password", label = "Senha do Cofre", placeholder = "Digite a senha..." },
+            { type = "number", label = "Quantidade de Ouro", default = 5, min = 1, max = 100 },
+            { type = "select", label = "Cavalo Principal", options = { "Mustang", "Turcomano", "Árabe" }, default = "Mustang" },
+            { type = "checkbox", label = "Aceita os Termos do Bando", default = true }
+        })
+
+        if data then
+            print("[fdb-libs] TestInput dados recebidos:", json.encode(data))
+            fdb.notify("Nome: " .. tostring(data[1]) .. " | Cavalo: " .. tostring(data[4]), "success", 8000)
+        else
+            fdb.notify("Diálogo cancelado!", "error", 4000)
+        end
+    end)
+end, false)
+

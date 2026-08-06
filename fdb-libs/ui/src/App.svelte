@@ -3,10 +3,16 @@
     import Menu from './components/Menu.svelte';
     import Notify from './components/Notify.svelte';
     import ProgressBar from './components/ProgressBar.svelte';
+    import InputDialog from './components/InputDialog.svelte';
 
     let menuData = null;
     let isOpen = false;
     let notifications = [];
+
+    // Estado do input dialog
+    let isInputOpen = false;
+    let inputTitle = 'Diálogo';
+    let inputFields = [];
 
     // Estado da barra de progresso
     let progressActive = false;
@@ -53,6 +59,22 @@
         }).catch(() => {});
     }
 
+    function submitInput(valuesArray) {
+        isInputOpen = false;
+        fetch(`https://${GetParentResourceName()}/submitInput`, {
+            method: 'POST',
+            body: JSON.stringify({ values: valuesArray })
+        }).catch(() => {});
+    }
+
+    function cancelInput() {
+        isInputOpen = false;
+        fetch(`https://${GetParentResourceName()}/submitInput`, {
+            method: 'POST',
+            body: JSON.stringify({ values: false })
+        }).catch(() => {});
+    }
+
     onMount(() => {
         const handleMessage = (event) => {
             const data = event.data;
@@ -85,6 +107,12 @@
             } else if (data.action === 'CANCEL_PROGRESS') {
                 clearInterval(progressInterval);
                 progressActive = false;
+            } else if (data.action === 'OPEN_INPUT') {
+                inputTitle = data.title || 'Diálogo';
+                inputFields = data.fields || [];
+                isInputOpen = true;
+            } else if (data.action === 'CLOSE_INPUT') {
+                isInputOpen = false;
             }
         };
 
@@ -93,12 +121,22 @@
         // Escape handling
         const handleKey = (e) => {
             if (e.key === 'Escape' || e.key === 'Backspace') {
+                // Se um campo de input de texto estiver focado, ignora o backspace para não fechar
+                const activeEl = document.activeElement;
+                const isInputField = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+                
+                if (isInputField && e.key === 'Backspace') {
+                    return; // Permite apagar texto normalmente
+                }
+
                 if (isOpen) {
                     fetch(`https://${GetParentResourceName()}/closeMenu`, {
                         method: 'POST',
                         body: JSON.stringify({})
                     });
                     isOpen = false;
+                } else if (isInputOpen) {
+                    cancelInput();
                 }
             }
         };
@@ -140,6 +178,15 @@
         percent={progressPercent} 
         icon={progressIcon}
     />
+
+    {#if isInputOpen}
+        <InputDialog 
+            title={inputTitle} 
+            fields={inputFields} 
+            on:submit={(e) => submitInput(e.detail)} 
+            on:cancel={cancelInput}
+        />
+    {/if}
 </main>
 
 <style>
@@ -190,6 +237,10 @@
         --fdb-bg-image-header: url('./assets/menu_header.png');
         --fdb-bg-image-card: url('./assets/selection_box_bg_1d.png');
         --fdb-bg-image-hover: url('./assets/hover.png');
+        --fdb-bg-image-arrow-left: url('./assets/selection_arrow_left.png');
+        --fdb-bg-image-arrow-right: url('./assets/selection_arrow_right.png');
+        --fdb-bg-image-tick-box: url('./assets/tick_box.png');
+        --fdb-bg-image-tick: url('./assets/tick.png');
         
         font-family: var(--fdb-font-body);
         color: var(--fdb-text-primary);
