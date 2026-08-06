@@ -264,11 +264,11 @@
         --fdb-status-critical: #c0392b;
         --fdb-status-info: #2980b9;
 
-        /* Imagens de Fundo Customizáveis */
-        --fdb-bg-image-menu: url('/assets/background.png');
-        --fdb-bg-image-header: url('/assets/menu_header.png');
-        --fdb-bg-image-card: url('/assets/selection_box_bg_1d.png');
-        --fdb-bg-image-hover: url('/assets/hover.png');
+        /* Imagens de Fundo Customizáveis (Definidas como none para usar o padrão uniforme de cores sólidas) */
+        --fdb-bg-image-menu: none;
+        --fdb-bg-image-header: none;
+        --fdb-bg-image-card: none;
+        --fdb-bg-image-hover: none;
         --fdb-bg-image-arrow-left: url('/assets/selection_arrow_left.png');
         --fdb-bg-image-arrow-right: url('/assets/selection_arrow_right.png');
         --fdb-bg-image-tick-box: url('/assets/tick_box.png');

@@ -85,7 +85,11 @@
         display: flex;
         flex-direction: column;
         color: var(--fdb-text-primary);
-        /* Removendo a cor de fundo sólida para usar a textura de papel rasgado abaixo */
+        background-color: var(--fdb-background-color);
+        border: 1px solid var(--fdb-border-color);
+        border-radius: var(--fdb-border-radius);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        overflow: hidden;
     }
 
     /* O Fundo de Papel Amassado do RDR2 */
@@ -97,7 +101,6 @@
         top: 0;
         left: 0;
         background-image: var(--fdb-bg-image-menu);
-        filter: invert(100%);
         background-repeat: no-repeat;
         background-size: 100% 100%;
         z-index: -1;
