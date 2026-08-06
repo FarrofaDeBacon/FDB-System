@@ -333,6 +333,7 @@ function StartCreator()
 end
 
 function FirstMenu()
+    print("^2[fdb-appearance] FirstMenu called! Sending openCreator to NUI...^0")
     CreatorCache = CreatorCache or {}
     ClothesCache = ClothesCache or {}
 
@@ -343,6 +344,7 @@ function FirstMenu()
         cache = CreatorCache
     })
     SetNuiFocus(true, true)
+    print("^2[fdb-appearance] SetNuiFocus(true, true) executed^0")
 end
 
 -- Helper local para puxar hash do vestuário cacheado
@@ -361,6 +363,7 @@ end
 -- NUI Callbacks
 
 RegisterNUICallback('nuiReady', function(data, cb)
+    print("^2[fdb-appearance] NUI Ready Handshake received successfully from Svelte App!^0")
     cb('ok')
 end)
 
