@@ -31,7 +31,8 @@ files {
     'data/hairs_list.lua',
     'data/clothes_list.lua',
     'locales/*.json',
-    'ui/build/**/*',
+    'ui/build/index.html',
+    'ui/build/assets/*',
 }
 
 ox_libs {
