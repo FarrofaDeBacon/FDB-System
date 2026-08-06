@@ -1,12 +1,13 @@
 <script>
     import { onMount } from 'svelte';
 
-    let isOpen = false;
-    let pedSex = 'male'; // 'male' ou 'female'
-    let activeTab = 'genetics'; // 'genetics', 'face', 'hair', 'clothing'
+    // Estados reativos usando as Runas do Svelte 5
+    let isOpen = $state(false);
+    let pedSex = $state('male'); // 'male' ou 'female'
+    let activeTab = $state('genetics'); // 'genetics', 'face', 'hair', 'clothing'
 
     // Estado inicial padrão dos controles
-    let creatorCache = {
+    let creatorCache = $state({
         // Genética
         head: 1,
         skin_tone: 1,
@@ -77,9 +78,9 @@
         pants: 1,
         boots: 1,
         hat: 0
-    };
+    });
 
-    let pedRotation = 0; // -180 a 180
+    let pedRotation = $state(0); // -180 a 180
 
     // Paleta de cores para cabelos e barbas baseada em RDR2
     const hairColors = [
@@ -107,13 +108,6 @@
                 setCamera('full');
             } else if (data.action === 'closeCreator') {
                 isOpen = false;
-            }
-        });
-
-        // Event listener para teclas do teclado
-        window.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                // Previne fechar sem salvar, ou permite se desejável
             }
         });
     });
@@ -200,23 +194,23 @@
                     <div class="section-title">Aparência Base</div>
                     
                     <div class="control-group">
-                        <label>Cabeça Base ({creatorCache.head})</label>
-                        <input type="range" min="1" max="6" step="1" value={creatorCache.head} on:input={(e) => handleChange('head', parseInt(e.target.value))} />
+                        <label for="base-head">Cabeça Base ({creatorCache.head})</label>
+                        <input id="base-head" type="range" min="1" max="6" step="1" value={creatorCache.head} on:input={(e) => handleChange('head', parseInt(e.target.value))} />
                     </div>
 
                     <div class="control-group">
-                        <label>Tom de Pele ({creatorCache.skin_tone})</label>
-                        <input type="range" min="1" max="6" step="1" value={creatorCache.skin_tone} on:input={(e) => handleChange('skin_tone', parseInt(e.target.value))} />
+                        <label for="skin-tone">Tom de Pele ({creatorCache.skin_tone})</label>
+                        <input id="skin-tone" type="range" min="1" max="6" step="1" value={creatorCache.skin_tone} on:input={(e) => handleChange('skin_tone', parseInt(e.target.value))} />
                     </div>
 
                     <div class="control-group">
-                        <label>Envelhecimento ({creatorCache.ageing})</label>
-                        <input type="range" min="1" max="20" step="1" value={creatorCache.ageing} on:input={(e) => handleChange('ageing', parseInt(e.target.value))} />
+                        <label for="ageing">Envelhecimento ({creatorCache.ageing})</label>
+                        <input id="ageing" type="range" min="1" max="20" step="1" value={creatorCache.ageing} on:input={(e) => handleChange('ageing', parseInt(e.target.value))} />
                     </div>
 
                     <div class="control-group">
-                        <label>Opacidade Envelhecimento ({Math.round(creatorCache.ageing_op * 100)}%)</label>
-                        <input type="range" min="0" max="1" step="0.05" value={creatorCache.ageing_op} on:input={(e) => handleChange('ageing_op', parseFloat(e.target.value))} />
+                        <label for="ageing-op">Opacidade Envelhecimento ({Math.round(creatorCache.ageing_op * 100)}%)</label>
+                        <input id="ageing-op" type="range" min="0" max="1" step="0.05" value={creatorCache.ageing_op} on:input={(e) => handleChange('ageing_op', parseFloat(e.target.value))} />
                     </div>
                 {/if}
 
@@ -225,58 +219,58 @@
 
                     <div class="scroll-area">
                         <div class="control-group">
-                            <label>Largura do Rosto ({creatorCache.face_width})</label>
-                            <input type="range" min="-100" max="100" step="5" value={creatorCache.face_width} on:input={(e) => handleChange('face_width', parseInt(e.target.value))} />
+                            <label for="face-width">Largura do Rosto ({creatorCache.face_width})</label>
+                            <input id="face-width" type="range" min="-100" max="100" step="5" value={creatorCache.face_width} on:input={(e) => handleChange('face_width', parseInt(e.target.value))} />
                         </div>
 
                         <div class="control-group">
-                            <label>Profundidade do Rosto ({creatorCache.face_depth})</label>
-                            <input type="range" min="-100" max="100" step="5" value={creatorCache.face_depth} on:input={(e) => handleChange('face_depth', parseInt(e.target.value))} />
+                            <label for="face-depth">Profundidade do Rosto ({creatorCache.face_depth})</label>
+                            <input id="face-depth" type="range" min="-100" max="100" step="5" value={creatorCache.face_depth} on:input={(e) => handleChange('face_depth', parseInt(e.target.value))} />
                         </div>
 
                         <div class="control-group">
-                            <label>Tamanho da Testa ({creatorCache.forehead_size})</label>
-                            <input type="range" min="-100" max="100" step="5" value={creatorCache.forehead_size} on:input={(e) => handleChange('forehead_size', parseInt(e.target.value))} />
+                            <label for="forehead-size">Tamanho da Testa ({creatorCache.forehead_size})</label>
+                            <input id="forehead-size" type="range" min="-100" max="100" step="5" value={creatorCache.forehead_size} on:input={(e) => handleChange('forehead_size', parseInt(e.target.value))} />
                         </div>
 
                         <div class="control-group">
-                            <label>Distância dos Olhos ({creatorCache.eyes_distance})</label>
-                            <input type="range" min="-100" max="100" step="5" value={creatorCache.eyes_distance} on:input={(e) => handleChange('eyes_distance', parseInt(e.target.value))} />
+                            <label for="eyes-distance">Distância dos Olhos ({creatorCache.eyes_distance})</label>
+                            <input id="eyes-distance" type="range" min="-100" max="100" step="5" value={creatorCache.eyes_distance} on:input={(e) => handleChange('eyes_distance', parseInt(e.target.value))} />
                         </div>
 
                         <div class="control-group">
-                            <label>Altura dos Olhos ({creatorCache.eyes_height})</label>
-                            <input type="range" min="-100" max="100" step="5" value={creatorCache.eyes_height} on:input={(e) => handleChange('eyes_height', parseInt(e.target.value))} />
+                            <label for="eyes-height">Altura dos Olhos ({creatorCache.eyes_height})</label>
+                            <input id="eyes-height" type="range" min="-100" max="100" step="5" value={creatorCache.eyes_height} on:input={(e) => handleChange('eyes_height', parseInt(e.target.value))} />
                         </div>
 
                         <div class="control-group">
-                            <label>Tamanho do Nariz ({creatorCache.nose_size})</label>
-                            <input type="range" min="-100" max="100" step="5" value={creatorCache.nose_size} on:input={(e) => handleChange('nose_size', parseInt(e.target.value))} />
+                            <label for="nose-size">Tamanho do Nariz ({creatorCache.nose_size})</label>
+                            <input id="nose-size" type="range" min="-100" max="100" step="5" value={creatorCache.nose_size} on:input={(e) => handleChange('nose_size', parseInt(e.target.value))} />
                         </div>
 
                         <div class="control-group">
-                            <label>Curvatura do Nariz ({creatorCache.nose_curvature})</label>
-                            <input type="range" min="-100" max="100" step="5" value={creatorCache.nose_curvature} on:input={(e) => handleChange('nose_curvature', parseInt(e.target.value))} />
+                            <label for="nose-curvature">Curvatura do Nariz ({creatorCache.nose_curvature})</label>
+                            <input id="nose-curvature" type="range" min="-100" max="100" step="5" value={creatorCache.nose_curvature} on:input={(e) => handleChange('nose_curvature', parseInt(e.target.value))} />
                         </div>
 
                         <div class="control-group">
-                            <label>Largura da Boca ({creatorCache.mouth_width})</label>
-                            <input type="range" min="-100" max="100" step="5" value={creatorCache.mouth_width} on:input={(e) => handleChange('mouth_width', parseInt(e.target.value))} />
+                            <label for="mouth-width">Largura da Boca ({creatorCache.mouth_width})</label>
+                            <input id="mouth-width" type="range" min="-100" max="100" step="5" value={creatorCache.mouth_width} on:input={(e) => handleChange('mouth_width', parseInt(e.target.value))} />
                         </div>
 
                         <div class="control-group">
-                            <label>Largura do Maxilar ({creatorCache.jaw_width})</label>
-                            <input type="range" min="-100" max="100" step="5" value={creatorCache.jaw_width} on:input={(e) => handleChange('jaw_width', parseInt(e.target.value))} />
+                            <label for="jaw-width">Largura do Maxilar ({creatorCache.jaw_width})</label>
+                            <input id="jaw-width" type="range" min="-100" max="100" step="5" value={creatorCache.jaw_width} on:input={(e) => handleChange('jaw_width', parseInt(e.target.value))} />
                         </div>
 
                         <div class="control-group">
-                            <label>Altura do Queixo ({creatorCache.chin_height})</label>
-                            <input type="range" min="-100" max="100" step="5" value={creatorCache.chin_height} on:input={(e) => handleChange('chin_height', parseInt(e.target.value))} />
+                            <label for="chin-height">Altura do Queixo ({creatorCache.chin_height})</label>
+                            <input id="chin-height" type="range" min="-100" max="100" step="5" value={creatorCache.chin_height} on:input={(e) => handleChange('chin_height', parseInt(e.target.value))} />
                         </div>
 
                         <div class="control-group">
-                            <label>Altura do Personagem ({creatorCache.height}%)</label>
-                            <input type="range" min="90" max="110" step="1" value={creatorCache.height} on:input={(e) => handleChange('height', parseInt(e.target.value))} />
+                            <label for="height">Altura do Personagem ({creatorCache.height}%)</label>
+                            <input id="height" type="range" min="90" max="110" step="1" value={creatorCache.height} on:input={(e) => handleChange('height', parseInt(e.target.value))} />
                         </div>
                     </div>
                 {/if}
@@ -285,8 +279,8 @@
                     <div class="section-title">Cabelos & Barbas</div>
                     <div class="scroll-area">
                         <div class="control-group">
-                            <label>Estilo de Cabelo ({creatorCache.hair})</label>
-                            <input type="range" min="1" max="50" step="1" value={creatorCache.hair} on:input={(e) => handleChange('hair', parseInt(e.target.value))} />
+                            <label for="hair-style">Estilo de Cabelo ({creatorCache.hair})</label>
+                            <input id="hair-style" type="range" min="1" max="50" step="1" value={creatorCache.hair} on:input={(e) => handleChange('hair', parseInt(e.target.value))} />
                         </div>
 
                         <div class="color-picker-title">Cor do Cabelo</div>
@@ -304,13 +298,13 @@
 
                         {#if pedSex === 'male'}
                             <div class="control-group" style="margin-top: 20px;">
-                                <label>Estilo de Barba ({creatorCache.beard})</label>
-                                <input type="range" min="0" max="30" step="1" value={creatorCache.beard} on:input={(e) => handleChange('beard', parseInt(e.target.value))} />
+                                <label for="beard-style">Estilo de Barba ({creatorCache.beard})</label>
+                                <input id="beard-style" type="range" min="0" max="30" step="1" value={creatorCache.beard} on:input={(e) => handleChange('beard', parseInt(e.target.value))} />
                             </div>
 
                             <div class="control-group">
-                                <label>Opacidade da Barba ({creatorCache.beard_op}%)</label>
-                                <input type="range" min="0" max="100" step="5" value={creatorCache.beard_op} on:input={(e) => handleChange('beard_op', parseInt(e.target.value))} />
+                                <label for="beard-op">Opacidade da Barba ({creatorCache.beard_op}%)</label>
+                                <input id="beard-op" type="range" min="0" max="100" step="5" value={creatorCache.beard_op} on:input={(e) => handleChange('beard_op', parseInt(e.target.value))} />
                             </div>
 
                             <div class="color-picker-title">Cor da Barba</div>
@@ -333,28 +327,28 @@
                     <div class="section-title">Vestuário Inicial</div>
                     <div class="scroll-area">
                         <div class="control-group">
-                            <label>Camisa ({creatorCache.shirt})</label>
-                            <input type="range" min="1" max="10" step="1" value={creatorCache.shirt} on:input={(e) => handleChange('shirt', parseInt(e.target.value))} />
+                            <label for="shirt">Camisa ({creatorCache.shirt})</label>
+                            <input id="shirt" type="range" min="1" max="10" step="1" value={creatorCache.shirt} on:input={(e) => handleChange('shirt', parseInt(e.target.value))} />
                         </div>
 
                         <div class="control-group">
-                            <label>Colete ({creatorCache.vest})</label>
-                            <input type="range" min="0" max="8" step="1" value={creatorCache.vest} on:input={(e) => handleChange('vest', parseInt(e.target.value))} />
+                            <label for="vest">Colete ({creatorCache.vest})</label>
+                            <input id="vest" type="range" min="0" max="8" step="1" value={creatorCache.vest} on:input={(e) => handleChange('vest', parseInt(e.target.value))} />
                         </div>
 
                         <div class="control-group">
-                            <label>Calça ({creatorCache.pants})</label>
-                            <input type="range" min="1" max="10" step="1" value={creatorCache.pants} on:input={(e) => handleChange('pants', parseInt(e.target.value))} />
+                            <label for="pants">Calça ({creatorCache.pants})</label>
+                            <input id="pants" type="range" min="1" max="10" step="1" value={creatorCache.pants} on:input={(e) => handleChange('pants', parseInt(e.target.value))} />
                         </div>
 
                         <div class="control-group">
-                            <label>Botas ({creatorCache.boots})</label>
-                            <input type="range" min="1" max="10" step="1" value={creatorCache.boots} on:input={(e) => handleChange('boots', parseInt(e.target.value))} />
+                            <label for="boots">Botas ({creatorCache.boots})</label>
+                            <input id="boots" type="range" min="1" max="10" step="1" value={creatorCache.boots} on:input={(e) => handleChange('boots', parseInt(e.target.value))} />
                         </div>
 
                         <div class="control-group">
-                            <label>Chapéu ({creatorCache.hat})</label>
-                            <input type="range" min="0" max="6" step="1" value={creatorCache.hat} on:input={(e) => handleChange('hat', parseInt(e.target.value))} />
+                            <label for="hat">Chapéu ({creatorCache.hat})</label>
+                            <input id="hat" type="range" min="0" max="6" step="1" value={creatorCache.hat} on:input={(e) => handleChange('hat', parseInt(e.target.value))} />
                         </div>
                     </div>
                 {/if}
@@ -377,8 +371,8 @@
 
         <!-- Controle de Rotação do Personagem (Parte Inferior Central) -->
         <div class="rotation-control">
-            <label>Girar Personagem</label>
-            <input type="range" min="-180" max="180" step="2" value={pedRotation} on:input={handleRotation} />
+            <label for="rotation">Girar Personagem</label>
+            <input id="rotation" type="range" min="-180" max="180" step="2" value={pedRotation} on:input={handleRotation} />
         </div>
     </div>
 {/if}
