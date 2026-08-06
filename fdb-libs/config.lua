@@ -81,3 +81,12 @@ Config.ThemePresets = {
         statusInfo = '#2980b9',
     }
 }
+
+-- CONFIGURAÇÕES PADRÃO PARA ZONAS (GEOFENCES)
+Config.DefaultZoneSettings = {
+    drawMarker = true,                                     -- Se desenha marcador no chão por padrão nas zonas
+    markerType = 1,                                        -- 1 = cilindro padrão
+    markerColor = { r = 201, g = 161, b = 90, a = 60 },    -- Cor padrão do marcador (ouro translúcido)
+    promptKey = 0xE30CD707,                                -- Tecla padrão para prompts (E / Context)
+}
+

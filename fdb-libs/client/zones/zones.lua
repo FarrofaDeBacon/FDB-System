@@ -27,8 +27,18 @@ end
 function fdb.zones.Create(name, coords, radius, options)
     options = options or {}
     
-    -- Configuração padrão de cor do marcador (ouro/accent color por padrão)
-    local markerColor = options.markerColor or { r = 201, g = 161, b = 90, a = 80 }
+    local defaultSettings = Config.DefaultZoneSettings or {}
+    
+    -- Configuração padrão de cor do marcador
+    local markerColor = options.markerColor or defaultSettings.markerColor or { r = 201, g = 161, b = 90, a = 60 }
+    
+    -- Configuração padrão de exibição do marcador
+    local drawMarker = options.drawMarker
+    if drawMarker == nil then drawMarker = (defaultSettings.drawMarker ~= nil and defaultSettings.drawMarker or false) end
+
+    -- Configuração padrão de exibição de prompt
+    local showPrompt = options.showPrompt
+    if showPrompt == nil then showPrompt = (defaultSettings.showPrompt ~= nil and defaultSettings.showPrompt or false) end
 
     activeZones[name] = {
         name = name,
@@ -40,12 +50,12 @@ function fdb.zones.Create(name, coords, radius, options)
         onKeyPress = options.onKeyPress,
         
         -- Configurações visuais e de prompts
-        drawMarker = options.drawMarker or false,
-        markerType = options.markerType or 1, -- 1 = cilindro vertical padrão
+        drawMarker = drawMarker,
+        markerType = options.markerType or defaultSettings.markerType or 1, -- 1 = cilindro vertical padrão
         markerColor = markerColor,
-        showPrompt = options.showPrompt or false,
+        showPrompt = showPrompt,
         promptText = options.promptText or "Interagir",
-        promptKey = options.promptKey or 0xE30CD707, -- default 'E'
+        promptKey = options.promptKey or defaultSettings.promptKey or 0xE30CD707, -- default 'E'
         promptHoldDuration = options.promptHoldDuration or 0
     }
     return name
