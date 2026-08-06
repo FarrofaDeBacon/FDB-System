@@ -332,7 +332,7 @@ function StartCreator()
     SpawnPeds()
 end
 
-
+function FirstMenu()
     CreatorCache = CreatorCache or {}
     ClothesCache = ClothesCache or {}
 
