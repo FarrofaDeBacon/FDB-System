@@ -206,14 +206,26 @@ RegisterCommand('testzone', function()
         return
     end
 
-    fdb.notify("Criando zona de teste (Raio 5 metros) no seu pé! Mova-se para testar.", "info", 5000)
+    fdb.notify("Criando zona de teste com Marcador 3D e Prompt (E)! Entre no círculo.", "info", 5000)
     
-    activeTestZone = exports['fdb-libs']:CreateZone("zona_teste_fdb", coords, 5.0, {
+    activeTestZone = exports['fdb-libs']:CreateZone("zona_teste_fdb", coords, 3.0, {
+        drawMarker = true,
+        markerType = 1, -- Cilindro
+        markerColor = { r = 201, g = 161, b = 90, a = 60 }, -- Dourado translúcido
+        showPrompt = true,
+        promptText = "Abrir Loja de Teste",
+        promptKey = 0xE30CD707, -- Tecla Context (E por padrão)
         onEnter = function()
-            fdb.notify("Você entrou na área de teste!", "success", 4000)
+            fdb.notify("Você entrou no círculo dourado! Olhe o Prompt no canto inferior direito.", "success", 4000)
         end,
         onExit = function()
-            fdb.notify("Você saiu da área de teste!", "error", 4000)
+            fdb.notify("Você saiu do círculo!", "error", 4000)
+        end,
+        onKeyPress = function()
+            fdb.notify("Você apertou [E]! Abrindo Diálogo de Registro...", "success", 3000)
+            Wait(1000)
+            -- Dispara o diálogo de inputs automaticamente como integração de teste!
+            ExecuteCommand("testinput")
         end
     })
 end, false)
