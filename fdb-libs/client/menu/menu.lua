@@ -85,25 +85,27 @@ end, false)
 
 -- COMANDO DE TESTE PARA BARRA DE PROGRESSO
 RegisterCommand('testprogress', function(source, args)
-    local duration = tonumber(args[1]) or 5000
-    
-    fdb.notify("Iniciando ação...", "info", 2000)
-    
-    local success = exports['fdb-libs']:Progress({
-        duration = duration,
-        label = "Minerando Ouro...",
-        icon = "gold",
-        canCancel = true,
-        controlDisables = {
-            disableMovement = true,
-            disableCombat = true
-        }
-    })
-    
-    if success then
-        fdb.notify("Ação concluída com sucesso!", "success", 3000)
-    else
-        fdb.notify("Ação cancelada pelo jogador!", "error", 3000)
-    end
+    Citizen.CreateThread(function()
+        local duration = tonumber(args[1]) or 5000
+        
+        fdb.notify("Iniciando ação...", "info", 2000)
+        
+        local success = exports['fdb-libs']:Progress({
+            duration = duration,
+            label = "Minerando Ouro...",
+            icon = "gold",
+            canCancel = true,
+            controlDisables = {
+                disableMovement = true,
+                disableCombat = true
+            }
+        })
+        
+        if success then
+            fdb.notify("Ação concluída com sucesso!", "success", 3000)
+        else
+            fdb.notify("Ação cancelada pelo jogador!", "error", 3000)
+        end
+    end)
 end, false)
 
