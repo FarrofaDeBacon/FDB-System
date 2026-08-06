@@ -129,3 +129,28 @@ RegisterCommand('testinput', function()
     end)
 end, false)
 
+-- COMANDO DE TESTE PARA MINIGAME (SKILLBAR)
+RegisterCommand('testminigame', function(source, args)
+    local diff = args[1] or "medium"
+    local config = { duration = 1800, targetWidth = 12, rounds = 3 }
+
+    if diff == "easy" then
+        config = { duration = 2500, targetWidth = 20, rounds = 2 }
+    elseif diff == "hard" then
+        config = { duration = 1200, targetWidth = 8, rounds = 4 }
+    end
+
+    Citizen.CreateThread(function()
+        fdb.notify("Iniciando minijogo (" .. diff .. ")... Pressione ESPAÇO!", "info", 3000)
+        Wait(1500)
+
+        local success = exports['fdb-libs']:StartMinigame(config)
+
+        if success then
+            fdb.notify("Você conseguiu destrancar!", "success", 4000)
+        else
+            fdb.notify("Você falhou!", "error", 4000)
+        end
+    end)
+end, false)
+

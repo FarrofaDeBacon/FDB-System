@@ -20,6 +20,7 @@ client_scripts {
     'client/notify/notify.lua',
     'client/progress/progress.lua',
     'client/input/input.lua',
+    'client/minigame/minigame.lua',
 }
 
 server_scripts {

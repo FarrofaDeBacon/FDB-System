@@ -209,6 +209,16 @@
             on:cancel={cancelInput}
         />
     {/if}
+
+    {#if isMinigameActive}
+        <Minigame 
+            active={isMinigameActive} 
+            duration={minigameDuration} 
+            targetWidth={minigameTargetWidth} 
+            rounds={minigameRounds} 
+            on:result={(e) => submitMinigame(e.detail.success)}
+        />
+    {/if}
 </main>
 
 <style>
