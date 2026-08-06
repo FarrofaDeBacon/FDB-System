@@ -56,6 +56,7 @@
     onMount(() => {
         const handleMessage = (event) => {
             const data = event.data;
+            console.log("[fdb-libs NUI] Action:", data.action, data);
             if (data.action === 'SET_THEME' || data.action === 'SET_THEME_OVERRIDE') {
                 applyTheme(data.theme);
             } else if (data.action === 'OPEN_MENU') {

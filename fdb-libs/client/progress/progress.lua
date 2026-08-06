@@ -14,6 +14,7 @@ end)
 ---@param cb function? Callback opcional de retorno (caso não queira usar await)
 ---@return boolean success Retorna true se concluiu com sucesso, false se cancelado
 function fdb.progress.Start(data, cb)
+    print("[fdb-libs client] progress.lua: fdb.progress.Start chamada com dados:", json.encode(data))
     -- ID único para evitar conflito entre múltiplas chamadas rápidas
     local progressId = GetGameTimer() + math.random(1000, 9999)
     activeProgressId = progressId
