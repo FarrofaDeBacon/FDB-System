@@ -5,6 +5,8 @@
     import ProgressBar from './components/ProgressBar.svelte';
     import InputDialog from './components/InputDialog.svelte';
     import Minigame from './components/Minigame.svelte';
+    import ContextMenu from './components/ContextMenu.svelte';
+    import ThemeEditor from './components/ThemeEditor.svelte';
 
     let menuData = null;
     let isOpen = false;
@@ -219,6 +221,9 @@
             on:result={(e) => submitMinigame(e.detail.success)}
         />
     {/if}
+
+    <ContextMenu />
+    <ThemeEditor />
 </main>
 
 <style>
