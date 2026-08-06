@@ -1,9 +1,11 @@
 <script>
     import { onMount } from 'svelte';
     import Menu from './components/Menu.svelte';
+    import Notify from './components/Notify.svelte';
 
     let menuData = null;
     let isOpen = false;
+    let notifications = [];
 
     // Apply theme to the :root element
     function applyTheme(themeObj) {
@@ -16,6 +18,10 @@
         }
     }
 
+    function removeNotification(id) {
+        notifications = notifications.filter(n => n.id !== id);
+    }
+
     onMount(() => {
         const handleMessage = (event) => {
             const data = event.data;
@@ -26,6 +32,14 @@
                 isOpen = true;
             } else if (data.action === 'CLOSE_MENU') {
                 isOpen = false;
+            } else if (data.action === 'SEND_NOTIFICATION') {
+                notifications = [...notifications, {
+                    id: Date.now() + Math.random(),
+                    type: data.type || 'info',
+                    title: data.title || '',
+                    message: data.message || '',
+                    duration: data.duration || 5000
+                }];
             }
         };
 
@@ -64,9 +78,29 @@
     {#if isOpen && menuData}
         <Menu {menuData} />
     {/if}
+
+    <div class="notifications-layer">
+        {#each notifications as notification (notification.id)}
+            <Notify 
+                {...notification} 
+                on:close={() => removeNotification(notification.id)} 
+            />
+        {/each}
+    </div>
 </main>
 
 <style>
+    .notifications-layer {
+        position: absolute;
+        top: 3vh;
+        right: 2vw;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        pointer-events: none;
+        z-index: 9999;
+    }
+
     :global(html, body) {
         margin: 0;
         padding: 0;

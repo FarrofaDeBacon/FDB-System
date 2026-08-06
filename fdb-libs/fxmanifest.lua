@@ -17,10 +17,11 @@ shared_scripts {
 client_scripts {
     'client/theme/theme.lua',
     'client/menu/menu.lua',
+    'client/notify/notify.lua',
 }
 
 server_scripts {
-    -- Placeholders for future server scripts
+    'server/notify/notify.lua',
     -- 'server/callback/*.lua',
 }
 

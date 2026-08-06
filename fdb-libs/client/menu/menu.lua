@@ -73,3 +73,11 @@ RegisterCommand('testlibs', function()
     })
 end, false)
 
+-- COMANDO DE TESTE PARA NOTIFICAÇÕES SIMULTÂNEAS
+RegisterCommand('testnotify', function()
+    fdb.notify("Ação concluída com sucesso!", "success", 5000, "Sucesso")
+    fdb.notify("Ocorreu um erro crítico!", "error", 7000, "Erro")
+    fdb.notify("Isto é um aviso de atenção.", "warning", 6000, "Aviso")
+    fdb.notify("Isto é uma informação comum.", "info", 5000, "Informação")
+end, false)
+
