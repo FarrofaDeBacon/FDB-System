@@ -144,8 +144,8 @@
         width: calc(100% + 14px);
         height: calc(100% + 14px);
         background-color: var(--fdb-accent-color);
-        -webkit-mask-image: url('/assets/selection_box_square.png');
-        mask-image: url('/assets/selection_box_square.png');
+        -webkit-mask-image: var(--fdb-bg-image-color-square);
+        mask-image: var(--fdb-bg-image-color-square);
         -webkit-mask-size: 100%;
         mask-size: 100%;
         -webkit-mask-repeat: no-repeat;

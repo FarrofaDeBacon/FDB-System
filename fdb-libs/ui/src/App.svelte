@@ -4,10 +4,17 @@
     import Notify from './components/Notify.svelte';
     import ProgressBar from './components/ProgressBar.svelte';
     import InputDialog from './components/InputDialog.svelte';
+    import Minigame from './components/Minigame.svelte';
 
     let menuData = null;
     let isOpen = false;
     let notifications = [];
+
+    // Estado do minigame
+    let isMinigameActive = false;
+    let minigameDuration = 2000;
+    let minigameTargetWidth = 15;
+    let minigameRounds = 3;
 
     // Estado do input dialog
     let isInputOpen = false;
@@ -75,6 +82,14 @@
         }).catch(() => {});
     }
 
+    function submitMinigame(success) {
+        isMinigameActive = false;
+        fetch(`https://${GetParentResourceName()}/minigameResult`, {
+            method: 'POST',
+            body: JSON.stringify({ success: success })
+        }).catch(() => {});
+    }
+
     onMount(() => {
         const handleMessage = (event) => {
             const data = event.data;
@@ -113,6 +128,13 @@
                 isInputOpen = true;
             } else if (data.action === 'CLOSE_INPUT') {
                 isInputOpen = false;
+            } else if (data.action === 'START_MINIGAME') {
+                minigameDuration = data.duration || 2000;
+                minigameTargetWidth = data.targetWidth || 15;
+                minigameRounds = data.rounds || 3;
+                isMinigameActive = true;
+            } else if (data.action === 'CANCEL_MINIGAME') {
+                isMinigameActive = false;
             }
         };
 
@@ -242,6 +264,13 @@
         --fdb-bg-image-tick-box: url('/assets/tick_box.png');
         --fdb-bg-image-tick: url('/assets/tick.png');
         --fdb-bg-image-swatch-box: url('/assets/swatch_box.png');
+        --fdb-bg-image-lock: url('/assets/lock.png');
+        --fdb-bg-image-slider-marker: url('/assets/tank_meter_marker.png');
+        --fdb-bg-image-color-square: url('/assets/selection_box_square.png');
+        --fdb-bg-image-notify-success: url('/assets/tick.png');
+        --fdb-bg-image-notify-error: url('/assets/cross.png');
+        --fdb-bg-image-notify-warning: url('/assets/warning.png');
+        --fdb-bg-image-notify-info: url('/assets/star.png');
         
         font-family: var(--fdb-font-body);
         color: var(--fdb-text-primary);

@@ -50,14 +50,8 @@
     <div class="icon-container">
         {#if icon}
             <img src="./assets/{icon}.png" alt={type} class="icon-img" />
-        {:else if type === 'success'}
-            <img src="./assets/tick.png" alt="success" class="icon-img" />
-        {:else if type === 'error'}
-            <img src="./assets/cross.png" alt="error" class="icon-img" />
-        {:else if type === 'warning'}
-            <img src="./assets/warning.png" alt="warning" class="icon-img" />
         {:else}
-            <img src="./assets/star.png" alt="info" class="icon-img" />
+            <div class="icon-img icon-fallback {type}"></div>
         {/if}
     </div>
     
@@ -141,6 +135,28 @@
         height: 32px;
         object-fit: contain;
         z-index: 1;
+    }
+
+    .icon-img.icon-fallback {
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .icon-img.icon-fallback.success {
+        background-image: var(--fdb-bg-image-notify-success);
+    }
+
+    .icon-img.icon-fallback.error {
+        background-image: var(--fdb-bg-image-notify-error);
+    }
+
+    .icon-img.icon-fallback.warning {
+        background-image: var(--fdb-bg-image-notify-warning);
+    }
+
+    .icon-img.icon-fallback.info {
+        background-image: var(--fdb-bg-image-notify-info);
     }
 
     .text-container {

@@ -123,8 +123,8 @@
         height: 30px;
         border-radius: 0;
         background-color: var(--fdb-accent-color);
-        -webkit-mask-image: url('/assets/tank_meter_marker.png');
-        mask-image: url('/assets/tank_meter_marker.png');
+        -webkit-mask-image: var(--fdb-bg-image-slider-marker);
+        mask-image: var(--fdb-bg-image-slider-marker);
         -webkit-mask-size: 100% 100%;
         mask-size: 100% 100%;
         -webkit-mask-repeat: no-repeat;
