@@ -147,6 +147,53 @@ Manages physical coordinates with distance check threads, custom visual cylinder
 
 ---
 
+### 🧬 9. Ped Components & Characterization (`component`)
+Provides utility exports for physical player/ped manipulation, clothing application, overlays, and features.
+
+* **Client Exports:**
+  ```lua
+  -- Aplica feições faciais finas nativas (-1.0 a 1.0)
+  exports['fdb-libs']:SetFaceFeature(ped, index, value)
+
+  -- Aplica uma peça de roupa/componente
+  exports['fdb-libs']:ApplyComponent(ped, category, hash, isMp)
+
+  -- Remove uma categoria específica de roupa
+  exports['fdb-libs']:RemoveComponent(ped, category)
+
+  -- Aplica overlays (barbas, maquiagens, batom, cicatrizes)
+  exports['fdb-libs']:SetOverlay(ped, overlayId, textureId, opacity, tint0, tint1, tint2)
+
+  -- Força o recarregamento/buffer do ped sem piscar
+  exports['fdb-libs']:RefreshPed(ped)
+  exports['fdb-libs']:WaitPedLoaded(ped)
+  ```
+
+---
+
+### 🖱️ 10. Context Menus (`context`)
+Renders context menus directly under the cursor or centered.
+
+* **Client Export:**
+  ```lua
+  exports['fdb-libs']:OpenContextMenu({
+      title = "Menu de Ações",
+      position = "mouse", -- "mouse" ou "center"
+      options = {
+          { label = "Revistar", icon = "eye", description = "Olhar pertences", action = function() ... end },
+          { label = "Algemar", icon = "lock", action = function() ... end },
+          { label = "Opção Bloqueada", disabled = true }
+      }
+  })
+  ```
+
+---
+
+### 🎨 11. Theme Editor (`ThemeEditor`)
+An in-game editor `/libseditor` allowing developers to customize UI colors and variables in real-time and export the final configuration back to `config.lua`. It automatically persists local themes inside KVPs.
+
+---
+
 ## 🛠️ Installation & Setup
 
 1. Copy the folder to your `resources` directory.
