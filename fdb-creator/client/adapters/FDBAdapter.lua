@@ -119,7 +119,7 @@ if Config.framework == 'fdb-core' then
                     SetEntityCanBeDamagedByRelationshipGroup(data.PedHandler, false, GetHashKey("PLAYER"))
                 else
                     print("Loading existing character: " .. tostring(value.citizenid))
-                    RSGCore.Functions.TriggerCallback('rsg-multicharacter:server:getAppearance', function(appearance)
+                    RSGCore.Functions.TriggerCallback('fdb-multicharacter:server:getAppearance', function(appearance)
                         if appearance == nil or next(appearance) == nil then
                             print("No appearance data found for character: " .. tostring(value.citizenid))
                         else
@@ -149,7 +149,7 @@ if Config.framework == 'fdb-core' then
                                 while Citizen.InvokeNative(0xA0BC8FAED8CFEB3C, data.PedHandler) ~= 1 do
                                     Wait(1)
                                 end
-                                exports['rsg-appearance']:ApplySkinMultiChar(skinTable, data.PedHandler, clothesTable)
+                                exports['fdb-appearance']:ApplySkinMultiChar(skinTable, data.PedHandler, clothesTable)
                                 print("Character skin applied: " .. tostring(value.citizenid))
                                 TriggerEvent("fdb_clothes:ApplyClothesToCharid", value.citizenid, data.PedHandler)
                                 TriggerEvent("fdb-barber:loadbarberoverlayOnCharacter", value.citizenid,
@@ -256,12 +256,12 @@ if Config.framework == 'fdb-core' then
         SwitchOffCam(false)
         DisplayRadar(true)
         DisplayHud(true)
-        TriggerServerEvent('rsg-multicharacter:server:loadUserData', myChars[id])
+        TriggerServerEvent('fdb-multicharacter:server:loadUserData', myChars[id])
         currentCharacter = myChars[id].citizenid
         Wait(5000)
-        TriggerServerEvent('rsg-appearance:server:LoadSkin')
+        TriggerServerEvent('fdb-appearance:server:LoadSkin')
         Wait(500)
-        TriggerServerEvent('rsg-appearance:server:LoadClothes', 1)
+        TriggerServerEvent('fdb-appearance:server:LoadClothes', 1)
         local PlayerData = RSGCore.Functions.GetPlayerData()
         local ped = PlayerPedId()
         FreezeEntityPosition(ped, false)
@@ -272,7 +272,7 @@ if Config.framework == 'fdb-core' then
 
         if PlayerData.metadata["injail"] > 0 then
             Wait(2000)
-            TriggerEvent('rsg-prison:client:prisonclothes')
+            TriggerEvent('fdb-prison:client:prisonclothes')
         end
     end)
 
@@ -335,7 +335,7 @@ if Config.framework == 'fdb-core' then
             if next(CachePedData) == nil then
                 --- If no data in fdb_creator, load default skin for framework
                 print("No skin data in fdb_creator")
-                TriggerServerEvent('rsg-appearance:server:LoadSkin')
+                TriggerServerEvent('fdb-appearance:server:LoadSkin')
             else
                 local model = CachePedData.pedmodel.model
                 local outfit = CachePedData.pedmodel.outfit
@@ -445,14 +445,14 @@ if Config.framework == 'fdb-core' then
             else
                 if healthinit == true then
                     currentHealth = 600
-                    TriggerServerEvent('rsg-medic:server:SetHealth', currentHealth)
+                    TriggerServerEvent('fdb-medic:server:SetHealth', currentHealth)
                     healthinit = false
                 else
                     currentHealth = PlayerData.metadata["health"]
                     -- Sécurité: éviter 0 HP avec isDead=false
                     if (not currentHealth or currentHealth <= 0) then
                         currentHealth = 100
-                        TriggerServerEvent('rsg-medic:server:SetHealth', currentHealth)
+                        TriggerServerEvent('fdb-medic:server:SetHealth', currentHealth)
                     end
                 end
             end
@@ -482,7 +482,7 @@ if Config.framework == 'fdb-core' then
         end
         creatingCharacter = true
         currentCharacter = nil
-        TriggerServerEvent('rsg-multicharacter:server:createCharacter', data)
+        TriggerServerEvent('fdb-multicharacter:server:createCharacter', data)
         Wait(2000)
         exports.weathersync:setSyncEnabled(true)
         TriggerServerEvent('RSGCore:Server:OnPlayerLoaded')

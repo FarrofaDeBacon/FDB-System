@@ -1,4 +1,5 @@
 FDBCore = exports['fdb-core']:GetCoreObject()
+local clothing = require 'data.clothing'
 local isLoggedIn = false
 BucketId = GetRandomIntInRange(0, 0xffffff)
 ComponentsMale = {}
@@ -363,7 +364,6 @@ function FirstMenu()
 end
 
 -- Helper local para puxar hash do vestuário cacheado
-local clothing = require 'data.clothing'
 local function GetClothingHash(category, model, texture)
     if not model or model == 0 then return nil end
     texture = texture or 0

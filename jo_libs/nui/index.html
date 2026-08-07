@@ -1,0 +1,276 @@
+<body>
+</body>
+
+<script>
+  window.citFrames = {};
+  window.lastMousePos = { x: 0, y: 0 };
+
+  function updateMousePos(x, y) {
+    window.lastMousePos.x = x
+    window.lastMousePos.y = y
+
+  }
+
+  window.addEventListener('mousemove', (event) => {
+    updateMousePos(event.screenX, event.screenY)
+  })
+
+  function isKeyboardEventType(type) {
+    return type == 'keydown' || type == 'keyup'
+  }
+
+  function defineKeyboardEventProperty(event, key, value) {
+    try {
+      Object.defineProperty(event, key, {
+        configurable: true,
+        enumerable: true,
+        value,
+      })
+    } catch (_error) { }
+  }
+
+  function createKeyboardEvent(type, source) {
+    const keyboardEvent = new KeyboardEvent(type, {
+      key: source.key || '',
+      code: source.code || '',
+      keyCode: source.keyCode || 0,
+      which: source.which || source.keyCode || 0,
+      repeat: !!source.repeat,
+      altKey: !!source.altKey,
+      ctrlKey: !!source.ctrlKey,
+      shiftKey: !!source.shiftKey,
+      metaKey: !!source.metaKey,
+      bubbles: true,
+      cancelable: true,
+    })
+
+    defineKeyboardEventProperty(keyboardEvent, 'keyCode', source.keyCode || 0)
+    defineKeyboardEventProperty(keyboardEvent, 'which', source.which || source.keyCode || 0)
+    return keyboardEvent
+  }
+
+  const eventsToRedirect = [
+    'keydown',
+    'keyup',
+    'wheel',
+    'resize',
+    'scroll',
+    'click',
+    'dblclick',
+    'mousedown',
+    'mouseup',
+    'mousemove',
+    'pointermove',
+    'pointercancel',
+    'pointerdown',
+    'pointerup',
+    'pointerover',
+    'pointerout',
+    'pointerenter',
+    'pointerleave',
+    'gotpointercapture',
+    'lostpointercapture',
+  ];
+
+  let iFrames = []
+  let uiNameFocused = ""
+  const zIndexFocused = 999999
+  let lastCoords = [0, 0]
+  const gapDistance = 10
+
+  function isEnoughFar(X, Y) {
+    if (Math.abs(lastCoords[0] - X) < gapDistance && Math.abs(lastCoords[1] - Y) < gapDistance)
+      return false
+
+    lastCoords = [X, Y]
+    return true
+  }
+
+  function getElementFromPoint(X, Y) {
+    for (let index = 0; index < iFrames.length; index++) {
+      const frame = iFrames[index];
+      const el = frame.element.contentWindow.document.elementFromPoint(X, Y)
+      if (el && el.nodeName != "BODY" && el.nodeName != "HTML")
+        return { el, frame }
+    }
+    return null
+  }
+
+  function getUiFromPoint(X, Y) {
+    const element = getElementFromPoint(X, Y)
+    if (element) {
+      return element.frame.uiName
+    }
+    return null
+  }
+
+  function moveiFrameOnTop(uiName) {
+    iFrames.forEach((frame, index) => {
+      if (frame.uiName == uiName)
+        frame.element.style.zIndex = iFrames.length
+      else if (frame.uiName == uiNameFocused)
+        frame.element.style.zIndex = zIndexFocused
+      else
+        frame.element.style.zIndex = index
+    })
+  }
+
+  function createNewFrame(resourceName, uiName, url) {
+    const frame = document.createElement('iframe');
+    frame.name = uiName;
+    frame.allow = 'microphone *; camera *;';
+    frame.src = url;
+    frame.tabIndex = -1;
+    frame.style.overflow = "hidden"
+
+    document.body.appendChild(frame);
+
+    frame.contentWindow.GetParentResourceName = function () {
+      return resourceName;
+    }
+
+    frame.contentWindow.addEventListener('dispatchEvent', (event) => {
+      const redirectedEvent = isKeyboardEventType(event.realtype)
+        ? createKeyboardEvent(event.realtype, event)
+        : new event.constructor(event.realtype, event);
+      redirectedEvent.fake = true
+      if (isKeyboardEventType(event.realtype)) {
+        frame.contentWindow.document.dispatchEvent(redirectedEvent)
+        return
+      }
+      const el = frame.contentWindow.document.elementFromPoint(event.screenX, event.screenY)
+      if (el == null) {
+        frame.contentWindow.document.dispatchEvent(redirectedEvent)
+        return
+      }
+      el.dispatchEvent(redirectedEvent)
+    })
+
+    eventsToRedirect.forEach(eventType => {
+      frame.contentWindow.addEventListener(eventType, (event) => {
+        if (eventType == "pointermove") updateMousePos(event.screenX, event.screenY)
+        if (event.fake) return
+        if (uiNameFocused !== "") return
+        const redirectedEvent = isKeyboardEventType(eventType)
+          ? createKeyboardEvent('dispatchEvent', event)
+          : new event.constructor('dispatchEvent', event);
+        redirectedEvent.realtype = eventType
+        iFrames.forEach((frame) => {
+          if (frame.uiName != uiName)
+            frame.element.contentWindow.document.dispatchEvent(redirectedEvent)
+        })
+      })
+    });
+
+
+    frame.contentWindow.addEventListener('mousemove', (event) => {
+      updateMousePos(event.screenX, event.screenY)
+      if (event.fake) return
+      if (uiName == uiNameFocused) return
+      const target = event.target
+      if (target.nodeName != "BODY" && target.nodeName != "HTML") return
+      const X = event.screenX
+      const Y = event.screenY
+      if (!isEnoughFar(X, Y)) return
+      const uiNameUnder = getUiFromPoint(X, Y)
+      if (uiNameUnder == null) return
+      moveiFrameOnTop(uiNameUnder)
+    })
+
+    return frame
+
+  }
+
+  const globalEvents = [
+    'keydown',
+    'keyup',
+  ]
+
+  globalEvents.forEach(eventType => {
+    window.addEventListener(eventType, (event) => {
+      if (event.fake) return
+      const redirectedEvent = createKeyboardEvent('dispatchEvent', event);
+      redirectedEvent.realtype = eventType
+      iFrames.forEach((frame) => {
+        frame.element.contentWindow.document.dispatchEvent(redirectedEvent)
+      })
+    })
+  });
+
+  window.addEventListener('message', (event) => {
+    const data = event.data
+    switch (data.action) {
+      case "jo_nui_loadNUI":
+        // Create the new iframe
+        if (iFrames.find((e) => e.uiName == data.uiName))
+          return console.log('ERROR, this uiName is already used:', data.uiName)
+
+        let frame = createNewFrame(GetParentResourceName(), data.uiName, data.url);
+
+        iFrames.push({
+          uiName: data.uiName,
+          element: frame
+        })
+        break;
+      case "jo_nui_force_focus":
+        uiNameFocused = data.uiName
+        iFrames.forEach((frame, index) => {
+          frame.element.style.zIndex = frame.uiName == data.uiName ? zIndexFocused : index
+        })
+        break;
+      case "jo_nui_reset_focus":
+        uiNameFocused = ""
+        iFrames.forEach((frame, index) => {
+          frame.element.style.zIndex = index
+        })
+        break;
+      case "jo_nui_is_hovering":
+        const hovered = getElementFromPoint(window.lastMousePos.x, window.lastMousePos.y)
+        fetch(`https://${GetParentResourceName()}/jo_nui_is_hovering`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: JSON.stringify({
+            action: "jo_nui_is_hovering",
+            hovering: hovered !== null
+          }),
+        })
+        break;
+      default:
+        const redirectedEvent = new event.constructor(event.type, event);
+        if (data.messageTargetUiName) {
+          const uiName = data.messageTargetUiName
+          let frame = iFrames.find((frame) => frame.uiName == uiName)
+          if (!frame)
+            return console.log('ERROR, this uiName is not loaded', uiName)
+          frame.element.contentWindow.dispatchEvent(redirectedEvent)
+        } else {
+          iFrames.forEach((frame) => {
+            frame.element.contentWindow.dispatchEvent(redirectedEvent);
+          })
+        }
+        break;
+    }
+  })
+
+</script>
+
+<style>
+  body {
+    background-color: transparent;
+    margin: 0px;
+    padding: 0px;
+  }
+
+  iframe {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    border: 0px;
+    width: 100%;
+    height: 100%;
+  }
+</style>
