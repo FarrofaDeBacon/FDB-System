@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                                   //
-//                                       MURPHY'S CREATOR                                            //
+//                                       FARROFA DEBACON                                             //
 //                                                                                                   //
-//                        2025 - Murphy / Webba Creative Technologies                                //
+//                        2026 - Farrofa DeBacon / FDB System                                        //
 //                                                                                                   //
 //                         This Script is working with all UI folder                                 //
 //                   to show and hide datas for Clothes creation / modification                      //

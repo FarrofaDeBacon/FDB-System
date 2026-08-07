@@ -1,4 +1,4 @@
-// Murphy Creator - Translation Helper 
+// FDB Creator - Translation Helper 
 // Helper functions to manage translations in NUI
 
 let currentLocale = 'en';

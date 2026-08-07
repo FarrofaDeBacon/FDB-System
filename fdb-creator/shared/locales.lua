@@ -1,5 +1,5 @@
--- Murphy Creator - Translation System
--- Système de Traduction pour Murphy Creator
+-- FDB Creator - Translation System
+-- Système de Traduction pour FDB Creator
 
 Lang = {}
 Lang.Locale = Config.Locale or "en" -- Set in config

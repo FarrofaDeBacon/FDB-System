@@ -77,6 +77,17 @@ RegisterNetEvent("fdb_creator:LaunchCreator", function()
     RequestCollisionAtCoord(coords.x, coords.y, coords.z)
     Wait(1000)
     
+    -- Ativar sets de interior do saloon dinamicamente para carregar decoração/móveis
+    local interiorId = GetInteriorAtCoords(coords.x, coords.y, coords.z)
+    if interiorId ~= 0 then
+        PinInteriorInMemory(interiorId)
+        for k, v in pairs(Config.CharSelect.interior_sets) do
+            if not IsInteriorEntitySetActive(interiorId, v) then
+                ActivateInteriorEntitySet(interiorId, v)
+            end
+        end
+    end
+    
     -- Initialize CachePedData with default values if not present
     if not CachePedData or not CachePedData.pedmodel then
         CachePedData = deepcopy(DefaultCachePedData)

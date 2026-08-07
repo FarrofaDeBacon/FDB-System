@@ -37,6 +37,16 @@ if Config.framework == 'fdb-core' then
         FreezeEntityPosition(PlayerPedId(), true)
         SetEntityInvincible(PlayerPedId(), true)
         SetEntityCanBeDamaged(PlayerPedId(), false)
+        RequestCollisionAtCoord(Config.CharSelect.playerSpawn.coords)
+        local interiorId = GetInteriorAtCoords(Config.CharSelect.playerSpawn.coords)
+        if interiorId ~= 0 then
+            PinInteriorInMemory(interiorId)
+            for k, v in pairs(Config.CharSelect.interior_sets) do
+                if not IsInteriorEntitySetActive(interiorId, v) then
+                    ActivateInteriorEntitySet(interiorId, v)
+                end
+            end
+        end
         MoveCam("charselect",
             {
                 coords = DecorSettings.charselectcam.coords,

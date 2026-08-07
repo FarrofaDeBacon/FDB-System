@@ -1,4 +1,4 @@
-// Murphy Creator - English Translation 
+// FDB Creator - English Translation 
 const Locale_EN = {
     // General UI
     ui: {
