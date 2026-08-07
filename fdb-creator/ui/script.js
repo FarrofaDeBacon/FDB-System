@@ -3608,8 +3608,10 @@ window.addEventListener('message', (event) => {
         } else {
             isSecondChanceMode = false;
         }
+        if (event.data.charInputs) {
+            globalMenuStructure = event.data.charInputs;
+        }
         showCharGlobalMenu();
-        globalMenuStructure = event.data.charInputs;
     }
     
     // Second Chance: Set the flag, the apparence menu will be opened by openEditApparenceMenu
