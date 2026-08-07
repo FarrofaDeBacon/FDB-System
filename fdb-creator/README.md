@@ -72,7 +72,7 @@ CreateThread(function()
     end
 end)
 ```
-## Optionnal: If you don't have murphy_clothing
+## Optionnal: If you don't have fdb_clothing
 In rsg-appearance\client\creator.lua replace ApplySkin function
 This will allow the script to load fdb_creator data a script call rsg's loadskin.
 ```lua
@@ -127,7 +127,7 @@ function ApplySkin()
         if _Target == previousPlayerPedId then
             print("[RSG Appearance] Skin applied successfully using fdb_creator and rsg-appearance.")
             TriggerEvent('rsg-appearance:client:ApplyClothes', _Clothes, PlayerPedId(), _SkinData)
-            -- After applying rsg-appearance clothes, load murphy_clothing
+            -- After applying rsg-appearance clothes, load fdb_clothing
             Wait(500)
             TriggerEvent("fdb-clothing:loadclothes")
         else
@@ -166,10 +166,10 @@ Config.framework = 'vorp'
 ```
 
 ## Config.fdb_clothing
-Enable or disable integration with the murphy_clothing resource.
+Enable or disable integration with the fdb_clothing resource.
 
-- true: Use murphy_clothing.
-- false: Do not use murphy_clothing.
+- true: Use fdb_clothing.
+- false: Do not use fdb_clothing.
 Example:
 ```lua
 Config.fdb_clothing = true

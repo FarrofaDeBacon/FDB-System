@@ -441,7 +441,7 @@ function ApplyCachePedDataToPed(ped, data, charid)
         SetCharExpression(ped, ExpressionsHashes[k], v)
     end
     TriggerEvent("fdb-barber:loadbarberoverlayOnCharacter", charid, ped)
-    TriggerEvent("murphy_clothes:ApplyClothesToCharid", charid, ped)
+    TriggerEvent("fdb_clothes:ApplyClothesToCharid", charid, ped)
     UpdatePedVariation(ped)
 end
 
@@ -451,7 +451,7 @@ function OpenClothesMenu()
         -- Stocker l'offset initial pour que 180 corresponde à baseHeading
         angleOffset = 180 - baseHeading
     end
-    TriggerEvent("murphy_clothing:OpenClothesMenuCreator")
+    TriggerEvent("fdb_clothing:OpenClothesMenuCreator")
 end
 
 -- fixing scale network issue

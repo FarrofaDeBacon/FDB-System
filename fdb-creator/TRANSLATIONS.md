@@ -1,5 +1,5 @@
-# Murphy Creator - Translation System
-# Système de Traduction Murphy Creator
+# FDB Creator - Translation System
+# Système de Traduction FDB Creator
 
 ## Configuration
 

@@ -356,10 +356,10 @@ function OpenBarberMenu()
     local items = {}
     for key, value in pairs(menucategories[selectedgender]) do
         for index, cat in pairs(value) do
-            if MURPHY_ASSETS[selectedgender][cat] == nil then
+            if FDB_ASSETS[selectedgender][cat] == nil then
                 -- print("Category not found: " .. cat)
             else
-                if next(MURPHY_ASSETS[selectedgender][cat]) ~= nil then
+                if next(FDB_ASSETS[selectedgender][cat]) ~= nil then
                     if tostring(key) ~= "categories" then
                         -- Inicializar hairstyleCache para categorias que ainda não existem
                         if hairstyleCache[cat] == nil then
@@ -371,7 +371,7 @@ function OpenBarberMenu()
                             id = cat,
                             name = Lang.Categories[cat] or cat,
                             category = key,
-                            totalAmount = #MURPHY_ASSETS[selectedgender][cat],
+                            totalAmount = #FDB_ASSETS[selectedgender][cat],
                             selectorType = "slider",
                             contextual = "variation",
                             value = hairstyleCache[cat].model or 0,
@@ -463,21 +463,21 @@ function UpdateContextualDatas(value, category)
                 end
                 local variationAmount = 1
                 local tints = {}
-                if MURPHY_ASSETS[selectedgender][category][value].variants then
-                    variationAmount = #MURPHY_ASSETS[selectedgender][category][value].variants
+                if FDB_ASSETS[selectedgender][category][value].variants then
+                    variationAmount = #FDB_ASSETS[selectedgender][category][value].variants
                     tint0value = hairstyleCache[category].texture.tint0 or
-                        MURPHY_ASSETS[selectedgender][category][value].variants[1].tint[1] or 1
+                        FDB_ASSETS[selectedgender][category][value].variants[1].tint[1] or 1
                     tint1value = hairstyleCache[category].texture.tint1 or
-                        MURPHY_ASSETS[selectedgender][category][value].variants[1].tint[2] or 1
+                        FDB_ASSETS[selectedgender][category][value].variants[1].tint[2] or 1
                     tint2value = hairstyleCache[category].texture.tint2 or
-                        MURPHY_ASSETS[selectedgender][category][value].variants[1].tint[3] or 1
+                        FDB_ASSETS[selectedgender][category][value].variants[1].tint[3] or 1
                     tints = {
                         { tintId = 1, value = tint0value },
                         { tintId = 2, value = tint1value },
                         { tintId = 3, value = tint2value }
                     }
                 else
-                    variationAmount = #MURPHY_ASSETS[selectedgender][category][value]
+                    variationAmount = #FDB_ASSETS[selectedgender][category][value]
                     if type(hairstyleCache[category].texture) == "table" then
                         tint0value = hairstyleCache[category].texture.tint0 or 1
                         tint1value = hairstyleCache[category].texture.tint1 or 1

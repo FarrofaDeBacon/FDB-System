@@ -413,7 +413,7 @@ if Config.framework == 'fdb-core' then
                         local charinfo = json.decode(result[1].charinfo)
                         local charName = charinfo.firstname .. " " .. charinfo.lastname
                         
-                        -- Delete from murphy tables
+                        -- Delete from Farrofa DeBacon tables
                         deleteIfTableExists('fdb_creator', citizenid)
                         deleteIfTableExists('fdb_barber', citizenid)
                         deleteIfTableExists('fdb_barber_preset', citizenid)

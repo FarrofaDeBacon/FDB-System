@@ -134,7 +134,7 @@ RegisterNetEvent("fdb_creator:LaunchCreator", function()
 
     local selectedgender = "female"
     if CachePedData.gender == "Male" then selectedgender = "male" end
-    for k, v in pairs(MURPHY_ASSETS[selectedgender]) do
+    for k, v in pairs(FDB_ASSETS[selectedgender]) do
         if hairstyleCache[k] == nil then
             hairstyleCache[k] = {}
             hairstyleCache[k].model = 0
@@ -181,7 +181,7 @@ RegisterNetEvent("fdb-creator:SecondChance", function()
         -- Initialize hair cache
         local selectedgender = "female"
         if CachePedData.gender == "Male" then selectedgender = "male" end
-        for k, v in pairs(MURPHY_ASSETS[selectedgender]) do
+        for k, v in pairs(FDB_ASSETS[selectedgender]) do
             if hairstyleCache[k] == nil then
                 hairstyleCache[k] = {}
                 hairstyleCache[k].model = 0

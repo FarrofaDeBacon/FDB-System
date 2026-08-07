@@ -161,7 +161,7 @@ if Config.framework == 'fdb-core' then
                                 end
                                 exports['fdb-appearance']:ApplySkinMultiChar(skinTable, data.PedHandler, clothesTable)
                                 print("Character skin applied: " .. tostring(value.citizenid))
-                                TriggerEvent("murphy_clothes:ApplyClothesToCharid", value.citizenid, data.PedHandler)
+                                TriggerEvent("fdb_clothes:ApplyClothesToCharid", value.citizenid, data.PedHandler)
                                 TriggerEvent("fdb-barber:loadbarberoverlayOnCharacter", value.citizenid,
                                     data.PedHandler)
                             end
@@ -407,13 +407,13 @@ if Config.framework == 'fdb-core' then
                         local comp = DefaultChar[CachePedData.gender][CachePedData.skintone].Legs
                             [CachePedData.lowerbody]
                         ApplyShopItemToPed(tonumber("0x" .. comp), CachePed)
-                        TriggerEvent("murphy_clothes:Loadlowerbody", tonumber("0x" .. comp))
+                        TriggerEvent("fdb_clothes:Loadlowerbody", tonumber("0x" .. comp))
                     end
                     if CachePedData.upperbody > 0 then
                         local comp = DefaultChar[CachePedData.gender][CachePedData.skintone].Body
                             [CachePedData.upperbody]
                         ApplyShopItemToPed(tonumber("0x" .. comp), CachePed)
-                        TriggerEvent("murphy_clothes:Loadupperbody", tonumber("0x" .. comp))
+                        TriggerEvent("fdb_clothes:Loadupperbody", tonumber("0x" .. comp))
                     end
                     if CachePedData.body > 0 then
                         local comp = tonumber(Body[CachePedData.body])
@@ -443,7 +443,7 @@ if Config.framework == 'fdb-core' then
                 end
                 UpdatePedVariation(CachePed)
             end
-            TriggerEvent("murphy_clothing:loadclothes")
+            TriggerEvent("fdb_clothing:loadclothes")
             TriggerEvent("fdb-barber:loadbarberoverlay")
 
             Wait(1000)

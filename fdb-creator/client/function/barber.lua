@@ -91,7 +91,7 @@ AddEventHandler('fdb-barber:clotheitem', function(hairstyleComponents, outfitid,
         if IsPedMale(_Target) then gender = "male" else gender = "female" end
         IsPedReadyToRender(_Target)
         barberCache = hairstyleComponents
-        for k, v in pairs(MURPHY_ASSETS[gender]) do
+        for k, v in pairs(FDB_ASSETS[gender]) do
             if barberCache[k] == nil then
                 barberCache[k] = {}
                 barberCache[k].model = 0
@@ -206,27 +206,27 @@ function ReequipAllhairstyle(ped)
         if data.model and data.model > 0 then
             print("[fdb-barber] Processing category:", category, "model:", data.model)
             
-            if not MURPHY_ASSETS[gender] then
-                print("[fdb-barber] ERROR: No MURPHY_ASSETS for gender:", gender)
+            if not FDB_ASSETS[gender] then
+                print("[fdb-barber] ERROR: No FDB_ASSETS for gender:", gender)
                 goto continue
             end
             
-            if not MURPHY_ASSETS[gender][category] then
-                print("[fdb-barber] ERROR: No MURPHY_ASSETS for category:", category)
+            if not FDB_ASSETS[gender][category] then
+                print("[fdb-barber] ERROR: No FDB_ASSETS for category:", category)
                 goto continue
             end
             
-            local drawable = MURPHY_ASSETS[gender][category] and MURPHY_ASSETS[gender][category][data.model] and
-            MURPHY_ASSETS[gender][category][data.model].drawable
-            if MURPHY_ASSETS[gender][category][data.model] == nil then
+            local drawable = FDB_ASSETS[gender][category] and FDB_ASSETS[gender][category][data.model] and
+            FDB_ASSETS[gender][category][data.model].drawable
+            if FDB_ASSETS[gender][category][data.model] == nil then
                 print("Invalid hairstyle data for category:", category, "model:", data.model)
-                print("If you updated MURPHY_ASSETS file recently, make sure to wipe your database before use.")
+                print("If you updated FDB_ASSETS file recently, make sure to wipe your database before use.")
             else
                 if drawable then
-                    local albedo = MURPHY_ASSETS[gender][category][data.model].variants[data.texture.palette].albedo
-                    local normal = MURPHY_ASSETS[gender][category][data.model].variants[data.texture.palette].normal
-                    local material = MURPHY_ASSETS[gender][category][data.model].variants[data.texture.palette].material
-                    local palette = MURPHY_ASSETS[gender][category][data.model].variants[data.texture.palette].palette
+                    local albedo = FDB_ASSETS[gender][category][data.model].variants[data.texture.palette].albedo
+                    local normal = FDB_ASSETS[gender][category][data.model].variants[data.texture.palette].normal
+                    local material = FDB_ASSETS[gender][category][data.model].variants[data.texture.palette].material
+                    local palette = FDB_ASSETS[gender][category][data.model].variants[data.texture.palette].palette
                     local tint0 = data.texture.tint0
                     local tint1 = data.texture.tint1
                     local tint2 = data.texture.tint2
@@ -236,7 +236,7 @@ function ReequipAllhairstyle(ped)
                 else
                     if type(data.texture) == "table" then
                         NativeSetPedComponentEnabled(ped,
-                            MURPHY_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture.model)].hash,
+                            FDB_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture.model)].hash,
                             false,
                             true,
                             true)
@@ -255,7 +255,7 @@ function ReequipAllhairstyle(ped)
                         local drawable, albedo, normal, material = GetMetaPedAssetGuids(ped, componentIndex)
                         local palette, t0, t1, t2 = GetMetaPedAssetTint(ped, componentIndex)
                         RemoveShopItemFromPed(ped,
-                            MURPHY_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture.model)].hash, 0,
+                            FDB_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture.model)].hash, 0,
                             0, 0)
                         -- RemoveShopItemFromPed(ped, FullDB[gender][k][tonumber(v.model)][1].hash, 0, 0, 0)
                         local tint0 = data.texture.tint0
@@ -266,7 +266,7 @@ function ReequipAllhairstyle(ped)
                         UpdatePedVariation(ped)
                     else
                         NativeSetPedComponentEnabled(ped, tonumber(
-                                MURPHY_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture)].hash),
+                                FDB_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture)].hash),
                             false,
                             true, true)
                         UpdatePedVariation(ped)

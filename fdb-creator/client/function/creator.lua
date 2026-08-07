@@ -81,18 +81,18 @@ function Change(id, category, change_type, value)
             if hairstyleCache[category] then
                 hairstyleCache[category].model = id
             end
-            if MURPHY_ASSETS[gender] and MURPHY_ASSETS[gender][category] and MURPHY_ASSETS[gender][category][id] and MURPHY_ASSETS[gender][category][id].drawable then
+            if FDB_ASSETS[gender] and FDB_ASSETS[gender][category] and FDB_ASSETS[gender][category][id] and FDB_ASSETS[gender][category][id].drawable then
                 if hairstyleCache[category] then
                     hairstyleCache[category].texture = {}
                 end
-                local drawable = MURPHY_ASSETS[gender][category][id].drawable
-                local albedo = MURPHY_ASSETS[gender][category][id].variants[1].albedo
-                local normal = MURPHY_ASSETS[gender][category][id].variants[1].normal
-                local material = MURPHY_ASSETS[gender][category][id].variants[1].material
-                local palette = MURPHY_ASSETS[gender][category][id].variants[1].palette
-                local tint0 = MURPHY_ASSETS[gender][category][id].variants[1].tint[1]
-                local tint1 = MURPHY_ASSETS[gender][category][id].variants[1].tint[2]
-                local tint2 = MURPHY_ASSETS[gender][category][id].variants[1].tint[3]
+                local drawable = FDB_ASSETS[gender][category][id].drawable
+                local albedo = FDB_ASSETS[gender][category][id].variants[1].albedo
+                local normal = FDB_ASSETS[gender][category][id].variants[1].normal
+                local material = FDB_ASSETS[gender][category][id].variants[1].material
+                local palette = FDB_ASSETS[gender][category][id].variants[1].palette
+                local tint0 = FDB_ASSETS[gender][category][id].variants[1].tint[1]
+                local tint1 = FDB_ASSETS[gender][category][id].variants[1].tint[2]
+                local tint2 = FDB_ASSETS[gender][category][id].variants[1].tint[3]
                 if hairstyleCache[category] and hairstyleCache[category].texture then
                     hairstyleCache[category].texture.palette = 1
                     hairstyleCache[category].texture.tint0 = tint0
@@ -104,41 +104,41 @@ function Change(id, category, change_type, value)
                     SendNUIMessage({
                         type = 'clipboard',
                         data = "moveAsset " ..
-                            gender .. " " .. category .. " " .. MURPHY_ASSETS[gender][category][id].drawable
+                            gender .. " " .. category .. " " .. FDB_ASSETS[gender][category][id].drawable
                     })
                     print("Clipboard",
-                        "moveAsset " .. gender .. " " .. category .. " " .. MURPHY_ASSETS[gender][category][id].drawable)
+                        "moveAsset " .. gender .. " " .. category .. " " .. FDB_ASSETS[gender][category][id].drawable)
                 end
             else
                 if hairstyleCache[category] then
                     hairstyleCache[category].texture = 1
                 end
-                NativeSetPedComponentEnabled(ped, MURPHY_ASSETS[gender][category][id][1].hash, false, true,
+                NativeSetPedComponentEnabled(ped, FDB_ASSETS[gender][category][id][1].hash, false, true,
                     true)
             end
         else
-            if hairstyleCache[category] and hairstyleCache[category].model and MURPHY_ASSETS[gender] and MURPHY_ASSETS[gender][category] and MURPHY_ASSETS[gender][category][hairstyleCache[category].model] and MURPHY_ASSETS[gender][category][hairstyleCache[category].model].drawable then
-                drawable = MURPHY_ASSETS[gender][category][hairstyleCache[category].model].drawable
+            if hairstyleCache[category] and hairstyleCache[category].model and FDB_ASSETS[gender] and FDB_ASSETS[gender][category] and FDB_ASSETS[gender][category][hairstyleCache[category].model] and FDB_ASSETS[gender][category][hairstyleCache[category].model].drawable then
+                drawable = FDB_ASSETS[gender][category][hairstyleCache[category].model].drawable
                 if change_type ~= "variants" then
-                    albedo = MURPHY_ASSETS[gender][category][hairstyleCache[category].model].variants
+                    albedo = FDB_ASSETS[gender][category][hairstyleCache[category].model].variants
                         [hairstyleCache[category].texture.palette].albedo
-                    normal = MURPHY_ASSETS[gender][category][hairstyleCache[category].model].variants
+                    normal = FDB_ASSETS[gender][category][hairstyleCache[category].model].variants
                         [hairstyleCache[category].texture.palette].normal
-                    material = MURPHY_ASSETS[gender][category][hairstyleCache[category].model].variants
+                    material = FDB_ASSETS[gender][category][hairstyleCache[category].model].variants
                         [hairstyleCache[category].texture.palette].material
-                    palette = MURPHY_ASSETS[gender][category][hairstyleCache[category].model].variants
+                    palette = FDB_ASSETS[gender][category][hairstyleCache[category].model].variants
                         [hairstyleCache[category].texture.palette].palette
                 end
                 if change_type == "variants" then
-                    albedo = MURPHY_ASSETS[gender][category][hairstyleCache[category].model].variants[value].albedo
-                    normal = MURPHY_ASSETS[gender][category][hairstyleCache[category].model].variants[value].normal
-                    material = MURPHY_ASSETS[gender][category][hairstyleCache[category].model].variants[value].material
-                    palette = MURPHY_ASSETS[gender][category][hairstyleCache[category].model].variants[value].palette
-                    tint0 = tonumber(MURPHY_ASSETS[gender][category][hairstyleCache[category].model].variants[value]
+                    albedo = FDB_ASSETS[gender][category][hairstyleCache[category].model].variants[value].albedo
+                    normal = FDB_ASSETS[gender][category][hairstyleCache[category].model].variants[value].normal
+                    material = FDB_ASSETS[gender][category][hairstyleCache[category].model].variants[value].material
+                    palette = FDB_ASSETS[gender][category][hairstyleCache[category].model].variants[value].palette
+                    tint0 = tonumber(FDB_ASSETS[gender][category][hairstyleCache[category].model].variants[value]
                         .tint0)
-                    tint1 = tonumber(MURPHY_ASSETS[gender][category][hairstyleCache[category].model].variants[value]
+                    tint1 = tonumber(FDB_ASSETS[gender][category][hairstyleCache[category].model].variants[value]
                         .tint1)
-                    tint2 = tonumber(MURPHY_ASSETS[gender][category][hairstyleCache[category].model].variants[value]
+                    tint2 = tonumber(FDB_ASSETS[gender][category][hairstyleCache[category].model].variants[value]
                         .tint2)
 
                     hairstyleCache[category].texture.palette = value
@@ -178,7 +178,7 @@ function Change(id, category, change_type, value)
                 if change_type == "variants" then
                     hairstyleCache[category].texture = value
                     NativeSetPedComponentEnabled(ped,
-                        MURPHY_ASSETS[gender][category][hairstyleCache[category].model][value].hash, false, true, true)
+                        FDB_ASSETS[gender][category][hairstyleCache[category].model][value].hash, false, true, true)
                 elseif change_type == 1 then
                     if type(hairstyleCache[category].texture) == "table" then
                         while GetComponentIndexByCategory(ped, catHash) == -1 do Wait(0) end

@@ -1,7 +1,7 @@
 Config = {}
 
 Config.framework = 'fdb-core' -- Framework to use. Options: 'REDEMRP2k23', 'rsg-core', 'vorp', 'rdr3mp', 'rdr3mp-legacy'
-Config.fdb_clothing = false -- Set to true if you are using murphy_clothing
+Config.fdb_clothing = false -- Set to true if you are using fdb_clothing
 Config.LoadSkinCommand = "mc" -- Command to load fdb_creator data
 Config.DevMode = true -- Set to true to enable developer mode, which allows you to use the F3 key to open the character creator
 Config.Locale = "en" -- Language: 'en' for English, 'fr' for French

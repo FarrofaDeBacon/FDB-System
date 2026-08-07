@@ -441,14 +441,14 @@ RegisterNUICallback("sexeStatusChanged", function(data, cb)
 
         ApplyCachePedDataToPedPlayer()
         RemoveAllClothesExceptEssentials(CachePed)
-        TriggerEvent("murphy_clothing:ResetClothesMenuCreator")
+        TriggerEvent("fdb_clothing:ResetClothesMenuCreator")
         Light()
         SetEntityCoords(CachePed, coords)
         SetEntityHeading(CachePed, heading)
         hairstyleCache = {}
         local selectedgender = "female"
         if CachePedData.gender == "Male" then selectedgender = "male" end
-        for k, v in pairs(MURPHY_ASSETS[selectedgender]) do
+        for k, v in pairs(FDB_ASSETS[selectedgender]) do
             if hairstyleCache[k] == nil then
                 hairstyleCache[k] = {}
                 hairstyleCache[k].model = 0
@@ -980,6 +980,6 @@ RegisterNUICallback("createNewChar", function(data, cb)
         }
     )
     TriggerEvent("fdb_creator:LaunchCreator")
-    TriggerEvent("murphy_clothing:ResetClothesMenuCreator")
+    TriggerEvent("fdb_clothing:ResetClothesMenuCreator")
     PlaySound("Select", "HUD_SHOP_SOUNDSET")
 end)

@@ -1,4 +1,4 @@
-MURPHY_ASSETS = {
+FDB_ASSETS = {
     ["male"] = {
         ["beards_mustache"] = {
             {drawable=-11329005,variants={
