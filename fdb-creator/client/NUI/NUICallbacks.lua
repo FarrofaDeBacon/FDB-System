@@ -244,7 +244,7 @@ RegisterNUICallback("CreateChar", function(data, cb)
     repeat
         Wait(100)
     until CharacterName ~= nil
-    if tostring(CharacterName) == "" or tostring(CharacterSurname) == "" or tostring(CharacterBirthDay) == "" or tostring(CharacterBirthMonth) == "" or tostring(CharacterBirthYear) == "" or tostring(CharacterLore) == "" then
+    if tostring(CharacterName) == "" or tostring(CharacterSurname) == "" or tostring(CharacterBirthDay) == "" or tostring(CharacterBirthMonth) == "" or tostring(CharacterBirthYear) == "" then
         PlaySound("UNAFFORDABLE", "Ledger_Sounds")
         print("Missing informations, please fill all fields")
     else
