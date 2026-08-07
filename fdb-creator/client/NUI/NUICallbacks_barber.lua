@@ -60,8 +60,12 @@ RegisterNUICallback("itemValue", function(body, resultCallback)
             OverlayChange(name,visibility,tx_id,0,0,tx_color_type,1.0,0,palette_id,palette_color_primary,palette_color_secondary,palette_color_tertiary,var,opacity)
         else
             Change(value, category, "model")
-            if hairstyleCache[category].model > value then
-                PlaySound("Amount_Decrease", "HUD_Donate_Sounds")
+            if hairstyleCache[category] then
+                if hairstyleCache[category].model > value then
+                    PlaySound("Amount_Decrease", "HUD_Donate_Sounds")
+                else
+                    PlaySound("Amount_Increase", "HUD_Donate_Sounds")
+                end
             else
                 PlaySound("Amount_Increase", "HUD_Donate_Sounds")
             end
@@ -69,7 +73,7 @@ RegisterNUICallback("itemValue", function(body, resultCallback)
         UpdateContextualDatas(value, category)
     else
         if not overlays_info[category] then
-            if hairstyleCache[category].model == 0 then
+            if hairstyleCache[category] and hairstyleCache[category].model == 0 then
                 if ContextualDataOn then
                     ContextualDataOn = false
                     PlaySound("SELECT", "HUD_PLAYER_MENU")
@@ -80,7 +84,7 @@ RegisterNUICallback("itemValue", function(body, resultCallback)
                         }
                     )
                 end
-            elseif hairstyleCache[category].model > 0 then
+            elseif hairstyleCache[category] and hairstyleCache[category].model > 0 then
                 -- if ContextualDataOn == false then
                 UpdateContextualDatas(hairstyleCache[category].model, category)
                 -- end

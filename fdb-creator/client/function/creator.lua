@@ -7,6 +7,45 @@ function Change(id, category, change_type, value)
     end
     local gender
     if IsPedMale(ped) then gender = "male" else gender = "female" end
+
+    -- Processamento de categorias de genética
+    if category == "height" then
+        CachePedData.height = scale(id, 0, 100, 0.85, 1.15)
+        SetPedScale(ped, CachePedData.height)
+        return
+    end
+
+    if category == "body" or category == "upper" then
+        CachePedData.upperbody = id
+        local SkinColor = DefaultChar[CachePedData.gender][CachePedData.skintone]
+        if SkinColor and SkinColor.Body and SkinColor.Body[id] then
+            local bodyType = tonumber("0x" .. SkinColor.Body[id])
+            if bodyType then
+                ApplyShopItemToPed(bodyType, ped)
+                UpdatePedVariation(ped)
+            end
+        end
+        return
+    end
+
+    if category == "waist" then
+        CachePedData.body_waist = id
+        return
+    end
+
+    if category == "legs" then
+        CachePedData.lowerbody = id
+        local SkinColor = DefaultChar[CachePedData.gender][CachePedData.skintone]
+        if SkinColor and SkinColor.Legs and SkinColor.Legs[id] then
+            local legs = tonumber("0x" .. SkinColor.Legs[id])
+            if legs then
+                ApplyShopItemToPed(legs, ped)
+                UpdatePedVariation(ped)
+            end
+        end
+        return
+    end
+
     if id < 1 then
         if category == "cloaks" or category == "ponchos" or category == "capes" then
             local categories = { "cloaks", "ponchos", "capes" }
@@ -34,12 +73,18 @@ function Change(id, category, change_type, value)
             Citizen.InvokeNative(0xD710A5007C2AC539, ped, hexHash, true)
             NativeUpdatePedVariation(ped)
         end
-        hairstyleCache[category].model = id
+        if hairstyleCache[category] then
+            hairstyleCache[category].model = id
+        end
     else
         if change_type == "model" then
-            hairstyleCache[category].model = id
-            if MURPHY_ASSETS[gender][category][id].drawable then
-                hairstyleCache[category].texture = {}
+            if hairstyleCache[category] then
+                hairstyleCache[category].model = id
+            end
+            if MURPHY_ASSETS[gender] and MURPHY_ASSETS[gender][category] and MURPHY_ASSETS[gender][category][id] and MURPHY_ASSETS[gender][category][id].drawable then
+                if hairstyleCache[category] then
+                    hairstyleCache[category].texture = {}
+                end
                 local drawable = MURPHY_ASSETS[gender][category][id].drawable
                 local albedo = MURPHY_ASSETS[gender][category][id].variants[1].albedo
                 local normal = MURPHY_ASSETS[gender][category][id].variants[1].normal
@@ -48,10 +93,12 @@ function Change(id, category, change_type, value)
                 local tint0 = MURPHY_ASSETS[gender][category][id].variants[1].tint[1]
                 local tint1 = MURPHY_ASSETS[gender][category][id].variants[1].tint[2]
                 local tint2 = MURPHY_ASSETS[gender][category][id].variants[1].tint[3]
-                hairstyleCache[category].texture.palette = 1
-                hairstyleCache[category].texture.tint0 = tint0
-                hairstyleCache[category].texture.tint1 = tint1
-                hairstyleCache[category].texture.tint2 = tint2
+                if hairstyleCache[category] and hairstyleCache[category].texture then
+                    hairstyleCache[category].texture.palette = 1
+                    hairstyleCache[category].texture.tint0 = tint0
+                    hairstyleCache[category].texture.tint1 = tint1
+                    hairstyleCache[category].texture.tint2 = tint2
+                end
                 UpdateCustomhairstyle(ped, drawable, albedo, normal, material, palette, tint0, tint1, tint2)
                 if Config.DevMode then
                     SendNUIMessage({
@@ -63,12 +110,14 @@ function Change(id, category, change_type, value)
                         "moveAsset " .. gender .. " " .. category .. " " .. MURPHY_ASSETS[gender][category][id].drawable)
                 end
             else
-                hairstyleCache[category].texture = 1
+                if hairstyleCache[category] then
+                    hairstyleCache[category].texture = 1
+                end
                 NativeSetPedComponentEnabled(ped, MURPHY_ASSETS[gender][category][id][1].hash, false, true,
                     true)
             end
         else
-            if MURPHY_ASSETS[gender][category][hairstyleCache[category].model].drawable then
+            if hairstyleCache[category] and hairstyleCache[category].model and MURPHY_ASSETS[gender] and MURPHY_ASSETS[gender][category] and MURPHY_ASSETS[gender][category][hairstyleCache[category].model] and MURPHY_ASSETS[gender][category][hairstyleCache[category].model].drawable then
                 drawable = MURPHY_ASSETS[gender][category][hairstyleCache[category].model].drawable
                 if change_type ~= "variants" then
                     albedo = MURPHY_ASSETS[gender][category][hairstyleCache[category].model].variants
@@ -113,7 +162,7 @@ function Change(id, category, change_type, value)
                     tint2 = value
                 end
                 UpdateCustomhairstyle(ped, drawable, albedo, normal, material, palette, tint0, tint1, tint2)
-            else
+            elseif hairstyleCache[category] then
                 local catHash
 
 
