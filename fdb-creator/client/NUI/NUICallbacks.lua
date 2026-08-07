@@ -442,8 +442,15 @@ RegisterNUICallback("sexeStatusChanged", function(data, cb)
             DeleteEntity(CachePed)
         end
         SetPlayerModel(PlayerId(), GetHashKey(model))
+        
+        -- Safe wait for player model switch to complete
+        local tempTimer = 0
+        while GetEntityModel(PlayerPedId()) ~= GetHashKey(model) and tempTimer < 500 do
+            Wait(10)
+            tempTimer = tempTimer + 1
+        end
+        
         CachePed = PlayerPedId()
-        -- local entity = CreatePed_2(GetHashKey(model), 0.0, 0.0, 0.0, 0.0, false, true)
         Wait(10)
         EquipMetaPedOutfitPreset(CachePed, 0, false)
 

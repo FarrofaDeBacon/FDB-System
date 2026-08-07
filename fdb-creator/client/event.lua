@@ -26,6 +26,28 @@ end)
 
 RegisterNetEvent("fdb_creator:LaunchCreator", function()
     FreezeEntityPosition(PlayerPedId(), false)
+    
+    -- Initialize CachePedData with default values if not present
+    if not CachePedData or not CachePedData.pedmodel then
+        CachePedData = deepcopy(DefaultCachePedData)
+        print("[fdb-creator] LaunchCreator: Initialized CachePedData with default values")
+    end
+
+    local model = CachePedData.pedmodel.model or "mp_male"
+    local modelHash = GetHashKey(model)
+    
+    RequestModel(modelHash)
+    while not HasModelLoaded(modelHash) do
+        Wait(10)
+    end
+    
+    if GetEntityModel(PlayerPedId()) ~= modelHash then
+        SetPlayerModel(PlayerId(), modelHash)
+        Wait(10)
+    end
+    
+    CachePed = PlayerPedId()
+
     local selectedgender = "female"
     if CachePedData.gender == "Male" then selectedgender = "male" end
     for k, v in pairs(MURPHY_ASSETS[selectedgender]) do
@@ -38,33 +60,16 @@ RegisterNetEvent("fdb_creator:LaunchCreator", function()
 
     overlay_all_layers = deepcopy(baseoverlay)
 
-
-    local model = "mp_male"
     local coords = Config.CharSelect.playerSpawn.coords
     local heading = Config.CharSelect.playerSpawn.heading
-    -- RequestModel(GetHashKey(model))
-    -- while not HasModelLoaded(GetHashKey(model)) do
-    --     Wait(1)
-    -- end
-    -- SetPlayerModel(PlayerId(), GetHashKey(model))
-    -- local entity = CreatePed_2(GetHashKey(model), 0.0,0.0,0.0, 0.0, false, true)
-    -- repeat
-    --     Wait(1)
-    -- until DoesEntityExist(entity)
     Wait(10) 
-    -- EquipMetaPedOutfitPreset(CachePed, 3, false)
-    
-    -- Safety check before applying ped data
-    if not CachePedData or not CachePedData.pedmodel then
-        print("[fdb-creator] Error: CachePedData not initialized properly")
-        return
-    end
     
     SetEntityCoords(CachePed, coords)
     SetEntityHeading(CachePed, heading)
 
     DisplayRadar(false)
     Wait(200)
+    EquipMetaPedOutfitPreset(CachePed, 0, false)
     ApplyCachePedDataToPedPlayer()
     RemoveAllClothesExceptEssentials(CachePed)
     Light()
@@ -75,8 +80,6 @@ RegisterNetEvent("fdb_creator:LaunchCreator", function()
             type = "showCharGlobalMenu",
         }
     )
-
-   
 end)
 
 -- ═══════════════════════════════════════════════════════════════════════════

@@ -97,6 +97,14 @@ function NPCAssetsToPed(model, outfit, target)
         RequestModel(playermodel)
         while not HasModelLoaded(playermodel) do Wait(100) end
         SetPlayerModel(PlayerId(), playermodel)
+        
+        -- Safe wait for player model switch to complete
+        local tempTimer = 0
+        while GetEntityModel(PlayerPedId()) ~= playermodel and tempTimer < 500 do
+            Wait(10)
+            tempTimer = tempTimer + 1
+        end
+        
         ped = PlayerPedId()
         CachePed = ped
         Citizen.InvokeNative(0x283978A15512B2FE, ped, true)
