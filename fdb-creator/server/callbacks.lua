@@ -162,3 +162,15 @@ AddEventHandler("fdb-barber:updatehairstyle", function(barberCache, barber_overl
             { citizenid, json.encode(barberCache), json.encode(makeup), json.encode(permanent), outfitid or 0 })
     end
 end)
+
+RegisterServerEvent("fdb-creator:PutPlayerInInstance")
+AddEventHandler("fdb-creator:PutPlayerInInstance", function()
+    local src = source
+    PutPlayerinInstance(src)
+end)
+
+RegisterServerEvent("fdb-creator:RemovePlayerFromInstance")
+AddEventHandler("fdb-creator:RemovePlayerFromInstance", function()
+    local src = source
+    RemovePlayerFromInstance(src)
+end)

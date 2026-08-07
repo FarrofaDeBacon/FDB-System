@@ -24,6 +24,47 @@ RegisterNetEvent("fdb-creator:OpenCharSelect", function()
     TriggerServerEvent("fdb-creator:getCharacters")
 end)
 
+Firstname = nil
+Lastname = nil
+Nationality = nil
+Selectedsex = nil
+Birthdate = nil
+Cid = nil
+Skinkosong = false
+
+RegisterNetEvent('fdb-creator:client:OpenCreator', function(data, empty)
+    TriggerServerEvent("fdb-creator:PutPlayerInInstance")
+    
+    if data then
+        Cid = data.cid
+        Firstname = data.firstname
+        Lastname = data.lastname
+        Nationality = data.nationality
+        Selectedsex = data.gender
+        Birthdate = data.birthdate
+        
+        CharacterName = data.firstname
+        CharacterSurname = data.lastname
+        CharacterBirthDay = 1
+        CharacterBirthMonth = 1
+        CharacterBirthYear = 1900
+        
+        local genderStr = (data.gender == 1) and "Male" or "Female"
+        local modelStr = (data.gender == 1) and "mp_male" or "mp_female"
+        
+        CachePedData = deepcopy(DefaultCachePedData)
+        CachePedData.gender = genderStr
+        CachePedData.pedmodel = { model = modelStr, outfit = 0 }
+    elseif empty then
+        Skinkosong = true
+        CachePedData = deepcopy(DefaultCachePedData)
+    else
+        CachePedData = deepcopy(DefaultCachePedData)
+    end
+    
+    TriggerEvent("fdb_creator:LaunchCreator")
+end)
+
 RegisterNetEvent("fdb_creator:LaunchCreator", function()
     FreezeEntityPosition(PlayerPedId(), false)
     

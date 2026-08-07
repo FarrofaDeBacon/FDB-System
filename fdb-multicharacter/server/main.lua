@@ -69,7 +69,7 @@ RegisterNetEvent('fdb-multicharacter:server:loadUserData', function(cData, skind
         if not skindata then
             TriggerClientEvent('fdb-spawn:client:setupSpawnUI', src, cData, false)
         else
-            TriggerClientEvent('fdb-appearance:client:OpenCreator', src, false, true)
+            TriggerClientEvent('fdb-creator:client:OpenCreator', src, false, true)
         end
         TriggerEvent('fdb-log:server:CreateLog', 'joinleave', 'Player Joined Server', 'green', '**' .. GetPlayerName(src) .. '** joined the server..')
     end

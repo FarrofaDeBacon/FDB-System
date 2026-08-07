@@ -299,7 +299,7 @@ RegisterNUICallback('createNewCharacter', function(data, cb) -- Creating a char
     cleanPed(charPed)
     DoScreenFadeIn(1000)
     FreezeEntityPosition(PlayerPedId(), false)
-    TriggerEvent('fdb-appearance:client:OpenCreator', data)
+    TriggerEvent('fdb-creator:client:OpenCreator', data)
     Wait(500)
     cb('ok')
 end)
