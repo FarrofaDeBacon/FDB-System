@@ -1,15 +1,5 @@
 local RSGCore = exports['rsg-core']:GetCoreObject()
 
--- Helper functions for instances (routing buckets)
-function PutPlayerinInstance(src)
-    SetPlayerRoutingBucket(src, src + 100)
-    SetRoutingBucketPopulationEnabled(src + 100, false)
-end
-
-function RemovePlayerFromInstance(src)
-    SetPlayerRoutingBucket(src, 0)
-end
-
 -- Callback GetPedData: Returns the character features (CachePedData)
 Callback.register('fdb-creator:GetPedData', function(source, charid)
     local citizenid = charid or GetCharIdentifier(source)

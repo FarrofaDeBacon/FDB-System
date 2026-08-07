@@ -12,7 +12,8 @@ server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'shared/**.lua',
     'server/adapters/RSGAdapter.lua',
-    'server/callbacks_custom.lua',
+    'server/function.lua',
+    'server/callbacks.lua',
 }
 
 escrow_ignore {
