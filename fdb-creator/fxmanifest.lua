@@ -31,5 +31,3 @@ files {
 ui_page 'ui/index.html'
 
 lua54 'yes'
-
-dependency '/assetpacks'
