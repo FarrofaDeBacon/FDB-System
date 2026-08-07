@@ -1,4 +1,0 @@
--------------
--- Server Side: Add Overwrite for your core
--- ⚠️ This file is executed in all resources that load the framework module ⚠️
--------------

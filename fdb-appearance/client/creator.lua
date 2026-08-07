@@ -220,17 +220,12 @@ function ApplySkin()
             LoadedComponents = _SkinData
         end
         FixIssues(_Target)
-        LoadHeight(_Target, _SkinData)
-        LoadBoody(_Target, _SkinData)
-        LoadHead(_Target, _SkinData)
-        LoadHair(_Target, _SkinData)
-        LoadBeard(_Target, _SkinData)
-        LoadEyes(_Target, _SkinData)
-        LoadFeatures(_Target, _SkinData)
-        LoadBodyFeature(_Target, _SkinData.body_size, Data.Appearance.body_size)
-        LoadBodyFeature(_Target, _SkinData.body_waist, Data.Appearance.body_waist)
-        LoadBodyFeature(_Target, _SkinData.chest_size, Data.Appearance.chest_size)
-        LoadOverlays(_Target, _SkinData)
+        
+        -- Carregar genética/características físicas do saloon fdb-creator
+        TriggerEvent("fdb-creator:loadskin")
+        Wait(4000)
+        
+        SetEntityAlpha(_Target, 255)
         SetAttributeCoreValue(_Target, 0, 100)
         SetAttributeCoreValue(_Target, 1, 100)
         SetEntityHealth(_Target, currentHealth, 0)

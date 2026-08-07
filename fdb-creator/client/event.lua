@@ -82,12 +82,23 @@ RegisterNetEvent("fdb_creator:LaunchCreator", function()
         Wait(10)
     end
     
+    local coords = Config.CharSelect.playerSpawn.coords
+    local heading = Config.CharSelect.playerSpawn.heading
+
     if GetEntityModel(PlayerPedId()) ~= modelHash then
         SetPlayerModel(PlayerId(), modelHash)
-        Wait(10)
+        local timeout = 0
+        while GetEntityModel(PlayerPedId()) ~= modelHash and timeout < 200 do
+            Wait(10)
+            timeout = timeout + 1
+        end
     end
     
     CachePed = PlayerPedId()
+    
+    SetEntityCoords(CachePed, coords.x, coords.y, coords.z, false, false, false, false)
+    SetEntityHeading(CachePed, heading)
+    FreezeEntityPosition(CachePed, true)
 
     local selectedgender = "female"
     if CachePedData.gender == "Male" then selectedgender = "male" end
@@ -100,13 +111,6 @@ RegisterNetEvent("fdb_creator:LaunchCreator", function()
     end
 
     overlay_all_layers = deepcopy(baseoverlay)
-
-    local coords = Config.CharSelect.playerSpawn.coords
-    local heading = Config.CharSelect.playerSpawn.heading
-    Wait(10) 
-    
-    SetEntityCoords(CachePed, coords)
-    SetEntityHeading(CachePed, heading)
 
     DisplayRadar(false)
     Wait(200)
