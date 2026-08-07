@@ -229,6 +229,10 @@ function ApplyCachePedDataToPedPlayer()
         end
         CachePed = PlayerPedId()
         
+        SetEntityVisible(CachePed, true, 0)
+        SetEntityAlpha(CachePed, 255, false)
+        ResetEntityAlpha(CachePed)
+        
         -- Garante posicionamento correto após troca de modelo do ped
         local spawnCoords = Config.CharSelect.playerSpawn.coords
         local spawnHeading = Config.CharSelect.playerSpawn.heading

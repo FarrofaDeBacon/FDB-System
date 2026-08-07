@@ -113,6 +113,10 @@ RegisterNetEvent("fdb_creator:LaunchCreator", function()
     
     CachePed = PlayerPedId()
     
+    SetEntityVisible(CachePed, true, 0)
+    SetEntityAlpha(CachePed, 255, false)
+    ResetEntityAlpha(CachePed)
+    
     SetEntityCoords(CachePed, coords.x, coords.y, coords.z, false, false, false, false)
     SetEntityHeading(CachePed, heading)
     FreezeEntityPosition(CachePed, true)
