@@ -337,11 +337,26 @@ function FirstMenu()
     CreatorCache = CreatorCache or {}
     ClothesCache = ClothesCache or {}
 
+    local ped = PlayerPedId()
+    local sex = IsPedMale(ped) and 'male' or 'female'
+
+    -- Calcular limites máximos dinamicamente
+    local maxValues = {
+        hair = hairs_list[sex] and hairs_list[sex]["hair"] and #hairs_list[sex]["hair"] or 50,
+        beard = hairs_list[sex] and hairs_list[sex]["beard"] and #hairs_list[sex]["beard"] or 0,
+        shirt = clothing[sex] and clothing[sex]["shirts_full"] and #clothing[sex]["shirts_full"] or 100,
+        vest = clothing[sex] and clothing[sex]["vests"] and #clothing[sex]["vests"] or 50,
+        pants = clothing[sex] and clothing[sex]["pants"] and #clothing[sex]["pants"] or 100,
+        boots = clothing[sex] and clothing[sex]["boots"] and #clothing[sex]["boots"] or 100,
+        hat = clothing[sex] and clothing[sex]["hats"] and #clothing[sex]["hats"] or 50,
+    }
+
     -- Enviar mensagem para abrir NUI do Criador em Svelte
     SendNUIMessage({
         action = 'openCreator',
-        sex = IsPedMale(PlayerPedId()) and 'male' or 'female',
-        cache = CreatorCache
+        sex = sex,
+        cache = CreatorCache,
+        maxValues = maxValues
     })
     SetNuiFocus(true, true)
     print("^2[fdb-appearance] SetNuiFocus(true, true) executed^0")

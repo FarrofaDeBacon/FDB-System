@@ -6,6 +6,17 @@
     let pedSex = $state('male'); // 'male' ou 'female'
     let activeTab = $state('genetics'); // 'genetics', 'face', 'hair', 'clothing'
 
+    // Limites máximos dinâmicos enviados pelo Client Lua
+    let maxValues = $state({
+        hair: 50,
+        beard: 30,
+        shirt: 100,
+        vest: 50,
+        pants: 100,
+        boots: 100,
+        hat: 50
+    });
+
     // Estado inicial padrão dos controles
     let creatorCache = $state({
         // Genética
@@ -104,6 +115,9 @@
                 if (data.cache) {
                     creatorCache = { ...creatorCache, ...data.cache };
                 }
+                if (data.maxValues) {
+                    maxValues = { ...maxValues, ...data.maxValues };
+                }
                 isOpen = true;
                 setCamera('full');
             } else if (data.action === 'closeCreator') {
@@ -195,7 +209,7 @@
                     
                     <div class="control-group">
                         <label for="base-head">Cabeça Base ({creatorCache.head})</label>
-                        <input id="base-head" type="range" min="1" max="6" step="1" value={creatorCache.head} on:input={(e) => handleChange('head', parseInt(e.target.value))} />
+                        <input id="base-head" type="range" min="1" max="120" step="1" value={creatorCache.head} on:input={(e) => handleChange('head', parseInt(e.target.value))} />
                     </div>
 
                     <div class="control-group">
@@ -280,7 +294,7 @@
                     <div class="scroll-area">
                         <div class="control-group">
                             <label for="hair-style">Estilo de Cabelo ({creatorCache.hair})</label>
-                            <input id="hair-style" type="range" min="1" max="50" step="1" value={creatorCache.hair} on:input={(e) => handleChange('hair', parseInt(e.target.value))} />
+                            <input id="hair-style" type="range" min="1" max={maxValues.hair} step="1" value={creatorCache.hair} on:input={(e) => handleChange('hair', parseInt(e.target.value))} />
                         </div>
 
                         <div class="color-picker-title">Cor do Cabelo</div>
@@ -299,7 +313,7 @@
                         {#if pedSex === 'male'}
                             <div class="control-group" style="margin-top: 20px;">
                                 <label for="beard-style">Estilo de Barba ({creatorCache.beard})</label>
-                                <input id="beard-style" type="range" min="0" max="30" step="1" value={creatorCache.beard} on:input={(e) => handleChange('beard', parseInt(e.target.value))} />
+                                <input id="beard-style" type="range" min="0" max={maxValues.beard} step="1" value={creatorCache.beard} on:input={(e) => handleChange('beard', parseInt(e.target.value))} />
                             </div>
 
                             <div class="control-group">
@@ -328,27 +342,27 @@
                     <div class="scroll-area">
                         <div class="control-group">
                             <label for="shirt">Camisa ({creatorCache.shirt})</label>
-                            <input id="shirt" type="range" min="1" max="10" step="1" value={creatorCache.shirt} on:input={(e) => handleChange('shirt', parseInt(e.target.value))} />
+                            <input id="shirt" type="range" min="1" max={maxValues.shirt} step="1" value={creatorCache.shirt} on:input={(e) => handleChange('shirt', parseInt(e.target.value))} />
                         </div>
 
                         <div class="control-group">
                             <label for="vest">Colete ({creatorCache.vest})</label>
-                            <input id="vest" type="range" min="0" max="8" step="1" value={creatorCache.vest} on:input={(e) => handleChange('vest', parseInt(e.target.value))} />
+                            <input id="vest" type="range" min="0" max={maxValues.vest} step="1" value={creatorCache.vest} on:input={(e) => handleChange('vest', parseInt(e.target.value))} />
                         </div>
 
                         <div class="control-group">
                             <label for="pants">Calça ({creatorCache.pants})</label>
-                            <input id="pants" type="range" min="1" max="10" step="1" value={creatorCache.pants} on:input={(e) => handleChange('pants', parseInt(e.target.value))} />
+                            <input id="pants" type="range" min="1" max={maxValues.pants} step="1" value={creatorCache.pants} on:input={(e) => handleChange('pants', parseInt(e.target.value))} />
                         </div>
 
                         <div class="control-group">
                             <label for="boots">Botas ({creatorCache.boots})</label>
-                            <input id="boots" type="range" min="1" max="10" step="1" value={creatorCache.boots} on:input={(e) => handleChange('boots', parseInt(e.target.value))} />
+                            <input id="boots" type="range" min="1" max={maxValues.boots} step="1" value={creatorCache.boots} on:input={(e) => handleChange('boots', parseInt(e.target.value))} />
                         </div>
 
                         <div class="control-group">
                             <label for="hat">Chapéu ({creatorCache.hat})</label>
-                            <input id="hat" type="range" min="0" max="6" step="1" value={creatorCache.hat} on:input={(e) => handleChange('hat', parseInt(e.target.value))} />
+                            <input id="hat" type="range" min="0" max={maxValues.hat} step="1" value={creatorCache.hat} on:input={(e) => handleChange('hat', parseInt(e.target.value))} />
                         </div>
                     </div>
                 {/if}
@@ -386,8 +400,8 @@
         height: 100vh;
         display: flex;
         align-items: center;
-        font-family: var(--fdb-font-body, 'Roboto Condensed', sans-serif);
-        color: var(--fdb-text-primary, #d4c5b0);
+        font-family: var(--fdb-font-body);
+        color: var(--fdb-text-primary);
         pointer-events: none; /* Deixa o fundo livre para cliques de câmera se necessário */
     }
 
@@ -409,7 +423,7 @@
     }
 
     .header h2 {
-        font-family: var(--fdb-font-display, 'Playfair Display', serif);
+        font-family: var(--fdb-font-display);
         color: var(--fdb-accent-color, #c9a15a);
         font-size: 24px;
         margin: 0 0 5px 0;
