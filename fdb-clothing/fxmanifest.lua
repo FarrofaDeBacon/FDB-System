@@ -3,7 +3,7 @@ rdr3_warning 'I acknowledge that this is a prerelease build of RedM, and I am aw
 game 'rdr3'
 lua54 'yes'
 
-description 'fdb-appearance'
+description 'fdb-clothing'
 version '2.5.6'
 
 shared_scripts {
