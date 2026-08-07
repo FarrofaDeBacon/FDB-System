@@ -48,7 +48,7 @@ MURPHY_ASSETS = {
             }},
             {drawable=692418668,variants={
                 {albedo=-122711323,normal=2121174521,material=-184742647,palette=-541985204,tint={9,9,9},ped="mp_u_m_m_fos_railway_foreman_01",outfit=1},
-            }},
+            }}, 
             {drawable=-1113911690,variants={
                 {albedo=-122711323,normal=2121174521,material=-184742647,palette=-541985204,tint={68,57,2},ped="mp_u_m_m_legendarybounty_09",outfit=1},
             }},

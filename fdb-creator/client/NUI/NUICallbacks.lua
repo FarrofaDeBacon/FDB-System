@@ -164,25 +164,10 @@ RegisterNUICallback("cameraChange", function(data, cb)
 
     if cameraName == "R" then
         local ped = CachePed
-        local x, y, z = table.unpack(GetEntityCoords(ped))
 
-        -- Initialiser le heading de base si pas encore fait
-        if not baseHeading then
-            baseHeading = GetEntityHeading(ped)
-            -- Stocker l'offset initial pour que 180 corresponde à baseHeading
-            angleOffset = 180 - baseHeading
-        end
-
-        -- Calculer le heading cible directement
-        local targetHeading = (value - angleOffset) % 360
-        local rad = math.rad(targetHeading)
-
-        -- Calculer un point à 1 unité devant le ped selon le heading voulu
-        local distance = 1.0
-        local targetX = x + (math.sin(-rad) * distance)
-        local targetY = y + (math.cos(-rad) * distance)
-
-        TaskTurnPedToFaceCoord(ped, targetX, targetY, z, 0)
+        -- Calcular o heading diretamente a partir do slider (0-360)
+        local targetHeading = tonumber(value) or 180.0
+        SetEntityHeading(ped, targetHeading)
         PlaySound("Amount_Decrease",
             "HUD_Donate_Sounds")
     end
@@ -507,7 +492,18 @@ RegisterNUICallback("pedValue", function(data, cb)
     CachePedData.pedmodel = { model = model, outfit = outfit }
 
     NPCAssetsToPed(model, outfit)
-    RemoveAllClothesExceptEssentials(PlayerPedId(), true)
+    
+    -- Reposicionar o ped no saloon e forçar visibilidade após troca de modelo
+    local coords = Config.CharSelect.playerSpawn.coords
+    local heading = Config.CharSelect.playerSpawn.heading
+    CachePed = PlayerPedId()
+    SetEntityVisible(CachePed, true, 0)
+    SetEntityAlpha(CachePed, 255, false)
+    ResetEntityAlpha(CachePed)
+    SetEntityCoords(CachePed, coords.x, coords.y, coords.z, false, false, false, false)
+    SetEntityHeading(CachePed, heading)
+    FreezeEntityPosition(CachePed, true)
+    
     DisplayHud(true)
     if pedwarning == false then
         pedwarning = true

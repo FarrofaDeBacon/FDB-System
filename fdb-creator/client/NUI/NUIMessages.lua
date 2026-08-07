@@ -361,6 +361,12 @@ function OpenBarberMenu()
             else
                 if next(MURPHY_ASSETS[selectedgender][cat]) ~= nil then
                     if tostring(key) ~= "categories" then
+                        -- Inicializar hairstyleCache para categorias que ainda não existem
+                        if hairstyleCache[cat] == nil then
+                            hairstyleCache[cat] = {}
+                            hairstyleCache[cat].model = 0
+                            hairstyleCache[cat].texture = 0
+                        end
                         table.insert(items, {
                             id = cat,
                             name = Lang.Categories[cat] or cat,
