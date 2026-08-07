@@ -11,7 +11,7 @@ client_scripts {
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'shared/**.lua',
-    'server/adapters/RSGAdapter.lua',
+    'server/adapters/FDBAdapter.lua',
     'server/function.lua',
     'server/callbacks.lua',
 }

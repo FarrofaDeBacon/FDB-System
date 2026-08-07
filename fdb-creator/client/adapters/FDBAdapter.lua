@@ -1,4 +1,4 @@
-if Config.framework == 'rsg-core' then
+if Config.framework == 'fdb-core' then
     local myChars          = {}
     charselectpeds         = {}
     headsonscreen          = {}

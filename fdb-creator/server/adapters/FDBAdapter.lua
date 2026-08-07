@@ -1,4 +1,4 @@
-if Config.framework == 'rsg-core' then
+if Config.framework == 'fdb-core' then
     local RSGCore = exports['fdb-core']:GetCoreObject()
     local creatingCharacters = {} -- Track character creation by source to prevent duplicates
 
