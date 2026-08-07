@@ -33,6 +33,7 @@ Cid = nil
 Skinkosong = false
 
 RegisterNetEvent('fdb-creator:client:OpenCreator', function(data, empty)
+    PedAccess = (Config.PedPermission and Config.PedPermission.default ~= nil) and Config.PedPermission.default or true
     TriggerServerEvent("fdb-creator:PutPlayerInInstance")
     
     if data then
@@ -66,7 +67,16 @@ RegisterNetEvent('fdb-creator:client:OpenCreator', function(data, empty)
 end)
 
 RegisterNetEvent("fdb_creator:LaunchCreator", function()
-    FreezeEntityPosition(PlayerPedId(), false)
+    local coords = Config.CharSelect.playerSpawn.coords
+    local heading = Config.CharSelect.playerSpawn.heading
+
+    -- Congelar e teleportar jogador antes para carregar colisão e evitar queda no limbo
+    FreezeEntityPosition(PlayerPedId(), true)
+    SetEntityCoords(PlayerPedId(), coords.x, coords.y, coords.z, false, false, false, false)
+    SetEntityHeading(PlayerPedId(), heading)
+    RequestCollisionAtCoord(coords.x, coords.y, coords.z)
+    LoadSceneForAreaByRadius(coords.x, coords.y, coords.z, 20.0)
+    Wait(1000)
     
     -- Initialize CachePedData with default values if not present
     if not CachePedData or not CachePedData.pedmodel then
@@ -81,9 +91,6 @@ RegisterNetEvent("fdb_creator:LaunchCreator", function()
     while not HasModelLoaded(modelHash) do
         Wait(10)
     end
-    
-    local coords = Config.CharSelect.playerSpawn.coords
-    local heading = Config.CharSelect.playerSpawn.heading
 
     if GetEntityModel(PlayerPedId()) ~= modelHash then
         SetPlayerModel(PlayerId(), modelHash)
