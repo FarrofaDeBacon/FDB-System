@@ -13,6 +13,17 @@ if Config.DevMode then
     end)
 end
 
+CreateThread(function()
+    while true do
+        Wait(0)
+        if NetworkIsSessionStarted() then
+            Wait(1000)
+            TriggerEvent('fdb-creator:OpenCharSelect')
+            return
+        end
+    end
+end)
+
 local charselectpeds = {}
 -- RegisterNetEvent("fdb-creator:LaunchCharSelect", function()
 --     local headsonscreen = {}

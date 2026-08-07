@@ -497,4 +497,130 @@ if Config.framework == 'fdb-core' then
             print("[fdb-creator] Admin " .. GetPlayerName(_source) .. " opened second chance menu for: " .. targetPlayer .. " (ID: " .. targetId .. ")")
         end, false)
     end
+
+    -- Backend integration for multicharacter features (replaces fdb-multicharacter)
+    local hasDonePreloading = {}
+
+    AddEventHandler('RSGCore:Server:PlayerLoaded', function(Player)
+        Wait(1000)
+        hasDonePreloading[Player.PlayerData.source] = true
+    end)
+
+    AddEventHandler('RSGCore:Server:OnPlayerUnload', function(src)
+        hasDonePreloading[src] = false
+    end)
+
+    local function GenerateHorseid()
+        local UniqueFound = false
+        local horseid = nil
+        while not UniqueFound do
+            horseid = tostring(RSGCore.Shared.RandomStr(3) .. RSGCore.Shared.RandomInt(3)):upper()
+            local result = MySQL.prepare.await('SELECT COUNT(*) as count FROM player_horses WHERE horseid = ?', { horseid })
+            if result == 0 then
+                UniqueFound = true
+            end
+        end
+        return horseid
+    end
+
+    local function GiveStarterItems(source)
+        local Player = RSGCore.Functions.GetPlayer(source)
+        for k, v in pairs(RSGCore.Shared.StarterItems) do
+            Player.Functions.AddItem(v.item, v.amount)
+        end
+        local StarterHorse = true
+        if StarterHorse then
+            local horseid = GenerateHorseid()
+            local horsesex = {'male', 'female'}
+            local randomSex = math.random(1, #horsesex)
+            local randomHorseSex = horsesex[randomSex]
+            MySQL.insert('INSERT INTO player_horses(stable, citizenid, horseid, name, horse, gender, active, born) VALUES(@stable, @citizenid, @horseid, @name, @horse, @gender, @active, @born)', {
+                ['@stable'] = 'valentine',
+                ['@citizenid'] = Player.PlayerData.citizenid,
+                ['@horseid'] = horseid,
+                ['@name'] = 'Starter',
+                ['@horse'] = 'A_C_Horse_KentuckySaddle_Grey',
+                ['@gender'] = randomHorseSex,
+                ['@active'] = true,
+                ['@born'] = os.time()
+            })
+        end
+    end
+
+    RegisterNetEvent('fdb-multicharacter:server:disconnect', function()
+        local src = source
+        DropPlayer(src, "You have disconnected from FDB System")
+    end)
+
+    RegisterNetEvent('fdb-multicharacter:server:loadUserData', function(cData, skindata)
+        local src = source
+        if RSGCore.Player.Login(src, cData.citizenid) then
+            print('^2[fdb-core]^7 '..GetPlayerName(src)..' (Citizen ID: '..cData.citizenid..') has successfully loaded via creator backend!')
+            repeat
+                Wait(10)
+            until hasDonePreloading[src]
+            RSGCore.Commands.Refresh(src)
+            TriggerClientEvent("fdb-multicharacter:client:closeNUI", src)
+            if not skindata then
+                TriggerClientEvent('fdb-spawn:client:setupSpawnUI', src, cData, false)
+            else
+                TriggerClientEvent('fdb-creator:client:OpenCreator', src, false, true)
+            end
+            TriggerEvent('fdb-log:server:CreateLog', 'joinleave', 'Player Joined Server', 'green', '**' .. GetPlayerName(src) .. '** joined the server..')
+        end
+    end)
+
+    RegisterNetEvent('fdb-multicharacter:server:createCharacter', function(data)
+        local newData = {}
+        local src = source
+        newData.cid = data.cid
+        newData.charinfo = data
+        if RSGCore.Player.Login(src, false, newData) then
+            repeat
+                Wait(10)
+            until hasDonePreloading[src]
+            RSGCore.ShowSuccess(GetCurrentResourceName(), GetPlayerName(src)..' has successfully loaded via creator backend!')
+            RSGCore.Commands.Refresh(src)
+            GiveStarterItems(src)
+        end
+    end)
+
+    RegisterNetEvent('fdb-multicharacter:server:deleteCharacter', function(citizenid)
+        local src = source
+        MySQL.update('DELETE FROM playerskins WHERE citizenid = ?', {citizenid})
+        RSGCore.Player.DeleteCharacter(src, citizenid)
+    end)
+
+    RSGCore.Functions.CreateCallback("fdb-multicharacter:server:setupCharacters", function(source, cb)
+        local src = source
+        local license = RSGCore.Functions.GetIdentifier(src, 'license')
+        local plyChars = {}
+        MySQL.Async.fetchAll('SELECT * FROM players WHERE license = @license', {['@license'] = license}, function(result)
+            for i = 1, (#result), 1 do
+                result[i].charinfo = json.decode(result[i].charinfo)
+                result[i].money = json.decode(result[i].money)
+                result[i].job = json.decode(result[i].job)
+                plyChars[#plyChars+1] = result[i]
+            end
+            cb(plyChars)
+        end)
+    end)
+
+    RSGCore.Functions.CreateCallback("fdb-multicharacter:server:GetNumberOfCharacters", function(source, cb)
+        cb(5) -- Default slot limit
+    end)
+
+    RSGCore.Functions.CreateCallback("fdb-multicharacter:server:getAppearance", function(source, cb, citizenid)
+        MySQL.Async.fetchAll('SELECT * FROM playerskins WHERE citizenid = ?', { citizenid}, function(result)
+            if result ~= nil and #result > 0 then
+                local skinData = json.decode(result[1].skin)
+                local clothesData = json.decode(result[1].clothes)
+                result[1].skin = skinData
+                result[1].clothes = clothesData
+                cb(result[1])
+            else
+                cb(nil)
+            end
+        end)
+    end)
 end
