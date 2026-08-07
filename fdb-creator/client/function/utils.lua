@@ -222,8 +222,19 @@ function ApplyCachePedDataToPedPlayer()
             Wait(1)
         end
         SetPlayerModel(PlayerId(), GetHashKey(model))
-        Wait(100)
+        local timeout = 0
+        while GetEntityModel(PlayerPedId()) ~= GetHashKey(model) and timeout < 200 do
+            Wait(10)
+            timeout = timeout + 1
+        end
         CachePed = PlayerPedId()
+        
+        -- Garante posicionamento correto após troca de modelo do ped
+        local spawnCoords = Config.CharSelect.playerSpawn.coords
+        local spawnHeading = Config.CharSelect.playerSpawn.heading
+        SetEntityCoords(CachePed, spawnCoords.x, spawnCoords.y, spawnCoords.z, false, false, false, false)
+        SetEntityHeading(CachePed, spawnHeading)
+        FreezeEntityPosition(CachePed, true)
 
         SetModelAsNoLongerNeeded(GetHashKey(model))
         EquipMetaPedOutfitPreset(CachePed, 0, false)
@@ -426,7 +437,7 @@ function ApplyCachePedDataToPed(ped, data, charid)
         SetCharExpression(ped, ExpressionsHashes[k], v)
     end
     TriggerEvent("fdb-barber:loadbarberoverlayOnCharacter", charid, ped)
-    TriggerEvent("fdb_clothes:ApplyClothesToCharid", charid, ped)
+    TriggerEvent("murphy_clothes:ApplyClothesToCharid", charid, ped)
     UpdatePedVariation(ped)
 end
 
