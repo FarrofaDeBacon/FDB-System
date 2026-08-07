@@ -75,7 +75,6 @@ RegisterNetEvent("fdb_creator:LaunchCreator", function()
     SetEntityCoords(PlayerPedId(), coords.x, coords.y, coords.z, false, false, false, false)
     SetEntityHeading(PlayerPedId(), heading)
     RequestCollisionAtCoord(coords.x, coords.y, coords.z)
-    LoadSceneForAreaByRadius(coords.x, coords.y, coords.z, 20.0)
     Wait(1000)
     
     -- Initialize CachePedData with default values if not present
