@@ -1,6 +1,6 @@
 # 🎬 Complete Guide - CharSelect / Decor / Camera Configuration
 
-This guide explains how to fully customize the character selection location in **murphy_creator**.
+This guide explains how to fully customize the character selection location in **fdb_creator**.
 
 ---
 

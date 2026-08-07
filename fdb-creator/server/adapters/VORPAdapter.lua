@@ -32,7 +32,7 @@ if Config.framework == 'vorp' then
     end
 
     -- Event handler to send health data from VORP Core database
-    RegisterNetEvent("murphy_creator:GetHealthValues", function()
+    RegisterNetEvent("fdb_creator:GetHealthValues", function()
         local _source = source
         local healthData = { hOuter = 600, hInner = 600, sOuter = 100, sInner = 600 }
         
@@ -49,7 +49,7 @@ if Config.framework == 'vorp' then
         end
         
         -- Send health data back to client
-        TriggerClientEvent("murphy_creator:HealthFromCore", _source, healthData)
+        TriggerClientEvent("fdb_creator:HealthFromCore", _source, healthData)
     end)
 
     function CreateNewCharacter(src, data)
@@ -57,7 +57,7 @@ if Config.framework == 'vorp' then
         
         -- Prevent duplicate character creation
         if creatingCharacters[_source] then
-            print("^3[MURPHY CREATOR WARNING]^7 Character creation already in progress for source " .. _source)
+            print("^3[FDB-CREATOR WARNING]^7 Character creation already in progress for source " .. _source)
             return
         end
         
@@ -92,7 +92,7 @@ if Config.framework == 'vorp' then
         
         -- Prevent character creation if at or over slot limit
         if numChars >= slots then
-            print("^3[MURPHY CREATOR]^7 Player " .. _source .. " cannot create character - slot limit reached (" .. numChars .. "/" .. slots .. ")")
+            print("^3[FDB-CREATOR]^7 Player " .. _source .. " cannot create character - slot limit reached (" .. numChars .. "/" .. slots .. ")")
             creatingCharacters[_source] = nil
             TriggerClientEvent('vorp:TipRight', _source, 'You have reached your maximum character slots!', 5000)
             return
@@ -153,16 +153,16 @@ if Config.framework == 'vorp' then
     RegisterNetEvent("vorpcharacter:reloadedskinlistener", function()
         local src = source
         Wait(1500)
-        TriggerClientEvent("murphy_creator:loadskinvorp", src)
+        TriggerClientEvent("fdb-creator:loadskinvorp", src)
     end)
 
-    RegisterServerEvent("murphy_creator:deleteCharacter", function(_charid)
+    RegisterServerEvent("fdb-creator:deleteCharacter", function(_charid)
         local _source = source
         
         -- Check if player has permission to delete characters
         if not CanPlayerDeleteCharacter(_source) then
             TriggerClientEvent('vorp:TipRight', _source, "You don't have permission to delete characters.", 4000)
-            TriggerClientEvent('murphy_creator:OpenCharSelect', _source)
+            TriggerClientEvent('fdb-creator:OpenCharSelect', _source)
             return
         end
         
@@ -178,27 +178,27 @@ if Config.framework == 'vorp' then
                     end
                 end)
         end
-        deleteIfTableExists('murphy_creator', _charid)
-        deleteIfTableExists('murphy_barber', _charid)
-        deleteIfTableExists('murphy_barber_preset', _charid)
-        deleteIfTableExists('murphy_clothes', _charid)
-        deleteIfTableExists('murphy_outfits', _charid)
-        deleteIfTableExists('murphy_wearable', _charid)
-        TriggerClientEvent("murphy_creator:deleteCharacterClient", _source, _charid)
+        deleteIfTableExists('fdb_creator', _charid)
+        deleteIfTableExists('fdb_barber', _charid)
+        deleteIfTableExists('fdb_barber_preset', _charid)
+        deleteIfTableExists('fdb_clothes', _charid)
+        deleteIfTableExists('fdb_outfits', _charid)
+        deleteIfTableExists('fdb_wearable', _charid)
+        TriggerClientEvent("fdb-creator:deleteCharacterClient", _source, _charid)
         Wait(2000)
-        TriggerClientEvent('murphy_creator:OpenCharSelect', _source)
+        TriggerClientEvent('fdb-creator:OpenCharSelect', _source)
     end)
 
-    RegisterServerEvent("murphy_creator:vorpcharacter:deleteCharacter")
-    AddEventHandler("murphy_creator:vorpcharacter:deleteCharacter", function(charid)
+    RegisterServerEvent("fdb_creator:vorpcharacter:deleteCharacter")
+    AddEventHandler("fdb_creator:vorpcharacter:deleteCharacter", function(charid)
         local User = VorpCore.getUser(source)
         if User then
             User.removeCharacter(charid)
         end
     end)
 
-    RegisterServerEvent("murphy_creator:getCharacters")
-    AddEventHandler("murphy_creator:getCharacters", function()
+    RegisterServerEvent("fdb-creator:getCharacters")
+    AddEventHandler("fdb-creator:getCharacters", function()
         local _source = source
         if _source == nil then
             return
@@ -219,7 +219,7 @@ if Config.framework == 'vorp' then
             local totalQueries = 0
             for k, v in pairs(result) do
                 totalQueries = totalQueries + 1
-                MySQL.query('SELECT * FROM murphy_creator WHERE `charid`=@charid;', { charid = v.charidentifier },
+                MySQL.query('SELECT * FROM fdb_creator WHERE `charid`=@charid;', { charid = v.charidentifier },
                     function(data)
                         if UserCharacters then
                             if data[1] ~= nil then
@@ -264,7 +264,7 @@ if Config.framework == 'vorp' then
                 pedperm = PedPermission.default
             end
 
-            TriggerClientEvent('murphy_creator:LaunchCharSelect', _source, UserCharacters, pedperm,
+            TriggerClientEvent('fdb-creator:LaunchCharSelect', _source, UserCharacters, pedperm,
                 slots)
         end)
     end)
@@ -568,11 +568,11 @@ if Config.framework == 'vorp' then
         Chap        = { comp = -1 },
     }
 
-    Callback.register('murphy_barber_creator:GetCharSkinTone', function(source, male, characterid)
+    Callback.register('fdb-barber:GetCharSkinTone', function(source, male, characterid)
         local _source = source
         local albedo = nil
         local charid = characterid or GetCharIdentifier(_source)
-        MySQL.query("SELECT * FROM murphy_creator WHERE `charid`=@charid;", { charid = charid }, function(skins)
+        MySQL.query("SELECT * FROM fdb_creator WHERE `charid`=@charid;", { charid = charid }, function(skins)
             if skins[1] then
                 local pedata = skins[1].peddata
                 local decoded = json.decode(pedata)
@@ -723,18 +723,18 @@ if Config.framework == 'vorp' then
                         local charName = result[1].firstname .. " " .. result[1].lastname
                         
                         -- Delete from murphy tables
-                        deleteIfTableExists('murphy_creator', charidentifier)
-                        deleteIfTableExists('murphy_barber', charidentifier)
-                        deleteIfTableExists('murphy_barber_preset', charidentifier)
-                        deleteIfTableExists('murphy_clothes', charidentifier)
-                        deleteIfTableExists('murphy_outfits', charidentifier)
-                        deleteIfTableExists('murphy_wearable', charidentifier)
+                        deleteIfTableExists('fdb_creator', charidentifier)
+                        deleteIfTableExists('fdb_barber', charidentifier)
+                        deleteIfTableExists('fdb_barber_preset', charidentifier)
+                        deleteIfTableExists('fdb_clothes', charidentifier)
+                        deleteIfTableExists('fdb_outfits', charidentifier)
+                        deleteIfTableExists('fdb_wearable', charidentifier)
                         
                         -- Delete from VORP characters table
                         MySQL.query('DELETE FROM characters WHERE charidentifier = @charid;',
                             { ['@charid'] = charidentifier }, function()
                                 TriggerClientEvent('vorp:TipRight', _source, "Character '" .. charName .. "' (ID: " .. charidentifier .. ") has been deleted.", 5000)
-                                print("[murphy_creator] Admin " .. GetPlayerName(_source) .. " deleted character: " .. charName .. " (ID: " .. charidentifier .. ")")
+                                print("[fdb-creator] Admin " .. GetPlayerName(_source) .. " deleted character: " .. charName .. " (ID: " .. charidentifier .. ")")
                             end)
                     else
                         TriggerClientEvent('vorp:TipRight', _source, "Character with ID " .. charidentifier .. " not found.", 4000)
@@ -803,10 +803,10 @@ if Config.framework == 'vorp' then
             end
             
             -- Trigger the character customization menu for the target player
-            TriggerClientEvent('murphy_creator:SecondChance', targetId)
+            TriggerClientEvent('fdb-creator:SecondChance', targetId)
             TriggerClientEvent('vorp:TipRight', _source, "Opened character customization menu for " .. targetPlayer .. " (ID: " .. targetId .. ")", 5000)
             TriggerClientEvent('vorp:TipRight', targetId, "An admin has opened the character customization menu for you.", 5000)
-            print("[murphy_creator] Admin " .. GetPlayerName(_source) .. " opened second chance menu for: " .. targetPlayer .. " (ID: " .. targetId .. ")")
+            print("[fdb-creator] Admin " .. GetPlayerName(_source) .. " opened second chance menu for: " .. targetPlayer .. " (ID: " .. targetId .. ")")
         end, false)
     end
 end

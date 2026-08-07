@@ -7,7 +7,7 @@ if Config.framework == "REDEMRP2k23" then
     charselectpeds = {}
     headsonscreen = {}
     PedAccess = false
-    RegisterNetEvent('murphy_creator:LaunchCharSelect', function(characters, skins, clothes, pedperm, slots)
+    RegisterNetEvent('fdb-creator:LaunchCharSelect', function(characters, skins, clothes, pedperm, slots)
         ShutdownLoadingScreen()
         ShutdownLoadingScreenNui()
         headsonscreen = {}
@@ -242,12 +242,12 @@ if Config.framework == "REDEMRP2k23" then
         )
     end)
 
-    RegisterNetEvent("murphy_creator:PlaySelectedChar", function(id)
+    RegisterNetEvent("fdb_creator:PlaySelectedChar", function(id)
         TriggerServerEvent("redemrp:selectCharacter", id)
         TriggerEvent("redemrp_charselect:removeLoadingScreen")
-        TriggerServerEvent("murphy_creator:RemovePlayerFromInstance")
+        TriggerServerEvent("fdb-creator:RemovePlayerFromInstance")
         Wait(2000)
-        TriggerEvent("murphy_creator:loadskin")
+        TriggerEvent("fdb-creator:loadskin")
     end)
 
     RegisterNetEvent('redemrp_charselect:client:FinishSelection')
@@ -255,19 +255,19 @@ if Config.framework == "REDEMRP2k23" then
         TriggerEvent("redemrp_charselect:removeLoadingScreen")
         Wait(2000)
         print("Loading skin")
-        TriggerEvent("murphy_creator:loadskin")
-        TriggerServerEvent("murphy_creator:RemovePlayerFromInstance")
+        TriggerEvent("fdb-creator:loadskin")
+        TriggerServerEvent("fdb-creator:RemovePlayerFromInstance")
     end)
 
     RegisterNetEvent('redemrp_respawn:client:Revived')
     AddEventHandler('redemrp_respawn:client:Revived', function()
         print("Loading skin")
         Wait(2000)
-        TriggerEvent("murphy_creator:loadskin")
+        TriggerEvent("fdb-creator:loadskin")
     end)
 
-    RegisterNetEvent("murphy_creator:loadskin", function()
-        Callback.triggerServer("murphy_creator:GetPedData", function(peddata)
+    RegisterNetEvent("fdb-creator:loadskin", function()
+        Callback.triggerServer("fdb-creator:GetPedData", function(peddata)
             print("Loading skin")
             CachePedData = peddata
             
@@ -288,14 +288,14 @@ if Config.framework == "REDEMRP2k23" then
                 stamCore = GetAttributeCoreValue(PlayerPedId(), 1)   -- Get stamina core value
                 health = GetEntityHealth(PlayerPedId())              -- Get health value
                 stam = Citizen.ResultAsFloat(Citizen.InvokeNative(0x22F2A386D43048A9, PlayerPedId()))
-                print("[MURPHY CREATOR] Model needs change, saving health/stamina - HealthCore: " .. tostring(healthCore) .. ", StamCore: " .. tostring(stamCore) .. ", Health: " .. tostring(health) .. ", Stam: " .. tostring(stam))
+                print("[FDB-CREATOR] Model needs change, saving health/stamina - HealthCore: " .. tostring(healthCore) .. ", StamCore: " .. tostring(stamCore) .. ", Health: " .. tostring(health) .. ", Stam: " .. tostring(stam))
             else
-                print("[MURPHY CREATOR] Model already correct, skipping health/stamina save/restore")
+                print("[FDB-CREATOR] Model already correct, skipping health/stamina save/restore")
             end
             
             if next(CachePedData) == nil then
-                --- If no data in murphy_creator, load default skin for framework
-                print("No skin data in murphy_creator")
+                --- If no data in fdb_creator, load default skin for framework
+                print("No skin data in fdb_creator")
                 TriggerServerEvent("RedEM:server:LoadSkin", true)
             else
                 local model = CachePedData.pedmodel.model
@@ -358,13 +358,13 @@ if Config.framework == "REDEMRP2k23" then
                         local comp = DefaultChar[CachePedData.gender][CachePedData.skintone].Legs
                             [CachePedData.lowerbody]
                         ApplyShopItemToPed(tonumber("0x" .. comp), CachePed)
-                        TriggerEvent("murphy_clothes:Loadlowerbody", tonumber("0x" .. comp))
+                        TriggerEvent("fdb_clothes:Loadlowerbody", tonumber("0x" .. comp))
                     end
                     if CachePedData.upperbody > 0 then
                         local comp = DefaultChar[CachePedData.gender][CachePedData.skintone].Body
                             [CachePedData.upperbody]
                         ApplyShopItemToPed(tonumber("0x" .. comp), CachePed)
-                        TriggerEvent("murphy_clothes:Loadupperbody", tonumber("0x" .. comp))
+                        TriggerEvent("fdb_clothes:Loadupperbody", tonumber("0x" .. comp))
                     end
                     if CachePedData.body > 0 then
                         local comp = tonumber(Body[CachePedData.body])
@@ -395,8 +395,8 @@ if Config.framework == "REDEMRP2k23" then
                 UpdatePedVariation(CachePed)
             end
             print("Loading overlays")
-            TriggerEvent("murphy_clothing:loadclothes")
-            TriggerEvent("murphy_barber_creator:loadbarberoverlay")
+            TriggerEvent("fdb-clothing:loadclothes")
+            TriggerEvent("fdb-barber:loadbarberoverlay")
 
             -- Restaurer vie/stamina SEULEMENT si le modèle a été changé
             if needsModelChange then
@@ -404,7 +404,7 @@ if Config.framework == "REDEMRP2k23" then
                 Citizen.InvokeNative(0xC6258F41D86676E0, PlayerPedId(), 1, stamCore)   -- Set Stamina Core back to what it was
                 SetEntityHealth(PlayerPedId(), health)                                 -- Set health back to what it was
                 Citizen.InvokeNative(0x675680D089BFA21F, PlayerPedId(), stam or 100.0) -- RestorePedStamina
-                print("[MURPHY CREATOR] Restored health/stamina after model change")
+                print("[FDB-CREATOR] Restored health/stamina after model change")
             end
         end)
     end)

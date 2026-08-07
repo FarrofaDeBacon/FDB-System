@@ -1,13 +1,13 @@
-RegisterNetEvent('murphy_barber_creator:loadbarberoverlay', function()
+RegisterNetEvent('fdb-barber:loadbarberoverlay', function()
     -- Wait for player ped to be ready
     local ped = PlayerPedId()
     if not DoesEntityExist(ped) then
-        print("[murphy_barber_creator] Error: Player ped does not exist")
+        print("[fdb-barber] Error: Player ped does not exist")
         return
     end
     IsPedReadyToRender(ped)
     
-    Callback.triggerServer('murphy_barber_creator:GetCurrentHairs', function(datatable, outfitid, makeup, permanent)
+    Callback.triggerServer('fdb-barber:GetCurrentHairs', function(datatable, outfitid, makeup, permanent)
         if datatable and next(datatable) ~= nil then
             barber_overlay_all_layers = deepcopy(baseoverlay)
             for k, v in pairs(barber_overlay_all_layers) do
@@ -30,21 +30,21 @@ RegisterNetEvent('murphy_barber_creator:loadbarberoverlay', function()
             end
             -- Small wait to ensure ped is ready for component changes
             Wait(100)
-            TriggerEvent("murphy_barber_creator:clotheitem", datatable, outfitid, true)
+            TriggerEvent("fdb-barber:clotheitem", datatable, outfitid, true)
         else
-            print("[murphy_barber_creator] No hairstyle data found for current character (empty datatable)")
+            print("[fdb-barber] No hairstyle data found for current character (empty datatable)")
         end
     end)
 end)
 
-RegisterNetEvent('murphy_barber_creator:loadbarberoverlayOnCharacter', function(charid, ped)
+RegisterNetEvent('fdb-barber:loadbarberoverlayOnCharacter', function(charid, ped)
     -- Wait for ped to be valid and fully loaded
     local attempts = 0
     while not DoesEntityExist(ped) do
         Wait(100)
         attempts = attempts + 1
         if attempts > 50 then
-            print("[murphy_barber_creator] Error: Ped not loaded after 5 seconds for character " .. tostring(charid))
+            print("[fdb-barber] Error: Ped not loaded after 5 seconds for character " .. tostring(charid))
             return
         end
     end
@@ -52,7 +52,7 @@ RegisterNetEvent('murphy_barber_creator:loadbarberoverlayOnCharacter', function(
     -- Wait for ped to be ready to render
     IsPedReadyToRender(ped)
     
-    Callback.triggerServer('murphy_barber_creator:GetCurrentHairsOnCharacter',
+    Callback.triggerServer('fdb-barber:GetCurrentHairsOnCharacter',
         function(datatable, outfitid, makeup, permanent)
             if datatable and next(datatable) ~= nil then
                 barber_overlay_all_layers = deepcopy(baseoverlay)
@@ -76,15 +76,15 @@ RegisterNetEvent('murphy_barber_creator:loadbarberoverlayOnCharacter', function(
                 end
                 -- Small wait to ensure ped is ready for component changes
                 Wait(100)
-                TriggerEvent("murphy_barber_creator:clotheitem", datatable, outfitid, true, ped, charid)
+                TriggerEvent("fdb-barber:clotheitem", datatable, outfitid, true, ped, charid)
             else
-                print("[murphy_barber_creator] No hairstyle data found for character " .. tostring(charid) .. " (empty datatable)")
+                print("[fdb-barber] No hairstyle data found for character " .. tostring(charid) .. " (empty datatable)")
             end
         end, charid)
 end)
 
-RegisterNetEvent('murphy_barber_creator:clotheitem')
-AddEventHandler('murphy_barber_creator:clotheitem', function(hairstyleComponents, outfitid, overlay, target, charid)
+RegisterNetEvent('fdb-barber:clotheitem')
+AddEventHandler('fdb-barber:clotheitem', function(hairstyleComponents, outfitid, overlay, target, charid)
     Citizen.CreateThread(function()
         local _Target = target or PlayerPedId()
         local gender
@@ -99,9 +99,9 @@ AddEventHandler('murphy_barber_creator:clotheitem', function(hairstyleComponents
             end
         end
         OldbarberCache = deepcopy(barberCache)
-        Callback.triggerServer("murphy_barber_creator:GetCurrentOverlays", function(makeup, permanent)
+        Callback.triggerServer("fdb-barber:GetCurrentOverlays", function(makeup, permanent)
             Actualalbedo = nil
-            Callback.triggerServer("murphy_barber_creator:GetCharSkinTone", function(result)
+            Callback.triggerServer("fdb-barber:GetCharSkinTone", function(result)
                 Actualalbedo = result
             end, IsPedMale(_Target), charid)
             repeat
@@ -146,7 +146,7 @@ AddEventHandler('murphy_barber_creator:clotheitem', function(hairstyleComponents
                     break
                 end
             end
-            print("[murphy_barber_creator] Hairstyle data - canloadhair:", canloadhair, "charid:", charid, "target:", _Target)
+            print("[fdb-barber] Hairstyle data - canloadhair:", canloadhair, "charid:", charid, "target:", _Target)
             if canloadhair then
                 -- Wait a bit to ensure ped is fully ready for component changes
                 Wait(100)
@@ -154,11 +154,11 @@ AddEventHandler('murphy_barber_creator:clotheitem', function(hairstyleComponents
                 Wait(100)
                 ReequipAllhairstyle(_Target)
                 if charid == nil then
-                    TriggerServerEvent("murphy_barber_creator:updatehairstyle", barberCache, barber_overlay_all_layers,
+                    TriggerServerEvent("fdb-barber:updatehairstyle", barberCache, barber_overlay_all_layers,
                         outfitid)
                 end
             else
-                print("[murphy_barber_creator] No hairstyle data to load for character")
+                print("[fdb-barber] No hairstyle data to load for character")
             end
         end, charid)
     end)
@@ -200,19 +200,19 @@ function ReequipAllhairstyle(ped)
     local gender
     if IsPedMale(ped) then gender = "male" else gender = "female" end
     
-    print("[murphy_barber_creator] ReequipAllhairstyle - gender:", gender, "ped:", ped)
+    print("[fdb-barber] ReequipAllhairstyle - gender:", gender, "ped:", ped)
 
     for category, data in pairs(barberCache) do
         if data.model and data.model > 0 then
-            print("[murphy_barber_creator] Processing category:", category, "model:", data.model)
+            print("[fdb-barber] Processing category:", category, "model:", data.model)
             
             if not MURPHY_ASSETS[gender] then
-                print("[murphy_barber_creator] ERROR: No MURPHY_ASSETS for gender:", gender)
+                print("[fdb-barber] ERROR: No MURPHY_ASSETS for gender:", gender)
                 goto continue
             end
             
             if not MURPHY_ASSETS[gender][category] then
-                print("[murphy_barber_creator] ERROR: No MURPHY_ASSETS for category:", category)
+                print("[fdb-barber] ERROR: No MURPHY_ASSETS for category:", category)
                 goto continue
             end
             
@@ -276,5 +276,5 @@ function ReequipAllhairstyle(ped)
             ::continue::
         end
     end
-    print("[murphy_barber_creator] ReequipAllhairstyle completed")
+    print("[fdb-barber] ReequipAllhairstyle completed")
 end

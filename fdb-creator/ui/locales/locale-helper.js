@@ -7,13 +7,13 @@ let translations = {};
 // Initialize translations
 function initLocale(locale = 'en') {
     currentLocale = locale;
-    console.log(`[murphy_creator] Locale set to: ${locale}`);
+    console.log(`[fdb-creator] Locale set to: ${locale}`);
 }
 
 // Get translation by path (e.g., "ui.cancel", "charSelect.title")
 function t(path, fallback = null) {
     if (!window.Locale) {
-        console.error('[murphy_creator] Locale not loaded!');
+        console.error('[fdb-creator] Locale not loaded!');
         return fallback || path;
     }
     
@@ -24,7 +24,7 @@ function t(path, fallback = null) {
         if (value && typeof value === 'object' && key in value) {
             value = value[key];
         } else {
-            console.warn(`[murphy_creator] Translation not found for: ${path}`);
+            console.warn(`[fdb-creator] Translation not found for: ${path}`);
             return fallback || path;
         }
     }
@@ -60,7 +60,7 @@ function loadLocale(locale) {
             resolve();
         };
         script.onerror = () => {
-            console.error(`[murphy_creator] Failed to load locale: ${locale}`);
+            console.error(`[fdb-creator] Failed to load locale: ${locale}`);
             reject();
         };
         document.head.appendChild(script);

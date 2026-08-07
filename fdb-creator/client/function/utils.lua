@@ -197,10 +197,10 @@ end
 function ApplyCachePedDataToPedPlayer()
     -- Prevent crash when clicking too fast before data is loaded
     if not CachePedData or not CachePedData.pedmodel or not CachePedData.pedmodel.model then
-        print("[murphy_creator] Warning: CachePedData not loaded yet, retrying...")
+        print("[fdb-creator] Warning: CachePedData not loaded yet, retrying...")
         Wait(500)
         if not CachePedData or not CachePedData.pedmodel or not CachePedData.pedmodel.model then
-            print("[murphy_creator] Error: CachePedData still not loaded, aborting")
+            print("[fdb-creator] Error: CachePedData still not loaded, aborting")
             return
         end
     end
@@ -417,8 +417,8 @@ function ApplyCachePedDataToPed(ped, data, charid)
     for k, v in pairs(data.expressions) do
         SetCharExpression(ped, ExpressionsHashes[k], v)
     end
-    TriggerEvent("murphy_barber_creator:loadbarberoverlayOnCharacter", charid, ped)
-    TriggerEvent("murphy_clothes:ApplyClothesToCharid", charid, ped)
+    TriggerEvent("fdb-barber:loadbarberoverlayOnCharacter", charid, ped)
+    TriggerEvent("fdb_clothes:ApplyClothesToCharid", charid, ped)
     UpdatePedVariation(ped)
 end
 

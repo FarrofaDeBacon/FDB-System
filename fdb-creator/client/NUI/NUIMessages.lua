@@ -177,7 +177,7 @@ function OpenApperanceMenu()
                 },
 
             }
-            if Config.murphy_clothing == true then
+            if Config.fdb_clothing == true then
                 local clothesCoords = GetPedBoneCoords(player, 37873, 0.0, 0.0, 0.0)
                 local retval, clothesx, clothesy = GetScreenCoordFromWorldCoord(clothesCoords.x+0.4, clothesCoords.y,
                     clothesCoords.z - 0.4)

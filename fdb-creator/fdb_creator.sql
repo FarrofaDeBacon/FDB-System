@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `murphy_creator` (
+CREATE TABLE IF NOT EXISTS `fdb_creator` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `charid` varchar(200) NOT NULL,
   `peddata` json NOT NULL,

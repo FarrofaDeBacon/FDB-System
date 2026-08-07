@@ -41,7 +41,7 @@ if server then
     end
     responseCallback[currentRequestId] = cb
 
-    TriggerClientEvent('murphy_creator:triggerCallback', source, name, currentRequestId, GetInvokingResource() or "unknown", ...)
+    TriggerClientEvent('fdb-creator:triggerCallback', source, name, currentRequestId, GetInvokingResource() or "unknown", ...)
 
     currentRequestId = currentRequestId < 65535 and currentRequestId + 1 or 0
   end
@@ -56,11 +56,11 @@ if server then
     end
   end
 
-  RegisterServerEvent('murphy_creator:responseCallback', executeResponse)
+  RegisterServerEvent('fdb-creator:responseCallback', executeResponse)
 
-  RegisterServerEvent('murphy_creator:triggerCallback', function(name, requestId, fromRessource, ...)
+  RegisterServerEvent('fdb-creator:triggerCallback', function(name, requestId, fromRessource, ...)
     local source = source
-    TriggerClientEvent('murphy_creator:responseCallback', source, requestId, fromRessource, executeCallback(name, source, ...))
+    TriggerClientEvent('fdb-creator:responseCallback', source, requestId, fromRessource, executeCallback(name, source, ...))
   end)
 
 else
@@ -71,7 +71,7 @@ else
   function Callback.triggerServer(name, cb, ...)
     responseCallback[currentRequestId] = cb
 
-    TriggerServerEvent('murphy_creator:triggerCallback', name, currentRequestId, GetInvokingResource() or 'unknown', ...)
+    TriggerServerEvent('fdb-creator:triggerCallback', name, currentRequestId, GetInvokingResource() or 'unknown', ...)
 
     currentRequestId = currentRequestId < 65535 and currentRequestId + 1 or 0
   end
@@ -86,10 +86,10 @@ else
     end
   end
 
-  RegisterNetEvent('murphy_creator:responseCallback', executeResponse)
+  RegisterNetEvent('fdb-creator:responseCallback', executeResponse)
 
-  RegisterNetEvent('murphy_creator:triggerCallback', function(name, requestId, fromRessource, ...)
-    TriggerServerEvent('murphy_creator:responseCallback', requestId, fromRessource, executeCallback(name, ...))
+  RegisterNetEvent('fdb-creator:triggerCallback', function(name, requestId, fromRessource, ...)
+    TriggerServerEvent('fdb-creator:responseCallback', requestId, fromRessource, executeCallback(name, ...))
   end)
 
 

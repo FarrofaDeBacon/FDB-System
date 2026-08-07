@@ -11,7 +11,7 @@ SET time_zone = "+00:00";
 
 
 
-CREATE TABLE `murphy_barber` (
+CREATE TABLE `fdb_barber` (
   `charid` varchar(255) NOT NULL,
   `hairstyle` LONGTEXT NOT NULL DEFAULT '',
   `overlays` LONGTEXT NOT NULL DEFAULT '',
@@ -20,7 +20,7 @@ CREATE TABLE `murphy_barber` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
-CREATE TABLE `murphy_barber_preset` (
+CREATE TABLE `fdb_barber_preset` (
   `charid` varchar(255) NOT NULL,
   `outfit_id` int(11) NOT NULL,
   `price` float(11) NOT NULL,

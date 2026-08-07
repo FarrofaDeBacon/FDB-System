@@ -12,7 +12,7 @@ SET time_zone = "+00:00";
 
 
 -- Create tables with utf8mb4 charset
-CREATE TABLE IF NOT EXISTS `murphy_barber` (
+CREATE TABLE IF NOT EXISTS `fdb_barber` (
   `charid` int(11) NOT NULL,
   `hairstyle` LONGTEXT NOT NULL DEFAULT '',
   `overlays` LONGTEXT NOT NULL DEFAULT '',
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS `murphy_barber` (
   `outfit_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `murphy_barber_preset` (
+CREATE TABLE IF NOT EXISTS `fdb_barber_preset` (
   `charid` int(11) NOT NULL,
   `outfit_id` int(11) NOT NULL,
   `price` float(11) NOT NULL,
@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS `murphy_barber_preset` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Change charset for existing tables if they exist
-ALTER TABLE `murphy_barber` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-ALTER TABLE `murphy_barber_preset` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `fdb_barber` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `fdb_barber_preset` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

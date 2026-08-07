@@ -9,7 +9,7 @@ if Config.framework == 'rsg-core' then
     local currentCharacter = nil
     local creatingCharacter = false -- Prevent duplicate character creation
 
-    RegisterNetEvent('murphy_creator:LaunchCharSelect', function(characters, pedperm, slots)
+    RegisterNetEvent('fdb-creator:LaunchCharSelect', function(characters, pedperm, slots)
         currentCharacter = nil
         creatingCharacter = false -- Reset character creation flag
         ShutdownLoadingScreen()
@@ -151,8 +151,8 @@ if Config.framework == 'rsg-core' then
                                 end
                                 exports['rsg-appearance']:ApplySkinMultiChar(skinTable, data.PedHandler, clothesTable)
                                 print("Character skin applied: " .. tostring(value.citizenid))
-                                TriggerEvent("murphy_clothes:ApplyClothesToCharid", value.citizenid, data.PedHandler)
-                                TriggerEvent("murphy_barber_creator:loadbarberoverlayOnCharacter", value.citizenid,
+                                TriggerEvent("fdb_clothes:ApplyClothesToCharid", value.citizenid, data.PedHandler)
+                                TriggerEvent("fdb-barber:loadbarberoverlayOnCharacter", value.citizenid,
                                     data.PedHandler)
                             end
                         end
@@ -248,8 +248,8 @@ if Config.framework == 'rsg-core' then
         )
     end)
 
-    RegisterNetEvent("murphy_creator:PlaySelectedChar", function(id)
-        TriggerServerEvent("murphy_creator:RemovePlayerFromInstance")
+    RegisterNetEvent("fdb_creator:PlaySelectedChar", function(id)
+        TriggerServerEvent("fdb-creator:RemovePlayerFromInstance")
         DoScreenFadeOut(0)
         repeat Wait(0) until IsScreenFadedOut()
         Wait(1000)
@@ -284,10 +284,10 @@ if Config.framework == 'rsg-core' then
         end
         SetEntityInvincible(PlayerPedId(), true)
         SetEntityCanBeDamaged(PlayerPedId(), false)
-        TriggerEvent("murphy_creator:loadskin")
+        TriggerEvent("fdb-creator:loadskin")
     end)
     local healthinit = false
-    RegisterNetEvent("murphy_creator:loadskin", function()
+    RegisterNetEvent("fdb-creator:loadskin", function()
         -- Sécuriser toute la phase de swap model/skin
         if LocalPlayer and LocalPlayer.state then
             LocalPlayer.state:set('invincible', true, true)
@@ -295,7 +295,7 @@ if Config.framework == 'rsg-core' then
         SetEntityInvincible(PlayerPedId(), true)
         SetEntityCanBeDamaged(PlayerPedId(), false)
 
-        Callback.triggerServer("murphy_creator:GetPedData", function(peddata)
+        Callback.triggerServer("fdb-creator:GetPedData", function(peddata)
             print("Loading skin")
             CachePedData = peddata
             local PlayerData = RSGCore.Functions.GetPlayerData()
@@ -327,14 +327,14 @@ if Config.framework == 'rsg-core' then
                 stamCore = GetAttributeCoreValue(PlayerPedId(), 1)   -- Get stamina core value
                 health = GetEntityHealth(PlayerPedId())              -- Get health value
                 stam = Citizen.ResultAsFloat(Citizen.InvokeNative(0x22F2A386D43048A9, PlayerPedId()))
-                print("[MURPHY CREATOR] Model needs change, saving health/stamina - HealthCore: " .. tostring(healthCore) .. ", StamCore: " .. tostring(stamCore) .. ", Health: " .. tostring(health) .. ", Stam: " .. tostring(stam))
+                print("[FDB-CREATOR] Model needs change, saving health/stamina - HealthCore: " .. tostring(healthCore) .. ", StamCore: " .. tostring(stamCore) .. ", Health: " .. tostring(health) .. ", Stam: " .. tostring(stam))
             else
-                print("[MURPHY CREATOR] Model already correct, skipping health/stamina save/restore")
+                print("[FDB-CREATOR] Model already correct, skipping health/stamina save/restore")
             end
 
             if next(CachePedData) == nil then
-                --- If no data in murphy_creator, load default skin for framework
-                print("No skin data in murphy_creator")
+                --- If no data in fdb_creator, load default skin for framework
+                print("No skin data in fdb_creator")
                 TriggerServerEvent('rsg-appearance:server:LoadSkin')
             else
                 local model = CachePedData.pedmodel.model
@@ -397,13 +397,13 @@ if Config.framework == 'rsg-core' then
                         local comp = DefaultChar[CachePedData.gender][CachePedData.skintone].Legs
                             [CachePedData.lowerbody]
                         ApplyShopItemToPed(tonumber("0x" .. comp), CachePed)
-                        TriggerEvent("murphy_clothes:Loadlowerbody", tonumber("0x" .. comp))
+                        TriggerEvent("fdb_clothes:Loadlowerbody", tonumber("0x" .. comp))
                     end
                     if CachePedData.upperbody > 0 then
                         local comp = DefaultChar[CachePedData.gender][CachePedData.skintone].Body
                             [CachePedData.upperbody]
                         ApplyShopItemToPed(tonumber("0x" .. comp), CachePed)
-                        TriggerEvent("murphy_clothes:Loadupperbody", tonumber("0x" .. comp))
+                        TriggerEvent("fdb_clothes:Loadupperbody", tonumber("0x" .. comp))
                     end
                     if CachePedData.body > 0 then
                         local comp = tonumber(Body[CachePedData.body])
@@ -433,8 +433,8 @@ if Config.framework == 'rsg-core' then
                 end
                 UpdatePedVariation(CachePed)
             end
-            TriggerEvent("murphy_clothing:loadclothes")
-            TriggerEvent("murphy_barber_creator:loadbarberoverlay")
+            TriggerEvent("fdb-clothing:loadclothes")
+            TriggerEvent("fdb-barber:loadbarberoverlay")
 
             Wait(1000)
             
@@ -464,7 +464,7 @@ if Config.framework == 'rsg-core' then
                 Citizen.InvokeNative(0xC6258F41D86676E0, PlayerPedId(), 0, healthCore) -- Set Health Core back to what it was
                 Citizen.InvokeNative(0xC6258F41D86676E0, PlayerPedId(), 1, stamCore)   -- Set Stamina Core back to what it was
                 Citizen.InvokeNative(0x675680D089BFA21F, PlayerPedId(), stam or 100.0) -- RestorePedStamina
-                print("[MURPHY CREATOR] Restored health/stamina after model change")
+                print("[FDB-CREATOR] Restored health/stamina after model change")
             end
 
             SetEntityInvincible(PlayerPedId(), false)
@@ -475,7 +475,7 @@ if Config.framework == 'rsg-core' then
         end)
     end)
 
-    RegisterNetEvent("murphy_creator:createnewchar", function(data)
+    RegisterNetEvent("fdb-creator:createnewchar", function(data)
         if creatingCharacter then
             print("Character creation already in progress, ignoring duplicate call")
             return
@@ -487,13 +487,13 @@ if Config.framework == 'rsg-core' then
         exports.weathersync:setSyncEnabled(true)
         TriggerServerEvent('RSGCore:Server:OnPlayerLoaded')
         TriggerEvent('RSGCore:Client:OnPlayerLoaded')
-        TriggerServerEvent("murphy_creator:RemovePlayerFromInstance")
+        TriggerServerEvent("fdb-creator:RemovePlayerFromInstance")
         Wait(2000)
         healthinit = true
         creatingCharacter = false
-        -- TriggerEvent("murphy_creator:loadskin")
+        -- TriggerEvent("fdb-creator:loadskin")
     end)
-    RegisterNetEvent("murphy_creator:rsg:getcitizenid", function(charid)
+    RegisterNetEvent("fdb-creator:rsg:getcitizenid", function(charid)
         print("Received citizenid for new char: " .. tostring(charid))
         currentCharacter = charid
     end)

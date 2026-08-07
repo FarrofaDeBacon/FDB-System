@@ -19,7 +19,7 @@ if Config.framework == 'rsg-core' then
     end
 
     local plyChars = {} -- Table to store characters per player
-    RegisterServerEvent("murphy_creator:getCharacters", function()
+    RegisterServerEvent("fdb-creator:getCharacters", function()
         local _source = source
         local license = RSGCore.Functions.GetIdentifier(source, 'license')
         local permissions = RSGCore.Functions.GetPermission(source)
@@ -54,7 +54,7 @@ if Config.framework == 'rsg-core' then
                                 charData.clothes = {}
                             end
                             totalQueries = totalQueries - 1
-                            MySQL.Async.fetchAll('SELECT * FROM murphy_creator WHERE `charid`=@charid;',
+                            MySQL.Async.fetchAll('SELECT * FROM fdb_creator WHERE `charid`=@charid;',
                                 { charid = citizenid },
                                 function(data)
                                     if data[1] ~= nil then
@@ -112,34 +112,34 @@ if Config.framework == 'rsg-core' then
             pedperm = PedPermission.default
         end
 
-        TriggerClientEvent('murphy_creator:LaunchCharSelect', _source, plyChars[_source], pedperm, slots)
+        TriggerClientEvent('fdb-creator:LaunchCharSelect', _source, plyChars[_source], pedperm, slots)
     end)
 
-    RegisterServerEvent("murphy_creator:deleteCharacter", function(charid)
+    RegisterServerEvent("fdb-creator:deleteCharacter", function(charid)
         local _source = source
         
         -- Check if player has permission to delete characters
         if not CanPlayerDeleteCharacter(_source) then
-            TriggerClientEvent('chat:addMessage', _source, { args = { "^1[murphy_creator]", "You don't have permission to delete characters." } })
-            TriggerClientEvent('murphy_creator:OpenCharSelect', _source)
+            TriggerClientEvent('chat:addMessage', _source, { args = { "^1[fdb-creator]", "You don't have permission to delete characters." } })
+            TriggerClientEvent('fdb-creator:OpenCharSelect', _source)
             return
         end
         
         -- Validate that plyChars exists for this player and the character exists
         if not plyChars[_source] then
-            print("^1[murphy_creator] Error: No character data found for player " .. _source .. "^7")
+            print("^1[fdb-creator] Error: No character data found for player " .. _source .. "^7")
             return
         end
         
         if not plyChars[_source][charid] then
-            print("^1[murphy_creator] Error: Character index " .. charid .. " not found for player " .. _source .. "^7")
+            print("^1[fdb-creator] Error: Character index " .. charid .. " not found for player " .. _source .. "^7")
             return
         end
         
         local _charid = plyChars[_source][charid].citizenid
         
         if not _charid then
-            print("^1[murphy_creator] Error: No citizenid found for character " .. charid .. "^7")
+            print("^1[fdb-creator] Error: No citizenid found for character " .. charid .. "^7")
             return
         end
         
@@ -159,18 +159,18 @@ if Config.framework == 'rsg-core' then
                     end
                 end)
         end
-        deleteIfTableExists('murphy_creator', _charid)
-        deleteIfTableExists('murphy_barber', _charid)
-        deleteIfTableExists('murphy_barber_preset', _charid)
-        deleteIfTableExists('murphy_clothes', _charid)
-        deleteIfTableExists('murphy_outfits', _charid)
-        deleteIfTableExists('murphy_wearable', _charid)
+        deleteIfTableExists('fdb_creator', _charid)
+        deleteIfTableExists('fdb_barber', _charid)
+        deleteIfTableExists('fdb_barber_preset', _charid)
+        deleteIfTableExists('fdb_clothes', _charid)
+        deleteIfTableExists('fdb_outfits', _charid)
+        deleteIfTableExists('fdb_wearable', _charid)
 
         -- Remove the deleted character from the player's character list
         table.remove(plyChars[_source], charid)
         
         Wait(5000)
-        TriggerClientEvent('murphy_creator:OpenCharSelect', _source)
+        TriggerClientEvent('fdb-creator:OpenCharSelect', _source)
     end)
 
 
@@ -179,7 +179,7 @@ if Config.framework == 'rsg-core' then
         
         -- Prevent duplicate character creation
         if creatingCharacters[source] then
-            print("^3[MURPHY CREATOR WARNING]^7 Character creation already in progress for source " .. source)
+            print("^3[FDB-CREATOR WARNING]^7 Character creation already in progress for source " .. source)
             return
         end
         
@@ -214,9 +214,9 @@ if Config.framework == 'rsg-core' then
         
         -- Prevent character creation if at or over slot limit
         if #characters >= slots then
-            print("^3[MURPHY CREATOR]^7 Player " .. source .. " cannot create character - slot limit reached (" .. #characters .. "/" .. slots .. ")")
+            print("^3[FDB-CREATOR]^7 Player " .. source .. " cannot create character - slot limit reached (" .. #characters .. "/" .. slots .. ")")
             creatingCharacters[source] = nil
-            TriggerClientEvent('murphy_creator:notify', source, 'You have reached your maximum character slots!', 'error')
+            TriggerClientEvent('fdb-creator:notify', source, 'You have reached your maximum character slots!', 'error')
             return
         end
         
@@ -230,7 +230,7 @@ if Config.framework == 'rsg-core' then
             birthdate = data.birthyear .. '-' .. data.birthmonth .. '-' .. data.birthday,
             cid = cid
         }
-        TriggerClientEvent("murphy_creator:createnewchar", source, newData)
+        TriggerClientEvent("fdb-creator:createnewchar", source, newData)
         RemovePlayerFromInstance(source)
         Wait(2000)
         local charid = GetCharIdentifier(source)
@@ -238,7 +238,7 @@ if Config.framework == 'rsg-core' then
             { charid, json.encode({ sex = gender }), json.encode({}) }, function(rowsChanged)
 
             end)
-        TriggerClientEvent("murphy_creator:rsg:getcitizenid", source, charid)
+        TriggerClientEvent("fdb-creator:rsg:getcitizenid", source, charid)
         
         -- Reset the flag after a delay
         SetTimeout(5000, function()
@@ -246,11 +246,11 @@ if Config.framework == 'rsg-core' then
         end)
     end
 
-    Callback.register('murphy_barber_creator:GetCharSkinTone', function(source, male, characterid)
+    Callback.register('fdb-barber:GetCharSkinTone', function(source, male, characterid)
         local _source = source
         local albedo = nil
         local charid = characterid or GetCharIdentifier(_source)
-        MySQL.query("SELECT * FROM murphy_creator WHERE `charid`=@charid;", { charid = charid }, function(skins)
+        MySQL.query("SELECT * FROM fdb_creator WHERE `charid`=@charid;", { charid = charid }, function(skins)
             if skins[1] then
                 local pedata = skins[1].peddata
                 local decoded = json.decode(pedata)
@@ -381,13 +381,13 @@ if Config.framework == 'rsg-core' then
             end
             
             if not hasPermission then
-                TriggerClientEvent('chat:addMessage', _source, { args = { "^1[murphy_creator]", "You don't have permission to use this command." } })
+                TriggerClientEvent('chat:addMessage', _source, { args = { "^1[fdb-creator]", "You don't have permission to use this command." } })
                 return
             end
             
             -- Check if citizenid was provided
             if not args[1] then
-                TriggerClientEvent('chat:addMessage', _source, { args = { "^3[murphy_creator]", "Usage: /" .. Config.Commands.deleteCharacter.command .. " [citizenid]" } })
+                TriggerClientEvent('chat:addMessage', _source, { args = { "^3[fdb-creator]", "Usage: /" .. Config.Commands.deleteCharacter.command .. " [citizenid]" } })
                 return
             end
             
@@ -414,21 +414,21 @@ if Config.framework == 'rsg-core' then
                         local charName = charinfo.firstname .. " " .. charinfo.lastname
                         
                         -- Delete from murphy tables
-                        deleteIfTableExists('murphy_creator', citizenid)
-                        deleteIfTableExists('murphy_barber', citizenid)
-                        deleteIfTableExists('murphy_barber_preset', citizenid)
-                        deleteIfTableExists('murphy_clothes', citizenid)
-                        deleteIfTableExists('murphy_outfits', citizenid)
-                        deleteIfTableExists('murphy_wearable', citizenid)
+                        deleteIfTableExists('fdb_creator', citizenid)
+                        deleteIfTableExists('fdb_barber', citizenid)
+                        deleteIfTableExists('fdb_barber_preset', citizenid)
+                        deleteIfTableExists('fdb_clothes', citizenid)
+                        deleteIfTableExists('fdb_outfits', citizenid)
+                        deleteIfTableExists('fdb_wearable', citizenid)
                         
                         -- Delete from RSG tables
                         MySQL.update('DELETE FROM playerskins WHERE citizenid = ?', { citizenid })
                         MySQL.update('DELETE FROM players WHERE citizenid = ?', { citizenid })
                         
-                        TriggerClientEvent('chat:addMessage', _source, { args = { "^2[murphy_creator]", "Character '" .. charName .. "' (ID: " .. citizenid .. ") has been deleted." } })
-                        print("[murphy_creator] Admin " .. GetPlayerName(_source) .. " deleted character: " .. charName .. " (ID: " .. citizenid .. ")")
+                        TriggerClientEvent('chat:addMessage', _source, { args = { "^2[fdb-creator]", "Character '" .. charName .. "' (ID: " .. citizenid .. ") has been deleted." } })
+                        print("[fdb-creator] Admin " .. GetPlayerName(_source) .. " deleted character: " .. charName .. " (ID: " .. citizenid .. ")")
                     else
-                        TriggerClientEvent('chat:addMessage', _source, { args = { "^1[murphy_creator]", "Character with ID " .. citizenid .. " not found." } })
+                        TriggerClientEvent('chat:addMessage', _source, { args = { "^1[fdb-creator]", "Character with ID " .. citizenid .. " not found." } })
                     end
                 end)
         end, false)
@@ -467,34 +467,34 @@ if Config.framework == 'rsg-core' then
             end
             
             if not hasPermission then
-                TriggerClientEvent('chat:addMessage', _source, { args = { "^1[murphy_creator]", "You don't have permission to use this command." } })
+                TriggerClientEvent('chat:addMessage', _source, { args = { "^1[fdb-creator]", "You don't have permission to use this command." } })
                 return
             end
             
             -- Check if player ID was provided
             if not args[1] then
-                TriggerClientEvent('chat:addMessage', _source, { args = { "^3[murphy_creator]", "Usage: /" .. Config.Commands.secondChance.command .. " [playerid]" } })
+                TriggerClientEvent('chat:addMessage', _source, { args = { "^3[fdb-creator]", "Usage: /" .. Config.Commands.secondChance.command .. " [playerid]" } })
                 return
             end
             
             local targetId = tonumber(args[1])
             if not targetId then
-                TriggerClientEvent('chat:addMessage', _source, { args = { "^1[murphy_creator]", "Invalid player ID. Must be a number." } })
+                TriggerClientEvent('chat:addMessage', _source, { args = { "^1[fdb-creator]", "Invalid player ID. Must be a number." } })
                 return
             end
             
             -- Check if target player exists
             local targetPlayer = GetPlayerName(targetId)
             if not targetPlayer then
-                TriggerClientEvent('chat:addMessage', _source, { args = { "^1[murphy_creator]", "Player with ID " .. targetId .. " not found." } })
+                TriggerClientEvent('chat:addMessage', _source, { args = { "^1[fdb-creator]", "Player with ID " .. targetId .. " not found." } })
                 return
             end
             
             -- Trigger the character customization menu for the target player
-            TriggerClientEvent('murphy_creator:SecondChance', targetId)
-            TriggerClientEvent('chat:addMessage', _source, { args = { "^2[murphy_creator]", "Opened character customization menu for " .. targetPlayer .. " (ID: " .. targetId .. ")" } })
-            TriggerClientEvent('chat:addMessage', targetId, { args = { "^2[murphy_creator]", "An admin has opened the character customization menu for you." } })
-            print("[murphy_creator] Admin " .. GetPlayerName(_source) .. " opened second chance menu for: " .. targetPlayer .. " (ID: " .. targetId .. ")")
+            TriggerClientEvent('fdb-creator:SecondChance', targetId)
+            TriggerClientEvent('chat:addMessage', _source, { args = { "^2[fdb-creator]", "Opened character customization menu for " .. targetPlayer .. " (ID: " .. targetId .. ")" } })
+            TriggerClientEvent('chat:addMessage', targetId, { args = { "^2[fdb-creator]", "An admin has opened the character customization menu for you." } })
+            print("[fdb-creator] Admin " .. GetPlayerName(_source) .. " opened second chance menu for: " .. targetPlayer .. " (ID: " .. targetId .. ")")
         end, false)
     end
 end

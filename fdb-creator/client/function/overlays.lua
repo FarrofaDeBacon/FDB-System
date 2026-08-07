@@ -2,7 +2,7 @@
 local textureId = -1
 
 function RemoveOverlays(ped)
-    Callback.triggerServer("murphy_barber:GetCurrentOverlays", function(makeup, permanent)
+    Callback.triggerServer("fdb-barber:GetCurrentOverlays", function(makeup, permanent)
         overlay_all_layers = deepcopy(baseoverlay)
         for k, v in pairs(overlay_all_layers) do
             for key, value in pairs(permanent) do

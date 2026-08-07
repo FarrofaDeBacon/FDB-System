@@ -120,7 +120,7 @@ RegisterNUICallback("cancelCharEdition", function(data, cb)
     cb("ok")
 end)
 
-RegisterNetEvent("murphy_creator:BackFromClothing", function()
+RegisterNetEvent("fdb_creator:BackFromClothing", function()
     PlaySound("BACK", "HUD_SHOP_SOUNDSET")
     ActiveCam = 0
     MoveCam("edit")
@@ -353,10 +353,10 @@ RegisterNUICallback("spawnCharacter", function(data, cb)
         SetEntityCoords(PlayerPedId(), SpawnLocation[spawnLocationId].pedspawn)
         SetEntityHeading(PlayerPedId(), SpawnLocation[spawnLocationId].pedspawnheading)
         FreezeEntityPosition(PlayerPedId(), true)
-        Callback.triggerServer('murphy_creator:CreateNewCharacter', function(result)
+        Callback.triggerServer('fdb-creator:CreateNewCharacter', function(result)
             if result then
                 print("Character created successfully")
-                Callback.triggerServer('murphy_creator:SavePreset', function(result, outfitid)
+                Callback.triggerServer('fdb-creator:SavePreset', function(result, outfitid)
                     print("Saving preset with outfit ID:", outfitid)
                     if result then
                         print("Preset saved successfully")
@@ -366,7 +366,7 @@ RegisterNUICallback("spawnCharacter", function(data, cb)
                         DoScreenFadeIn(500)
                         FreezeEntityPosition(PlayerPedId(), false)
                         canspawn = true -- Reset after successful creation
-                        -- TriggerEvent("murphy_creator:loadskin")
+                        -- TriggerEvent("fdb-creator:loadskin")
                     else
                         canspawn = true -- Reset on failure
                     end
@@ -762,7 +762,7 @@ RegisterNUICallback("CancelApparenceEdition", function(data, cb)
         
         -- Reload the original skin
         Wait(500)
-        TriggerEvent("murphy_creator:loadskin")
+        TriggerEvent("fdb-creator:loadskin")
         return
     end
     
@@ -806,16 +806,16 @@ RegisterNUICallback("SaveSecondChance", function(data, cb)
     DisplayPins = false
     
     -- Save the current CachePedData to database
-    Callback.triggerServer("murphy_creator:UpdatePedData", function(success)
+    Callback.triggerServer("fdb-creator:UpdatePedData", function(success)
         if success then
-            print("[murphy_creator] SecondChance: Skin data saved successfully")
+            print("[fdb-creator] SecondChance: Skin data saved successfully")
             
             -- Also save barber data (hairstyles, overlays/makeup)
-            Callback.triggerServer('murphy_creator:SavePreset', function(barberResult, outfitid)
+            Callback.triggerServer('fdb-creator:SavePreset', function(barberResult, outfitid)
                 if barberResult then
-                    print("[murphy_creator] SecondChance: Barber data saved successfully")
+                    print("[fdb-creator] SecondChance: Barber data saved successfully")
                 else
-                    print("[murphy_creator] SecondChance: Failed to save barber data (may not exist)")
+                    print("[fdb-creator] SecondChance: Failed to save barber data (may not exist)")
                 end
                 
                 -- Close the menu
@@ -834,10 +834,10 @@ RegisterNUICallback("SaveSecondChance", function(data, cb)
                 
                 -- Reload the skin
                 Wait(500)
-                TriggerEvent("murphy_creator:loadskin")
+                TriggerEvent("fdb-creator:loadskin")
             end, hairstyleCache, overlay_all_layers, nil, 0, IsPedMale(PlayerPedId()))
         else
-            print("[murphy_creator] SecondChance: Failed to save skin data")
+            print("[fdb-creator] SecondChance: Failed to save skin data")
             PlaySound("UNAFFORDABLE", "Ledger_Sounds")
         end
     end, CachePedData)
@@ -852,7 +852,7 @@ local isSelectingChar = false
 RegisterNUICallback("selectedChar", function(data, cb)
     -- Prevent rapid clicking
     if isSelectingChar then
-        print("[murphy_creator] Character selection in progress, please wait...")
+        print("[fdb-creator] Character selection in progress, please wait...")
         cb("busy")
         return
     end
@@ -903,14 +903,14 @@ end)
 RegisterNUICallback("PlaySelectedChar", function(data, cb)
     -- Prevent double-clicking  
     if isSelectingChar then
-        print("[murphy_creator] Action in progress, please wait...")
+        print("[fdb-creator] Action in progress, please wait...")
         cb("busy")
         return
     end
     isSelectingChar = true
     
     PlaySound("SELECT", "HUD_SHOP_SOUNDSET")
-    TriggerEvent("murphy_creator:PlaySelectedChar", SelectedChar)
+    TriggerEvent("fdb_creator:PlaySelectedChar", SelectedChar)
     for k, v in pairs(charselectpeds) do
         if DoesEntityExist(v) then
             DeleteEntity(v)
@@ -944,7 +944,7 @@ RegisterNUICallback("DeleteSelectedChar", function(data, cb)
             type = "hideSelectedCharMenu",
         }
     )
-    TriggerServerEvent("murphy_creator:deleteCharacter", SelectedChar)
+    TriggerServerEvent("fdb-creator:deleteCharacter", SelectedChar)
 end)
 
 RegisterNUICallback("CancelSelectedChar", function(data, cb)
@@ -976,7 +976,7 @@ RegisterNUICallback("createNewChar", function(data, cb)
             type = "hideSelectCharMenu",
         }
     )
-    TriggerEvent("murphy_creator:LaunchCreator")
+    TriggerEvent("fdb_creator:LaunchCreator")
     TriggerEvent("murphy_clothing:ResetClothesMenuCreator")
     PlaySound("Select", "HUD_SHOP_SOUNDSET")
 end)

@@ -516,17 +516,17 @@ Lang.fr.Notifications = {
 function _U(category, key)
     local locale = Lang[Lang.Locale]
     if not locale then
-        print("[murphy_creator] Language '" .. Lang.Locale .. "' not found, falling back to English")
+        print("[fdb-creator] Language '" .. Lang.Locale .. "' not found, falling back to English")
         locale = Lang.en
     end
     
     if not locale[category] then
-        print("[murphy_creator] Category '" .. category .. "' not found in language")
+        print("[fdb-creator] Category '" .. category .. "' not found in language")
         return key
     end
     
     if not locale[category][key] then
-        print("[murphy_creator] Translation key '" .. key .. "' not found in category '" .. category .. "'")
+        print("[fdb-creator] Translation key '" .. key .. "' not found in category '" .. category .. "'")
         return key
     end
     

@@ -12,26 +12,26 @@ if Config.framework == 'vorp' then
     AddEventHandler('vorp:SelectedCharacter', function()
         Wait(3000)
         print("Loading skin on character selection")
-        TriggerEvent("murphy_creator:loadskin")
+        TriggerEvent("fdb-creator:loadskin")
     end)
 
     RegisterNetEvent('vorp_core:Client:OnPlayerRevive')
     AddEventHandler('vorp_core:Client:OnPlayerRevive', function()
         Wait(1500)
         print("Loading skin on revive")
-        TriggerEvent("murphy_creator:loadskin")
+        TriggerEvent("fdb-creator:loadskin")
     end)
 
     RegisterNetEvent('vorp_core:Client:OnPlayerRespawn')
     AddEventHandler('vorp_core:Client:OnPlayerRespawn', function()
         Wait(1500)
         print("Loading skin on respawn")
-        TriggerEvent("murphy_creator:loadskinvorp")
+        TriggerEvent("fdb-creator:loadskinvorp")
     end)
 
 
-    RegisterNetEvent("murphy_creator:PlaySelectedChar", function(id)
-        TriggerServerEvent("murphy_creator:RemovePlayerFromInstance")
+    RegisterNetEvent("fdb_creator:PlaySelectedChar", function(id)
+        TriggerServerEvent("fdb-creator:RemovePlayerFromInstance")
         DoScreenFadeOut(0)
         repeat Wait(0) until IsScreenFadedOut()
         Wait(1000)
@@ -71,7 +71,7 @@ if Config.framework == 'vorp' then
         DisplayHud(true)
     end)
 
-    RegisterNetEvent('murphy_creator:LaunchCharSelect', function(characters, pedperm, slots)
+    RegisterNetEvent('fdb-creator:LaunchCharSelect', function(characters, pedperm, slots)
         ShutdownLoadingScreen()
         ShutdownLoadingScreenNui()
         SetNuiFocus(false, false)
@@ -191,8 +191,8 @@ if Config.framework == 'vorp' then
                     LoadCharacterSelect(data.PedHandler, value.skin, value.components)
                     SetEntityInvincible(data.PedHandler, true)
                     charselectpeds[key] = data.PedHandler
-                    TriggerEvent("murphy_clothes:ApplyClothesToCharid", value.charIdentifier, data.PedHandler)
-                    TriggerEvent("murphy_barber_creator:loadbarberoverlayOnCharacter", value.charIdentifier,
+                    TriggerEvent("fdb_clothes:ApplyClothesToCharid", value.charIdentifier, data.PedHandler)
+                    TriggerEvent("fdb-barber:loadbarberoverlayOnCharacter", value.charIdentifier,
                         data.PedHandler)
                     SetPedCanBeTargetted(data.PedHandler, false)
                 end
@@ -281,27 +281,27 @@ if Config.framework == 'vorp' then
         )
     end)
 
-    RegisterNetEvent("murphy_creator:deleteCharacterClient", function(charid)
-        TriggerServerEvent("murphy_creator:vorpcharacter:deleteCharacter", myChars[charid].charIdentifier)
+    RegisterNetEvent("fdb-creator:deleteCharacterClient", function(charid)
+        TriggerServerEvent("fdb_creator:vorpcharacter:deleteCharacter", myChars[charid].charIdentifier)
         table.remove(myChars, charid)
     end)
 
-    RegisterNetEvent("murphy_creator:loadskin", function()
+    RegisterNetEvent("fdb-creator:loadskin", function()
         -- Add cooldown to prevent /rc spam abuse
         local currentTime = GetGameTimer()
         if currentTime - lastRcCommand > 2000 then -- 2 second cooldown
             lastRcCommand = currentTime
             
             -- First, check if model change is needed by getting the target model from server
-            Callback.triggerServer("murphy_creator:GetPedData", function(peddata)
+            Callback.triggerServer("fdb-creator:GetPedData", function(peddata)
                 if not peddata or next(peddata) == nil then
-                    print("[MURPHY CREATOR] No ped data found, skipping loadskin")
+                    print("[FDB-CREATOR] No ped data found, skipping loadskin")
                     return
                 end
                 
                 local targetModel = peddata.pedmodel and peddata.pedmodel.model or nil
                 if not targetModel then
-                    print("[MURPHY CREATOR] No target model in ped data, skipping loadskin")
+                    print("[FDB-CREATOR] No target model in ped data, skipping loadskin")
                     return
                 end
                 
@@ -310,10 +310,10 @@ if Config.framework == 'vorp' then
                 local needsModelChange = (currentModel ~= targetModelHash)
                 
                 if not needsModelChange then
-                    print("[MURPHY CREATOR] Model already correct (" .. targetModel .. "), no model change needed - skipping health/stamina save/restore")
+                    print("[FDB-CREATOR] Model already correct (" .. targetModel .. "), no model change needed - skipping health/stamina save/restore")
                     -- Just reload clothes and overlays without changing model
-                    TriggerEvent("murphy_clothing:loadclothes")
-                    TriggerEvent("murphy_barber_creator:loadbarberoverlay")
+                    TriggerEvent("fdb-clothing:loadclothes")
+                    TriggerEvent("fdb-barber:loadbarberoverlay")
                     return
                 end
                 
@@ -327,7 +327,7 @@ if Config.framework == 'vorp' then
                 local innerHealth = tonumber(savedHealthInner)
                 local innerStamina = tonumber(savedStaminaInner)
                 
-                print("[MURPHY CREATOR] Model change needed - Saving health/stamina BEFORE: HealthOuter: " .. tostring(savedHealthOuter) .. ", HealthInner: " .. tostring(innerHealth) .. ", StaminaOuter: " .. tostring(savedStaminaOuter) .. ", StaminaInner: " .. tostring(innerStamina))
+                print("[FDB-CREATOR] Model change needed - Saving health/stamina BEFORE: HealthOuter: " .. tostring(savedHealthOuter) .. ", HealthInner: " .. tostring(innerHealth) .. ", StaminaOuter: " .. tostring(savedStaminaOuter) .. ", StaminaInner: " .. tostring(innerStamina))
                 
                 -- Execute /rc which changes the model
                 ExecuteCommand("rc")
@@ -354,7 +354,7 @@ if Config.framework == 'vorp' then
                 player = PlayerPedId() -- Refresh ped reference
                 
                 if player == 0 or not DoesEntityExist(player) then
-                    print("[MURPHY CREATOR] ERROR: Player ped not valid after model change, cannot restore health")
+                    print("[FDB-CREATOR] ERROR: Player ped not valid after model change, cannot restore health")
                     return
                 end
                 
@@ -364,27 +364,27 @@ if Config.framework == 'vorp' then
                 Citizen.InvokeNative(0xC6258F41D86676E0, player, 1, innerStamina or 100)
                 Citizen.InvokeNative(0x675680D089BFA21F, player, savedStaminaOuter or 100.0)
                 
-                print("[MURPHY CREATOR] AFTER loadskin restored - HealthOuter: " .. tostring(savedHealthOuter) .. ", HealthInner: " .. tostring(innerHealth) .. ", StaminaOuter: " .. tostring(savedStaminaOuter) .. ", StaminaInner: " .. tostring(innerStamina))
+                print("[FDB-CREATOR] AFTER loadskin restored - HealthOuter: " .. tostring(savedHealthOuter) .. ", HealthInner: " .. tostring(innerHealth) .. ", StaminaOuter: " .. tostring(savedStaminaOuter) .. ", StaminaInner: " .. tostring(innerStamina))
             end)
         else
-            print("^3[MURPHY CREATOR]^7 Please wait before reloading character again (cooldown: 2s)")
+            print("^3[FDB-CREATOR]^7 Please wait before reloading character again (cooldown: 2s)")
         end
     end)
 
     local processingLoadSkin = false
-    RegisterNetEvent("murphy_creator:loadskinvorp", function()
+    RegisterNetEvent("fdb-creator:loadskinvorp", function()
         if processingLoadSkin then
             print("Multiple skin loads avoided")
             return
         end
         processingLoadSkin = true
         
-        Callback.triggerServer("murphy_creator:GetPedData", function(peddata)
+        Callback.triggerServer("fdb-creator:GetPedData", function(peddata)
             Wait(1000)
             CachePedData = peddata
 
             if next(CachePedData) == nil then
-                --- If no data in murphy_creator, load default skin for framework
+                --- If no data in fdb_creator, load default skin for framework
                 processingLoadSkin = false
                 return
             end
@@ -412,9 +412,9 @@ if Config.framework == 'vorp' then
                 innerHealth = tonumber(savedHealthInner)
                 innerStamina = tonumber(savedStaminaInner)
                 
-                print("[MURPHY CREATOR] Model change needed - Saving health/stamina BEFORE: HealthOuter: " .. tostring(savedHealthOuter) .. ", HealthInner: " .. tostring(innerHealth) .. ", StaminaOuter: " .. tostring(savedStaminaOuter) .. ", StaminaInner: " .. tostring(innerStamina))
+                print("[FDB-CREATOR] Model change needed - Saving health/stamina BEFORE: HealthOuter: " .. tostring(savedHealthOuter) .. ", HealthInner: " .. tostring(innerHealth) .. ", StaminaOuter: " .. tostring(savedStaminaOuter) .. ", StaminaInner: " .. tostring(innerStamina))
             else
-                print("[MURPHY CREATOR] Model already correct (" .. model .. "), no model change needed - skipping health/stamina save/restore")
+                print("[FDB-CREATOR] Model already correct (" .. model .. "), no model change needed - skipping health/stamina save/restore")
             end
             
             if model == "mp_male" or model == "mp_female" then
@@ -473,13 +473,13 @@ if Config.framework == 'vorp' then
                         local comp = DefaultChar[CachePedData.gender][CachePedData.skintone].Legs
                             [CachePedData.lowerbody]
                         ApplyShopItemToPed(tonumber("0x" .. comp), CachePed)
-                        TriggerEvent("murphy_clothes:Loadlowerbody", tonumber("0x" .. comp))
+                        TriggerEvent("fdb_clothes:Loadlowerbody", tonumber("0x" .. comp))
                     end
                     if CachePedData.upperbody > 0 then
                         local comp = DefaultChar[CachePedData.gender][CachePedData.skintone].Body
                             [CachePedData.upperbody]
                         ApplyShopItemToPed(tonumber("0x" .. comp), CachePed)
-                        TriggerEvent("murphy_clothes:Loadupperbody", tonumber("0x" .. comp))
+                        TriggerEvent("fdb_clothes:Loadupperbody", tonumber("0x" .. comp))
                     end
                     if CachePedData.body > 0 then
                         local comp = tonumber(Body[CachePedData.body])
@@ -531,7 +531,7 @@ if Config.framework == 'vorp' then
                 ped = PlayerPedId() -- Refresh ped reference
                 
                 if ped == 0 or not DoesEntityExist(ped) then
-                    print("[MURPHY CREATOR] ERROR: Player ped not valid after model change, cannot restore health")
+                    print("[FDB-CREATOR] ERROR: Player ped not valid after model change, cannot restore health")
                     processingLoadSkin = false
                     return
                 end
@@ -546,21 +546,21 @@ if Config.framework == 'vorp' then
                 -- Stamina Outer - savedStaminaOuter is already 0-100 float from ResultAsFloat()
                 Citizen.InvokeNative(0x675680D089BFA21F, ped, savedStaminaOuter or 100.0)
                 
-                print("[MURPHY CREATOR] AFTER loadskinvorp restored - HealthOuter: " .. tostring(savedHealthOuter) .. ", HealthInner: " .. tostring(innerHealth) .. ", StaminaOuter: " .. tostring(savedStaminaOuter) .. ", StaminaInner: " .. tostring(innerStamina))
+                print("[FDB-CREATOR] AFTER loadskinvorp restored - HealthOuter: " .. tostring(savedHealthOuter) .. ", HealthInner: " .. tostring(innerHealth) .. ", StaminaOuter: " .. tostring(savedStaminaOuter) .. ", StaminaInner: " .. tostring(innerStamina))
             end
 
-            TriggerEvent("murphy_clothing:loadclothes")
-            TriggerEvent("murphy_barber_creator:loadbarberoverlay")
+            TriggerEvent("fdb-clothing:loadclothes")
+            TriggerEvent("fdb-barber:loadbarberoverlay")
             processingLoadSkin = false
         end)
     end)
 
     -- RegisterCommand("barbervorp", function()
-    --     TriggerEvent("murphy_barber_creator:loadbarberoverlay")
+    --     TriggerEvent("fdb-barber:loadbarberoverlay")
     -- end)
 
-    RegisterNetEvent("murphy_creator:HealthFromCore")
-    AddEventHandler("murphy_creator:HealthFromCore", function(healthData)
+    RegisterNetEvent("fdb_creator:HealthFromCore")
+    AddEventHandler("fdb_creator:HealthFromCore", function(healthData)
         HealthData = healthData
     end)
 

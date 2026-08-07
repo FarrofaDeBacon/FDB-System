@@ -1,11 +1,11 @@
 # Execute SQL File
 
-Execute murphy_creator.sql and murphy_barber.sql in your database.
+Execute fdb_creator.sql and fdb_barber.sql in your database.
 
 
 
 # REDEMRP Installation steps:
-replace event for murphy_creator event,
+replace event for fdb_creator event,
 replace this event,
 ```lua
 RegisterNetEvent('redemrp_charselect:removeLoadingScreen', function()
@@ -42,7 +42,7 @@ RegisterNetEvent('vorp:playerSpawn', function()
     SetPlayerRoutingBucket(_source, roomId)
 
     user.Source(_source)
-    TriggerClientEvent("murphy_creator:OpenCharSelect", _source)
+    TriggerClientEvent("fdb-creator:OpenCharSelect", _source)
     -- local numCharacters <const> = user.Numofcharacters()
     -- if numCharacters <= 0 then
     --     return TriggerEvent("vorp_CreateNewCharacter", _source)
@@ -66,7 +66,7 @@ CreateThread(function()
                 Wait(100)
             end
             Wait(1000)
-            TriggerServerEvent('murphy_creator:getCharacters')
+            TriggerServerEvent('fdb-creator:getCharacters')
             return
         end
     end
@@ -74,7 +74,7 @@ end)
 ```
 ## Optionnal: If you don't have murphy_clothing
 In rsg-appearance\client\creator.lua replace ApplySkin function
-This will allow the script to load murphy_creator data a script call rsg's loadskin.
+This will allow the script to load fdb_creator data a script call rsg's loadskin.
 ```lua
 function ApplySkin()
     local _Target = PlayerPedId()
@@ -85,7 +85,7 @@ function ApplySkin()
     local dirtSkin = GetAttributeBaseRank(_Target, 22)
 
     local promise = promise.new()
-    print ("[RSG Appearance] Fetching skin data from server using murphy_creator and rsg-appearance...")
+    print ("[RSG Appearance] Fetching skin data from server using fdb_creator and rsg-appearance...")
     RSGCore.Functions.TriggerCallback('rsg-multicharacter:server:getAppearance', function(data)
         print ("[RSG Appearance] Skin data received from server.")
         local _SkinData = data.skin
@@ -111,10 +111,10 @@ function ApplySkin()
         -- LoadBodyFeature(_Target, _SkinData.chest_size, Data.Appearance.chest_size)
         -- LoadOverlays(_Target, _SkinData)
 
-        -- First, trigger murphy_creator to load the base skin/model
-        TriggerEvent("murphy_creator:loadskin")
+        -- First, trigger fdb_creator to load the base skin/model
+        TriggerEvent("fdb-creator:loadskin")
 
-        -- Wait for murphy_creator to finish loading
+        -- Wait for fdb_creator to finish loading
         Wait(4000)
 
         SetEntityAlpha(_Target, 255)
@@ -125,11 +125,11 @@ function ApplySkin()
         Citizen.InvokeNative(0xDE1B1907A83A1550, _Target, 0)
         print(_Target, previousPlayerPedId, PlayerPedId())
         if _Target == previousPlayerPedId then
-            print("[RSG Appearance] Skin applied successfully using murphy_creator and rsg-appearance.")
+            print("[RSG Appearance] Skin applied successfully using fdb_creator and rsg-appearance.")
             TriggerEvent('rsg-appearance:client:ApplyClothes', _Clothes, PlayerPedId(), _SkinData)
             -- After applying rsg-appearance clothes, load murphy_clothing
             Wait(500)
-            TriggerEvent("murphy_clothing:loadclothes")
+            TriggerEvent("fdb-clothing:loadclothes")
         else
             for i, m in pairs(Overlays.overlay_all_layers) do
                 Overlays.overlay_all_layers[i] =
@@ -141,7 +141,7 @@ function ApplySkin()
         SetAttributeBaseRank(_Target, 22, dirtSkin)
         promise:resolve()
     end, citizenid)
-    print("[RSG Appearance] Applying skin using murphy_creator and rsg-appearance...")
+    print("[RSG Appearance] Applying skin using fdb_creator and rsg-appearance...")
     Citizen.Await(promise)
 end
 ```
@@ -165,14 +165,14 @@ Specifies which framework to use.
 Config.framework = 'vorp'
 ```
 
-## Config.murphy_clothing
+## Config.fdb_clothing
 Enable or disable integration with the murphy_clothing resource.
 
 - true: Use murphy_clothing.
 - false: Do not use murphy_clothing.
 Example:
 ```lua
-Config.murphy_clothing = true
+Config.fdb_clothing = true
 ```
 
 ## Config.MaxCharacterSlots

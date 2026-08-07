@@ -1,8 +1,8 @@
 Config = {}
 
 Config.framework = 'vorp' -- Framework to use. Options: 'REDEMRP2k23', 'rsg-core', 'vorp', 'rdr3mp', 'rdr3mp-legacy'
-Config.murphy_clothing = true -- Set to true if you are using murphy_clothing
-Config.LoadSkinCommand = "mc" -- Command to load murphy_creator data
+Config.fdb_clothing = true -- Set to true if you are using murphy_clothing
+Config.LoadSkinCommand = "mc" -- Command to load fdb_creator data
 Config.DevMode = true -- Set to true to enable developer mode, which allows you to use the F3 key to open the character creator
 Config.Locale = "en" -- Language: 'en' for English, 'fr' for French
 
