@@ -5,7 +5,7 @@ if Config.framework == 'rsg-core' then
     PedAccess              = false
     PlayerInfo             = {}
     PlayerSex              = {}
-    local RSGCore          = exports['rsg-core']:GetCoreObject()
+    local RSGCore          = exports['fdb-core']:GetCoreObject()
     local currentCharacter = nil
     local creatingCharacter = false -- Prevent duplicate character creation
 

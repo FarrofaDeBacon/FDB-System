@@ -1,4 +1,4 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local RSGCore = exports['fdb-core']:GetCoreObject()
 
 -- Callback GetPedData: Returns the character features (CachePedData)
 Callback.register('fdb-creator:GetPedData', function(source, charid)
