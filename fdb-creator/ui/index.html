@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/tint_menu.css">
+    <link rel="stylesheet" href="./css/font_faces.css">
+    <link rel="stylesheet" href="./css/indicator.css">
+    <link rel="stylesheet" href="./css/global_menu.css">
+    <link rel="stylesheet" href="./css/variation_menu.css">
+    <link rel="stylesheet" href="./css/matrice.css">
+    <link rel="stylesheet" href="./css/spawn.css">
+    <script src="locales/locale-helper.js"></script>
+    <script src="locales/en.js"></script>
+    <script src="script.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+
+    <!-- Spawn selection menu -->
+    <div id="SpawnMenu" class="hidden"></div>
+
+    <!-- Delete Outfit Menu Container-->
+    <div id="DeletionConfirmation" class="hidden" style="width: 200vh;
+    height: 100vh;
+    background-color: #000000eb;
+    z-index: 5;">
+
+    </div>
+
+    <!-- Choose Character Menu -->
+    <div id="ChooseCharacterMenu" class="hidden">
+
+        <div id="CharactersMenuContent">
+
+            <div id="CharactersMenuList">
+
+                <div class="title">
+                    <h1 id="titleSelectedCharactersMenu">CHAR NAME</h1>
+                </div>
+
+                <div id="CharactersMenuElem">
+
+                    <div id="SelectedEditionTitle" class="hidden">
+
+                        <img src="./img/icons/eye.png" alt="Camera Icon">
+                        <h2 data-i18n="charSelect.characterInfo">Character info</h2>
+
+
+                    </div>
+
+                    <img src="img/separator.png" alt="separator" class="separatorEdition hidden" id="selectedSeparator">
+
+                    <div class="styleElem typeTwo unselectable hidden" id="Selectedsexe_selector">
+
+                        <p class="elemTitle" data-i18n="charSelect.sexe">Sexe</p>
+                        <div class="sliderDiv">
+                            <div class="sliderElemTypeTwo">
+                                <a id="" class="arrow" style="opacity: 0;"><img src="./img/arrow.png"
+                                        alt="Arrow left"></a>
+                                <p class="sliderValueTypeTwo unselectable" id="SelectedsliderValue_sexe_selector">Female
+                                </p>
+                                <input type="range" min="0" max="1" value="1" class="hidden"
+                                    id="rangeGlobal_sexe_selector">
+                                <a id="" class="arrow" style="opacity: 0;"><img src="./img/arrow.png" alt="Arrow right"
+                                        style="transform: rotate(180deg);"></a>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <textarea type="text" id="selectedCharacterLore" required class="inputTextarea hidden"
+                        placeholder="Character lore..." data-i18n-placeholder="placeholders.characterLore" disabled
+                        cols="250">Salut je suis un personnage hyper important mon lore est très complet et poussé car je suis un vieux avec une voix de vieux.</textarea>
+
+
+                    <div class="characterNameDiv hidden" id="SelectedBirthdayContainer">
+
+                        <input type="number" id="SelectedCharacterBirthDay" disabled max="31" value="21" required
+                            class="inputTextThree" placeholder="Day..." data-i18n-placeholder="placeholders.day" maxlength="25">
+                        <input type="text" id="SelectedCharacterBirthMonth" disabled value="June" required
+                            class="inputTextThree" placeholder="Month..." data-i18n-placeholder="placeholders.month" maxlength="25">
+                        <input type="number" id="SelectedCharacterBirthYear" disabled value="1875" required
+                            class="inputTextThree" placeholder="Year..." data-i18n-placeholder="placeholders.year" maxlength="25">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div id="CharactersMenuInteraction">
+
+                <a href="#" id="PlaySelectedChar" class="button" data-i18n="ui.play">Play</a>
+                <div style="display: flex; justify-content: space-between; align-items: center;width: 80%;">
+                    <a href="#" id="DeleteSelectedChar" class="button" style="width: 49%;" data-i18n="ui.delete">Delete</a>
+                    <a href="#" id="CancelSelectedChar" class="button" style="width: 49%;" data-i18n="ui.cancel">Cancel</a>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Global menu for editon of character apparence-->
+    <div id="GlobalCharacterMenu" class="hidden">
+
+        <div id="CharactersMenuContent">
+
+            <div id="CharactersMenuList">
+
+                <div class="title">
+                    <h1 id="titleCharactersMenu">EDIT APPARENCE</h1>
+                </div>
+
+                <div id="CharactersMenuElem">
+
+                    <div id="EditionTitleGlobSet">
+
+                        <img src="./img/icons/eye.png" alt="Camera Icon">
+                        <h2 data-i18n="appearance.globalSettings">Global Settings</h2>
+
+
+                    </div>
+
+                    <img src="img/separator.png" alt="separator" class="separatorEdition" id="GlobalSetSeparator">
+
+                    <div id="GlobalSettingsContainer">
+                    </div>
+
+                    <div id="EditionTitleSkin">
+
+                        <img src="./img/icons/variation_icon.png" alt="Camera Icon">
+                        <h2 data-i18n="appearance.skinSettings">Skin Settings</h2>
+
+
+                    </div>
+
+                    <img src="img/separator.png" alt="separator" class="separatorEdition" id="SkinSeparator">
+
+                    <div class="styleElemColour unselectable" id="skin_colour_selector">
+                    </div>
+
+                    <!-- <div id="EyeEditionTitle">
+
+                        <img src="./img/icons/variation_icon.png" alt="Camera Icon">
+                        <h2>Eyes Settings</h2>
+
+
+                    </div>
+
+                    <img src="img/separator.png" alt="separator" class="separatorEdition" id="EyeSeparator">
+
+                    <div class="styleElemColour unselectable" id="EyeSettingsContainer">
+                    </div> -->
+
+                </div>
+
+            </div>
+
+            <div id="CharactersMenuInteraction">
+
+                <a href="#" id="SaveSecondChance" class="button hidden" data-i18n="ui.save">Save</a>
+                <div style="display: flex; justify-content: space-between; align-items: center;width: 80%;">
+                    <a href="#" id="UndressApparenceEdition" class="button" style="width: 49%;" data-i18n="appearance.undress">Undress</a>
+                    <a href="#" id="ResetApparenceEdition" class="button" style="width: 49%;" data-i18n="appearance.reset">Reset</a>
+
+                </div>
+                <a href="#" id="CancelApparenceEdition" class="button" data-i18n="ui.back">Back</a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Body Part menu for character customisation-->
+    <div id="BodyPartsMenu" class="hidden">
+
+        <!-- Pin indicator container -->
+        <div id="pinContainer">
+        </div>
+
+        <!-- Save Menu -->
+        <div id="saveCharacter" class="hidden">
+            <a class="button" data-i18n="ui.save">Save character</a>
+            <a class="button" data-i18n="ui.cancel">Cancel</a>
+        </div>
+
+    </div>
+
+    <!-- Select character to play menu -->
+    <div id="SelectCharMenu" class="hidden">
+
+        <!-- Pin indicator container -->
+        <div id="selectCharPinContainer">
+        </div>
+
+    </div>
+
+    <!-- Edition Menu -->
+    <div id="EditionMenu" class="hidden">
+
+        <div id="EditionMenuContent">
+
+            <div id="EditionMenuList">
+
+                <div class="title">
+                    <h1 id="titleEditionMenu">NOSE</h1>
+                </div>
+
+                <div id="EditionMenuElemList">
+
+                </div>
+
+            </div>
+
+            <div id="EditionMenuInteraction">
+                <a href="#" id="CancelCharEdition" class="button" data-i18n="ui.back">Back</a>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Edition Menu -->
+    <div id="CharactersMenu" class="hidden">
+
+        <div id="CharactersMenuContent">
+
+            <div id="CharactersMenuList">
+
+                <div class="title">
+                    <h1 id="titleCharactersMenu">CHARACTER</h1>
+                </div>
+
+                <div id="CharactersMenuElem">
+
+                    <div id="EditionTitle">
+
+                        <img src="./img/icons/eye.png" alt="Camera Icon">
+                        <h2 data-i18n="charSelect.characterInfo">Character info</h2>
+
+
+                    </div>
+
+                    <img src="img/separator.png" alt="separator" class="separatorEdition">
+
+
+                    <div class="characterNameDiv" id="NameContainer">
+
+                        <input type="text" id="characterName" required class="inputText" placeholder="Name..."
+                            data-i18n-placeholder="placeholders.name" maxlength="25">
+                        <input type="text" id="characterSurname" required class="inputText" placeholder="Surname..."
+                            data-i18n-placeholder="placeholders.surname" maxlength="25">
+
+                    </div>
+
+                    <div class="styleElem typeTwo unselectable" id="sexe_selector">
+                    </div>
+
+
+                    <textarea type="text" id="characterLore" required class="inputTextarea"
+                        placeholder="Character lore..." data-i18n-placeholder="placeholders.characterLore" cols="250"></textarea>
+
+
+                    <div class="characterNameDiv" id="BirthdayContainer">
+
+                        <input type="number" id="characterBirthDay" max="31" required class="inputTextThree"
+                            placeholder="Day..." data-i18n-placeholder="placeholders.day" maxlength="25">
+                        <input type="text" id="characterBirthMonth" required class="inputTextThree"
+                            placeholder="Month..." data-i18n-placeholder="placeholders.month" maxlength="25">
+                        <input type="number" id="characterBirthYear" required class="inputTextThree"
+                            placeholder="Year..." data-i18n-placeholder="placeholders.year" maxlength="25">
+
+                    </div>
+
+                    <div id="PedTitle">
+
+                        <img src="./img/icons/pen.png" alt="Camera Icon">
+                        <h2 data-i18n="charCreation.playAsAPed">Ped settings</h2>
+
+                    </div>
+
+                    <img src="img/separator.png" alt="separator" class="separatorEdition" id="PedSeparator">
+
+                    <div class="styleElem typeTwo unselectable" id="ped_selector">
+                    </div>
+
+                    <a href="#" id="SelectPed" class="button"
+                        style="width: 100%;padding-top: 15px;padding-bottom: 15px;font-family: 'Hapna';" data-i18n="charCreation.selectPed">Select ped</a>
+
+                </div>
+
+            </div>
+
+            <div id="CharactersMenuInteraction">
+
+                <a href="#" id="EditChar" class="button" data-i18n="ui.edit">Edit apparence</a>
+                <div style="display: flex; justify-content: space-between; align-items: center;width: 80%;">
+                    <a href="#" id="CancelCharCreation" class="button" style="width: 49%;" data-i18n="ui.cancel">Cancel</a>
+                    <a href="#" id="CreateChar" class="button" style="width: 49%;" data-i18n="ui.create">Create</a>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- PED Selection menu -->
+    <div id="PedSelectionMenu" class="hidden">
+
+        <div id="PedSelectionMenuContent">
+
+            <div id="PedSelectionMenuList">
+
+                <div class="title">
+                    <h1 id="titlePedSelectionMenu" data-i18n="pedSelection.title">PED SELECTION</h1>
+                </div>
+
+                <div id="PedSelectionMenuElemList">
+
+                    <input type="text" id="searchPed" class="inputTextGlob" placeholder="Search ped..."
+                        data-i18n-placeholder="placeholders.searchPed" maxlength="25" style="margin-top: 10px;">
+
+
+                    <img src="img/separator.png" alt="separator" class="separatorEdition">
+
+                    <div id="PedListContainer">
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div id="PedSelectionMenuInteraction">
+                <a href="#" id="CancelPedSelection" class="button" data-i18n="ui.back">Back</a>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Global menu for character customisation-->
+    <div id="OutfitMenu" class="hidden">
+
+        <div id="OutfitMenuContent">
+
+            <div id="OutfitMenuList">
+                <div id="title">
+                    <h1>BARBER</h1>
+                </div>
+
+                <!-- Categories Container -->
+                <div id="Categories">
+
+                </div>
+
+                <img src="img/separator.png" alt="separator" class="separator">
+
+                <!-- Items Container -->
+                <div id="StyleProperties">
+
+                </div>
+            </div>
+
+            <div id="OutfitMenuInteraction">
+                <a href="#" id="CancelOutfit" class="button" data-i18n="ui.cancel">Cancel</a>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Variation menu for character customisation-->
+    <div id="VariationSettings" class="hidden">
+
+        <div id="ContextTitle">
+
+            <img src="./img/icons/variation_icon.png" alt="Variations Icon">
+            <h2 data-i18n="variation.title">Variation settings</h2>
+
+        </div>
+
+        <img src="img/separator.png" alt="separator" class="separator">
+
+        <div id="ContextSettings">
+
+            <div class="ContextElem" id="varSlider">
+
+                <p>Var - <span id="actualVar">2756</span></p>
+
+                <div>
+
+                    <a onclick="VALUE" id="left_arrow" class="arrow"><img src="./img/arrow.png" alt="Arrow left"></a>
+                    <input type="range" name="Variation" id="rangeContext">
+                    <a onclick="VALUE" id="right_arrow" class="arrow"><img src="./img/arrow.png" alt="Arrow right"></a>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+        <img src="img/separator_down.png" alt="separator" class="separator" id="separator_var"
+            style="margin-bottom: 0;">
+
+        <div id="ContextSettingsAdvanced" class="hidden"></div>
+
+        <img src="img/separator_down.png" alt="separator" class="separator hidden" id="separator_colour"
+            style="margin-bottom: 0;">
+
+        <div id="ContextSettings" class="TintList"></div>
+
+    </div>
+
+    <!-- Variation menu for character customisation-->
+    <div id="TintSettings" class="hidden">
+
+        <div id="ContextTitle">
+
+            <img src="./img/icons/variation_icon.png" alt="Variations Icon">
+            <h2 data-i18n="appearance.eyeSettings">Eyes colour settings</h2>
+
+        </div>
+
+        <img src="img/separator.png" alt="separator" class="separator">
+
+        <div id="ContextSettingsEyes" style="width: 80%;">
+
+        </div>
+
+    </div>
+
+    <!-- Camera settings menu for character customisation-->
+    <div id="CameraSettings" class="hidden">
+
+        <div id="CamTitle">
+
+            <img src="./img/icons/camera_icon.png" alt="Camera Icon">
+            <h2 data-i18n="camera.title">Camera position</h2>
+
+        </div>
+
+        <img src="img/separator.png" alt="separator" class="separator">
+
+        <div id="ContextSettings" class="CameraList">
+
+        </div>
+
+    </div>
+
+
+</body>
+
+</html>

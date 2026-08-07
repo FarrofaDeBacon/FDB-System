@@ -1,0 +1,73 @@
+body {
+    color: #FFFFFF;
+    font-family: 'Hapna';
+}
+
+#SpawnMenu {
+    background-color: rgba(0, 0, 0, 0.63);
+    margin: auto;
+    width: 100vw;
+    height: 100vh;
+    padding-left: 5vw;
+    padding-right: 5vw;
+
+    display: flex;
+    flex-direction: row;
+
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+#city_lore_area {
+    width: 60vw;
+    text-align: left;
+
+    display: flex;
+    flex-direction: column;
+}
+
+#city_lore_title h1 {
+
+    font-size: 5em;
+    margin: 0;
+    padding: 0;
+
+    font-family: 'RDRLino';
+
+}
+
+#city_lore_text p {
+    font-size: 1.2em;
+    margin-bottom: 35px;
+    margin-top: 35px;
+    padding: 0;
+    width: 750px;
+    text-align: justify;
+
+    color: rgb(206, 206, 206);
+
+    font-family: 'Hapna';
+}
+
+.arrow_spawn {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 15px;
+    width: auto;
+
+    border-radius: 99px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.arrow_spawn img {
+    width: 20px;
+    height: 20px;
+}
+
+.arrow_spawn:hover {
+    background-color: #444444;
+    cursor: pointer;
+}
