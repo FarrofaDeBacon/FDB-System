@@ -1,47 +1,41 @@
-fx_version 'cerulean'
+fx_version "adamant"
+games { "rdr3" }
 rdr3_warning 'I acknowledge that this is a prerelease build of RedM, and I am aware my resources *will* become incompatible once RedM ships.'
-game 'rdr3'
-lua54 'yes'
-
-description 'fdb-clothing'
-version '2.5.6'
-
-shared_scripts {
-    '@ox_lib/init.lua',
-    'config.lua',
-    'shared/functions.lua',
-}
-
-ui_page 'ui/build/index.html'
-
+version '3.31.0'
+-- shared_script {
+--     'shared/*',
+-- }
 client_scripts {
-    'client/*.lua',
+	'shared/*',
+	'client/**/*',
 }
+
 
 server_scripts {
-    '@oxmysql/lib/MySQL.lua',
-    'server/*.lua',
+	'@oxmysql/lib/MySQL.lua',
+	'shared/*',
+	'server/**/*',
+	-- 'server/*',
 }
 
 files {
-    'img/*.png',
-    'data/features.lua',
-    'data/overlays.lua',
-    'data/clothing.lua',
-    'data/hairs_list.lua',
-    'data/clothes_list.lua',
-    'locales/*.json',
-    'ui/build/index.html',
-    'ui/build/assets/*',
+	'ui/**/*',
+	'ui/*',
+	'ui/lang.js',
 }
 
-ox_libs {
-    'locale',
+escrow_ignore {
+	'ui/lang.js',
+	'shared/config.lua',
+	'shared/lang.lua',
+	'shared/fdb_assets.lua',
+	'client/adapters/*.lua',
+	'client/*.lua',
+	'server/adapters/*.lua',
 }
 
-dependencies {
-    'fdb-core',
-    'ox_lib',
-    'fdb-menubase',
-    'fdb-libs'
-}
+ui_page 'ui/index.html'
+
+lua54 'yes'
+
+dependency '/assetpacks'
