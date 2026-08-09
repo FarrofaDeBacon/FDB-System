@@ -16,6 +16,8 @@ shared_scripts {
 }
 
 client_scripts {
+    'client/utils/loaders.lua',
+    'client/anim/anim.lua',
     'client/theme/theme.lua',
     'client/theme/theme_editor.lua',
     'client/menu/menu.lua',
