@@ -181,20 +181,20 @@ RegisterCommand('testtarget', function()
         local forward = GetEntityForwardVector(ped)
         local spawnCoords = coords + (forward * 1.5)
         
-        exports['fdb-libs']:LoadModel('p_boxwood01x')
-        local prop = CreateObject(joaat('p_boxwood01x'), spawnCoords.x, spawnCoords.y, spawnCoords.z, true, true, false)
+        exports['fdb-libs']:LoadModel('p_cigar01x')
+        local prop = CreateObject(joaat('p_cigar01x'), spawnCoords.x, spawnCoords.y, spawnCoords.z, true, true, false)
         PlaceObjectOnGroundProperly(prop)
         
         exports['fdb-libs']:addLocalEntity(prop, {{
             name = 'teste_prop',
-            label = 'Inspecionar Caixa',
+            label = 'Inspecionar Charuto',
             icon = 'fa-solid fa-magnifying-glass',
             distance = 3.0,
             onSelect = function()
-                print('[fdb-libs] SUCESSO! O CALLBACK DO TARGET FUNCIONOU! (Caixa Inspecionada)')
+                print('[fdb-libs] SUCESSO! O CALLBACK DO TARGET FUNCIONOU! (Charuto Inspecionado)')
                 DeleteEntity(prop)
             end
         }})
-        print('[fdb-libs] Target Registrado! Olhe para a caixa de madeira no chao e segure ALT.')
+        print('[fdb-libs] Target Registrado! Olhe para o charuto no chao a sua frente e segure ALT.')
     end)
 end, false)
