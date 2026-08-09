@@ -173,3 +173,24 @@ end)
 -- Exports compatíveis com ox_target
 exports('addLocalEntity', addLocalEntity)
 exports('removeEntity', removeEntity)
+
+-- COMANDO DE TESTE TEMPORARIO
+RegisterCommand('testtarget', function()
+    Citizen.CreateThread(function()
+        local cavalo = GetMount(PlayerPedId())
+        if cavalo == 0 then 
+            print('[fdb-libs] Suba no cavalo primeiro!') 
+            return 
+        end
+        exports['fdb-libs']:addLocalEntity(cavalo, {{
+            name = 'teste_cavalo',
+            label = 'Inspecionar Cavalo',
+            icon = 'fa-solid fa-horse',
+            distance = 3.0,
+            onSelect = function()
+                print('[fdb-libs] SUCESSO! O CALLBACK DO TARGET FUNCIONOU!')
+            end
+        }})
+        print('[fdb-libs] Target Registrado! Desca do cavalo, segure a tecla ALT e olhe pra ele.')
+    end)
+end, false)

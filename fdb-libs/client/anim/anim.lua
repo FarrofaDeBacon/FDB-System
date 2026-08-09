@@ -79,3 +79,17 @@ end)
 
 exports('PlayAnim', PlayAnim)
 exports('ClearProps', ClearProps)
+
+-- COMANDO DE TESTE TEMPORARIO
+RegisterCommand('testanim', function()
+    Citizen.CreateThread(function()
+        print('[fdb-libs] Testando Anim e Prop...')
+        local result = exports['fdb-libs']:PlayAnim(PlayerPedId(), 'mech_inspection@generic@rh@base', 'hold', { prop = 'p_lantern01x', bone = 'SKEL_R_Hand' })
+        print('[fdb-libs] Resultado PlayAnim: ' .. tostring(result))
+    end)
+end, false)
+
+RegisterCommand('testclear', function()
+    exports['fdb-libs']:ClearProps(PlayerPedId())
+    print('[fdb-libs] Props limpos!')
+end, false)
