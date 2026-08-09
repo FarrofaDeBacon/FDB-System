@@ -47,15 +47,6 @@ A próxima grande fase seria a integração da joia da coroa: **`fdb-medic` + `f
 ⚠️ **Status atual:** Esta fase está **intencionalmente pausada** por decisão do usuário. Não iniciaremos a migração do sistema médico até recebermos autorização expressa.
 
 ---
-- `fdb-canteen` (Integrado à sede)
-- `fdb-appearance` (Refatoração em andamento, transição de UI)
-
-### 5.3 O Nascimento do `fdb-creator` (Centralização de Aparência)
-Recentemente, resolvemos um enorme gargalo arquitetural criando o **`fdb-creator`**. 
-Antes, módulos como o `fdb-clothing` e o `fdb-barbers` possuíam códigos redundantes para manipulação avançada de memória (`dataview.lua`), cálculos de câmera orbital (`camera.lua`) e aplicação de overlays (maquiagem/sujeira). 
-**O que mudou:** Nós **arrancamos** essa lógica desses scripts individuais e as centralizamos no `fdb-creator`. Agora ele age como a verdadeira *Engine Visual* do personagem. O `fdb-clothing` e o `fdb-barbers` foram emagrecidos e agora dependem diretamente das rotinas do `fdb-creator` para funcionar (e futuramente essas bibliotecas bases vão morar no `fdb-libs`).
-
----
 **ATENÇÃO - Nota Importante para o Claude / IAs Auxiliares:**
 O repositório `FDB-System` evoluiu massivamente. Não presuma mais que "apenas o fdb-core foi modificado". Neste momento, os seguintes módulos já são builds altamente customizadas, higienizadas e integradas nativamente à arquitetura do FDB-Core:
 - `fdb-core` (Fonte de verdade absoluta)
@@ -66,7 +57,7 @@ O repositório `FDB-System` evoluiu massivamente. Não presuma mais que "apenas 
 - `fdb-survival` (Motor base de atributos vitais)
 - `fdb-horses` e `fdb-ammo`
 - `fdb-canteen` (Integrado à sede)
-- `fdb-creator` (Engine central de customização: Câmeras, DataView e Overlays. Ele absorveu as funções complexas do antigo `fdb-clothing` e `fdb-barbers`!)
+- `fdb-appearance` (Refatoração em andamento, transição de UI)
 
 ### 5.3 Refatoração do `fdb-appearance` e o Dilema da Interface (Atualizado)
 Iniciamos a reescrita estrutural do criador de personagens (`fdb-appearance`) para abandonar menus defasados.
