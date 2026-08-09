@@ -25,7 +25,7 @@ local function LoadModel(model)
     return true
 end
 
--- Carrega um dicionário de animação
+-- Carrega um dicionario de animacao
 local function LoadAnimDict(dict)
     if HasAnimDictLoaded(dict) then return true end
     
@@ -86,8 +86,8 @@ exports('LoadWeaponAsset', LoadWeaponAsset)
 -- COMANDO DE TESTE TEMPORARIO
 RegisterCommand('testloader', function()
     Citizen.CreateThread(function()
-        print('[fdb-libs] Testando LoadModel (p_lantern01x)...')
-        local result = exports['fdb-libs']:LoadModel('p_lantern01x')
+        print('[fdb-libs] Testando LoadModel (p_cigar01x)...')
+        local result = exports['fdb-libs']:LoadModel('p_cigar01x')
         print('[fdb-libs] Resultado LoadModel: ' .. tostring(result))
     end)
 end, false)

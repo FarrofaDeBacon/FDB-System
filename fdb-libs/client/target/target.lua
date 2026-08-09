@@ -144,10 +144,13 @@ end, false)
 
 -- Limpa a variável quando a tecla é solta
 RegisterCommand('-fdb_target', function()
+    isTargeting = false
 end, false)
 
 -- Tecla padrão: ALT Esquerdo
-RegisterKeyMapping('+fdb_target', 'Target Interagir (FDB)', 'keyboard', 'LMENU')
+Citizen.CreateThread(function()
+    RegisterKeyMapping('+fdb_target', 'Target Interagir (FDB)', 'keyboard', 'LMENU')
+end)
 
 -- ============================================================
 -- Callback do Context Menu
