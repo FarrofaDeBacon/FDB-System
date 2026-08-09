@@ -100,7 +100,7 @@ local function GetEntityInFrontOfPlayer(distance)
     local forward = GetEntityForwardVector(ped)
     local endCoords = coords + (forward * distance)
 
-    local ray = StartShapeTestCapsule(coords.x, coords.y, coords.z, endCoords.x, endCoords.y, endCoords.z, 1.0, 10, ped, 7)
+    local ray = StartShapeTestCapsule(coords.x, coords.y, coords.z, endCoords.x, endCoords.y, endCoords.z, 1.0, 31, ped, 7)
     local _, hit, _, _, entityHit = GetShapeTestResult(ray)
     
     if hit == 1 and entityHit ~= 0 then
@@ -110,46 +110,42 @@ local function GetEntityInFrontOfPlayer(distance)
     return nil
 end
 
-RegisterCommand('+fdb_target', function()
-    local entity = GetEntityInFrontOfPlayer(4.0)
-    if entity and targetEntities[entity] then
-        local options = targetEntities[entity]
-        local menuItems = {}
-        local playerCoords = GetEntityCoords(PlayerPedId())
-        local entityCoords = GetEntityCoords(entity)
-        local dist = #(playerCoords - entityCoords)
-        
-        for i, opt in ipairs(options) do
-            if dist <= (opt.distance or 2.5) then
-                table.insert(menuItems, {
-                    type = "button",
-                    id = opt.name,
-                    label = opt.label,
-                    icon = opt.icon or "fa-solid fa-circle-dot"
-                })
+Citizen.CreateThread(function()
+    while true do
+        Wait(0)
+        -- Verifica se o jogador pressionou o ALT Esquerdo (INPUT_SPRINT / 0x8AAA0AD4)
+        if IsControlJustPressed(0, 0x8AAA0AD4) then
+            local entity = GetEntityInFrontOfPlayer(4.0)
+            if entity and targetEntities[entity] then
+                local options = targetEntities[entity]
+                local menuItems = {}
+                local playerCoords = GetEntityCoords(PlayerPedId())
+                local entityCoords = GetEntityCoords(entity)
+                local dist = #(playerCoords - entityCoords)
+                
+                for i, opt in ipairs(options) do
+                    if dist <= (opt.distance or 2.5) then
+                        table.insert(menuItems, {
+                            type = "button",
+                            id = opt.name,
+                            label = opt.label,
+                            icon = opt.icon or "fa-solid fa-circle-dot"
+                        })
+                    end
+                end
+
+                if #menuItems > 0 then
+                    currentTargetEntity = entity
+                    -- Usa a interface gráfica global da lib
+                    fdb.menu.open({
+                        id = targetMenuId,
+                        title = "Interagir",
+                        items = menuItems
+                    })
+                end
             end
         end
-
-        if #menuItems > 0 then
-            currentTargetEntity = entity
-            -- Usa a interface gráfica global da lib
-            fdb.menu.open({
-                id = targetMenuId,
-                title = "Interagir",
-                items = menuItems
-            })
-        end
     end
-end, false)
-
--- Limpa a variável quando a tecla é solta
-RegisterCommand('-fdb_target', function()
-    isTargeting = false
-end, false)
-
--- Tecla padrão: ALT Esquerdo
-Citizen.CreateThread(function()
-    RegisterKeyMapping('+fdb_target', 'Target Interagir (FDB)', 'keyboard', 'LMENU')
 end)
 
 -- ============================================================
