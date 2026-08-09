@@ -82,3 +82,12 @@ exports('LoadModel', LoadModel)
 exports('LoadAnimDict', LoadAnimDict)
 exports('LoadParticleFx', LoadParticleFx)
 exports('LoadWeaponAsset', LoadWeaponAsset)
+
+-- COMANDO DE TESTE TEMPORARIO
+RegisterCommand('testloader', function()
+    Citizen.CreateThread(function()
+        print('[fdb-libs] Testando LoadModel (p_lantern01x)...')
+        local result = exports['fdb-libs']:LoadModel('p_lantern01x')
+        print('[fdb-libs] Resultado LoadModel: ' .. tostring(result))
+    end)
+end, false)
