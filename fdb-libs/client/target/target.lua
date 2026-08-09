@@ -180,20 +180,25 @@ exports('removeEntity', removeEntity)
 -- COMANDO DE TESTE TEMPORARIO
 RegisterCommand('testtarget', function()
     Citizen.CreateThread(function()
-        local cavalo = GetMount(PlayerPedId())
-        if cavalo == 0 then 
-            print('[fdb-libs] Suba no cavalo primeiro!') 
-            return 
-        end
-        exports['fdb-libs']:addLocalEntity(cavalo, {{
-            name = 'teste_cavalo',
-            label = 'Inspecionar Cavalo',
-            icon = 'fa-solid fa-horse',
+        local ped = PlayerPedId()
+        local coords = GetEntityCoords(ped)
+        local forward = GetEntityForwardVector(ped)
+        local spawnCoords = coords + (forward * 1.5)
+        
+        exports['fdb-libs']:LoadModel('p_cigar01x')
+        local prop = CreateObject(joaat('p_cigar01x'), spawnCoords.x, spawnCoords.y, spawnCoords.z, true, true, false)
+        PlaceObjectOnGroundProperly(prop)
+        
+        exports['fdb-libs']:addLocalEntity(prop, {{
+            name = 'teste_prop',
+            label = 'Inspecionar Charuto',
+            icon = 'fa-solid fa-magnifying-glass',
             distance = 3.0,
             onSelect = function()
-                print('[fdb-libs] SUCESSO! O CALLBACK DO TARGET FUNCIONOU!')
+                print('[fdb-libs] SUCESSO! O CALLBACK DO TARGET FUNCIONOU! (Charuto Inspecionado)')
+                DeleteEntity(prop)
             end
         }})
-        print('[fdb-libs] Target Registrado! Desca do cavalo, segure a tecla ALT e olhe pra ele.')
+        print('[fdb-libs] Target Registrado! Olhe para o charuto no chao a sua frente e segure ALT.')
     end)
 end, false)
