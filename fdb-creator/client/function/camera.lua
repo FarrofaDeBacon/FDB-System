@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | client/function/camera.lua
+-- Camera manipulation for creator UI
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 ActiveCam = 0
 currentCamDestionation = ""
 camCoords = {}
@@ -223,9 +228,9 @@ function Light()
 		end
 
 		while CreatorLight == true do
-			SetLightsIntensityForEntity(lamp, 10.0) -- Pleine intensité pendant la journée
+			SetLightsIntensityForEntity(lamp, 10.0) -- Pleine intensitÃ© pendant la journÃ©e
 			UpdateLightsOnEntity(lamp)
-			SetLightsIntensityForEntity(lamp2, 5.0) -- Pleine intensité pendant la journée
+			SetLightsIntensityForEntity(lamp2, 5.0) -- Pleine intensitÃ© pendant la journÃ©e
 			UpdateLightsOnEntity(lamp2)
 			Wait(0)
 		end
@@ -261,3 +266,4 @@ AddEventHandler("onResourceStop", function(resourceName)
 		DisplayRadar(true)
 	end
 end)
+
