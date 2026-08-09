@@ -43,3 +43,10 @@ Abaixo estão os links diretos para cada documento no GitHub e a explicação do
   * Diagnóstico completo de recursos (fdb-medic, fdb-survival, fdb-consume, etc).
   * Cronograma dividido em Fases de substituição e testes.
 * **Propósito:** É o **Mapa da Mina** que o Claude deverá seguir rigorosamente na próxima etapa para importar os módulos customizados para o novo namespace `fdb-core` sem quebrar o que já estabilizamos.
+
+### 6. [Auditoria Técnica e Mapeamento: mega_doctorjob (MEGA_DOCTORJOB_AUDIT.md)](./MEGA_DOCTORJOB_AUDIT.md)
+* **O que é:** Um mapeamento aprofundado e auditoria do antigo script `mega_doctorjob`.
+* **O que contém:**
+  * Explicação detalhada do sistema visual de doenças (SVG), rotas NUI, mecânicas de itens médicos e Central de Despachos.
+  * O plano técnico de fusão dessas mecânicas com o `fdb-medic` ou o `medical-core`.
+* **Propósito:** Servir como **Blueprint (Planta Baixa)**. Documentar tudo o que o script original fazia para que possamos extrair o melhor de sua lógica médica avançada e reescrever/mesclar dentro dos padrões modernos do FDB-System sem perder nenhuma feature.
