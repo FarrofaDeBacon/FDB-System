@@ -111,21 +111,30 @@ local function GetEntityInFrontOfPlayer(distance)
 end
 
 Citizen.CreateThread(function()
+    local lastValidEntity = nil
+    local lastMenuItems = {}
+
     while true do
-        Wait(0)
-        -- Verifica se o jogador pressionou o ALT Esquerdo (INPUT_SPRINT / 0x8AAA0AD4)
-        if IsControlJustPressed(0, 0x8AAA0AD4) then
+        local sleep = 500
+        -- Verifica se o jogador ESTÁ SEGURANDO o ALT Esquerdo (INPUT_FRONTEND_ALT / 0x8AAA0AD4)
+        if IsControlPressed(0, 0x8AAA0AD4) then
+            sleep = 0
+            
             local entity = GetEntityInFrontOfPlayer(4.0)
+            
+            -- Limpa os dados se não tiver entidade
+            lastValidEntity = nil
+            lastMenuItems = {}
+            
             if entity and targetEntities[entity] then
                 local options = targetEntities[entity]
-                local menuItems = {}
                 local playerCoords = GetEntityCoords(PlayerPedId())
                 local entityCoords = GetEntityCoords(entity)
                 local dist = #(playerCoords - entityCoords)
                 
                 for i, opt in ipairs(options) do
                     if dist <= (opt.distance or 2.5) then
-                        table.insert(menuItems, {
+                        table.insert(lastMenuItems, {
                             type = "button",
                             id = opt.name,
                             label = opt.label,
@@ -133,18 +142,33 @@ Citizen.CreateThread(function()
                         })
                     end
                 end
-
-                if #menuItems > 0 then
-                    currentTargetEntity = entity
-                    -- Usa a interface gráfica global da lib
-                    fdb.menu.open({
-                        id = targetMenuId,
-                        title = "Interagir",
-                        items = menuItems
-                    })
+                
+                if #lastMenuItems > 0 then
+                    lastValidEntity = entity
+                    -- Aqui poderia ter um DrawText na tela indicando que achou o alvo, 
+                    -- mas o RedM nativamente já mostra um ponto (dot) ao segurar ALT.
                 end
             end
         end
+
+        -- Se o jogador SOLTOU o ALT Esquerdo
+        if IsControlJustReleased(0, 0x8AAA0AD4) then
+            if lastValidEntity and #lastMenuItems > 0 then
+                currentTargetEntity = lastValidEntity
+                -- Abre a interface gráfica global da lib
+                fdb.menu.open({
+                    id = targetMenuId,
+                    title = "Interagir",
+                    items = lastMenuItems
+                })
+            end
+            
+            -- Reseta o estado
+            lastValidEntity = nil
+            lastMenuItems = {}
+        end
+
+        Wait(sleep)
     end
 end)
 
