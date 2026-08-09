@@ -4,7 +4,7 @@ game 'rdr3'
 
 description 'fdb-backpacks - Novo script de mochilas físicas com sistema de gaveta deslizante'
 version '1.0.0'
-author 'Antigravity'
+author 'Farrofa DeBacon'
 
 shared_scripts {
     '@ox_lib/init.lua',
