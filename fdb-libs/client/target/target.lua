@@ -88,7 +88,7 @@ local function GetEntityInFrontOfPlayer(distance)
     local forwardCam = vector3(dirX, dirY, dirZ)
     local endCam = camPos + (forwardCam * distance * 2)
     
-    local rayCam = StartShapeTestCapsule(camPos.x, camPos.y, camPos.z, endCam.x, endCam.y, endCam.z, 1.0, 31, ped, 7)
+    local rayCam = StartShapeTestLosProbe(camPos.x, camPos.y, camPos.z, endCam.x, endCam.y, endCam.z, 511, ped, 4)
     local _, hitCam, _, _, entityHitCam = GetShapeTestResult(rayCam)
     
     if hitCam == 1 and entityHitCam ~= 0 then
@@ -100,7 +100,7 @@ local function GetEntityInFrontOfPlayer(distance)
     local forward = GetEntityForwardVector(ped)
     local endCoords = coords + (forward * distance)
 
-    local ray = StartShapeTestCapsule(coords.x, coords.y, coords.z, endCoords.x, endCoords.y, endCoords.z, 1.0, 31, ped, 7)
+    local ray = StartShapeTestLosProbe(coords.x, coords.y, coords.z, endCoords.x, endCoords.y, endCoords.z, 511, ped, 4)
     local _, hit, _, _, entityHit = GetShapeTestResult(ray)
     
     if hit == 1 and entityHit ~= 0 then
