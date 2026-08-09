@@ -89,7 +89,15 @@ local function GetEntityInFrontOfPlayer(distance)
     local endCam = camPos + (forwardCam * distance * 2)
     
     local rayCam = StartShapeTestLosProbe(camPos.x, camPos.y, camPos.z, endCam.x, endCam.y, endCam.z, 511, ped, 4)
-    local _, hitCam, _, _, entityHitCam = GetShapeTestResult(rayCam)
+    local hitCam, entityHitCam = 0, 0
+    while true do
+        Wait(0)
+        local retval, h, _, _, e = GetShapeTestResult(rayCam)
+        if retval ~= 1 then
+            hitCam, entityHitCam = h, e
+            break
+        end
+    end
     
     if hitCam == 1 and entityHitCam ~= 0 then
         return entityHitCam
@@ -101,7 +109,15 @@ local function GetEntityInFrontOfPlayer(distance)
     local endCoords = coords + (forward * distance)
 
     local ray = StartShapeTestLosProbe(coords.x, coords.y, coords.z, endCoords.x, endCoords.y, endCoords.z, 511, ped, 4)
-    local _, hit, _, _, entityHit = GetShapeTestResult(ray)
+    local hit, entityHit = 0, 0
+    while true do
+        Wait(0)
+        local retval, h, _, _, e = GetShapeTestResult(ray)
+        if retval ~= 1 then
+            hit, entityHit = h, e
+            break
+        end
+    end
     
     if hit == 1 and entityHit ~= 0 then
         return entityHit
