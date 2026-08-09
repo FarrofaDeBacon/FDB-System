@@ -133,7 +133,7 @@ RegisterCommand('+fdb_target', function()
         if #menuItems > 0 then
             currentTargetEntity = entity
             -- Usa a interface gráfica global da lib
-            exports['fdb-libs']:openMenu({
+            fdb.menu.open({
                 id = targetMenuId,
                 title = "Interagir",
                 items = menuItems
@@ -158,7 +158,7 @@ AddEventHandler('fdb-libs:menu:onChange', function(data)
         if currentTargetEntity and targetEntities[currentTargetEntity] then
             for _, opt in ipairs(targetEntities[currentTargetEntity]) do
                 if opt.name == data.itemId then
-                    exports['fdb-libs']:closeMenu()
+                    fdb.menu.close()
                     if type(opt.onSelect) == "function" then
                         opt.onSelect(currentTargetEntity)
                     end
