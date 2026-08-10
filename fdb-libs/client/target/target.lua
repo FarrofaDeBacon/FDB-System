@@ -128,112 +128,79 @@ local function GetEntityInFrontOfPlayer(distance)
     return nil
 end
 
-local activeCallbacks = {}
-
 Citizen.CreateThread(function()
-    local isEyeOpen = false
-    local isMouseFree = false
     local lastValidEntity = nil
-    local lostFrames = 0
-    local LOST_THRESHOLD = 10 -- Quantos frames sem achar a entidade antes de limpar
-    
+    local lastMenuItems = {}
+
     while true do
         local sleep = 500
-        
-        -- Verifica se o jogador ESTA SEGURANDO o ALT Esquerdo
+        -- Verifica se o jogador ESTÁ SEGURANDO o ALT Esquerdo (INPUT_FRONTEND_ALT / 0x8AAA0AD4)
         if IsControlPressed(0, 0x8AAA0AD4) then
             sleep = 0
             
-            if not isEyeOpen then
-                isEyeOpen = true
-                SendNUIMessage({ action = "SET_TARGET_EYE", data = { visible = true } })
-            end
-            
             local entity = GetEntityInFrontOfPlayer(4.0)
             
+            -- Limpa os dados se nao tiver entidade
+            lastValidEntity = nil
+            local contextOptions = {}
+            
             if entity and targetEntities[entity] then
-                lostFrames = 0 -- Resetou, encontrou alvo
+                if debugLastEntity ~= entity then
+                    debugLastEntity = entity
+                    print("[fdb-libs] [DEBUG] ALVO VALIDO DETECTADO NA MIRA! (" .. tostring(entity) .. ")")
+                end
                 
-                if entity ~= lastValidEntity then
+                local options = targetEntities[entity]
+                local playerCoords = GetEntityCoords(PlayerPedId())
+                local entityCoords = GetEntityCoords(entity)
+                local dist = #(playerCoords - entityCoords)
+                
+                for i, opt in ipairs(options) do
+                    if dist <= (opt.distance or 2.5) then
+                        table.insert(contextOptions, {
+                            label = opt.label,
+                            icon = opt.icon or "fa-solid fa-circle-dot",
+                            action = function()
+                                if type(opt.onSelect) == "function" then
+                                    opt.onSelect(entity)
+                                end
+                            end
+                        })
+                    end
+                end
+                
+                if #contextOptions > 0 then
                     lastValidEntity = entity
-                    local options = targetEntities[entity]
-                    local playerCoords = GetEntityCoords(PlayerPedId())
-                    local entityCoords = GetEntityCoords(entity)
-                    local dist = #(playerCoords - entityCoords)
-                    
-                    local contextOptions = {}
-                    activeCallbacks = {}
-                    
-                    for i, opt in ipairs(options) do
-                        if dist <= (opt.distance or 2.5) then
-                            table.insert(contextOptions, {
-                                label = opt.label,
-                                icon = opt.icon
-                            })
-                            activeCallbacks[#contextOptions] = opt.onSelect
-                        end
-                    end
-                    
-                    if #contextOptions > 0 then
-                        SendNUIMessage({ action = "SET_TARGET_OPTIONS", data = { options = contextOptions } })
-                        if not isMouseFree then
-                            isMouseFree = true
-                            SetNuiFocus(true, true)
-                            SendNUIMessage({ action = "SET_TARGET_MOUSE", data = { free = true } })
-                        end
-                    end
                 end
             else
-                -- Nao achou entidade NESTE frame, mas espera alguns frames antes de desistir
-                lostFrames = lostFrames + 1
-                if lostFrames >= LOST_THRESHOLD and lastValidEntity ~= nil then
-                    lastValidEntity = nil
-                    activeCallbacks = {}
-                    SendNUIMessage({ action = "SET_TARGET_OPTIONS", data = { options = {} } })
-                    if isMouseFree then
-                        isMouseFree = false
-                        SetNuiFocus(false, false)
-                        SendNUIMessage({ action = "SET_TARGET_MOUSE", data = { free = false } })
-                    end
+                if debugLastEntity ~= nil then
+                    debugLastEntity = nil
+                    print("[fdb-libs] [DEBUG] ALVO PERDIDO DA MIRA.")
                 end
             end
-            
-        else
-            -- Soltou o ALT
-            if isEyeOpen then
-                isEyeOpen = false
-                isMouseFree = false
-                lastValidEntity = nil
-                lostFrames = 0
-                activeCallbacks = {}
-                SetNuiFocus(false, false)
-                SendNUIMessage({ action = "SET_TARGET_EYE", data = { visible = false } })
+        end
+
+        -- Se o jogador SOLTOU o ALT Esquerdo
+        if IsControlJustReleased(0, 0x8AAA0AD4) then
+            print("[fdb-libs] [DEBUG] ALT SOLTO!")
+            if lastValidEntity and #contextOptions > 0 then
+                print("[fdb-libs] [DEBUG] ABRINDO CONTEXT MENU PARA O ALVO " .. tostring(lastValidEntity))
+                -- Abre a interface de Contexto (flutuante perto da mira/mouse)
+                fdb.context.OpenContextMenu({
+                    title = "Interagir",
+                    options = contextOptions
+                })
+            else
+                print("[fdb-libs] [DEBUG] NENHUM ALVO VALIDO NA MIRA NO MOMENTO QUE O ALT FOI SOLTO.")
             end
+            
+            -- Reseta o estado
+            lastValidEntity = nil
+            contextOptions = {}
         end
 
         Wait(sleep)
     end
-end)
-
--- Callback do clique do NUI
-RegisterNUICallback('targetSelectOption', function(data, cb)
-    local index = tonumber(data.index)
-    
-    -- Fecha tudo apos o clique
-    SetNuiFocus(false, false)
-    SendNUIMessage({ action = "SET_TARGET_EYE", data = { visible = false } })
-    
-    -- Dispara a acao do Lua
-    if index and activeCallbacks[index] then
-        if type(activeCallbacks[index]) == "function" then
-            -- OBS: lastValidEntity aqui ja e uma upvalue do escopo local
-            -- Porem, ele pode ter sido resetado pelo if (nao esta segurando alt).
-            -- Para evitar bugs, e bom passar a entidade que estava ativa.
-            activeCallbacks[index]() 
-        end
-    end
-    
-    if cb then cb('ok') end
 end)
 
 -- Exports compatíveis com ox_target

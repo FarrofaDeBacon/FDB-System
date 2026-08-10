@@ -1,5 +1,5 @@
 <script>
-    import { onMount, onDestroy } from 'svelte';
+    import { onMount } from 'svelte';
     import Menu from './components/Menu.svelte';
     import Notify from './components/Notify.svelte';
     import ProgressBar from './components/ProgressBar.svelte';
@@ -7,7 +7,6 @@
     import Minigame from './components/Minigame.svelte';
     import ContextMenu from './components/ContextMenu.svelte';
     import ThemeEditor from './components/ThemeEditor.svelte';
-    import Target from './components/Target.svelte';
 
     let menuData = null;
     let isOpen = false;
@@ -231,7 +230,6 @@
         />
     {/if}
 
-    <Target />
     <ContextMenu />
     <ThemeEditor />
 </main>
