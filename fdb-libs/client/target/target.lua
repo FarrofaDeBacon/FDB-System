@@ -188,7 +188,8 @@ Citizen.CreateThread(function()
                 -- Abre a interface de Contexto (flutuante perto da mira/mouse)
                 fdb.context.OpenContextMenu({
                     title = "Interagir",
-                    options = contextOptions
+                    options = contextOptions,
+                    position = "center"
                 })
             else
                 print("[fdb-libs] [DEBUG] NENHUM ALVO VALIDO NA MIRA NO MOMENTO QUE O ALT FOI SOLTO.")
