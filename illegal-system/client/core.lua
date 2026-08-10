@@ -27,6 +27,17 @@ CreateThread(function()
     })
 end)
 
-RegisterNetEvent('illegal-system:client:npcRobberyResult', function(result)
-    -- espaço reservado pra UI/animação de resultado (sucesso/falha)
+RegisterNetEvent('illegal-system:client:startNpcRobberyMinigame', function(data)
+    SetNuiFocus(true, false)
+    SendNUIMessage({
+        action = "START_MINIGAME",
+        time = 5.0,
+        images = data.images
+    })
+end)
+
+RegisterNUICallback('minigameResult', function(data, cb)
+    SetNuiFocus(false, false)
+    TriggerServerEvent('illegal-system:server:finishNpcRobbery', data.success, data.tier)
+    cb('ok')
 end)

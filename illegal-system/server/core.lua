@@ -124,33 +124,42 @@ function CrimeCore.AttemptCrime(source, crimeId)
         return { ok = false, reason = 'cooldown' }
     end
 
+    -- Aplica o cooldown imediatamente para não spammar minigames
+    SetCooldown(citizenid, crimeId, crime.cooldown)
+
+    return { ok = true }
+end
+
+--- Finaliza o crime baseado no resultado do minigame do client
+function CrimeCore.FinishCrime(source, crimeId, success, rewardItem)
+    local crime = GetCrimeConfig(crimeId)
+    local citizenid = Bridge.GetIdentifier(source)
+
+    if not citizenid then return false end
+
     local record = EnsureCriminalRecord(citizenid)
 
-    local success = Utils.RollChance(crime.successChance)
     local witnessGenerated = RollWitness(crime)
     local evidenceGenerated = RollEvidence(crime)
-    local rewardGiven = 0
+    local rewardGivenName = ""
 
     if success then
-        rewardGiven = Utils.RandomBetween(crime.rewardMin, crime.rewardMax)
-        Bridge.AddMoney(source, rewardGiven, ('crime:%s'):format(crimeId))
-
+        if rewardItem then
+            Bridge.AddItem(source, rewardItem, 1)
+            rewardGivenName = rewardItem
+        end
         record.xp = record.xp + crime.xp
         record.heat = math.min(Config.Heat.max, record.heat + crime.heat)
     else
-        -- falha ainda gera heat (menor) e pode gerar testemunha/evidência —
-        -- tentar e falhar não é de graça
         record.heat = math.min(Config.Heat.max, record.heat + math.floor(crime.heat / 2))
     end
 
     PersistCriminalRecord(citizenid)
-    SetCooldown(citizenid, crimeId, crime.cooldown)
-    LogCrimeHistory(citizenid, crimeId, success, rewardGiven, witnessGenerated, evidenceGenerated)
+    LogCrimeHistory(citizenid, crimeId, success, rewardGivenName, witnessGenerated, evidenceGenerated)
 
     return {
-        ok               = true,
         success          = success,
-        reward           = rewardGiven,
+        reward           = rewardGivenName,
         witnessGenerated = witnessGenerated,
         evidenceGenerated= evidenceGenerated,
         newLevel         = GetCriminalLevel(record.xp),
@@ -186,4 +195,5 @@ CreateThread(function()
 end)
 
 exports('AttemptCrime', CrimeCore.AttemptCrime)
+exports('FinishCrime', CrimeCore.FinishCrime)
 exports('GetCriminalStatus', CrimeCore.GetCriminalStatus)

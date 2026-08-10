@@ -7,6 +7,8 @@
     heat) vem inteiramente da resposta do servidor.
 ]]
 
+local activeRobberies = {}
+
 RegisterNetEvent('illegal-system:server:attemptNpcRobbery', function()
     local source = source
     local result = CrimeCore.AttemptCrime(source, 'npc_robbery')
@@ -20,17 +22,49 @@ RegisterNetEvent('illegal-system:server:attemptNpcRobbery', function()
         return
     end
 
+    local lootConfig = Config.Crimes['npc_robbery'].loot
+    local items = {
+        common = lootConfig.common[math.random(#lootConfig.common)],
+        uncommon = lootConfig.uncommon[math.random(#lootConfig.uncommon)],
+        rare = lootConfig.rare[math.random(#lootConfig.rare)]
+    }
+
+    activeRobberies[source] = items
+
+    -- Manda o client iniciar a UI do minigame com os itens selecionados
+    TriggerClientEvent('illegal-system:client:startNpcRobberyMinigame', source, {
+        items = items,
+        images = {
+            common = Config.InventoryURL .. items.common .. '.png',
+            uncommon = Config.InventoryURL .. items.uncommon .. '.png',
+            rare = Config.InventoryURL .. items.rare .. '.png'
+        }
+    })
+end)
+
+RegisterNetEvent('illegal-system:server:finishNpcRobbery', function(success, tier)
+    local source = source
+    local activeItems = activeRobberies[source]
+
+    if not activeItems then return end
+    activeRobberies[source] = nil -- limpa cache para evitar exploit
+
+    local rewardItem = nil
+    if success and tier and activeItems[tier] then
+        rewardItem = activeItems[tier]
+    else
+        success = false
+    end
+
+    local result = CrimeCore.FinishCrime(source, 'npc_robbery', success, rewardItem)
+
     if result.success then
-        Bridge.Notify(source, ('Você conseguiu $%d.'):format(result.reward), 'success')
+        Bridge.Notify(source, 'Você conseguiu roubar um item!', 'success')
     else
         Bridge.Notify(source, 'A vítima percebeu e você não conseguiu nada.', 'error')
     end
 
     if result.witnessGenerated then
-        -- Etapa 7 vai substituir isso por um evento real pro sistema de
-        -- polícia consumir (descrição, não identidade)
         print(('[illegal-system] Testemunha gerada para roubo de NPC (source %s)'):format(source))
     end
-
-    TriggerClientEvent('illegal-system:client:npcRobberyResult', source, result)
 end)

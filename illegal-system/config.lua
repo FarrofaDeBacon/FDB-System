@@ -29,6 +29,13 @@ Config.CriminalLevels = {
 }
 
 -- ─────────────────────────────────────────────────────────
+-- Configuração de Imagens (Inventário)
+-- ─────────────────────────────────────────────────────────
+-- Defina de onde a UI deve carregar as imagens.
+-- Ex: 'nui://fdb-inventory/html/images/' ou 'nui://rsg-inventory/html/images/'
+Config.InventoryURL = 'nui://rsg-inventory/html/images/'
+
+-- ─────────────────────────────────────────────────────────
 -- Catálogo de crimes. Cada entrada = 1 crime, sem precisar
 -- de código novo no Core pra existir.
 -- ─────────────────────────────────────────────────────────
@@ -43,9 +50,16 @@ Config.Crimes = {
         witnessChance    = 25,          -- % de gerar testemunha
         evidenceChance   = 10,          -- % de gerar evidência
         cooldown         = 5 * 60,      -- segundos (por jogador)
-        rewardMin        = 5,
-        rewardMax        = 25,
-        successChance    = 70,          -- % de sucesso na tentativa (server-side)
+        
+        -- Configuração de Loot para o Minigame
+        -- common (Branco): fácil de acertar
+        -- uncommon (Amarelo): médio
+        -- rare (Azul): difícil
+        loot = {
+            common   = { 'water', 'lockpick', 'bandage' },
+            uncommon = { 'phone', 'rolex' },
+            rare     = { 'goldbar', 'weapon_pistol' }
+        },
     },
 
     -- próximos crimes entram aqui como novas entradas,
