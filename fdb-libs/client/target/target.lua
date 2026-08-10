@@ -130,10 +130,10 @@ Citizen.CreateThread(function()
     local lastValidEntity = nil
     local debugLastEntity = nil
     local contextOptions = {}
-    local wasAltPressed = false
     local lastHitTime = 0
     local GRACE_MS = 300
     local lastScreenX, lastScreenY = 0.5, 0.5
+    local indicatorVisible = false
 
     while true do
         local sleep = 500
@@ -141,7 +141,6 @@ Citizen.CreateThread(function()
 
         if isAltPressed then
             sleep = 0
-            wasAltPressed = true
 
             local entity = GetEntityInFrontOfPlayer(4.0)
 
@@ -168,7 +167,6 @@ Citizen.CreateThread(function()
                                 label = opt.label,
                                 icon = opt.icon or "fa-solid fa-circle-dot",
                                 action = function()
-                                    print("[fdb-libs] [DEBUG] Executando action! Tipo de opt.onSelect: " .. type(opt.onSelect))
                                     if opt.onSelect then
                                         local success, err = pcall(function()
                                             opt.onSelect(entity)
@@ -193,6 +191,11 @@ Citizen.CreateThread(function()
                     if onScreen then
                         lastScreenX = screenX
                         lastScreenY = screenY
+                        
+                        if not indicatorVisible then
+                            indicatorVisible = true
+                        end
+
                         SendNUIMessage({
                             action = "UPDATE_TARGET_EYE",
                             active = true,
@@ -206,7 +209,11 @@ Citizen.CreateThread(function()
                 if lastValidEntity and (GetGameTimer() - lastHitTime) > GRACE_MS then
                     lastValidEntity = nil
                     contextOptions = {}
-                    SendNUIMessage({ action = "UPDATE_TARGET_EYE", active = false })
+                    
+                    if indicatorVisible then
+                        indicatorVisible = false
+                        SendNUIMessage({ action = "UPDATE_TARGET_EYE", active = false })
+                    end
 
                     if debugLastEntity ~= nil then
                         debugLastEntity = nil
@@ -214,25 +221,34 @@ Citizen.CreateThread(function()
                     end
                 end
             end
+        else
+            -- Se nao esta segurando ALT, porem o indicador estava visivel, limpar.
+            if indicatorVisible then
+                indicatorVisible = false
+                SendNUIMessage({ action = "UPDATE_TARGET_EYE", active = false })
+                lastValidEntity = nil
+                contextOptions = {}
+                debugLastEntity = nil
+            end
+        end
 
-        elseif wasAltPressed then
-            wasAltPressed = false
-            print("[fdb-libs] [DEBUG] ALT solto! lastValidEntity=" .. tostring(lastValidEntity) .. " opcoes=" .. tostring(#contextOptions))
-
+        -- Clique esquerdo processa o menu se o indicador estiver visivel
+        if indicatorVisible and IsControlJustPressed(0, 0x4B9CE38B) then -- INPUT_ATTACK
             if lastValidEntity and #contextOptions > 0 then
-                print("[fdb-libs] [DEBUG] Abrindo ContextMenu...")
+                print("[fdb-libs] [DEBUG] Clicou com indicador visivel, abrindo ContextMenu...")
                 fdb.context.OpenContextMenu({
                     title = "Interagir",
                     position = { x = lastScreenX, y = lastScreenY },
                     options = contextOptions
                 })
+                
+                -- Esconde o indicador de imediato e reseta variaveis
+                indicatorVisible = false
+                SendNUIMessage({ action = "UPDATE_TARGET_EYE", active = false })
+                lastValidEntity = nil
+                contextOptions = {}
+                debugLastEntity = nil
             end
-
-            SendNUIMessage({ action = "UPDATE_TARGET_EYE", active = false })
-            lastValidEntity = nil
-            debugLastEntity = nil
-            contextOptions = {}
-            lastHitTime = 0
         end
 
         Wait(sleep)
