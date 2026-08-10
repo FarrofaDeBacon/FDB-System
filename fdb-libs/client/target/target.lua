@@ -141,7 +141,6 @@ Citizen.CreateThread(function()
 
         if isAltPressed then
             sleep = 0
-
             local entity = GetEntityInFrontOfPlayer(4.0)
 
             if entity and targetEntities[entity] then
@@ -150,11 +149,6 @@ Citizen.CreateThread(function()
                 if entity ~= lastValidEntity then
                     lastValidEntity = entity
                     contextOptions = {}
-
-                    if debugLastEntity ~= entity then
-                        debugLastEntity = entity
-                        print("[fdb-libs] [DEBUG] Alvo valido detectado na mira (" .. tostring(entity) .. ")")
-                    end
 
                     local options = targetEntities[entity]
                     local playerCoords = GetEntityCoords(PlayerPedId())
@@ -167,14 +161,7 @@ Citizen.CreateThread(function()
                                 label = opt.label,
                                 icon = opt.icon or "fa-solid fa-circle-dot",
                                 action = function()
-                                    if opt.onSelect then
-                                        local success, err = pcall(function()
-                                            opt.onSelect(entity)
-                                        end)
-                                        if not success then
-                                            print("[fdb-libs] [ERROR] Falha ao executar onSelect: " .. tostring(err))
-                                        end
-                                    end
+                                    if opt.onSelect then pcall(function() opt.onSelect(entity) end) end
                                 end
                             })
                         end
@@ -184,70 +171,33 @@ Citizen.CreateThread(function()
                         lastValidEntity = nil
                     end
                 end
-
-                if lastValidEntity then
-                    local entCoords = GetEntityCoords(lastValidEntity)
-                    local onScreen, screenX, screenY = GetScreenCoordFromWorldCoord(entCoords.x, entCoords.y, entCoords.z)
-                    if onScreen then
-                        lastScreenX = screenX
-                        lastScreenY = screenY
-                        
-                        if not indicatorVisible then
-                            indicatorVisible = true
-                        end
-
-                        SendNUIMessage({
-                            action = "UPDATE_TARGET_EYE",
-                            active = true,
-                            x = screenX,
-                            y = screenY
-                        })
-                    end
-                end
             else
-                -- Raycast nao achou nada NESTE frame, mas so limpa se passar 300ms
                 if lastValidEntity and (GetGameTimer() - lastHitTime) > GRACE_MS then
                     lastValidEntity = nil
                     contextOptions = {}
-                    
-                    if indicatorVisible then
-                        indicatorVisible = false
-                        SendNUIMessage({ action = "UPDATE_TARGET_EYE", active = false })
-                    end
-
-                    if debugLastEntity ~= nil then
-                        debugLastEntity = nil
-                        print("[fdb-libs] [DEBUG] Alvo perdido da mira (grace expirou).")
-                    end
                 end
-            end
-        else
-            -- Se nao esta segurando ALT, porem o indicador estava visivel, limpar.
-            if indicatorVisible then
-                indicatorVisible = false
-                SendNUIMessage({ action = "UPDATE_TARGET_EYE", active = false })
-                lastValidEntity = nil
-                contextOptions = {}
-                debugLastEntity = nil
             end
         end
 
-        -- Clique esquerdo processa o menu se o indicador estiver visivel
+        -- Controle do Indicador
+        if isAltPressed and lastValidEntity and not indicatorVisible then
+            indicatorVisible = true
+            SendNUIMessage({ action = "SHOW_TARGET_INDICATOR" })
+        elseif (not isAltPressed or not lastValidEntity) and indicatorVisible then
+            indicatorVisible = false
+            SendNUIMessage({ action = "HIDE_TARGET_INDICATOR" })
+        end
+
+        -- Clique esquerdo processa o menu se o indicador estiver visível
         if indicatorVisible and IsControlJustPressed(0, 0x4B9CE38B) then -- INPUT_ATTACK
             if lastValidEntity and #contextOptions > 0 then
-                print("[fdb-libs] [DEBUG] Clicou com indicador visivel, abrindo ContextMenu...")
                 fdb.context.OpenContextMenu({
                     title = "Interagir",
-                    position = { x = lastScreenX, y = lastScreenY },
+                    position = "mouse", -- ou 'center', conforme preferência
                     options = contextOptions
                 })
-                
-                -- Esconde o indicador de imediato e reseta variaveis
                 indicatorVisible = false
-                SendNUIMessage({ action = "UPDATE_TARGET_EYE", active = false })
-                lastValidEntity = nil
-                contextOptions = {}
-                debugLastEntity = nil
+                SendNUIMessage({ action = "HIDE_TARGET_INDICATOR" })
             end
         end
 

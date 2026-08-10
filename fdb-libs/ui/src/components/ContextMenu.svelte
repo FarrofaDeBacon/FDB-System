@@ -10,9 +10,7 @@
     let y = 0;
     let menuEl;
 
-    let eyeVisible = false;
-    let eyeX = 0;
-    let eyeY = 0;
+    let indicatorVisible = false;
 
     // Escuta eventos globais
     function handleMessage(event) {
@@ -21,7 +19,7 @@
             title = item.data.title;
             options = item.data.options;
             position = item.data.position;
-            eyeVisible = false; // esconde o olho ao abrir
+            indicatorVisible = false; // esconde o olho ao abrir
             visible = true;
             
             if (position === "mouse") {
@@ -29,12 +27,10 @@
             }
         } else if (item.action === "CLOSE_CONTEXT_MENU") {
             visible = false;
-        } else if (item.action === "UPDATE_TARGET_EYE") {
-            eyeVisible = item.active;
-            if (item.active) {
-                eyeX = item.x * window.innerWidth;
-                eyeY = item.y * window.innerHeight;
-            }
+        } else if (item.action === "SHOW_TARGET_INDICATOR") {
+            indicatorVisible = true;
+        } else if (item.action === "HIDE_TARGET_INDICATOR") {
+            indicatorVisible = false;
         }
     }
     
@@ -91,8 +87,8 @@
             : `position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);`);
 </script>
 
-{#if eyeVisible && !visible}
-    <div class="target-eye" style="left: {eyeX}px; top: {eyeY}px;">
+{#if indicatorVisible && !visible}
+    <div class="target-indicator">
         <i class="fa-solid fa-eye"></i>
     </div>
 {/if}
@@ -138,8 +134,10 @@
 {/if}
 
 <style>
-    .target-eye {
+    .target-indicator {
         position: absolute;
+        left: 50%;
+        top: 50%;
         transform: translate(-50%, -50%);
         color: var(--fdb-accent-color, #c9a15a);
         font-size: 24px;
