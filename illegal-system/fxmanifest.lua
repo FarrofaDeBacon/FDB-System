@@ -20,11 +20,6 @@ server_scripts {
     'server/crimes/npc_robbery.lua',
 }
 
-    'bridge/fdb_bridge.lua', -- trocar por outro bridge se o framework mudar
-    'server/core.lua',
-    'server/crimes/npc_robbery.lua',
-}
-
 client_scripts {
     'bridge/rsg_bridge_client.lua',
     'bridge/fdb_bridge_client.lua',
