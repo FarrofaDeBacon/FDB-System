@@ -229,27 +229,28 @@ end)
 exports('addLocalEntity', addLocalEntity)
 exports('removeEntity', removeEntity)
 
--- COMANDO DE TESTE TEMPORARIO REMOVIDO PARA EVITAR O CHAT
-Citizen.CreateThread(function()
-    Wait(2000) -- Aguarda o jogador carregar
-    local ped = PlayerPedId()
-    local coords = GetEntityCoords(ped)
-    local forward = GetEntityForwardVector(ped)
-    local spawnCoords = coords + (forward * 1.5)
-    
-    exports['fdb-libs']:LoadModel('p_cigar01x')
-    local prop = CreateObject(joaat('p_cigar01x'), spawnCoords.x, spawnCoords.y, spawnCoords.z, true, true, false)
-    PlaceObjectOnGroundProperly(prop)
-    
-    exports['fdb-libs']:addLocalEntity(prop, {{
-        name = 'teste_prop',
-        label = 'Inspecionar Charuto',
-        icon = 'fa-solid fa-magnifying-glass',
-        distance = 3.0,
-        onSelect = function()
-            print('[fdb-libs] SUCESSO! O CALLBACK DO TARGET FUNCIONOU! (Charuto Inspecionado)')
-            DeleteEntity(prop)
-        end
-    }})
-    print('[fdb-libs] Charuto spawnado automaticamente na sua frente para teste! Segure ALT.')
-end)
+-- COMANDO DE TESTE TEMPORARIO
+RegisterCommand('testtarget', function()
+    Citizen.CreateThread(function()
+        local ped = PlayerPedId()
+        local coords = GetEntityCoords(ped)
+        local forward = GetEntityForwardVector(ped)
+        local spawnCoords = coords + (forward * 1.5)
+        
+        exports['fdb-libs']:LoadModel('p_cigar01x')
+        local prop = CreateObject(joaat('p_cigar01x'), spawnCoords.x, spawnCoords.y, spawnCoords.z, true, true, false)
+        PlaceObjectOnGroundProperly(prop)
+        
+        exports['fdb-libs']:addLocalEntity(prop, {{
+            name = 'teste_prop',
+            label = 'Inspecionar Charuto',
+            icon = 'fa-solid fa-magnifying-glass',
+            distance = 3.0,
+            onSelect = function()
+                print('[fdb-libs] SUCESSO! O CALLBACK DO TARGET FUNCIONOU! (Charuto Inspecionado)')
+                DeleteEntity(prop)
+            end
+        }})
+        print('[fdb-libs] Target Registrado! Olhe para o charuto no chao a sua frente e segure ALT.')
+    end)
+end, false)
