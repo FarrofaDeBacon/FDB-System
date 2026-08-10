@@ -4,7 +4,6 @@
 -- ============================================================
 
 local targetEntities = {}
-local targetMenuId = "fdb_target_menu"
 local currentTargetEntity = nil
 
 --- Registra uma entidade local para ter opções de Target
@@ -18,20 +17,18 @@ local function addLocalEntity(entity, options)
         if type(options) ~= "table" then
             error("Opcoes invalidas (esperado table)")
         end
-        
-        -- Inicializa a tabela da entidade se não existir
+
         if not targetEntities[entity] then
             targetEntities[entity] = {}
         end
-        
-        -- Adiciona as novas opções
+
         for _, opt in ipairs(options) do
             table.insert(targetEntities[entity], opt)
         end
     end)
-    
+
     if not success then
-        print(string.format("[fdb-libs] ^3WARN^7 ox_target_setup_failed (fdb.target): falha ao registrar target - %s", tostring(err)))
+        print(string.format("[fdb-libs] ^3WARN^7 fdb.target: falha ao registrar target - %s", tostring(err)))
         return false
     end
     return true
@@ -44,9 +41,8 @@ local function removeEntity(entity, optionNames)
     local success, err = pcall(function()
         if not entity or entity == 0 then return end
         if not targetEntities[entity] then return end
-        
+
         if optionNames == nil then
-            -- Remove todas as opções dessa entidade
             targetEntities[entity] = nil
         elseif type(optionNames) == "string" then
             for i = #targetEntities[entity], 1, -1 do
@@ -66,21 +62,21 @@ local function removeEntity(entity, optionNames)
             if #targetEntities[entity] == 0 then targetEntities[entity] = nil end
         end
     end)
-    
+
     if not success then
         print(string.format("[fdb-libs] ^3WARN^7 fdb.target: falha ao remover target - %s", tostring(err)))
     end
 end
 
 -- ============================================================
--- Lógica de Raycast e KeyMapping
+-- Lógica de Raycast
 -- ============================================================
 
+-- Espera até 3 frames pela engine terminar o cálculo do shape test,
+-- em vez de ler o resultado na hora (que vinha "pendente" e falhava).
 local function ResolveShapeTest(rayHandle)
     local retval, hit, endCoords, surfaceNormal, entityHit
 
-    -- Espera ate 3 frames pela engine terminar o calculo do raycast.
-    -- Na pratica resolve em 0-1 frame, o limite e so seguranca contra loop infinito.
     for _ = 1, 3 do
         retval, hit, endCoords, surfaceNormal, entityHit = GetShapeTestResult(rayHandle)
         if retval ~= 1 then
@@ -95,7 +91,7 @@ end
 local function GetEntityInFrontOfPlayer(distance)
     local ped = PlayerPedId()
 
-    -- Raycast 1: camera (o que o jogador esta olhando)
+    -- Raycast 1: câmera (o que o jogador está olhando)
     local camRot = GetGameplayCamRot(2)
     local camPos = GetGameplayCamCoord()
     local dirX = -math.sin(math.rad(camRot.z)) * math.abs(math.cos(math.rad(camRot.x)))
@@ -106,20 +102,18 @@ local function GetEntityInFrontOfPlayer(distance)
 
     local rayCam = StartShapeTestLosProbe(camPos.x, camPos.y, camPos.z, endCam.x, endCam.y, endCam.z, 511, ped, 4)
     local hitCam, entityHitCam = ResolveShapeTest(rayCam)
-    print("hitCam:", hitCam, "entityHitCam:", entityHitCam)
 
     if hitCam == 1 and entityHitCam ~= 0 then
         return entityHitCam
     end
 
-    -- Raycast 2 (fallback): direto da frente do personagem, ignora a camera
+    -- Raycast 2 (fallback): direto da frente do personagem, ignora a câmera
     local coords = GetEntityCoords(ped)
     local forward = GetEntityForwardVector(ped)
     local endCoords = coords + (forward * distance)
 
     local ray = StartShapeTestLosProbe(coords.x, coords.y, coords.z, endCoords.x, endCoords.y, endCoords.z, 511, ped, 4)
     local hit, entityHit = ResolveShapeTest(ray)
-    print("hitFallback:", hit, "entityHitFallback:", entityHit)
 
     if hit == 1 and entityHit ~= 0 then
         return entityHit
@@ -128,34 +122,40 @@ local function GetEntityInFrontOfPlayer(distance)
     return nil
 end
 
+-- ============================================================
+-- Loop Principal
+-- ============================================================
+
 Citizen.CreateThread(function()
     local lastValidEntity = nil
-    local lastMenuItems = {}
+    local debugLastEntity = nil
 
     while true do
         local sleep = 500
-        -- Verifica se o jogador ESTÁ SEGURANDO o ALT Esquerdo (INPUT_FRONTEND_ALT / 0x8AAA0AD4)
-        if IsControlPressed(0, 0x8AAA0AD4) then
+
+        -- contextOptions declarada AQUI (topo do loop), visível pros dois blocos abaixo.
+        -- Esse era o bug: antes estava local dentro do 'if IsControlPressed', e o
+        -- 'if IsControlJustReleased' tentava ler ela já fora de escopo (virava nil global).
+        local contextOptions = {}
+
+        if IsControlPressed(0, 0x8AAA0AD4) then -- INPUT_FRONTEND_ALT (ALT esquerdo)
             sleep = 0
-            
+
             local entity = GetEntityInFrontOfPlayer(4.0)
-            
-            -- Limpa os dados se nao tiver entidade
             lastValidEntity = nil
-            local contextOptions = {}
-            
+
             if entity and targetEntities[entity] then
                 if debugLastEntity ~= entity then
                     debugLastEntity = entity
-                    print("[fdb-libs] [DEBUG] ALVO VALIDO DETECTADO NA MIRA! (" .. tostring(entity) .. ")")
+                    print("[fdb-libs] [DEBUG] Alvo valido detectado na mira (" .. tostring(entity) .. ")")
                 end
-                
+
                 local options = targetEntities[entity]
                 local playerCoords = GetEntityCoords(PlayerPedId())
                 local entityCoords = GetEntityCoords(entity)
                 local dist = #(playerCoords - entityCoords)
-                
-                for i, opt in ipairs(options) do
+
+                for _, opt in ipairs(options) do
                     if dist <= (opt.distance or 2.5) then
                         table.insert(contextOptions, {
                             label = opt.label,
@@ -168,35 +168,29 @@ Citizen.CreateThread(function()
                         })
                     end
                 end
-                
+
                 if #contextOptions > 0 then
                     lastValidEntity = entity
                 end
             else
                 if debugLastEntity ~= nil then
                     debugLastEntity = nil
-                    print("[fdb-libs] [DEBUG] ALVO PERDIDO DA MIRA.")
+                    print("[fdb-libs] [DEBUG] Alvo perdido da mira.")
                 end
             end
         end
 
-        -- Se o jogador SOLTOU o ALT Esquerdo
+        -- Se o jogador SOLTOU o ALT esquerdo
         if IsControlJustReleased(0, 0x8AAA0AD4) then
-            print("[fdb-libs] [DEBUG] ALT SOLTO!")
             if lastValidEntity and #contextOptions > 0 then
-                print("[fdb-libs] [DEBUG] ABRINDO CONTEXT MENU PARA O ALVO " .. tostring(lastValidEntity))
-                -- Abre a interface de Contexto (flutuante perto da mira/mouse)
                 fdb.context.OpenContextMenu({
                     title = "Interagir",
                     options = contextOptions
                 })
-            else
-                print("[fdb-libs] [DEBUG] NENHUM ALVO VALIDO NA MIRA NO MOMENTO QUE O ALT FOI SOLTO.")
             end
-            
-            -- Reseta o estado
+
             lastValidEntity = nil
-            contextOptions = {}
+            debugLastEntity = nil
         end
 
         Wait(sleep)
@@ -207,18 +201,20 @@ end)
 exports('addLocalEntity', addLocalEntity)
 exports('removeEntity', removeEntity)
 
--- COMANDO DE TESTE TEMPORARIO
+-- ============================================================
+-- COMANDO DE TESTE TEMPORÁRIO — remover antes de ir pra produção
+-- ============================================================
 RegisterCommand('testtarget', function()
     Citizen.CreateThread(function()
         local ped = PlayerPedId()
         local coords = GetEntityCoords(ped)
         local forward = GetEntityForwardVector(ped)
         local spawnCoords = coords + (forward * 1.5)
-        
+
         exports['fdb-libs']:LoadModel('p_cigar01x')
         local prop = CreateObject(joaat('p_cigar01x'), spawnCoords.x, spawnCoords.y, spawnCoords.z, true, true, false)
         PlaceObjectOnGroundProperly(prop)
-        
+
         exports['fdb-libs']:addLocalEntity(prop, {{
             name = 'teste_prop',
             label = 'Inspecionar Charuto',
@@ -229,6 +225,6 @@ RegisterCommand('testtarget', function()
                 DeleteEntity(prop)
             end
         }})
-        print('[fdb-libs] Target Registrado! Olhe para o charuto no chao a sua frente e segure ALT.')
+        print('[fdb-libs] Target registrado! Olhe para o charuto no chao a sua frente e segure ALT.')
     end)
 end, false)

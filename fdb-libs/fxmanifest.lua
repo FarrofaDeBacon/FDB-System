@@ -18,6 +18,7 @@ shared_scripts {
 client_scripts {
     'client/utils/loaders.lua',
     'client/anim/anim.lua',
+    'client/context/context.lua',
     'client/target/target.lua',
     'client/theme/theme.lua',
     'client/theme/theme_editor.lua',
@@ -30,7 +31,6 @@ client_scripts {
     'client/blip/blip.lua',
     'client/zones/zones.lua',
     'client/component/component.lua',
-    'client/context/context.lua',
 }
 
 server_scripts {
