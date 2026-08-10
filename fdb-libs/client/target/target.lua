@@ -130,11 +130,11 @@ end
 
 Citizen.CreateThread(function()
     local lastValidEntity = nil
-    local lastMenuItems = {}
+    local contextOptions = {}
 
     while true do
         local sleep = 500
-        -- Verifica se o jogador ESTÁ SEGURANDO o ALT Esquerdo (INPUT_FRONTEND_ALT / 0x8AAA0AD4)
+        -- Verifica se o jogador ESTA SEGURANDO o ALT Esquerdo (INPUT_FRONTEND_ALT / 0x8AAA0AD4)
         if IsControlPressed(0, 0x8AAA0AD4) then
             sleep = 0
             
@@ -142,7 +142,7 @@ Citizen.CreateThread(function()
             
             -- Limpa os dados se nao tiver entidade
             lastValidEntity = nil
-            local contextOptions = {}
+            contextOptions = {}
             
             if entity and targetEntities[entity] then
                 if debugLastEntity ~= entity then
@@ -171,6 +171,8 @@ Citizen.CreateThread(function()
                 
                 if #contextOptions > 0 then
                     lastValidEntity = entity
+                    -- Desenha um pequeno marcador visual (uma bolinha branca) sobre a entidade para o jogador saber que ela esta na mira
+                    DrawMarker(0, entityCoords.x, entityCoords.y, entityCoords.z + 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.1, 0.1, 255, 255, 255, 200, false, true, 2, false, false, false, false)
                 end
             else
                 if debugLastEntity ~= nil then
