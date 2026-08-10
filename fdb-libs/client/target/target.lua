@@ -130,12 +130,15 @@ Citizen.CreateThread(function()
     local lastValidEntity = nil
     local debugLastEntity = nil
     local contextOptions = {}
+    local wasAltPressed = false
 
     while true do
         local sleep = 500
+        local isAltPressed = IsControlPressed(0, 0x8AAA0AD4) -- INPUT_FRONTEND_ALT
 
-        if IsControlPressed(0, 0x8AAA0AD4) then -- INPUT_FRONTEND_ALT (ALT esquerdo)
+        if isAltPressed then
             sleep = 0
+            wasAltPressed = true
 
             local entity = GetEntityInFrontOfPlayer(4.0)
             lastValidEntity = nil
@@ -175,11 +178,14 @@ Citizen.CreateThread(function()
                     print("[fdb-libs] [DEBUG] Alvo perdido da mira.")
                 end
             end
-        end
 
-        -- Se o jogador SOLTOU o ALT esquerdo
-        if IsControlJustReleased(0, 0x8AAA0AD4) then
+        elseif wasAltPressed then
+            -- ALT acabou de ser solto (estava pressionado no frame anterior, agora nao esta)
+            wasAltPressed = false
+            print("[fdb-libs] [DEBUG] ALT solto! lastValidEntity=" .. tostring(lastValidEntity) .. " opcoes=" .. tostring(#contextOptions))
+
             if lastValidEntity and #contextOptions > 0 then
+                print("[fdb-libs] [DEBUG] Abrindo ContextMenu...")
                 fdb.context.OpenContextMenu({
                     title = "Interagir",
                     options = contextOptions
