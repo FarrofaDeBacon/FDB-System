@@ -45,17 +45,22 @@ end
 -- Callback de clique do NUI
 RegisterNUICallback('contextClick', function(data, cb)
     local index = tonumber(data.index)
+    print(string.format("[fdb-libs] [DEBUG] contextClick acionado! index = %s, activeCallbacks = %s", tostring(index), tostring(activeCallbacks[index] ~= nil)))
     local callback = index and activeCallbacks[index]
     fdb.context.CloseContextMenu()
 
     if callback then
+        print("[fdb-libs] [DEBUG] callback de contexto executando...")
         callback()
+    else
+        print("[fdb-libs] [DEBUG] callback nao encontrado em activeCallbacks["..tostring(index).."]")
     end
     cb('ok')
 end)
 
 -- Callback de fechamento espontâneo do NUI
 RegisterNUICallback('closeContext', function(data, cb)
+    print("[fdb-libs] [DEBUG] closeContext acionado (clique fora / ESC)")
     fdb.context.CloseContextMenu()
     cb('ok')
 end)
