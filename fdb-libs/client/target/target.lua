@@ -133,6 +133,7 @@ Citizen.CreateThread(function()
     local wasAltPressed = false
     local lastHitTime = 0
     local GRACE_MS = 300
+    local lastScreenX, lastScreenY = 0.5, 0.5
 
     while true do
         local sleep = 500
@@ -185,11 +186,28 @@ Citizen.CreateThread(function()
                         lastValidEntity = nil
                     end
                 end
+
+                if lastValidEntity then
+                    local entCoords = GetEntityCoords(lastValidEntity)
+                    local onScreen, screenX, screenY = GetScreenCoordFromWorldCoord(entCoords.x, entCoords.y, entCoords.z)
+                    if onScreen then
+                        lastScreenX = screenX
+                        lastScreenY = screenY
+                        SendNUIMessage({
+                            action = "UPDATE_TARGET_EYE",
+                            active = true,
+                            x = screenX,
+                            y = screenY
+                        })
+                    end
+                end
             else
                 -- Raycast nao achou nada NESTE frame, mas so limpa se passar 300ms
                 if lastValidEntity and (GetGameTimer() - lastHitTime) > GRACE_MS then
                     lastValidEntity = nil
                     contextOptions = {}
+                    SendNUIMessage({ action = "UPDATE_TARGET_EYE", active = false })
+
                     if debugLastEntity ~= nil then
                         debugLastEntity = nil
                         print("[fdb-libs] [DEBUG] Alvo perdido da mira (grace expirou).")
@@ -205,10 +223,12 @@ Citizen.CreateThread(function()
                 print("[fdb-libs] [DEBUG] Abrindo ContextMenu...")
                 fdb.context.OpenContextMenu({
                     title = "Interagir",
+                    position = { x = lastScreenX, y = lastScreenY },
                     options = contextOptions
                 })
             end
 
+            SendNUIMessage({ action = "UPDATE_TARGET_EYE", active = false })
             lastValidEntity = nil
             debugLastEntity = nil
             contextOptions = {}

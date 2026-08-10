@@ -4,11 +4,15 @@
     export let visible = false;
     export let title = "Opções";
     export let options = [];
-    export let position = "mouse"; // "mouse" ou "center"
+    export let position = "mouse"; // "mouse", "center" ou objeto {x, y}
     
     let x = 0;
     let y = 0;
     let menuEl;
+
+    let eyeVisible = false;
+    let eyeX = 0;
+    let eyeY = 0;
 
     // Escuta eventos globais
     function handleMessage(event) {
@@ -17,6 +21,7 @@
             title = item.data.title;
             options = item.data.options;
             position = item.data.position;
+            eyeVisible = false; // esconde o olho ao abrir
             visible = true;
             
             if (position === "mouse") {
@@ -24,6 +29,12 @@
             }
         } else if (item.action === "CLOSE_CONTEXT_MENU") {
             visible = false;
+        } else if (item.action === "UPDATE_TARGET_EYE") {
+            eyeVisible = item.active;
+            if (item.active) {
+                eyeX = item.x * window.innerWidth;
+                eyeY = item.y * window.innerHeight;
+            }
         }
     }
     
@@ -73,10 +84,18 @@
     }
 
     // Calcula a posição na tela para evitar que o menu saia das bordas
-    $: menuStyle = position === "mouse" 
-        ? `position: absolute; left: ${Math.min(x, window.innerWidth - 260)}px; top: ${Math.min(y, window.innerHeight - 300)}px;`
-        : `position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);`;
+    $: menuStyle = (typeof position === "object" && position !== null)
+        ? `position: absolute; left: ${Math.min(position.x * window.innerWidth, window.innerWidth - 260)}px; top: ${Math.min(position.y * window.innerHeight, window.innerHeight - 300)}px;`
+        : (position === "mouse" 
+            ? `position: absolute; left: ${Math.min(x, window.innerWidth - 260)}px; top: ${Math.min(y, window.innerHeight - 300)}px;`
+            : `position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);`);
 </script>
+
+{#if eyeVisible && !visible}
+    <div class="target-eye" style="left: {eyeX}px; top: {eyeY}px;">
+        <i class="fa-solid fa-eye"></i>
+    </div>
+{/if}
 
 {#if visible}
     <!-- Fundo invisível para detectar clique fora e fechar -->
@@ -102,7 +121,7 @@
                     >
                         {#if opt.icon}
                             <span class="option-icon">
-                                <i class="fas fa-{opt.icon}"></i>
+                                <i class="{opt.icon.startsWith('fa') ? opt.icon : 'fas fa-' + opt.icon}"></i>
                             </span>
                         {/if}
                         <div class="option-content">
@@ -119,6 +138,23 @@
 {/if}
 
 <style>
+    .target-eye {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        color: var(--fdb-accent-color, #c9a15a);
+        font-size: 24px;
+        text-shadow: 0 0 10px rgba(0,0,0,0.8);
+        pointer-events: none;
+        z-index: 9998;
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+        50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+        100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+    }
+
     .context-overlay {
         position: fixed;
         top: 0;
