@@ -167,8 +167,14 @@ Citizen.CreateThread(function()
                                 label = opt.label,
                                 icon = opt.icon or "fa-solid fa-circle-dot",
                                 action = function()
-                                    if type(opt.onSelect) == "function" then
-                                        opt.onSelect(entity)
+                                    print("[fdb-libs] [DEBUG] Executando action! Tipo de opt.onSelect: " .. type(opt.onSelect))
+                                    if opt.onSelect then
+                                        local success, err = pcall(function()
+                                            opt.onSelect(entity)
+                                        end)
+                                        if not success then
+                                            print("[fdb-libs] [ERROR] Falha ao executar onSelect: " .. tostring(err))
+                                        end
                                     end
                                 end
                             })
@@ -231,13 +237,13 @@ RegisterCommand('testtarget', function()
         local prop = CreateObject(joaat('p_cigar01x'), spawnCoords.x, spawnCoords.y, spawnCoords.z, true, true, false)
         PlaceObjectOnGroundProperly(prop)
 
-        exports['fdb-libs']:addLocalEntity(prop, {{
+        addLocalEntity(prop, {{
             name = 'teste_prop',
             label = 'Inspecionar Charuto',
             icon = 'fa-solid fa-magnifying-glass',
             distance = 3.0,
-            onSelect = function()
-                print('[fdb-libs] SUCESSO! O CALLBACK DO TARGET FUNCIONOU! (Charuto Inspecionado)')
+            onSelect = function(ent)
+                print('[fdb-libs] SUCESSO! O CALLBACK DO TARGET FUNCIONOU! (Charuto Inspecionado) Entidade: ' .. tostring(ent))
                 DeleteEntity(prop)
             end
         }})
