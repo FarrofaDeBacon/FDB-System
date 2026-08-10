@@ -9,6 +9,8 @@
 
 if Config.Framework ~= 'fdb' then return end
 
+Bridge = Bridge or {}
+
 function Bridge.RegisterTargetEntity(entity, options)
     exports.ox_target:addLocalEntity(entity, options)
 end
