@@ -129,20 +129,17 @@ end
 Citizen.CreateThread(function()
     local lastValidEntity = nil
     local debugLastEntity = nil
+    local contextOptions = {}
 
     while true do
         local sleep = 500
-
-        -- contextOptions declarada AQUI (topo do loop), visível pros dois blocos abaixo.
-        -- Esse era o bug: antes estava local dentro do 'if IsControlPressed', e o
-        -- 'if IsControlJustReleased' tentava ler ela já fora de escopo (virava nil global).
-        local contextOptions = {}
 
         if IsControlPressed(0, 0x8AAA0AD4) then -- INPUT_FRONTEND_ALT (ALT esquerdo)
             sleep = 0
 
             local entity = GetEntityInFrontOfPlayer(4.0)
             lastValidEntity = nil
+            contextOptions = {}
 
             if entity and targetEntities[entity] then
                 if debugLastEntity ~= entity then
@@ -191,6 +188,7 @@ Citizen.CreateThread(function()
 
             lastValidEntity = nil
             debugLastEntity = nil
+            contextOptions = {}
         end
 
         Wait(sleep)
