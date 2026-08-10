@@ -68,3 +68,5 @@ end)
 -- Exportações para outros recursos
 exports('OpenContextMenu', fdb.context.OpenContextMenu)
 exports('CloseContextMenu', fdb.context.CloseContextMenu)
+exports('ShowTargetIndicator', function() SendNUIMessage({ action = "SHOW_TARGET_INDICATOR" }) end)
+exports('HideTargetIndicator', function() SendNUIMessage({ action = "HIDE_TARGET_INDICATOR" }) end)
