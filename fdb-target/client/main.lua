@@ -4,6 +4,7 @@
 -- ============================================================
 
 local targetEntities = {}
+local globalPedOptions = {}
 local currentTargetEntity = nil
 
 --- Registra uma entidade local para ter opções de Target
@@ -30,6 +31,16 @@ local function addLocalEntity(entity, options)
     if not success then
         print(string.format("[fdb-libs] ^3WARN^7 fdb.target: falha ao registrar target - %s", tostring(err)))
         return false
+    end
+    return true
+end
+
+--- Registra opcoes globais para todos os Pedestres (NPCs e Players)
+--- @param options table Array de opções
+local function addGlobalPed(options)
+    if type(options) ~= "table" then return false end
+    for _, opt in ipairs(options) do
+        table.insert(globalPedOptions, opt)
     end
     return true
 end
@@ -143,14 +154,25 @@ Citizen.CreateThread(function()
             sleep = 0
             local entity = GetEntityInFrontOfPlayer(4.0)
 
-            if entity and targetEntities[entity] then
+            local isPed = entity and GetEntityType(entity) == 1
+            local hasEntityOpts = entity and targetEntities[entity] ~= nil
+            local hasGlobalPedOpts = isPed and #globalPedOptions > 0
+
+            if hasEntityOpts or hasGlobalPedOpts then
                 lastHitTime = GetGameTimer()
 
                 if entity ~= lastValidEntity then
                     lastValidEntity = entity
                     contextOptions = {}
 
-                    local options = targetEntities[entity]
+                    local options = {}
+                    if hasEntityOpts then
+                        for _, opt in ipairs(targetEntities[entity]) do table.insert(options, opt) end
+                    end
+                    if hasGlobalPedOpts then
+                        for _, opt in ipairs(globalPedOptions) do table.insert(options, opt) end
+                    end
+
                     local playerCoords = GetEntityCoords(PlayerPedId())
                     local entityCoords = GetEntityCoords(entity)
                     local dist = #(playerCoords - entityCoords)
@@ -161,7 +183,11 @@ Citizen.CreateThread(function()
                                 label = opt.label,
                                 icon = opt.icon or "fa-solid fa-circle-dot",
                                 action = function()
-                                    if opt.onSelect then pcall(function() opt.onSelect(entity) end) end
+                                    if opt.onSelect then
+                                        pcall(function()
+                                            opt.onSelect({ entity = entity }) 
+                                        end)
+                                    end
                                 end
                             })
                         end
@@ -207,6 +233,7 @@ end)
 
 -- Exports compatíveis com ox_target
 exports('addLocalEntity', addLocalEntity)
+exports('addGlobalPed', addGlobalPed)
 exports('removeEntity', removeEntity)
 
 -- ============================================================
