@@ -34,3 +34,4 @@ Bridge.Notify             = NotImplemented('Notify')            -- (source, mess
 
 -- ── Interação no mundo (cliente) ───────────────────────────
 Bridge.RegisterTargetEntity = NotImplemented('RegisterTargetEntity') -- (entity, options) -> nil
+Bridge.RegisterGlobalPedTarget = NotImplemented('RegisterGlobalPedTarget') -- (options) -> nil

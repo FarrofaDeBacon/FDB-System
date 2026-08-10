@@ -3,38 +3,29 @@
     no servidor. Aqui só existe apresentação (target, animação, notificação).
 ]]
 
-local function TryRobNearbyPed()
-    local playerPed = PlayerPedId()
-    local playerCoords = GetEntityCoords(playerPed)
-    local closestPed, closestDist = nil, 5.0
+CreateThread(function()
+    Bridge.RegisterGlobalPedTarget({
+        {
+            name = 'illegal_rob_npc',
+            icon = 'fa-solid fa-mask',
+            label = 'Roubar',
+            distance = 2.0,
+            onSelect = function(data)
+                local ped = data.entity
+                if not ped or IsPedAPlayer(ped) then return end
+                
+                local playerPed = PlayerPedId()
+                
+                -- animação/minigame local só como feedback visual — não decide nada
+                TaskStartScenarioInPlace(playerPed, 'WORLD_HUMAN_STAND_IMPATIENT', 0, true)
+                Wait(1500)
+                ClearPedTasks(playerPed)
 
-    -- varredura simples de peds próximos; suficiente pra Etapa 2.
-    -- Etapa 4+ (roubo de casa) não usa isso, é interação com o mundo estático.
-    local peds = GetGamePool('CPed')
-    for _, ped in ipairs(peds) do
-        if ped ~= playerPed and not IsPedAPlayer(ped) then
-            local dist = #(playerCoords - GetEntityCoords(ped))
-            if dist < closestDist then
-                closestPed, closestDist = ped, dist
+                TriggerServerEvent('illegal-system:server:attemptNpcRobbery')
             end
-        end
-    end
-
-    if not closestPed then
-        return
-    end
-
-    -- animação/minigame local só como feedback visual — não decide nada
-    TaskStartScenarioInPlace(playerPed, 'WORLD_HUMAN_STAND_IMPATIENT', 0, true)
-    Wait(1500)
-    ClearPedTasks(playerPed)
-
-    TriggerServerEvent('illegal-system:server:attemptNpcRobbery')
-end
-
-RegisterCommand('roubar', function()
-    TryRobNearbyPed()
-end, false)
+        }
+    })
+end)
 
 RegisterNetEvent('illegal-system:client:npcRobberyResult', function(result)
     -- espaço reservado pra UI/animação de resultado (sucesso/falha)
