@@ -134,11 +134,13 @@ Citizen.CreateThread(function()
     local isEyeOpen = false
     local isMouseFree = false
     local lastValidEntity = nil
+    local lostFrames = 0
+    local LOST_THRESHOLD = 10 -- Quantos frames sem achar a entidade antes de limpar
     
     while true do
         local sleep = 500
         
-        -- Verifica se o jogador ESTA SEGURANDO o ALT Esquerdo (INPUT_FRONTEND_ALT / 0x8AAA0AD4)
+        -- Verifica se o jogador ESTA SEGURANDO o ALT Esquerdo
         if IsControlPressed(0, 0x8AAA0AD4) then
             sleep = 0
             
@@ -149,40 +151,45 @@ Citizen.CreateThread(function()
             
             local entity = GetEntityInFrontOfPlayer(4.0)
             
-            if entity and entity ~= lastValidEntity and targetEntities[entity] then
-                lastValidEntity = entity
-                local options = targetEntities[entity]
-                local playerCoords = GetEntityCoords(PlayerPedId())
-                local entityCoords = GetEntityCoords(entity)
-                local dist = #(playerCoords - entityCoords)
+            if entity and targetEntities[entity] then
+                lostFrames = 0 -- Resetou, encontrou alvo
                 
-                local contextOptions = {}
-                activeCallbacks = {}
-                
-                for i, opt in ipairs(options) do
-                    if dist <= (opt.distance or 2.5) then
-                        table.insert(contextOptions, {
-                            label = opt.label,
-                            icon = opt.icon
-                        })
-                        activeCallbacks[#contextOptions] = opt.onSelect
+                if entity ~= lastValidEntity then
+                    lastValidEntity = entity
+                    local options = targetEntities[entity]
+                    local playerCoords = GetEntityCoords(PlayerPedId())
+                    local entityCoords = GetEntityCoords(entity)
+                    local dist = #(playerCoords - entityCoords)
+                    
+                    local contextOptions = {}
+                    activeCallbacks = {}
+                    
+                    for i, opt in ipairs(options) do
+                        if dist <= (opt.distance or 2.5) then
+                            table.insert(contextOptions, {
+                                label = opt.label,
+                                icon = opt.icon
+                            })
+                            activeCallbacks[#contextOptions] = opt.onSelect
+                        end
+                    end
+                    
+                    if #contextOptions > 0 then
+                        SendNUIMessage({ action = "SET_TARGET_OPTIONS", data = { options = contextOptions } })
+                        if not isMouseFree then
+                            isMouseFree = true
+                            SetNuiFocus(true, true)
+                            SendNUIMessage({ action = "SET_TARGET_MOUSE", data = { free = true } })
+                        end
                     end
                 end
-                
-                SendNUIMessage({ action = "SET_TARGET_OPTIONS", data = { options = contextOptions } })
-                
-                -- Libera o mouse automaticamente quando tem opcoes para o jogador clicar
-                if not isMouseFree and #contextOptions > 0 then
-                    isMouseFree = true
-                    SetNuiFocus(true, true)
-                    SendNUIMessage({ action = "SET_TARGET_MOUSE", data = { free = true } })
-                end
-            elseif not entity or not targetEntities[entity] then
-                if lastValidEntity ~= nil then
+            else
+                -- Nao achou entidade NESTE frame, mas espera alguns frames antes de desistir
+                lostFrames = lostFrames + 1
+                if lostFrames >= LOST_THRESHOLD and lastValidEntity ~= nil then
                     lastValidEntity = nil
                     activeCallbacks = {}
                     SendNUIMessage({ action = "SET_TARGET_OPTIONS", data = { options = {} } })
-                    -- Trava o mouse de volta quando perde o alvo
                     if isMouseFree then
                         isMouseFree = false
                         SetNuiFocus(false, false)
@@ -192,11 +199,12 @@ Citizen.CreateThread(function()
             end
             
         else
-            -- Se soltou o ALT ou nao esta segurando
+            -- Soltou o ALT
             if isEyeOpen then
                 isEyeOpen = false
                 isMouseFree = false
                 lastValidEntity = nil
+                lostFrames = 0
                 activeCallbacks = {}
                 SetNuiFocus(false, false)
                 SendNUIMessage({ action = "SET_TARGET_EYE", data = { visible = false } })
