@@ -4,28 +4,6 @@ fdb.menu = {}
 local isMenuOpen = false
 local currentMenuId = nil
 
--- Failsafe: Sempre limpa o NUI focus quando o script (re)iniciar
-Citizen.CreateThread(function()
-    Wait(1000)
-    SetNuiFocus(false, false)
-end)
-
--- Failsafe 2: Comando salvador para quando o dev bugar a UI
-RegisterCommand('fixui', function()
-    SetNuiFocus(false, false)
-    SendNUIMessage({
-        action = "hideContextMenu"
-    })
-    print("[fdb-libs] NUI Focus destravado a força!")
-end, false)
-
--- Failsafe 3: Libera o NUI Focus sempre que o resource parar ou restartar
-AddEventHandler('onResourceStop', function(resourceName)
-    if resourceName == GetCurrentResourceName() then
-        SetNuiFocus(false, false)
-    end
-end)
-
 --- Abre um menu no NUI
 ---@param data table Configuração do menu (id, title, items, theme)
 function fdb.menu.open(data)
