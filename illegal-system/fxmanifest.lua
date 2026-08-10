@@ -29,5 +29,6 @@ client_scripts {
 
 dependencies {
     'fdb-core',
+    'fdb-target',
     'oxmysql'
 }
