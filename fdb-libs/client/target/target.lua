@@ -76,10 +76,26 @@ end
 -- Lógica de Raycast e KeyMapping
 -- ============================================================
 
+local function ResolveShapeTest(rayHandle)
+    local retval, hit, endCoords, surfaceNormal, entityHit
+
+    -- Espera ate 3 frames pela engine terminar o calculo do raycast.
+    -- Na pratica resolve em 0-1 frame, o limite e so seguranca contra loop infinito.
+    for _ = 1, 3 do
+        retval, hit, endCoords, surfaceNormal, entityHit = GetShapeTestResult(rayHandle)
+        if retval ~= 1 then
+            break
+        end
+        Wait(0)
+    end
+
+    return hit, entityHit
+end
+
 local function GetEntityInFrontOfPlayer(distance)
     local ped = PlayerPedId()
-    
-    -- Tenta pegar pela câmera primeiro (onde o jogador está olhando)
+
+    -- Raycast 1: camera (o que o jogador esta olhando)
     local camRot = GetGameplayCamRot(2)
     local camPos = GetGameplayCamCoord()
     local dirX = -math.sin(math.rad(camRot.z)) * math.abs(math.cos(math.rad(camRot.x)))
@@ -87,42 +103,24 @@ local function GetEntityInFrontOfPlayer(distance)
     local dirZ = math.sin(math.rad(camRot.x))
     local forwardCam = vector3(dirX, dirY, dirZ)
     local endCam = camPos + (forwardCam * distance * 2)
-    
+
     local rayCam = StartShapeTestLosProbe(camPos.x, camPos.y, camPos.z, endCam.x, endCam.y, endCam.z, 511, ped, 4)
-    local hitCam, entityHitCam = 0, 0
-    local timeout = 0
-    while true do
-        Wait(0)
-        local retval, h, _, _, e = GetShapeTestResult(rayCam)
-        if retval ~= 1 or timeout > 10 then
-            hitCam, entityHitCam = h, e
-            break
-        end
-        timeout = timeout + 1
-    end
-    
+    local hitCam, entityHitCam = ResolveShapeTest(rayCam)
+    print("hitCam:", hitCam, "entityHitCam:", entityHitCam)
+
     if hitCam == 1 and entityHitCam ~= 0 then
         return entityHitCam
     end
 
-    -- Fallback: Tenta pegar pela frente do personagem
+    -- Raycast 2 (fallback): direto da frente do personagem, ignora a camera
     local coords = GetEntityCoords(ped)
     local forward = GetEntityForwardVector(ped)
     local endCoords = coords + (forward * distance)
 
     local ray = StartShapeTestLosProbe(coords.x, coords.y, coords.z, endCoords.x, endCoords.y, endCoords.z, 511, ped, 4)
-    local hit, entityHit = 0, 0
-    timeout = 0
-    while true do
-        Wait(0)
-        local retval, h, _, _, e = GetShapeTestResult(ray)
-        if retval ~= 1 or timeout > 10 then
-            hit, entityHit = h, e
-            break
-        end
-        timeout = timeout + 1
-    end
-    
+    local hit, entityHit = ResolveShapeTest(ray)
+    print("hitFallback:", hit, "entityHitFallback:", entityHit)
+
     if hit == 1 and entityHit ~= 0 then
         return entityHit
     end
