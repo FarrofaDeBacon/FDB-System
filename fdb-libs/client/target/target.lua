@@ -131,6 +131,8 @@ Citizen.CreateThread(function()
     local debugLastEntity = nil
     local contextOptions = {}
     local wasAltPressed = false
+    local lastHitTime = 0
+    local GRACE_MS = 300
 
     while true do
         local sleep = 500
@@ -141,46 +143,55 @@ Citizen.CreateThread(function()
             wasAltPressed = true
 
             local entity = GetEntityInFrontOfPlayer(4.0)
-            lastValidEntity = nil
-            contextOptions = {}
 
             if entity and targetEntities[entity] then
-                if debugLastEntity ~= entity then
-                    debugLastEntity = entity
-                    print("[fdb-libs] [DEBUG] Alvo valido detectado na mira (" .. tostring(entity) .. ")")
-                end
+                lastHitTime = GetGameTimer()
 
-                local options = targetEntities[entity]
-                local playerCoords = GetEntityCoords(PlayerPedId())
-                local entityCoords = GetEntityCoords(entity)
-                local dist = #(playerCoords - entityCoords)
+                if entity ~= lastValidEntity then
+                    lastValidEntity = entity
+                    contextOptions = {}
 
-                for _, opt in ipairs(options) do
-                    if dist <= (opt.distance or 2.5) then
-                        table.insert(contextOptions, {
-                            label = opt.label,
-                            icon = opt.icon or "fa-solid fa-circle-dot",
-                            action = function()
-                                if type(opt.onSelect) == "function" then
-                                    opt.onSelect(entity)
+                    if debugLastEntity ~= entity then
+                        debugLastEntity = entity
+                        print("[fdb-libs] [DEBUG] Alvo valido detectado na mira (" .. tostring(entity) .. ")")
+                    end
+
+                    local options = targetEntities[entity]
+                    local playerCoords = GetEntityCoords(PlayerPedId())
+                    local entityCoords = GetEntityCoords(entity)
+                    local dist = #(playerCoords - entityCoords)
+
+                    for _, opt in ipairs(options) do
+                        if dist <= (opt.distance or 2.5) then
+                            table.insert(contextOptions, {
+                                label = opt.label,
+                                icon = opt.icon or "fa-solid fa-circle-dot",
+                                action = function()
+                                    if type(opt.onSelect) == "function" then
+                                        opt.onSelect(entity)
+                                    end
                                 end
-                            end
-                        })
+                            })
+                        end
+                    end
+
+                    if #contextOptions == 0 then
+                        lastValidEntity = nil
                     end
                 end
-
-                if #contextOptions > 0 then
-                    lastValidEntity = entity
-                end
             else
-                if debugLastEntity ~= nil then
-                    debugLastEntity = nil
-                    print("[fdb-libs] [DEBUG] Alvo perdido da mira.")
+                -- Raycast nao achou nada NESTE frame, mas so limpa se passar 300ms
+                if lastValidEntity and (GetGameTimer() - lastHitTime) > GRACE_MS then
+                    lastValidEntity = nil
+                    contextOptions = {}
+                    if debugLastEntity ~= nil then
+                        debugLastEntity = nil
+                        print("[fdb-libs] [DEBUG] Alvo perdido da mira (grace expirou).")
+                    end
                 end
             end
 
         elseif wasAltPressed then
-            -- ALT acabou de ser solto (estava pressionado no frame anterior, agora nao esta)
             wasAltPressed = false
             print("[fdb-libs] [DEBUG] ALT solto! lastValidEntity=" .. tostring(lastValidEntity) .. " opcoes=" .. tostring(#contextOptions))
 
@@ -195,6 +206,7 @@ Citizen.CreateThread(function()
             lastValidEntity = nil
             debugLastEntity = nil
             contextOptions = {}
+            lastHitTime = 0
         end
 
         Wait(sleep)
