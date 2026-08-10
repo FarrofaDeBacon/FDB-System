@@ -4,7 +4,7 @@ Config = {}
 -- Framework alvo. O bridge carregado no fxmanifest precisa
 -- corresponder a isso (rsg_bridge.lua ⇄ 'rsg').
 -- ─────────────────────────────────────────────────────────
-Config.Framework = 'rsg'
+Config.Framework = 'fdb'
 
 -- ─────────────────────────────────────────────────────────
 -- Heat: decai com o tempo, independente de XP/Reputação.
