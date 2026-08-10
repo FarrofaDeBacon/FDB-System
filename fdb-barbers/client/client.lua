@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-barbers | client/client.lua
+-- Main client-side barbershop logic
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 local FDBCore = exports['fdb-core']:GetCoreObject()
 local ComponentsMale = {}
 local ComponentsFemale = {}
@@ -603,3 +608,4 @@ AddEventHandler("onResourceStop", function(resourceName)
         end
     end
 end)
+

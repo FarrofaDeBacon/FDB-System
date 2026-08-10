@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | client/settings/creatordata.lua
+-- Creator default data and variables
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 
 DefaultChar = {
     Male = {

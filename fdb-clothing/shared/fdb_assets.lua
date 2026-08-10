@@ -1,4 +1,9 @@
-MURPHY_ASSETS = {
+-- ============================================================
+-- FDB System | fdb-clothing | shared/fdb_assets.lua
+-- Asset registry and definitions
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
+FDB_ASSETS = {
     ["male"] = {
         ["eyecaps"] = {
             {drawable=1231425619,variants={-- 1 

@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | client/event.lua
+-- Client-side event listeners for creator
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 
 if Config.DevMode then
     Citizen.CreateThread(function()
@@ -81,14 +86,14 @@ RegisterNetEvent("fdb_creator:LaunchCreator", function()
     local coords = Config.CharSelect.playerSpawn.coords
     local heading = Config.CharSelect.playerSpawn.heading
 
-    -- Congelar e teleportar jogador antes para carregar colisão e evitar queda no limbo
+    -- Congelar e teleportar jogador antes para carregar colisÃ£o e evitar queda no limbo
     FreezeEntityPosition(PlayerPedId(), true)
     SetEntityCoords(PlayerPedId(), coords.x, coords.y, coords.z, false, false, false, false)
     SetEntityHeading(PlayerPedId(), heading)
     RequestCollisionAtCoord(coords.x, coords.y, coords.z)
     Wait(1000)
     
-    -- Ativar sets de interior do saloon dinamicamente para carregar decoração/móveis
+    -- Ativar sets de interior do saloon dinamicamente para carregar decoraÃ§Ã£o/mÃ³veis
     local interiorId = GetInteriorAtCoords(coords.x, coords.y, coords.z)
     if interiorId ~= 0 then
         PinInteriorInMemory(interiorId)
@@ -159,10 +164,10 @@ RegisterNetEvent("fdb_creator:LaunchCreator", function()
     )
 end)
 
--- ═══════════════════════════════════════════════════════════════════════════
+-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 -- "Second Chance" event - Reopen character customization menu
 -- Triggered by admin command to allow player to re-customize their character
--- ═══════════════════════════════════════════════════════════════════════════
+-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 SecondChanceMode = false
 
 RegisterNetEvent("fdb-creator:SecondChance", function()

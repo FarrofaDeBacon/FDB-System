@@ -11,14 +11,14 @@ SET time_zone = "+00:00";
 
 
 
-CREATE TABLE `murphy_clothes` (
+CREATE TABLE `fdb_clothes` (
   `charid` varchar(200) NOT NULL,
   `clothes` LONGTEXT NOT NULL,
   `outfit_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-CREATE TABLE `murphy_outfits` (
+CREATE TABLE `FDB_outfits` (
   `charid` varchar(200) NOT NULL,
   `outfit_id` int(11) NOT NULL,
   `price` float(11) NOT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE `murphy_outfits` (
   `gender` varchar(200) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `murphy_wearable` (
+CREATE TABLE `FDB_wearable` (
   `charid` varchar(200) NOT NULL,
   `outfit_id` int(11) NOT NULL,
   `skin` LONGTEXT NOT NULL

@@ -1,0 +1,5 @@
+-- ============================================================
+-- FDB System | fdb-barbers | server/versionchecker.lua
+-- Resource version checker
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================

@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | client/function/barber.lua
+-- Barber and hair application functions
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 RegisterNetEvent('fdb-barber:loadbarberoverlay', function()
     -- Wait for player ped to be ready
     local ped = PlayerPedId()
@@ -141,7 +146,7 @@ AddEventHandler('fdb-barber:clotheitem', function(hairstyleComponents, outfitid,
             end
             local canloadhair = false
             for k, v in pairs(barberCache) do
-                if v.model > 0 then
+                if v.model and v.model ~= 0 then
                     canloadhair = true
                     break
                 end
@@ -174,8 +179,6 @@ function RemoveAllBarber(ped)
         "beards_mustache",
         "beards_complete",
         "hair_bonnet",
-        "hats",
-        "hat_accessories",
     }
 
     for category, data in pairs(equipped) do
@@ -203,7 +206,7 @@ function ReequipAllhairstyle(ped)
     print("[fdb-barber] ReequipAllhairstyle - gender:", gender, "ped:", ped)
 
     for category, data in pairs(barberCache) do
-        if data.model and data.model > 0 then
+        if data.model and data.model ~= 0 then
             print("[fdb-barber] Processing category:", category, "model:", data.model)
             
             if not FDB_ASSETS[gender] then
@@ -278,3 +281,4 @@ function ReequipAllhairstyle(ped)
     end
     print("[fdb-barber] ReequipAllhairstyle completed")
 end
+

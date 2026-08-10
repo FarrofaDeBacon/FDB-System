@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | server/callbacks.lua
+-- Server-side callback definitions
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 local RSGCore = exports['fdb-core']:GetCoreObject()
 
 -- Callback GetPedData: Returns the character features (CachePedData)
@@ -174,3 +179,4 @@ AddEventHandler("fdb-creator:RemovePlayerFromInstance", function()
     local src = source
     RemovePlayerFromInstance(src)
 end)
+

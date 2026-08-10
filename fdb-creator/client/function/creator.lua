@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | client/function/creator.lua
+-- Core character creation functions
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 function Change(id, category, change_type, value)
     id = tonumber(id)
     if MannequinPed then
@@ -8,7 +13,7 @@ function Change(id, category, change_type, value)
     local gender
     if IsPedMale(ped) then gender = "male" else gender = "female" end
 
-    -- Processamento de categorias de genética
+    -- Processamento de categorias de genÃ©tica
     if category == "height" then
         CachePedData.height = scale(id, 0, 100, 0.85, 1.15)
         SetPedScale(ped, CachePedData.height)
@@ -387,7 +392,7 @@ end
 
 
 function GetCategoryNameByHash(gender, target)
-    -- Vérifier les catégories connues dans pedTags
+    -- VÃ©rifier les catÃ©gories connues dans pedTags
 
 
     for _, tagName in pairs(catlist[gender]) do
@@ -409,7 +414,7 @@ function GetCategoryNameByHash(gender, target)
         end
     end
     
-    -- Vérifier les composants
+    -- VÃ©rifier les composants
     for _, componentName in ipairs(components) do
         local hash = joaat(componentName)
         if IsMetaPedUsingComponentCategory(ped, hash) then
@@ -419,7 +424,7 @@ function GetCategoryNameByHash(gender, target)
         end
     end
     
-    -- Vérifier les catégories spéciales avec hash hexadécimal
+    -- VÃ©rifier les catÃ©gories spÃ©ciales avec hash hexadÃ©cimal
     for _, tagName in ipairs(pedTags) do
         local hexHash = tagName:match("0x[%x]+")
         if hexHash then
@@ -451,7 +456,7 @@ function CheckCategoryEquipped(ped)
         end
     end
     
-    -- Vérifier les composants
+    -- VÃ©rifier les composants
     for _, componentName in ipairs(components) do
         local hash = joaat(componentName)
         if IsMetaPedUsingComponentCategory(ped, hash) then
@@ -459,7 +464,7 @@ function CheckCategoryEquipped(ped)
         end
     end
     
-    -- Vérifier les catégories spéciales avec hash hexadécimal
+    -- VÃ©rifier les catÃ©gories spÃ©ciales avec hash hexadÃ©cimal
     for _, tagName in ipairs(pedTags) do
         local hexHash = tagName:match("0x[%x]+")
         if hexHash then

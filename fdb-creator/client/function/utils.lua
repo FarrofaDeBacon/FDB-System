@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | client/function/utils.lua
+-- Utility functions for creator
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 CachePed = PlayerPedId()
 CachePedData = {}
 CachePedData.expressions = {}
@@ -233,7 +238,7 @@ function ApplyCachePedDataToPedPlayer()
         SetEntityAlpha(CachePed, 255, false)
         ResetEntityAlpha(CachePed)
         
-        -- Garante posicionamento correto após troca de modelo do ped
+        -- Garante posicionamento correto apÃ³s troca de modelo do ped
         local spawnCoords = Config.CharSelect.playerSpawn.coords
         local spawnHeading = Config.CharSelect.playerSpawn.heading
         SetEntityCoords(CachePed, spawnCoords.x, spawnCoords.y, spawnCoords.z, false, false, false, false)
@@ -448,7 +453,7 @@ end
 function OpenClothesMenu()
     if not baseHeading then
         baseHeading = GetEntityHeading(PlayerPedId())
-        -- Stocker l'offset initial pour que 180 corresponde à baseHeading
+        -- Stocker l'offset initial pour que 180 corresponde Ã  baseHeading
         angleOffset = 180 - baseHeading
     end
     TriggerEvent("fdb_clothing:OpenClothesMenuCreator")
@@ -492,3 +497,4 @@ ShowAdvancedRightNotification = function(_text, _dict, icon, text_color, duratio
     struct2:SetInt64(8 * 5, bigInt(GetHashKey(text_color or "COLOR_WHITE")))
     Citizen.InvokeNative(0xB249EBCB30DD88E0, struct1:Buffer(), struct2:Buffer(), 1)
 end
+

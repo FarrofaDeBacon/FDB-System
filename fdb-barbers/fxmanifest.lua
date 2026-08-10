@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-barbers | fxmanifest.lua
+-- Resource manifest file
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 fx_version 'cerulean'
 rdr3_warning 'I acknowledge that this is a prerelease build of RedM, and I am aware my resources *will* become incompatible once RedM ships.'
 game 'rdr3'
@@ -33,3 +38,4 @@ dependencies {
 }
 
 lua54 'yes'
+

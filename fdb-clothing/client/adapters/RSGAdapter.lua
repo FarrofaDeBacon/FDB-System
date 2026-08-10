@@ -1,7 +1,12 @@
+-- ============================================================
+-- FDB System | fdb-clothing | client/adapters/RSGAdapter.lua
+-- RSG Framework adapter for clothing
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 if Config.framework == 'rsg-core' then
     RegisterNetEvent('RSGCore:Client:OnPlayerLoaded')
     AddEventHandler('RSGCore:Client:OnPlayerLoaded', function()
-        Callback.triggerServer('murphy_clothing:GetCurrentClothes', function(datatable, id)
+        Callback.triggerServer('fdb_clothing:GetCurrentClothes', function(datatable, id)
             if IsPedMale(PlayerPedId()) then SelectedGender = "male" else SelectedGender = "female" end
             Wait(1000)
             if type(baseskin) ~= "table" then
@@ -9,6 +14,7 @@ if Config.framework == 'rsg-core' then
             end
             
             -- Capture base body parts with their original albedo (skin color)
+            local CORE = exports['fdb-core']:GetCoreObject()
             local ped = PlayerPedId()
             local equipped = GetCategoriesEquiped(ped)
             
@@ -38,13 +44,13 @@ if Config.framework == 'rsg-core' then
             if datatable then
                 local loadclothes = false
                 for k, v in pairs(datatable) do
-                    if v.model > 0 then
+                    if v.model and v.model ~= 0 then
                         loadclothes = true
                         break
                     end
                 end
                 if loadclothes then
-                    TriggerEvent("murphy_clothes:clotheitem", datatable, id)
+                    TriggerEvent("fdb_clothes:clotheitem", datatable, id)
                 end
             end
         end)
@@ -52,18 +58,18 @@ if Config.framework == 'rsg-core' then
 
     RegisterNetEvent('rsg-medic:client:playerRevive')
     AddEventHandler('rsg-medic:client:playerRevive', function()
-        Callback.triggerServer('murphy_clothing:GetCurrentClothes', function(datatable, id)
+        Callback.triggerServer('fdb_clothing:GetCurrentClothes', function(datatable, id)
             if IsPedMale(PlayerPedId()) then SelectedGender = "male" else SelectedGender = "female" end
             if datatable then
                 local loadclothes = false
                 for k, v in pairs(datatable) do
-                    if v.model > 0 then
+                    if v.model and v.model ~= 0 then
                         loadclothes = true
                         break
                     end
                 end
                 if loadclothes then
-                    TriggerEvent("murphy_clothes:clotheitem", datatable, id)
+                    TriggerEvent("fdb_clothes:clotheitem", datatable, id)
                 end
             end
         end)
@@ -71,24 +77,25 @@ if Config.framework == 'rsg-core' then
 
     RegisterNetEvent('rsg-medic:client:adminRevive')
     AddEventHandler('rsg-medic:client:adminRevive', function()
-        Callback.triggerServer('murphy_clothing:GetCurrentClothes', function(datatable, id)
+        Callback.triggerServer('fdb_clothing:GetCurrentClothes', function(datatable, id)
             if IsPedMale(PlayerPedId()) then SelectedGender = "male" else SelectedGender = "female" end
             if datatable then
                 local loadclothes = false
                 for k, v in pairs(datatable) do
-                    if v.model > 0 then
+                    if v.model and v.model ~= 0 then
                         loadclothes = true
                         break
                     end
                 end
                 if loadclothes then
-                    TriggerEvent("murphy_clothes:clotheitem", datatable, id)
+                    TriggerEvent("fdb_clothes:clotheitem", datatable, id)
                 end
             end
         end)
     end)
 
-    RegisterNetEvent("murphy_clothes:outfitchanged", function()
+    RegisterNetEvent("fdb_clothes:outfitchanged", function()
         --- your corde
     end)
 end
+

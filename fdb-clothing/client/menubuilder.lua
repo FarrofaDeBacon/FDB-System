@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-clothing | client/menubuilder.lua
+-- UI and NUI menu building logic
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 local menucategories = {
     male = {
         categories = { "head", "upper", "lower", "feets", "accs", "weapons", "admin" },
@@ -125,7 +130,7 @@ Citizen.CreateThread(function()
     
     -- Filter NPC assets if Config.FilterNPCAssets is enabled
     if Config.FilterNPCAssets then
-        for gender, categories in pairs(MURPHY_ASSETS) do
+        for gender, categories in pairs(FDB_ASSETS) do
             for category, assets in pairs(categories) do
                 local filteredAssets = {}
                 for i, asset in ipairs(assets) do
@@ -134,24 +139,24 @@ Citizen.CreateThread(function()
                         table.insert(filteredAssets, asset)
                     end
                 end
-                MURPHY_ASSETS[gender][category] = filteredAssets
+                FDB_ASSETS[gender][category] = filteredAssets
             end
         end
     end
     
-    -- Vérifie les catégories manquantes dans le menu
+    -- VÃ©rifie les catÃ©gories manquantes dans le menu
     for gender, value in pairs(menucategories) do
-        -- Vérifie si la catégorie existe dans MURPHY_ASSETS
+        -- VÃ©rifie si la catÃ©gorie existe dans FDB_ASSETS
         for cat, data in pairs(value) do
             for _, gamecat in pairs(data) do
-                if not MURPHY_ASSETS[gender][gamecat] then
+                if not FDB_ASSETS[gender][gamecat] then
                     -- print("Unknown category in menu: " .. gamecat .. " (gender: " .. gender .. ")")
                 end
             end
         end
 
-        -- Vérifie si des catégories de MURPHY_ASSETS sont manquantes dans le menu
-        for assetCat, _ in pairs(MURPHY_ASSETS[gender]) do
+        -- VÃ©rifie si des catÃ©gories de FDB_ASSETS sont manquantes dans le menu
+        for assetCat, _ in pairs(FDB_ASSETS[gender]) do
             local found = false
             for _, categoryData in pairs(value) do
                 for _, menuCat in pairs(categoryData) do
@@ -173,27 +178,27 @@ Citizen.CreateThread(function()
     end
 
     if Config.GoreBodies then
-        for gender, _ in pairs(MURPHY_ASSETS) do
-            if MURPHY_ASSETS[gender]["gore_upper"] then
-                if not MURPHY_ASSETS[gender]["bodies_upper"] then
-                    MURPHY_ASSETS[gender]["bodies_upper"] = {}
+        for gender, _ in pairs(FDB_ASSETS) do
+            if FDB_ASSETS[gender]["gore_upper"] then
+                if not FDB_ASSETS[gender]["bodies_upper"] then
+                    FDB_ASSETS[gender]["bodies_upper"] = {}
                 end
 
-                for index, asset in pairs(MURPHY_ASSETS[gender]["gore_upper"]) do
-                    table.insert(MURPHY_ASSETS[gender]["bodies_upper"], {
+                for index, asset in pairs(FDB_ASSETS[gender]["gore_upper"]) do
+                    table.insert(FDB_ASSETS[gender]["bodies_upper"], {
                         drawable = asset.drawable,
                         variants = asset.variants,
                         hash = asset.hash
                     })
                 end
             end
-            if MURPHY_ASSETS[gender]["gore_lower"] then
-                if not MURPHY_ASSETS[gender]["bodies_lower"] then
-                    MURPHY_ASSETS[gender]["bodies_lower"] = {}
+            if FDB_ASSETS[gender]["gore_lower"] then
+                if not FDB_ASSETS[gender]["bodies_lower"] then
+                    FDB_ASSETS[gender]["bodies_lower"] = {}
                 end
 
-                for index, asset in pairs(MURPHY_ASSETS[gender]["gore_lower"]) do
-                    table.insert(MURPHY_ASSETS[gender]["bodies_lower"], {
+                for index, asset in pairs(FDB_ASSETS[gender]["gore_lower"]) do
+                    table.insert(FDB_ASSETS[gender]["bodies_lower"], {
                         drawable = asset.drawable,
                         variants = asset.variants,
                         hash = asset.hash
@@ -242,7 +247,7 @@ function OpenOutfitListMenu(show, shopName)
             lamp2 = nil
         end
     elseif show then
-        Callback.triggerServer('murphy_clothing:GetCurrentOutfitList', function(datatable)
+        Callback.triggerServer('fdb_clothing:GetCurrentOutfitList', function(datatable)
             if datatable then
                 local outfits = {}
                 for k, v in pairs(datatable) do
@@ -252,7 +257,7 @@ function OpenOutfitListMenu(show, shopName)
                         Value = v.price
                     })
                 end
-                -- Essayer de créer une caméra fixe, sinon utiliser la caméra libre
+                -- Essayer de crÃ©er une camÃ©ra fixe, sinon utiliser la camÃ©ra libre
                 if shopName then
                     CurrentShopName = shopName
                     local fixedCamCreated = CreateFixedCamera(shopName)
@@ -291,10 +296,10 @@ function OpenShopMenu(show, outfitid)
             MannequinPed = nil
             ClearPedTasks(PlayerPedId())
         else
-            Callback.triggerServer('murphy_clothing:GetCurrentClothes', function(datatable, id)
+            Callback.triggerServer('fdb_clothing:GetCurrentClothes', function(datatable, id)
                 if IsPedMale(PlayerPedId()) then SelectedGender = "male" else SelectedGender = "female" end
                 if datatable and id then
-                    TriggerEvent("murphy_clothes:clotheitem", datatable, id)
+                    TriggerEvent("fdb_clothes:clotheitem", datatable, id)
                 end
             end)
             ClearPedTasks(PlayerPedId())
@@ -323,7 +328,7 @@ function OpenShopMenu(show, outfitid)
             ped = PlayerPedId()
         end
         local job, grade
-        Callback.triggerServer('murphy_clothing:GetCharJob', function(playerjob, playergrade)
+        Callback.triggerServer('fdb_clothing:GetCharJob', function(playerjob, playergrade)
             job, grade = playerjob, tonumber(playergrade)
         end)
         repeat
@@ -332,7 +337,7 @@ function OpenShopMenu(show, outfitid)
         Playerjob = job
         PlayerJobGrade = grade
         print("Player job: " .. Playerjob .. ", grade: " .. PlayerJobGrade)
-        Callback.triggerServer('murphy_clothing:GetCurrentClothes', function(datatable)
+        Callback.triggerServer('fdb_clothing:GetCurrentClothes', function(datatable)
             if IsPedMale(ped) then SelectedGender = "male" else SelectedGender = "female" end
             if outfitid then
                 if datatable then
@@ -347,7 +352,7 @@ function OpenShopMenu(show, outfitid)
                             end
                         end
                     end
-                    for k, v in pairs(MURPHY_ASSETS[SelectedGender]) do
+                    for k, v in pairs(FDB_ASSETS[SelectedGender]) do
                         if ClothesCache[k] == nil then
                             ClothesCache[k] = {}
                             ClothesCache[k].model = 0
@@ -370,7 +375,7 @@ function OpenShopMenu(show, outfitid)
                         end
                     end
                 end
-                for k, v in pairs(MURPHY_ASSETS[SelectedGender]) do
+                for k, v in pairs(FDB_ASSETS[SelectedGender]) do
                     if ClothesCache[k] == nil then
                         ClothesCache[k] = {}
                         ClothesCache[k].model = 0
@@ -399,10 +404,10 @@ function OpenShopMenu(show, outfitid)
             local items = {}
             for key, value in pairs(menucategories[SelectedGender]) do
                 for index, cat in pairs(value) do
-                    if MURPHY_ASSETS[SelectedGender][cat] == nil then
+                    if FDB_ASSETS[SelectedGender][cat] == nil then
                         print("Category not found: " .. cat)
                     else
-                        if next(MURPHY_ASSETS[SelectedGender][cat]) ~= nil then
+                        if next(FDB_ASSETS[SelectedGender][cat]) ~= nil then
                             if next(Config.JobLocked) ~= nil and Config.JobLocked[cat] then
                                 for _, j in pairs(Config.JobLocked[cat]) do
                                     if j[1] == Playerjob and tonumber(j[2]) <= tonumber(PlayerJobGrade) then
@@ -412,7 +417,7 @@ function OpenShopMenu(show, outfitid)
                                                 id = cat,
                                                 name = Lang.Categories[cat] or cat,
                                                 category = key,
-                                                totalAmount = #MURPHY_ASSETS[SelectedGender][cat],
+                                                totalAmount = #FDB_ASSETS[SelectedGender][cat],
                                                 selectorType = "slider",
                                                 contextual = "variation",
                                                 value = ClothesCache[cat].model or 0,
@@ -427,7 +432,7 @@ function OpenShopMenu(show, outfitid)
                                         id = cat,
                                         name = Lang.Categories[cat] or cat,
                                         category = key,
-                                        totalAmount = #MURPHY_ASSETS[SelectedGender][cat],
+                                        totalAmount = #FDB_ASSETS[SelectedGender][cat],
                                         selectorType = "slider",
                                         contextual = "variation",
                                         value = ClothesCache[cat].model or 0,
@@ -444,7 +449,7 @@ function OpenShopMenu(show, outfitid)
                 name = "Upper Body",
                 category = "skin",
                 totalAmount = #WearableStates[SelectedGender]["bodies_upper"] +
-                    #MURPHY_ASSETS[SelectedGender]["bodies_upper"],
+                    #FDB_ASSETS[SelectedGender]["bodies_upper"],
                 selectorType = "slider",
                 contextual = "variation",
                 value = 1,
@@ -454,7 +459,7 @@ function OpenShopMenu(show, outfitid)
                 name = "Lower Body",
                 category = "skin",
                 totalAmount = #WearableStates[SelectedGender]["bodies_lower"] +
-                    #MURPHY_ASSETS[SelectedGender]["bodies_lower"],
+                    #FDB_ASSETS[SelectedGender]["bodies_lower"],
                 selectorType = "slider",
                 contextual = "variation",
                 value = 1,
@@ -490,7 +495,7 @@ end
 -- Citizen.CreateThread(function ()
 --     while true do
 --         local job, grade
---         Callback.triggerServer('murphy_clothing:GetCharJob', function(playerjob, playergrade)
+--         Callback.triggerServer('fdb_clothing:GetCharJob', function(playerjob, playergrade)
 --             job, grade = playerjob, tonumber(playergrade)
 --         end)
 --         repeat
@@ -535,18 +540,18 @@ local function ToggleNaked(notify)
         RemoveAllClothesExceptEssentials(ped)
         isNaked = true
         if notify then
-            TriggerEvent('murphy_notify:sendRight', "Clothes removed - MP body displayed", 5000)
+            TriggerEvent('FDB_notify:sendRight', "Clothes removed - MP body displayed", 5000)
         end
         return true
     else
         -- Reload clothes from server
-        Callback.triggerServer('murphy_clothing:GetCurrentClothes', function(datatable, id)
+        Callback.triggerServer('fdb_clothing:GetCurrentClothes', function(datatable, id)
             if IsPedMale(PlayerPedId()) then SelectedGender = "male" else SelectedGender = "female" end
             if datatable then
-                TriggerEvent("murphy_clothes:clotheitem", datatable, id)
+                TriggerEvent("fdb_clothes:clotheitem", datatable, id)
                 isNaked = false
                 if notify then
-                    TriggerEvent('murphy_notify:sendRight', "Clothes reloaded", 5000)
+                    TriggerEvent('FDB_notify:sendRight', "Clothes reloaded", 5000)
                 end
             end
         end)
@@ -566,18 +571,18 @@ local function SetNaked(naked, notify)
         RemoveAllClothesExceptEssentials(ped)
         isNaked = true
         if notify then
-            TriggerEvent('murphy_notify:sendRight', "Clothes removed - MP body displayed", 5000)
+            TriggerEvent('FDB_notify:sendRight', "Clothes removed - MP body displayed", 5000)
         end
         return true
     elseif not naked and isNaked then
         -- Get dressed
-        Callback.triggerServer('murphy_clothing:GetCurrentClothes', function(datatable, id)
+        Callback.triggerServer('fdb_clothing:GetCurrentClothes', function(datatable, id)
             if IsPedMale(PlayerPedId()) then SelectedGender = "male" else SelectedGender = "female" end
             if datatable then
-                TriggerEvent("murphy_clothes:clotheitem", datatable, id)
+                TriggerEvent("fdb_clothes:clotheitem", datatable, id)
                 isNaked = false
                 if notify then
-                    TriggerEvent('murphy_notify:sendRight', "Clothes reloaded", 5000)
+                    TriggerEvent('FDB_notify:sendRight', "Clothes reloaded", 5000)
                 end
             end
         end)
@@ -587,20 +592,20 @@ local function SetNaked(naked, notify)
 end
 
 -- Event: Toggle between naked and clothed
--- Usage: TriggerEvent('murphy_clothing:toggleNaked', true) -- true for notification, false or nil to disable
-RegisterNetEvent('murphy_clothing:toggleNaked', function(notify)
+-- Usage: TriggerEvent('fdb_clothing:toggleNaked', true) -- true for notification, false or nil to disable
+RegisterNetEvent('fdb_clothing:toggleNaked', function(notify)
     ToggleNaked(notify)
 end)
 
 -- Event: Set specific naked state
--- Usage: TriggerEvent('murphy_clothing:setNaked', true, true) -- (naked: true/false, notify: true/false)
-RegisterNetEvent('murphy_clothing:setNaked', function(naked, notify)
+-- Usage: TriggerEvent('fdb_clothing:setNaked', true, true) -- (naked: true/false, notify: true/false)
+RegisterNetEvent('fdb_clothing:setNaked', function(naked, notify)
     SetNaked(naked, notify)
 end)
 
 -- Event: Get current naked state
--- Usage: local state = exports.murphy_clothing:IsPlayerNaked()
-RegisterNetEvent('murphy_clothing:getNakedState', function()
+-- Usage: local state = exports.fdb_clothing:IsPlayerNaked()
+RegisterNetEvent('fdb_clothing:getNakedState', function()
     return isNaked
 end)
 
@@ -659,7 +664,7 @@ function OpenWearableMenu(show)
     elseif show then
         if IsPedMale(PlayerPedId()) then SelectedGender = "male" else SelectedGender = "female" end
         local outfit_id = nil
-        Callback.triggerServer('murphy_clothing:GetCurrentClothes', function(datatable, id)
+        Callback.triggerServer('fdb_clothing:GetCurrentClothes', function(datatable, id)
             if IsPedMale(PlayerPedId()) then SelectedGender = "male" else SelectedGender = "female" end
             if datatable then
                 ClothesCache = datatable
@@ -673,7 +678,7 @@ function OpenWearableMenu(show)
                         end
                     end
                 end
-                for k, v in pairs(MURPHY_ASSETS[SelectedGender]) do
+                for k, v in pairs(FDB_ASSETS[SelectedGender]) do
                     if ClothesCache[k] == nil then
                         ClothesCache[k] = {}
                         ClothesCache[k].model = 0
@@ -683,7 +688,7 @@ function OpenWearableMenu(show)
 
                 -- if Config.MenuBuilder[MenuType].Instance == true and not Mannequin then
                 --     local room = math.random(1,1000)
-                --     TriggerServerEvent("murphy_clothing:instanceplayers", room)
+                --     TriggerServerEvent("fdb_clothing:instanceplayers", room)
                 -- end
                 OldClothesCache = deepcopy(ClothesCache)
                 -- Sauvegarder WearableCache pour le menu F1
@@ -699,7 +704,7 @@ function OpenWearableMenu(show)
             category = 2,
             selectorType = "slider",
             totalAmount = #WearableStates[SelectedGender]["bodies_upper"] +
-                #MURPHY_ASSETS[SelectedGender]["bodies_upper"],
+                #FDB_ASSETS[SelectedGender]["bodies_upper"],
             value = 1,
         })
         table.insert(items, {
@@ -708,7 +713,7 @@ function OpenWearableMenu(show)
             category = 2,
             selectorType = "slider",
             totalAmount = #WearableStates[SelectedGender]["bodies_lower"] +
-                #MURPHY_ASSETS[SelectedGender]["bodies_lower"],
+                #FDB_ASSETS[SelectedGender]["bodies_lower"],
             value = 1,
         })
 
@@ -720,16 +725,16 @@ function OpenWearableMenu(show)
                 local data = ClothesCache[v]
                 if data then
                     local texture
-                    if data.model > 0 then
+                    if data.model ~= 0 then
                         if type(data.texture) == "table" then
                             texture = data.texture.palette
                         else
                             texture = data.texture
                         end
-                        if MURPHY_ASSETS[SelectedGender][v][tonumber(data.model)][tonumber(texture)] then
-                            if MURPHY_ASSETS[SelectedGender][v][tonumber(data.model)][tonumber(texture)].hash then
+                        if FDB_ASSETS[SelectedGender][v][tonumber(data.model)][tonumber(texture)] then
+                            if FDB_ASSETS[SelectedGender][v][tonumber(data.model)][tonumber(texture)].hash then
                                 local count = GetShopItemNumWearableStates(
-                                    MURPHY_ASSETS[SelectedGender][v][tonumber(data.model)][tonumber(texture)].hash,
+                                    FDB_ASSETS[SelectedGender][v][tonumber(data.model)][tonumber(texture)].hash,
                                     female,
                                     true)
                                 if count > 0 then
@@ -756,7 +761,7 @@ function OpenWearableMenu(show)
             local candisplay = false
             for k, v in pairs(value) do
                 if ClothesCache[v] then
-                    if ClothesCache[v].model > 0 then
+                    if ClothesCache[v].model ~= 0 then
                         candisplay = v
                     end
                 end
@@ -812,7 +817,7 @@ RegisterNetEvent('fdb_clothing:OpenClothesMenuCreator', function()
                 end
             end
         end
-        for k, v in pairs(MURPHY_ASSETS[SelectedGender]) do
+        for k, v in pairs(FDB_ASSETS[SelectedGender]) do
             if ClothesCache[k] == nil then
                 ClothesCache[k] = {}
                 ClothesCache[k].model = 0
@@ -864,10 +869,10 @@ RegisterNetEvent('fdb_clothing:OpenClothesMenuCreator', function()
     local items = {}
     for key, value in pairs(menucategories[SelectedGender]) do
         for index, cat in pairs(value) do
-            if MURPHY_ASSETS[SelectedGender][cat] == nil then
+            if FDB_ASSETS[SelectedGender][cat] == nil then
                 print("Category not found: " .. cat)
             else
-                if next(MURPHY_ASSETS[SelectedGender][cat]) ~= nil then
+                if next(FDB_ASSETS[SelectedGender][cat]) ~= nil then
                     if next(Config.JobLocked) ~= nil and Config.JobLocked[cat] then
                         for _, j in pairs(Config.JobLocked[cat]) do
                             if Playerjob ~= nil then
@@ -879,7 +884,7 @@ RegisterNetEvent('fdb_clothing:OpenClothesMenuCreator', function()
                                                 id = cat,
                                                 name = Lang.Categories[cat] or cat,
                                                 category = key,
-                                                totalAmount = #MURPHY_ASSETS[SelectedGender][cat],
+                                                totalAmount = #FDB_ASSETS[SelectedGender][cat],
                                                 selectorType = "slider",
                                                 contextual = "variation",
                                                 value = ClothesCache[cat].model or 0,
@@ -896,7 +901,7 @@ RegisterNetEvent('fdb_clothing:OpenClothesMenuCreator', function()
                                 id = cat,
                                 name = Lang.Categories[cat] or cat,
                                 category = key,
-                                totalAmount = #MURPHY_ASSETS[SelectedGender][cat],
+                                totalAmount = #FDB_ASSETS[SelectedGender][cat],
                                 selectorType = "slider",
                                 contextual = "variation",
                                 value = ClothesCache[cat].model or 0,
@@ -912,7 +917,7 @@ RegisterNetEvent('fdb_clothing:OpenClothesMenuCreator', function()
         id = "bodies_upper",
         name = "Upper Body",
         category = "skin",
-        totalAmount = #WearableStates[SelectedGender]["bodies_upper"] + #MURPHY_ASSETS[SelectedGender]["bodies_upper"],
+        totalAmount = #WearableStates[SelectedGender]["bodies_upper"] + #FDB_ASSETS[SelectedGender]["bodies_upper"],
         selectorType = "slider",
         contextual = "variation",
         value = 1,
@@ -921,7 +926,7 @@ RegisterNetEvent('fdb_clothing:OpenClothesMenuCreator', function()
         id = "bodies_lower",
         name = "Lower Body",
         category = "skin",
-        totalAmount = #WearableStates[SelectedGender]["bodies_lower"] + #MURPHY_ASSETS[SelectedGender]["bodies_lower"],
+        totalAmount = #WearableStates[SelectedGender]["bodies_lower"] + #FDB_ASSETS[SelectedGender]["bodies_lower"],
         selectorType = "slider",
         contextual = "variation",
         value = 1,
@@ -939,3 +944,4 @@ RegisterNetEvent('fdb_clothing:OpenClothesMenuCreator', function()
     PlaySound("INFO", "HUD_SHOP_SOUNDSET")
     SetNuiFocus(true, true)
 end)
+

@@ -1,18 +1,23 @@
+-- ============================================================
+-- FDB System | fdb-clothing | shared/config.lua
+-- Main configuration file for fdb-clothing
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 Config = {}
 
 Config.DevMode = true    -- activate the dev category
 Config.GoreBodies = false -- activate the gore bodies category, false is recommended
 
 -- Filter NPC assets (assets with drawable) from the menu
--- ⚠️ WARNING: Changing this value requires a database wipe of murphy_clothing SQL, otherwise there will be problems
+-- âš ï¸ WARNING: Changing this value requires a database wipe of fdb_clothing SQL, otherwise there will be problems
 -- true = NPC assets will be filtered out
 -- false = NPC assets will be available in the menu
 Config.FilterNPCAssets = false
 
-Config.framework = "vorp" --- "vorp" or "REDEMRP2k23" or "rsg-core"
+Config.framework = "rsg-core" --- "vorp" or "REDEMRP2k23" or "rsg-core"
 
 Config.MenuCommand = "openmenu" --- nil if you don't want a command to open the menu
-Config.NativePrompt = false     -- if you want to use the native prompt instead of the interaction menu
+Config.NativePrompt = true     -- if you want to use the native prompt instead of the interaction menu
 Config.OutfitItem = "clothes"     ---- Outfit item
 
 -- Outfit modification pricing behavior
@@ -99,19 +104,19 @@ Config.TemperatureProtection = {
     ["Shop Name"] = {
         shopCoords = vector3(x, y, z),
         camera = {
-            coords = vector3(x, y, z),    -- Position de la caméra
-            rotation = vector3(x, y, z),   -- Rotation de la caméra (optionnel)
-            fov = 40.0,                     -- Field of view (optionnel, défaut: 40.0)
-            pointAt = vector3(x, y, z)      -- Point où la caméra regarde (optionnel)
+            coords = vector3(x, y, z),    -- Position de la camÃ©ra
+            rotation = vector3(x, y, z),   -- Rotation de la camÃ©ra (optionnel)
+            fov = 40.0,                     -- Field of view (optionnel, dÃ©faut: 40.0)
+            pointAt = vector3(x, y, z)      -- Point oÃ¹ la camÃ©ra regarde (optionnel)
         }
     }
 ]]
 
 Config.Shops = {
-    -- Exemple avec caméra libre (comme avant)
+    -- Exemple avec camÃ©ra libre (comme avant)
     ["Saint-Denis Tailor"] = vector3(2554.636, -1170.411, 53.68349),
     
-    -- Exemple avec caméra fixe
+    -- Exemple avec camÃ©ra fixe
     -- ["Blackwater Tailor"] = {
     --     shopCoords = vector3(-813.0, -1364.0, 43.75),
     --     camera = {
@@ -284,3 +289,4 @@ Config.EssentialsCategories = { -- Categories that will not be removed when chan
     "beards_mustache",
     "beards_complete",
 }
+

@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | client/settings/settings.lua
+-- Client configuration settings
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 SpawnLocation = {
     {
         id = 1,
@@ -12,7 +17,7 @@ SpawnLocation = {
     {
         id = 2,
         name = "Saint-denis",
-        description = "Saint-Denis Inspirée par la Nouvelle-Orléans, Saint-Denis est une grande ville portuaire et cosmopolite. Elle représente l'essor industriel et l'influence culturelle des villes modernes de l'époque. Son ambiance est raffinée mais cache une part d'ombre avec des inégalités sociales et des activités criminelles.",
+        description = "Saint-Denis InspirÃ©e par la Nouvelle-OrlÃ©ans, Saint-Denis est une grande ville portuaire et cosmopolite. Elle reprÃ©sente l'essor industriel et l'influence culturelle des villes modernes de l'Ã©poque. Son ambiance est raffinÃ©e mais cache une part d'ombre avec des inÃ©galitÃ©s sociales et des activitÃ©s criminelles.",
         coords = vector3(2561.39, -1196.94, 55.27),
         target = vector3(2575.39, -1199.94, 57.27),
         fov = 50.0,
@@ -22,7 +27,7 @@ SpawnLocation = {
     {
         id = 3,
         name = "Blackwater",
-        description = "Blackwater est une ville en pleine transition, symbolisant le changement entre l'ancien Ouest sauvage et la modernité. Elle est prospère, bien organisée et plus développée que les autres villes du jeu. Cependant, son histoire est marquée par des événements tragiques, notamment une fusillade majeure qui a laissé une empreinte sur son atmosphère",
+        description = "Blackwater est une ville en pleine transition, symbolisant le changement entre l'ancien Ouest sauvage et la modernitÃ©. Elle est prospÃ¨re, bien organisÃ©e et plus dÃ©veloppÃ©e que les autres villes du jeu. Cependant, son histoire est marquÃ©e par des Ã©vÃ©nements tragiques, notamment une fusillade majeure qui a laissÃ© une empreinte sur son atmosphÃ¨re",
         coords = vector3(-796.39, -1329.94, 44.27),
         target = vector3(-804.02, -1260.20, 45.79),
         fov = 44.0,
@@ -1088,3 +1093,4 @@ EditionElem = {
         }
     }
 }
+

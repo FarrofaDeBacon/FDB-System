@@ -10,13 +10,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 
-CREATE TABLE IF NOT EXISTS `murphy_clothes` (
+CREATE TABLE IF NOT EXISTS `fdb_clothes` (
   `charid` int(11) NOT NULL,
   `clothes` LONGTEXT NOT NULL DEFAULT '',
   `outfit_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `murphy_outfits` (
+CREATE TABLE IF NOT EXISTS `FDB_outfits` (
   `charid` int(11) NOT NULL,
   `outfit_id` int(11) NOT NULL,
   `price` float(11) NOT NULL,
@@ -26,16 +26,16 @@ CREATE TABLE IF NOT EXISTS `murphy_outfits` (
   `gender` varchar(200) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `murphy_wearable` (
+CREATE TABLE IF NOT EXISTS `FDB_wearable` (
   `charid` int(11) NOT NULL,
   `outfit_id` int(11) NOT NULL,
   `skin` LONGTEXT NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Change charset for existing tables
-ALTER TABLE `murphy_clothes` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-ALTER TABLE `murphy_outfits` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-ALTER TABLE `murphy_wearable` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `fdb_clothes` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `FDB_outfits` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `FDB_wearable` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

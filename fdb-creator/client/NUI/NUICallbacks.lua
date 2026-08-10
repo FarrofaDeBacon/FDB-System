@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | client/NUI/NUICallbacks.lua
+-- NUI callback handlers for creator
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 local camOnHead = false
 local processingcam = false
 local teethanim = false
@@ -20,7 +25,7 @@ RegisterNUICallback("showEditionMenu", function(data, cb)
     else
         local arrayData = {}
         if EditionElem[elemId] then
-            -- Convertir la table en tableau indexé numériquement
+            -- Convertir la table en tableau indexÃ© numÃ©riquement
             for _, i in pairs(EditionElem[elemId].division) do
                 for j, elem in pairs(i.elements) do
                     if elem.type == "slider" then
@@ -47,7 +52,7 @@ RegisterNUICallback("showEditionMenu", function(data, cb)
                                 ExpressionsMaxValues[elem.YHashes].max, 0, 1)
                         end
                     end
-                    -- Mise à jour des valeurs pour les slider_legacy depuis CachePedData
+                    -- Mise Ã  jour des valeurs pour les slider_legacy depuis CachePedData
                     if elem.type == "slider_legacy" then
                         if elem.id == "head" and CachePedData.head then
                             elem.value = CachePedData.head
@@ -98,7 +103,7 @@ RegisterNUICallback("cancelCharEdition", function(data, cb)
     local x, y, z = table.unpack(GetEntityCoords(ped))
     if not baseHeading then
         baseHeading = GetEntityHeading(ped)
-        -- Stocker l'offset initial pour que 180 corresponde à baseHeading
+        -- Stocker l'offset initial pour que 180 corresponde Ã  baseHeading
         angleOffset = 180 - baseHeading
     end
     local targetHeading = (180 - angleOffset) % 360
@@ -130,7 +135,7 @@ RegisterNetEvent("fdb_creator:BackFromClothing", function()
     local x, y, z = table.unpack(GetEntityCoords(ped))
     if not baseHeading then
         baseHeading = GetEntityHeading(ped)
-        -- Stocker l'offset initial pour que 180 corresponde à baseHeading
+        -- Stocker l'offset initial pour que 180 corresponde Ã  baseHeading
         angleOffset = 180 - baseHeading
     end
     local targetHeading = (180 - angleOffset) % 360
@@ -142,6 +147,7 @@ RegisterNetEvent("fdb_creator:BackFromClothing", function()
     DisplayPins = true
     Light()
     Wait(1000)
+    SendNUIMessage({ type = "showGlobalCharacterMenu" })
     LoadApparenceMenu()
     OpenApperanceMenu()
 end)
@@ -345,6 +351,22 @@ RegisterNUICallback("spawnCharacter", function(data, cb)
                     print("Saving preset with outfit ID:", outfitid)
                     if result then
                         print("Preset saved successfully")
+                        
+                        -- Save clothes data from fdb-clothing
+                        local clothesData = exports['fdb-clothing']:GetClothesCache()
+                        if clothesData then
+                            local nonZero = 0
+                            for k, v in pairs(clothesData) do
+                                if v.model and v.model ~= 0 then
+                                    nonZero = nonZero + 1
+                                end
+                            end
+                            print("[fdb-creator] Saving clothes on character creation - items with clothes: " .. tostring(nonZero))
+                            TriggerServerEvent('fdb_clothing:SaveCurrentClothes', clothesData, 0)
+                        else
+                            print("[fdb-creator] WARNING: No clothes data from fdb-clothing export!")
+                        end
+                        
                         SetEntityCoords(PlayerPedId(), SpawnLocation[spawnLocationId].pedspawn)
                         SetEntityHeading(PlayerPedId(), SpawnLocation[spawnLocationId].pedspawnheading)
                         Wait(2000)
@@ -493,7 +515,7 @@ RegisterNUICallback("pedValue", function(data, cb)
 
     NPCAssetsToPed(model, outfit)
     
-    -- Reposicionar o ped no saloon e forçar visibilidade após troca de modelo
+    -- Reposicionar o ped no saloon e forÃ§ar visibilidade apÃ³s troca de modelo
     local coords = Config.CharSelect.playerSpawn.coords
     local heading = Config.CharSelect.playerSpawn.heading
     CachePed = PlayerPedId()
@@ -799,9 +821,9 @@ RegisterNUICallback("UndressApparenceEdition", function(data, cb)
     end
 end)
 
--- ═══════════════════════════════════════════════════════════════════════════
+-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 -- Second Chance - Save skin and close
--- ═══════════════════════════════════════════════════════════════════════════
+-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 RegisterNUICallback("SaveSecondChance", function(data, cb)
     PlaySound("SELECT", "HUD_SHOP_SOUNDSET")
     
@@ -983,3 +1005,4 @@ RegisterNUICallback("createNewChar", function(data, cb)
     TriggerEvent("fdb_clothing:ResetClothesMenuCreator")
     PlaySound("Select", "HUD_SHOP_SOUNDSET")
 end)
+

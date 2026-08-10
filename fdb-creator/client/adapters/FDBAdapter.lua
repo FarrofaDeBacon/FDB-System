@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | client/adapters/FDBAdapter.lua
+-- FDB Framework adapter for creator
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 if Config.framework == 'fdb-core' then
     local myChars          = {}
     charselectpeds         = {}
@@ -14,7 +19,7 @@ if Config.framework == 'fdb-core' then
         creatingCharacter = false -- Reset character creation flag
         ShutdownLoadingScreen()
         ShutdownLoadingScreenNui()
-        -- Protection: empêcher la boucle mort de rsg-medic pendant le menu
+        -- Protection: empÃªcher la boucle mort de rsg-medic pendant le menu
         if LocalPlayer and LocalPlayer.state then
             LocalPlayer.state:set('invincible', true, true)
         end
@@ -284,11 +289,13 @@ if Config.framework == 'fdb-core' then
             Wait(2000)
             TriggerEvent('fdb-prison:client:prisonclothes')
         end
+        Wait(1000)
+        DoScreenFadeIn(1000)
     end)
 
     AddEventHandler("RSGCore:Client:OnPlayerLoaded", function()
         Wait(1000)
-        -- Ne retire pas l’invincibilité avant le chargement du skin
+        -- Ne retire pas lâ€™invincibilitÃ© avant le chargement du skin
         if LocalPlayer and LocalPlayer.state then
             LocalPlayer.state:set('invincible', true, true)
         end
@@ -298,7 +305,7 @@ if Config.framework == 'fdb-core' then
     end)
     local healthinit = false
     RegisterNetEvent("fdb-creator:loadskin", function()
-        -- Sécuriser toute la phase de swap model/skin
+        -- SÃ©curiser toute la phase de swap model/skin
         if LocalPlayer and LocalPlayer.state then
             LocalPlayer.state:set('invincible', true, true)
         end
@@ -318,9 +325,9 @@ if Config.framework == 'fdb-core' then
             local isDead = PlayerData.metadata["isdead"]
             if isDead == nil then isDead = false end
             print("Player is dead: " .. tostring(isDead))
-            if isDead == true then return end -- Si mort, on ne charge pas le skin (évite les bugs)
+            if isDead == true then return end -- Si mort, on ne charge pas le skin (Ã©vite les bugs)
             
-            -- Vérifier si le model doit être changé
+            -- VÃ©rifier si le model doit Ãªtre changÃ©
             local currentModel = GetEntityModel(PlayerPedId())
             local targetModel = nil
             if CachePedData and CachePedData.pedmodel and CachePedData.pedmodel.model then
@@ -331,7 +338,7 @@ if Config.framework == 'fdb-core' then
             local ped
             local healthCore, stamCore, health, stam
             
-            -- Sauvegarder les valeurs de vie/stamina AVANT le changement de modèle si nécessaire
+            -- Sauvegarder les valeurs de vie/stamina AVANT le changement de modÃ¨le si nÃ©cessaire
             if needsModelChange then
                 healthCore = GetAttributeCoreValue(PlayerPedId(), 0) -- Get health core value
                 stamCore = GetAttributeCoreValue(PlayerPedId(), 1)   -- Get stamina core value
@@ -459,7 +466,7 @@ if Config.framework == 'fdb-core' then
                     healthinit = false
                 else
                     currentHealth = PlayerData.metadata["health"]
-                    -- Sécurité: éviter 0 HP avec isDead=false
+                    -- SÃ©curitÃ©: Ã©viter 0 HP avec isDead=false
                     if (not currentHealth or currentHealth <= 0) then
                         currentHealth = 100
                         TriggerServerEvent('fdb-medic:server:SetHealth', currentHealth)
@@ -469,7 +476,7 @@ if Config.framework == 'fdb-core' then
             print("Current Health: " .. tostring(currentHealth))
             SetEntityHealth(PlayerPedId(), currentHealth)
 
-            -- Restaurer vie/stamina SEULEMENT si le modèle a été changé
+            -- Restaurer vie/stamina SEULEMENT si le modÃ¨le a Ã©tÃ© changÃ©
             if needsModelChange then
                 Citizen.InvokeNative(0xC6258F41D86676E0, PlayerPedId(), 0, healthCore) -- Set Health Core back to what it was
                 Citizen.InvokeNative(0xC6258F41D86676E0, PlayerPedId(), 1, stamCore)   -- Set Stamina Core back to what it was
@@ -508,3 +515,4 @@ if Config.framework == 'fdb-core' then
         currentCharacter = charid
     end)
 end
+

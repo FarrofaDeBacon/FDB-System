@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-clothing | client/NUICallbacks.lua
+-- Handlers for NUI callbacks from the frontend
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 baseHeading = nil
 angleOffset = nil
 currentH, currentZ, currentR = 0, 0, 0
@@ -12,10 +17,10 @@ RegisterNUICallback("closeoutfitmenu", function(body, resultCallback)
             WearableCache = deepcopy(OldWearableCache)
             OldWearableCache = nil
         end
-        Callback.triggerServer('murphy_clothing:GetCurrentClothes', function(datatable, id)
+        Callback.triggerServer('fdb_clothing:GetCurrentClothes', function(datatable, id)
             if IsPedMale(PlayerPedId()) then SelectedGender = "male" else SelectedGender = "female" end
             if datatable and id then
-                TriggerEvent("murphy_clothes:clotheitem", datatable, id)
+                TriggerEvent("fdb_clothes:clotheitem", datatable, id)
             end
         end)
         ClearPedTasks(PlayerPedId())
@@ -75,7 +80,7 @@ RegisterNUICallback("itemValue", function(body, resultCallback)
                         }
                     )
                 end
-            elseif ClothesCache[category].model > 0 then
+            elseif ClothesCache[category].model ~= 0 then
                 -- if ContextualDataOn == false then
                 UpdateContextualDatas(ClothesCache[category].model, category)
                 -- end
@@ -178,7 +183,7 @@ RegisterNUICallback("cameraChange", function(body, resultCallback)
         -- Initialiser le heading de base si pas encore fait
         if not baseHeading then
             baseHeading = GetEntityHeading(ped)
-            -- Stocker l'offset initial pour que 180 corresponde à baseHeading
+            -- Stocker l'offset initial pour que 180 corresponde Ã  baseHeading
             angleOffset = 180 - baseHeading
         end
 
@@ -186,7 +191,7 @@ RegisterNUICallback("cameraChange", function(body, resultCallback)
         local targetHeading = (value - angleOffset) % 360
         local rad = math.rad(targetHeading)
 
-        -- Calculer un point à 1 unité devant le ped selon le heading voulu
+        -- Calculer un point Ã  1 unitÃ© devant le ped selon le heading voulu
         local distance = 1.0
         local targetX = x + (math.sin(-rad) * distance)
         local targetY = y + (math.cos(-rad) * distance)
@@ -217,15 +222,15 @@ RegisterNUICallback("createOutfit", function(body, resultCallback)
     local gender = false
     if MannequinPed then ped = MannequinPed end
     if IsPedMale(ped) then gender = true end
-    Callback.triggerServer('murphy_clothing:SaveOutfit', function(result, outfitid)
+    Callback.triggerServer('fdb_clothing:SaveOutfit', function(result, outfitid)
         if result then
-            TriggerEvent("murphy_clothes:clotheitem", ClothesCache, outfitid)
+            TriggerEvent("fdb_clothes:clotheitem", ClothesCache, outfitid)
             PlaySound("PURCHASE", "Ledger_Sounds")
             if WearableCache["bodies_upper"] or WearableCache["bodies_lower"] then
-                Callback.triggerServer('murphy_clothing:SaveWearable', function(result)
+                Callback.triggerServer('fdb_clothing:SaveWearable', function(result)
                 end, outfitid, WearableCache)
             end
-            -- Mettre à jour OldWearableCache car l'outfit est maintenant sauvegardé
+            -- Mettre Ã  jour OldWearableCache car l'outfit est maintenant sauvegardÃ©
             OldWearableCache = deepcopy(WearableCache)
             Wait(200)
             OpenShopMenu(false)
@@ -235,19 +240,19 @@ RegisterNUICallback("createOutfit", function(body, resultCallback)
     end, ClothesCache, name, price, gender)
 end)
 
-RegisterNetEvent('murphy_clothing:SaveClothesCreator', function()
+RegisterNetEvent('fdb_clothing:SaveClothesCreator', function()
     local name = "Default"
     local ped = PlayerPedId()
     local gender = false
     if IsPedMale(ped) then gender = true end
     print(json.encode(ClothesCache))
-    Callback.triggerServer('murphy_clothing:SaveOutfit', function(result, outfitid)
+    Callback.triggerServer('fdb_clothing:SaveOutfit', function(result, outfitid)
         if result then
-            TriggerEvent("murphy_clothes:clotheitem", ClothesCache, outfitid)
+            TriggerEvent("fdb_clothes:clotheitem", ClothesCache, outfitid)
             PlaySound("PURCHASE", "Ledger_Sounds")
             if not MannequinPed then
                 if WearableCache["bodies_upper"] or WearableCache["bodies_lower"] then
-                    Callback.triggerServer('murphy_clothing:SaveWearable', function(result)
+                    Callback.triggerServer('fdb_clothing:SaveWearable', function(result)
                     end, outfitid, WearableCache)
                 end
             end
@@ -266,7 +271,7 @@ end)
 RegisterNUICallback("saveOutfit", function(body, resultCallback)
     local outfitid = body.outfitid
     local changes = false
-    for k, v in pairs(MURPHY_ASSETS[SelectedGender]) do
+    for k, v in pairs(FDB_ASSETS[SelectedGender]) do
         if k ~= "bodies_upper" and k ~= "bodies_lower" then
             if OldClothesCache[k].model then
                 if OldClothesCache[k].model ~= ClothesCache[k].model then
@@ -274,7 +279,7 @@ RegisterNUICallback("saveOutfit", function(body, resultCallback)
                     break
                 end
             else
-                if ClothesCache[k].model > 0 then
+                if ClothesCache[k].model ~= 0 then
                     changes = true
                     break
                 end
@@ -286,19 +291,19 @@ RegisterNUICallback("saveOutfit", function(body, resultCallback)
     else
         local totalPrice = CalculatePrice()
         local price = Config.ModifyOutfitFullPrice and totalPrice or (totalPrice - OutfitPrice)
-        Callback.triggerServer('murphy_clothing:ModifyOutfit', function(result, data)
+        Callback.triggerServer('fdb_clothing:ModifyOutfit', function(result, data)
             if result then
                 -- Save wearable data (bodies_upper/bodies_lower) along with the outfit
                 if WearableCache["bodies_upper"] or WearableCache["bodies_lower"] then
-                    Callback.triggerServer('murphy_clothing:SaveWearable', function(wearableResult)
+                    Callback.triggerServer('fdb_clothing:SaveWearable', function(wearableResult)
                     end, outfitid, WearableCache)
                 end
-                -- Mettre à jour OldWearableCache car l'outfit est maintenant modifié et sauvegardé
+                -- Mettre Ã  jour OldWearableCache car l'outfit est maintenant modifiÃ© et sauvegardÃ©
                 OldWearableCache = deepcopy(WearableCache)
                 OpenShopMenu(false)
                 PlaySound("PURCHASE", "Ledger_Sounds")
                 Wait(200)
-                TriggerEvent("murphy_clothes:clotheitem", data, outfitid)
+                TriggerEvent("fdb_clothes:clotheitem", data, outfitid)
             else
                 PlaySound("UNAFFORDABLE", "Ledger_Sounds")
             end
@@ -327,7 +332,7 @@ RegisterNUICallback("showOutfit", function(body, resultCallback)
             playergender = "female"
             mannequingender = "male"
         end
-        Callback.triggerServer('murphy_clothing:GetOutfit', function(datatable, gender)
+        Callback.triggerServer('fdb_clothing:GetOutfit', function(datatable, gender)
             if datatable then
                 -- Charger la tenue imm\u00e9diatement pour affichage
                 if playergender ~= gender then
@@ -337,7 +342,7 @@ RegisterNUICallback("showOutfit", function(body, resultCallback)
                         ProcessingMannequin = false
                     end
                     SelectedGender = mannequingender
-                    TriggerEvent("murphy_clothes:clotheitem", datatable, id)
+                    TriggerEvent("fdb_clothes:clotheitem", datatable, id)
                 else
                     if MannequinPed then
                         ProcessingMannequin = true
@@ -356,10 +361,10 @@ RegisterNUICallback("showOutfit", function(body, resultCallback)
                         TaskGoToCoordAnyMeans(PlayerPedId(), OriginalCoords, 1.0, 0, false, 786603, 0)
                         Wait(1000)
                         TaskTurnPedToFaceCoord(PlayerPedId(), GetCamCoord(ClothingCamera), -1)
-                        TriggerEvent("murphy_clothes:clotheitem", datatable, id)
+                        TriggerEvent("fdb_clothes:clotheitem", datatable, id)
                         ProcessingMannequin = false
                     else
-                        TriggerEvent("murphy_clothes:clotheitem", datatable, id)
+                        TriggerEvent("fdb_clothes:clotheitem", datatable, id)
                     end
                 end
             end
@@ -379,7 +384,7 @@ RegisterNUICallback("modifyOutfit", function(body, resultCallback)
             playergender = "male"
             mannequingender = "male"
         end
-        Callback.triggerServer('murphy_clothing:GetOutfit', function(datatable, gender)
+        Callback.triggerServer('fdb_clothing:GetOutfit', function(datatable, gender)
             if datatable then
                 OutfitPrice = price
                 
@@ -391,7 +396,7 @@ RegisterNUICallback("modifyOutfit", function(body, resultCallback)
                         ProcessingMannequin = false
                     end
                     SelectedGender = mannequingender
-                    TriggerEvent("murphy_clothes:clotheitem", datatable, id)
+                    TriggerEvent("fdb_clothes:clotheitem", datatable, id)
                 else
                     if MannequinPed then
                         ProcessingMannequin = true
@@ -410,10 +415,10 @@ RegisterNUICallback("modifyOutfit", function(body, resultCallback)
                         TaskGoToCoordAnyMeans(PlayerPedId(), OriginalCoords, 1.0, 0, false, 786603, 0)
                         Wait(1000)
                         TaskTurnPedToFaceCoord(PlayerPedId(), GetCamCoord(ClothingCamera), -1)
-                        TriggerEvent("murphy_clothes:clotheitem", datatable, id)
+                        TriggerEvent("fdb_clothes:clotheitem", datatable, id)
                         ProcessingMannequin = false
                     else
-                        TriggerEvent("murphy_clothes:clotheitem", datatable, id)
+                        TriggerEvent("fdb_clothes:clotheitem", datatable, id)
                     end
                 end
                 
@@ -433,7 +438,7 @@ RegisterNUICallback("recoverOutfit", function(body, resultCallback)
     local id = body.outfit
     local name = body.name
     local price = body.price
-    Callback.triggerServer('murphy_clothing:GiveOutfit', function(result)
+    Callback.triggerServer('fdb_clothing:GiveOutfit', function(result)
         if result then
             OpenOutfitListMenu(false)
             PlaySound("PURCHASE", "Ledger_Sounds")
@@ -445,7 +450,7 @@ end)
 
 RegisterNUICallback("deleteOutfit", function(body, resultCallback)
     local id = body.outfit
-    Callback.triggerServer('murphy_clothing:DeleteOutfit', function(result)
+    Callback.triggerServer('fdb_clothing:DeleteOutfit', function(result)
         if result then
             OpenOutfitListMenu(true)
         else
@@ -460,6 +465,11 @@ end)
 
 RegisterNUICallback("backToOutfitList", function(body, resultCallback)
     if CreatorMode == true then
+        TriggerServerEvent('fdb_clothing:SaveCurrentClothes', ClothesCache, 0)
+        if WearableCache["bodies_upper"] or WearableCache["bodies_lower"] then
+            Callback.triggerServer('fdb_clothing:SaveWearable', function(result)
+            end, 0, WearableCache)
+        end
         if lamp or lamp2 then
             DeleteObject(lamp)
             DeleteObject(lamp2)
@@ -482,7 +492,7 @@ RegisterNUICallback("backToOutfitList", function(body, resultCallback)
         -- KillCamera()
         CurrentPrice = 0
         Wait(1000)
-        TriggerEvent("murphy_creator:BackFromClothing")
+        TriggerEvent("fdb_creator:BackFromClothing")
         SetNuiFocus(false, false)
     else
         OpenShopMenu(false)
@@ -499,9 +509,9 @@ RegisterNUICallback("resetOutfit", function(body, resultCallback)
     -- Restaurer WearableCache original (bodies_upper/lower)
     if OldWearableCache then
         WearableCache = deepcopy(OldWearableCache)
-        -- Réappliquer les bodies originaux
+        -- RÃ©appliquer les bodies originaux
         for category, value in pairs(WearableCache) do
-            if (category == "bodies_upper" or category == "bodies_lower") and value.model and value.model > 0 then
+            if (category == "bodies_upper" or category == "bodies_lower") and value.model and value.model ~= 0 then
                 local gender = "female"
                 if IsPedMale(ped) then gender = "male" end
                 if value.texture and value.texture.palette then
@@ -516,7 +526,7 @@ RegisterNUICallback("resetOutfit", function(body, resultCallback)
     RemoveAllClothesExceptEssentials(ped)
     local gender = "female"
     if IsPedMale(ped) then gender = "male" end
-    for k, v in pairs(MURPHY_ASSETS[gender]) do
+    for k, v in pairs(FDB_ASSETS[gender]) do
         ClothesCache[k] = {}
         ClothesCache[k].model = 0
         ClothesCache[k].texture = 0
@@ -590,7 +600,7 @@ RegisterNUICallback("invertActiveCategory", function(body, resultCallback)
     if Config.Removecategories[category] then
         for k, v in pairs(Config.Removecategories[category]) do
             if ClothesCache[v] then
-                TriggerEvent("murphy_clothes:itemclothes", v, ClothesCache[v].model, ClothesCache[v].texture)
+                TriggerEvent("fdb_clothes:itemclothes", v, ClothesCache[v].model, ClothesCache[v].texture)
             end
         end
     end
@@ -599,9 +609,9 @@ end)
 RegisterNUICallback("saveMyOutfit", function(body, resultCallback)
     local outfitid = body.outfitId
     PlaySound("SELECT", "HUD_SHOP_SOUNDSET")
-    Callback.triggerServer('murphy_clothing:SaveWearable', function(result)
+    Callback.triggerServer('fdb_clothing:SaveWearable', function(result)
         if result then
-            -- Mettre à jour OldWearableCache car les changements sont maintenant sauvegardés
+            -- Mettre Ã  jour OldWearableCache car les changements sont maintenant sauvegardÃ©s
             OldWearableCache = deepcopy(WearableCache)
         end
     end, outfitid, WearableCache)
@@ -612,10 +622,10 @@ RegisterNUICallback("resetMyOutfit", function(body, resultCallback)
     -- Restaurer WearableCache original
     if OldWearableCache then
         WearableCache = deepcopy(OldWearableCache)
-        -- Réappliquer les bodies originaux
+        -- RÃ©appliquer les bodies originaux
         local ped = PlayerPedId()
         for category, value in pairs(WearableCache) do
-            if (category == "bodies_upper" or category == "bodies_lower") and value.model and value.model > 0 then
+            if (category == "bodies_upper" or category == "bodies_lower") and value.model and value.model ~= 0 then
                 local gender = "female"
                 if IsPedMale(ped) then gender = "male" end
                 if value.texture and value.texture.palette then
@@ -626,10 +636,10 @@ RegisterNUICallback("resetMyOutfit", function(body, resultCallback)
             end
         end
     end
-    Callback.triggerServer('murphy_clothing:GetCurrentClothes', function(datatable, id)
+    Callback.triggerServer('fdb_clothing:GetCurrentClothes', function(datatable, id)
         if IsPedMale(PlayerPedId()) then SelectedGender = "male" else SelectedGender = "female" end
         if datatable then
-            TriggerEvent("murphy_clothes:clotheitem", datatable, id)
+            TriggerEvent("fdb_clothes:clotheitem", datatable, id)
         else
         end
     end)
@@ -641,9 +651,9 @@ RegisterNUICallback("isNaked", function(body, resultCallback)
         RemoveAllClothesExceptEssentials(PlayerPedId())
         PlaySound("Amount_Increase", "HUD_Donate_Sounds")
     elseif naked == "false" then
-        Callback.triggerServer('murphy_clothing:GetCurrentClothes', function(datatable, id)
+        Callback.triggerServer('fdb_clothing:GetCurrentClothes', function(datatable, id)
             if datatable then
-                TriggerEvent("murphy_clothes:clotheitem", datatable, id)
+                TriggerEvent("fdb_clothes:clotheitem", datatable, id)
             end
         end)
         PlaySound("Amount_Decrease", "HUD_Donate_Sounds")
@@ -652,13 +662,13 @@ end)
 
 
 RegisterNUICallback("closeMyOutfitMenu", function(body, resultCallback)
-    -- Restaurer WearableCache original si non sauvegardé
+    -- Restaurer WearableCache original si non sauvegardÃ©
     if OldWearableCache then
         WearableCache = deepcopy(OldWearableCache)
-        -- Réappliquer les bodies originaux si nécessaire
+        -- RÃ©appliquer les bodies originaux si nÃ©cessaire
         local ped = PlayerPedId()
         for category, value in pairs(WearableCache) do
-            if (category == "bodies_upper" or category == "bodies_lower") and value.model and value.model > 0 then
+            if (category == "bodies_upper" or category == "bodies_lower") and value.model and value.model ~= 0 then
                 local gender = "female"
                 if IsPedMale(ped) then gender = "male" end
                 if value.texture and value.texture.palette then
@@ -671,7 +681,7 @@ RegisterNUICallback("closeMyOutfitMenu", function(body, resultCallback)
         OldWearableCache = nil
     end
     OpenWearableMenu(false)
-    -- Ne pas recharger les vêtements ici - ils sont déjà appliqués sur le joueur
+    -- Ne pas recharger les vÃªtements ici - ils sont dÃ©jÃ  appliquÃ©s sur le joueur
 end)
 
 local handsup = false
@@ -697,3 +707,4 @@ RegisterNUICallback("handsup", function(body, resultCallback)
         ClearPedTasks(PlayerPedId())
     end
 end)
+

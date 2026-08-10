@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-clothing | client/client.lua
+-- Main client-side events and initializations
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 local promptkey = 0x760A9C6F
 local PromptGroup = GetRandomIntInRange(0, 0xffffff)
 local str = 'Open'
@@ -27,7 +32,7 @@ Citizen.CreateThread(function()
             SetBlipScale(blip, 0.2)
             Citizen.InvokeNative(0x9CB1A1623062F402, blip, string.format(k))
             if Config.NativePrompt == false then
-                exports.murphy_interact:AddInteraction({
+                exports.FDB_interact:AddInteraction({
                     coords = shopCoords,
                     distance = 8.0, -- optional
                     interactDst = 4.0, -- optional
@@ -70,18 +75,18 @@ end
 
 if Config.LoadClothesCommand then
     RegisterCommand(Config.LoadClothesCommand, function (source, args, raw)
-        Callback.triggerServer('murphy_clothing:GetCurrentClothes', function(datatable, id)
+        Callback.triggerServer('fdb_clothing:GetCurrentClothes', function(datatable, id)
             if IsPedMale(PlayerPedId()) then SelectedGender = "male" else SelectedGender = "female" end
             if datatable then
                 local loadclothes = false
                 for k, v in pairs(datatable) do
-                    if v.model > 0 then
+                    if v.model and v.model ~= 0 then
                         loadclothes = true
                         break
                     end
                 end
                 if loadclothes then
-                    TriggerEvent("murphy_clothes:clotheitem",datatable, id)
+                    TriggerEvent("fdb_clothes:clotheitem",datatable, id)
                 end
             end
         end)
@@ -89,19 +94,19 @@ if Config.LoadClothesCommand then
    
 end
 
-RegisterNetEvent('murphy_clothing:loadclothes', function()
-    Callback.triggerServer('murphy_clothing:GetCurrentClothes', function(datatable, id)
+RegisterNetEvent('fdb_clothing:loadclothes', function()
+    Callback.triggerServer('fdb_clothing:GetCurrentClothes', function(datatable, id)
         if IsPedMale(PlayerPedId()) then SelectedGender = "male" else SelectedGender = "female" end
         if datatable then
             local loadclothes = false
             for k, v in pairs(datatable) do
-                if v.model > 0 then
+                if v.model and v.model ~= 0 then
                     loadclothes = true
                     break
                 end
             end
             if loadclothes then
-                TriggerEvent("murphy_clothes:clotheitem",datatable, id)
+                TriggerEvent("fdb_clothes:clotheitem",datatable, id)
             end
         end
     end)

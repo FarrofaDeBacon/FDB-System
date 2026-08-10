@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | client/NUI/NUIMessages.lua
+-- NUI message dispatcher to frontend
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 local init = false
 DisplayPins = true
 function OpenApperanceMenu()
@@ -272,7 +277,7 @@ function LoadApparenceMenu()
             }
         )
     else
-        -- Créer une copie du menu avec les valeurs actuelles de CachePedData
+        -- CrÃ©er une copie du menu avec les valeurs actuelles de CachePedData
         local updatedApparenceMenu = deepcopy(ApparenceMenu)
         for _, elem in pairs(updatedApparenceMenu) do
             if elem.id == "height" and CachePedData.height then
@@ -361,7 +366,7 @@ function OpenBarberMenu()
             else
                 if next(FDB_ASSETS[selectedgender][cat]) ~= nil then
                     if tostring(key) ~= "categories" then
-                        -- Inicializar hairstyleCache para categorias que ainda não existem
+                        -- Inicializar hairstyleCache para categorias que ainda nÃ£o existem
                         if hairstyleCache[cat] == nil then
                             hairstyleCache[cat] = {}
                             hairstyleCache[cat].model = 0
@@ -525,3 +530,4 @@ function UpdateContextualDatas(value, category)
         end
     end
 end
+

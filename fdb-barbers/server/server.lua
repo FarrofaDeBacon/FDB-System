@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-barbers | server/server.lua
+-- Server-side barbershop logic and persistence
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 

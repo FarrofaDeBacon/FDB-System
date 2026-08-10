@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | shared/Callbacks.lua
+-- Shared callback wrapper
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 local currentRequestId = 0
 local responseCallback = {}
 local registeredCallback = {}
@@ -109,3 +114,4 @@ AddEventHandler('onResourceStop', function(resource)
     end
   end
 end)
+

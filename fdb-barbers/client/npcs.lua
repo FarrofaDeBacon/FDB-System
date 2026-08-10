@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-barbers | client/npcs.lua
+-- Barber NPC spawning and management
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 local spawnedPeds = {}
 
 CreateThread(function()
@@ -68,3 +73,4 @@ AddEventHandler("onResourceStop", function(resourceName)
         spawnedPeds[k] = nil
     end
 end)
+

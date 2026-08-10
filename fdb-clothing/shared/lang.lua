@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-clothing | shared/lang.lua
+-- Shared localization and language keys
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 Lang = {}
 
 Lang.Categories = {
@@ -186,7 +191,7 @@ Lang.Categories = {
     ["-419539457"] = "Unknown 62",
     ["-853084561"] = "Unknown 63",
     ["-328758153"] = "Unknown 64",
-    ["nbtudvja_0x53b67599"] = "Débardeur",
+    ["nbtudvja_0x53b67599"] = "DÃ©bardeur",
     ["1038525765"] = "Unknown 66",
     ["758729615"] = "Unknown 67",
     ["1314832239"] = "Unknown 68",

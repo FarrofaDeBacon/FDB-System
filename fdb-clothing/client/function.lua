@@ -1,5 +1,15 @@
+-- ============================================================
+-- FDB System | fdb-clothing | client/function.lua
+-- Core clothing functions and component management
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 OldClothesCache = {}
 ClothesCache = {}
+
+-- Export for other resources to get current clothes cache
+exports('GetClothesCache', function()
+    return ClothesCache
+end)
 
 
 ComponentsMale = {}
@@ -63,16 +73,16 @@ function Change(id, category, change_type, value)
     else
         if change_type == "model" then
             ClothesCache[category].model = id
-            if MURPHY_ASSETS[gender][category][id].drawable then
+            if FDB_ASSETS[gender][category][id].drawable then
                 ClothesCache[category].texture = {}
-                local drawable = MURPHY_ASSETS[gender][category][id].drawable
-                local albedo = MURPHY_ASSETS[gender][category][id].variants[1].albedo
-                local normal = MURPHY_ASSETS[gender][category][id].variants[1].normal
-                local material = MURPHY_ASSETS[gender][category][id].variants[1].material
-                local palette = MURPHY_ASSETS[gender][category][id].variants[1].palette
-                local tint0 = MURPHY_ASSETS[gender][category][id].variants[1].tint[1]
-                local tint1 = MURPHY_ASSETS[gender][category][id].variants[1].tint[2]
-                local tint2 = MURPHY_ASSETS[gender][category][id].variants[1].tint[3]
+                local drawable = FDB_ASSETS[gender][category][id].drawable
+                local albedo = FDB_ASSETS[gender][category][id].variants[1].albedo
+                local normal = FDB_ASSETS[gender][category][id].variants[1].normal
+                local material = FDB_ASSETS[gender][category][id].variants[1].material
+                local palette = FDB_ASSETS[gender][category][id].variants[1].palette
+                local tint0 = FDB_ASSETS[gender][category][id].variants[1].tint[1]
+                local tint1 = FDB_ASSETS[gender][category][id].variants[1].tint[2]
+                local tint2 = FDB_ASSETS[gender][category][id].variants[1].tint[3]
                 ClothesCache[category].texture.palette = 1
                 ClothesCache[category].texture.tint0 = tint0
                 ClothesCache[category].texture.tint1 = tint1
@@ -82,37 +92,37 @@ function Change(id, category, change_type, value)
                     SendNUIMessage({
                         type = 'clipboard',
                         data = "moveAsset " ..
-                            gender .. " " .. category .. " " .. MURPHY_ASSETS[gender][category][id].drawable
+                            gender .. " " .. category .. " " .. FDB_ASSETS[gender][category][id].drawable
                     })
                     print("Clipboard",
-                        "moveAsset " .. gender .. " " .. category .. " " .. MURPHY_ASSETS[gender][category][id].drawable)
+                        "moveAsset " .. gender .. " " .. category .. " " .. FDB_ASSETS[gender][category][id].drawable)
                 end
             else
                 ClothesCache[category].texture = 1
-                NativeSetPedComponentEnabled(ped, MURPHY_ASSETS[gender][category][id][1].hash, false, true,
+                NativeSetPedComponentEnabled(ped, FDB_ASSETS[gender][category][id][1].hash, false, true,
                     true)
             end
         else
-            if MURPHY_ASSETS[gender][category][ClothesCache[category].model].drawable then
-                drawable = MURPHY_ASSETS[gender][category][ClothesCache[category].model].drawable
+            if FDB_ASSETS[gender][category][ClothesCache[category].model].drawable then
+                drawable = FDB_ASSETS[gender][category][ClothesCache[category].model].drawable
                 if change_type ~= "variants" then
-                    albedo = MURPHY_ASSETS[gender][category][ClothesCache[category].model].variants
+                    albedo = FDB_ASSETS[gender][category][ClothesCache[category].model].variants
                         [ClothesCache[category].texture.palette].albedo
-                    normal = MURPHY_ASSETS[gender][category][ClothesCache[category].model].variants
+                    normal = FDB_ASSETS[gender][category][ClothesCache[category].model].variants
                         [ClothesCache[category].texture.palette].normal
-                    material = MURPHY_ASSETS[gender][category][ClothesCache[category].model].variants
+                    material = FDB_ASSETS[gender][category][ClothesCache[category].model].variants
                         [ClothesCache[category].texture.palette].material
-                    palette = MURPHY_ASSETS[gender][category][ClothesCache[category].model].variants
+                    palette = FDB_ASSETS[gender][category][ClothesCache[category].model].variants
                         [ClothesCache[category].texture.palette].palette
                 end
                 if change_type == "variants" then
-                    albedo = MURPHY_ASSETS[gender][category][ClothesCache[category].model].variants[value].albedo
-                    normal = MURPHY_ASSETS[gender][category][ClothesCache[category].model].variants[value].normal
-                    material = MURPHY_ASSETS[gender][category][ClothesCache[category].model].variants[value].material
-                    palette = MURPHY_ASSETS[gender][category][ClothesCache[category].model].variants[value].palette
-                    tint0 = tonumber(MURPHY_ASSETS[gender][category][ClothesCache[category].model].variants[value].tint0)
-                    tint1 = tonumber(MURPHY_ASSETS[gender][category][ClothesCache[category].model].variants[value].tint1)
-                    tint2 = tonumber(MURPHY_ASSETS[gender][category][ClothesCache[category].model].variants[value].tint2)
+                    albedo = FDB_ASSETS[gender][category][ClothesCache[category].model].variants[value].albedo
+                    normal = FDB_ASSETS[gender][category][ClothesCache[category].model].variants[value].normal
+                    material = FDB_ASSETS[gender][category][ClothesCache[category].model].variants[value].material
+                    palette = FDB_ASSETS[gender][category][ClothesCache[category].model].variants[value].palette
+                    tint0 = tonumber(FDB_ASSETS[gender][category][ClothesCache[category].model].variants[value].tint0)
+                    tint1 = tonumber(FDB_ASSETS[gender][category][ClothesCache[category].model].variants[value].tint1)
+                    tint2 = tonumber(FDB_ASSETS[gender][category][ClothesCache[category].model].variants[value].tint2)
 
                     ClothesCache[category].texture.palette = value
                     ClothesCache[category].texture.tint0 = tint0 or 0
@@ -145,7 +155,7 @@ function Change(id, category, change_type, value)
                 if change_type == "variants" then
                     ClothesCache[category].texture = value
                     NativeSetPedComponentEnabled(ped,
-                        MURPHY_ASSETS[gender][category][ClothesCache[category].model][value].hash, false, true, true)
+                        FDB_ASSETS[gender][category][ClothesCache[category].model][value].hash, false, true, true)
                 elseif change_type == 1 then
                     if type(ClothesCache[category].texture) == "table" then
                         while GetComponentIndexByCategory(ped, catHash) == -1 do Wait(0) end
@@ -420,7 +430,7 @@ FixedCamera = false
 CurrentShopName = nil
 
 function camera(zoom, offset)
-    -- Si caméra fixe, ne rien faire
+    -- Si camÃ©ra fixe, ne rien faire
     if FixedCamera then
         return
     end
@@ -506,7 +516,7 @@ function CreateFixedCamera(shopName)
     
     DestroyAllCams(true)
     
-    -- Créer la caméra fixe
+    -- CrÃ©er la camÃ©ra fixe
     local camCoords = camConfig.coords
     local camRot = camConfig.rotation or vector3(0.0, 0.0, 0.0)
     local camFov = camConfig.fov or 40.0
@@ -516,7 +526,7 @@ function CreateFixedCamera(shopName)
         camRot.x, camRot.y, camRot.z, 
         camFov, false, 0)
     
-    -- Pointer la caméra
+    -- Pointer la camÃ©ra
     if camConfig.pointAt then
         PointCamAtCoord(ClothingCamera, camConfig.pointAt.x, camConfig.pointAt.y, camConfig.pointAt.z)
     else
@@ -659,14 +669,14 @@ function Light()
             end
             local hour = GetClockHours()
             if hour >= 6 and hour <= 20 then
-                SetLightsIntensityForEntity(lamp, 800.0)  -- Pleine intensité pendant la journée
+                SetLightsIntensityForEntity(lamp, 800.0)  -- Pleine intensitÃ© pendant la journÃ©e
                 UpdateLightsOnEntity(lamp)
-                SetLightsIntensityForEntity(lamp2, 700.0) -- Pleine intensité pendant la journée
+                SetLightsIntensityForEntity(lamp2, 700.0) -- Pleine intensitÃ© pendant la journÃ©e
                 UpdateLightsOnEntity(lamp2)
             else
-                SetLightsIntensityForEntity(lamp, 100.0) -- Intensité réduite la nuit
+                SetLightsIntensityForEntity(lamp, 100.0) -- IntensitÃ© rÃ©duite la nuit
                 UpdateLightsOnEntity(lamp)
-                SetLightsIntensityForEntity(lamp2, 60.0) -- Pleine intensité pendant la journée
+                SetLightsIntensityForEntity(lamp2, 60.0) -- Pleine intensitÃ© pendant la journÃ©e
                 UpdateLightsOnEntity(lamp2)
             end
             Wait(100)
@@ -696,11 +706,11 @@ function ChangeSkin(cat, value, change_type, variant_value, target)
         ped = MannequinPed
     end
     if IsPedMale(ped) then gender = "male" end
-    -- Gestion du modèle de base et des variantes
+    -- Gestion du modÃ¨le de base et des variantes
     if value > #WearableStates[gender][category] then
         local drawable, albedo, normal, material, palette, tint0, tint1, tint2
 
-        -- Initialisation de la texture si pas de change_type spécifié
+        -- Initialisation de la texture si pas de change_type spÃ©cifiÃ©
         if not change_type then
             if not WearableCache[category] then
                 WearableCache[category] = {}
@@ -710,18 +720,18 @@ function ChangeSkin(cat, value, change_type, variant_value, target)
             value = value - #WearableStates[gender][category]
             -- ClothesCache[category].texture = {}
             -- ClothesCache[category].texture.palette = 1
-            -- Vérifier que l'item existe dans MURPHY_ASSETS
-            if not MURPHY_ASSETS[gender][category] or not MURPHY_ASSETS[gender][category][value] then
+            -- VÃ©rifier que l'item existe dans FDB_ASSETS
+            if not FDB_ASSETS[gender][category] or not FDB_ASSETS[gender][category][value] then
                 return
             end
-            drawable = MURPHY_ASSETS[gender][category][value].drawable
+            drawable = FDB_ASSETS[gender][category][value].drawable
             albedo = AlbedoData[gender][category][1]
-            -- albedo = MURPHY_ASSETS[gender][category][value].variants[1].albedo
-            if not MURPHY_ASSETS[gender][category][value].variants or not MURPHY_ASSETS[gender][category][value].variants[1] then
+            -- albedo = FDB_ASSETS[gender][category][value].variants[1].albedo
+            if not FDB_ASSETS[gender][category][value].variants or not FDB_ASSETS[gender][category][value].variants[1] then
                 return
             end
-            normal = MURPHY_ASSETS[gender][category][value].variants[1].normal
-            material = MURPHY_ASSETS[gender][category][value].variants[1].material
+            normal = FDB_ASSETS[gender][category][value].variants[1].normal
+            material = FDB_ASSETS[gender][category][value].variants[1].material
 
             -- local equiped = GetCategoriesEquiped(ped)
             -- if equiped[`heads`] then
@@ -730,10 +740,10 @@ function ChangeSkin(cat, value, change_type, variant_value, target)
             --     _, albedo, normal, material = GetMetaPedAssetGuids(ped, index)
             --     palette, tint0, tint1, tint2 = GetMetaPedAssetTint(ped, index)
             -- else
-            --     -- palette = MURPHY_ASSETS[gender][category][value].variants[1].palette
-            --     -- tint0 = MURPHY_ASSETS[gender][category][value].variants[1].tint[1]
-            --     -- tint1 = MURPHY_ASSETS[gender][category][value].variants[1].tint[2]
-            --     -- tint2 = MURPHY_ASSETS[gender][category][value].variants[1].tint[3]
+            --     -- palette = FDB_ASSETS[gender][category][value].variants[1].palette
+            --     -- tint0 = FDB_ASSETS[gender][category][value].variants[1].tint[1]
+            --     -- tint1 = FDB_ASSETS[gender][category][value].variants[1].tint[2]
+            --     -- tint2 = FDB_ASSETS[gender][category][value].variants[1].tint[3]
 
             -- end
             -- ClothesCache[category].texture.tint0 = tint0
@@ -743,28 +753,28 @@ function ChangeSkin(cat, value, change_type, variant_value, target)
                 -- SendNUIMessage({
                 --     type = 'clipboard',
                 --     data = "moveAsset " ..
-                --     gender .. " " .. category .. " " .. MURPHY_ASSETS[gender][category][value].drawable .. " gore_upper"
+                --     gender .. " " .. category .. " " .. FDB_ASSETS[gender][category][value].drawable .. " gore_upper"
                 -- })
                 print("Clipboard",
-                    "moveAsset " .. gender .. " " .. category .. " " .. MURPHY_ASSETS[gender][category][value].drawable)
+                    "moveAsset " .. gender .. " " .. category .. " " .. FDB_ASSETS[gender][category][value].drawable)
             end
         else
             -- Gestion des variations de texture
             value = value - #WearableStates[gender][category]
-            drawable = MURPHY_ASSETS[gender][category][value].drawable
+            drawable = FDB_ASSETS[gender][category][value].drawable
             if WearableCache[category].texture == nil then
                 WearableCache[category].texture = {}
             end
             if change_type == "variants" then
                 albedo = AlbedoData[gender][category][variant_value]
-                -- albedo = MURPHY_ASSETS[gender][category][value].variants[variant_value].albedo
-                normal = MURPHY_ASSETS[gender][category][value].variants[1].normal
-                material = MURPHY_ASSETS[gender][category][value].variants[1]
+                -- albedo = FDB_ASSETS[gender][category][value].variants[variant_value].albedo
+                normal = FDB_ASSETS[gender][category][value].variants[1].normal
+                material = FDB_ASSETS[gender][category][value].variants[1]
                     .material
-                palette = MURPHY_ASSETS[gender][category][value].variants[1].palette
-                tint0 = MURPHY_ASSETS[gender][category][value].variants[1].tint0
-                tint1 = MURPHY_ASSETS[gender][category][value].variants[1].tint1
-                tint2 = MURPHY_ASSETS[gender][category][value].variants[1].tint2
+                palette = FDB_ASSETS[gender][category][value].variants[1].palette
+                tint0 = FDB_ASSETS[gender][category][value].variants[1].tint0
+                tint1 = FDB_ASSETS[gender][category][value].variants[1].tint1
+                tint2 = FDB_ASSETS[gender][category][value].variants[1].tint2
 
                 WearableCache[category].texture.palette = variant_value
                 WearableCache[category].texture.tint0 = tint0 or 0
@@ -853,9 +863,9 @@ function ChangeWearable(cat, value, target)
     end
     local hash
     if type(data.texture) == "table" then
-        hash = MURPHY_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture.palette)].hash
+        hash = FDB_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture.palette)].hash
     else
-        hash = MURPHY_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture)].hash
+        hash = FDB_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture)].hash
     end
     NativeSetPedComponentEnabled(ped, tonumber(hash), false,
         true, true)
@@ -980,13 +990,13 @@ function scale(value, oldMin, oldMax, newMin, newMax)
     return (((value - oldMin) * (newMax - newMin)) / (oldMax - oldMin)) + newMin
 end
 
-RegisterNetEvent("murphy:clothing:RemoveAllClothes", function(ped)
+RegisterNetEvent("FDB:clothing:RemoveAllClothes", function(ped)
     RemoveAllClothesExceptEssentials(ped)
 end)
 
 RegisterCommand("undress", function ()
     local ped = PlayerPedId()
-    TriggerEvent("murphy:clothing:RemoveAllClothes", ped)
+    TriggerEvent("FDB:clothing:RemoveAllClothes", ped)
 end)
 
 --- Reapply base MP body (baseskin) to the ped
@@ -1053,7 +1063,7 @@ function RemoveAllClothesExceptEssentials(ped)
         -- Baseskin already applied by ReapplyBaseSkin() above
     end
 
-    for _, tagName in pairs(catlist[SelectedGender]) do
+    for tagName, _ in pairs(FDB_ASSETS[SelectedGender]) do
         local isEssential = false
         local hash = joaat(tagName)
         if IsMetaPedUsingComponentCategory(ped, hash) then
@@ -1090,7 +1100,7 @@ function RemoveAllClothesExceptEssentials(ped)
     --  NativeUpdatePedVariation(ped)
 end
 
--- Vérifie si une table contient une valeur spécifique
+-- VÃ©rifie si une table contient une valeur spÃ©cifique
 function contains(table, value)
     for _, v in pairs(table) do
         if v == value then
@@ -1101,16 +1111,16 @@ function contains(table, value)
 end
 
 function areTablesEqual(t1, t2)
-    -- Vérifie si les deux références pointent vers la même table
+    -- VÃ©rifie si les deux rÃ©fÃ©rences pointent vers la mÃªme table
     if t1 == t2 then return true end
 
-    -- Vérifie si les deux objets sont des tables
+    -- VÃ©rifie si les deux objets sont des tables
     if type(t1) ~= "table" or type(t2) ~= "table" then return false end
 
-    -- Vérifie que toutes les clés et valeurs de t1 sont dans t2
+    -- VÃ©rifie que toutes les clÃ©s et valeurs de t1 sont dans t2
     for key, value in pairs(t1) do
         if type(value) == "table" then
-            -- Appel récursif pour les sous-tables
+            -- Appel rÃ©cursif pour les sous-tables
             if not areTablesEqual(value, t2[key]) then
                 return false
             end
@@ -1122,7 +1132,7 @@ function areTablesEqual(t1, t2)
         end
     end
 
-    -- Vérifie que t2 n'a pas de clés supplémentaires
+    -- VÃ©rifie que t2 n'a pas de clÃ©s supplÃ©mentaires
     for key in pairs(t2) do
         if t1[key] == nil then
             return false
@@ -1136,7 +1146,7 @@ function ReequipAllClothes(ped)
     local gender
     if IsPedMale(ped) then gender = "male" else gender = "female" end
     IsPedReadyToRender(ped)
-    -- Définir l'ordre des catégories
+    -- DÃ©finir l'ordre des catÃ©gories
     local categoryOrder = {
         "cloaks",
         "ponchos",
@@ -1153,28 +1163,28 @@ function ReequipAllClothes(ped)
 
     }
     ClothesCache["bodies_upper"], ClothesCache["bodies_lower"] = nil, nil
-    -- Appliquer les catégories dans l'ordre défini
+    -- Appliquer les catÃ©gories dans l'ordre dÃ©fini
     for _, category in ipairs(categoryOrder) do
         local data = ClothesCache[category]
-        if data and data.model and data.model > 0 then
-            -- Vérifier que l'item existe dans MURPHY_ASSETS
-            if not MURPHY_ASSETS[gender][category] or not MURPHY_ASSETS[gender][category][data.model] then
+        if data and data.model and data.model ~= 0 then
+            -- VÃ©rifier que l'item existe dans FDB_ASSETS
+            if not FDB_ASSETS[gender][category] or not FDB_ASSETS[gender][category][data.model] then
                 goto continue
             end
-            local drawable = MURPHY_ASSETS[gender][category][data.model].drawable
+            local drawable = FDB_ASSETS[gender][category][data.model].drawable
             if drawable then
-                -- Vérifier que data.texture existe et est une table
+                -- VÃ©rifier que data.texture existe et est une table
                 if not data.texture or type(data.texture) ~= "table" or not data.texture.palette then
                     goto continue
                 end
-                -- Vérifier que la palette existe dans les variants
-                if not MURPHY_ASSETS[gender][category][data.model].variants or not MURPHY_ASSETS[gender][category][data.model].variants[data.texture.palette] then
+                -- VÃ©rifier que la palette existe dans les variants
+                if not FDB_ASSETS[gender][category][data.model].variants or not FDB_ASSETS[gender][category][data.model].variants[data.texture.palette] then
                     goto continue
                 end
-                local albedo = MURPHY_ASSETS[gender][category][data.model].variants[data.texture.palette].albedo
-                local normal = MURPHY_ASSETS[gender][category][data.model].variants[data.texture.palette].normal
-                local material = MURPHY_ASSETS[gender][category][data.model].variants[data.texture.palette].material
-                local palette = MURPHY_ASSETS[gender][category][data.model].variants[data.texture.palette].palette
+                local albedo = FDB_ASSETS[gender][category][data.model].variants[data.texture.palette].albedo
+                local normal = FDB_ASSETS[gender][category][data.model].variants[data.texture.palette].normal
+                local material = FDB_ASSETS[gender][category][data.model].variants[data.texture.palette].material
+                local palette = FDB_ASSETS[gender][category][data.model].variants[data.texture.palette].palette
                 local tint0 = data.texture.tint0
                 local tint1 = data.texture.tint1
                 local tint2 = data.texture.tint2
@@ -1183,7 +1193,7 @@ function ReequipAllClothes(ped)
             else
                 if type(data.texture) == "table" then
                     NativeSetPedComponentEnabled(ped,
-                        MURPHY_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture.palette)].hash, false,
+                        FDB_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture.palette)].hash, false,
                         true,
                         true)
                     -- local catHash
@@ -1197,7 +1207,7 @@ function ReequipAllClothes(ped)
                     -- local drawable, albedo, normal, material = GetMetaPedAssetGuids(ped, componentIndex)
                     -- local palette, t0, t1, t2 = GetMetaPedAssetTint(ped, componentIndex)
                     -- RemoveShopItemFromPed(ped,
-                    --     MURPHY_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture.palette)].hash, 0, 0,
+                    --     FDB_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture.palette)].hash, 0, 0,
                     --     0)
                     -- local tint0 = data.texture.tint0
                     -- local tint1 = data.texture.tint1
@@ -1205,8 +1215,10 @@ function ReequipAllClothes(ped)
 
                     -- UpdateCustomClothes(ped, drawable, albedo, normal, material, palette, tint0, tint1, tint2)
                 else
+                    local texIdx = tonumber(data.texture)
+                    if not texIdx or texIdx < 1 then texIdx = 1 end
                     NativeSetPedComponentEnabled(ped, tonumber(
-                            MURPHY_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture)].hash), false,
+                            FDB_ASSETS[gender][category][tonumber(data.model)][texIdx].hash), false,
                         true, true)
                 end
             end
@@ -1214,28 +1226,28 @@ function ReequipAllClothes(ped)
         ::continue::
     end
 
-    -- Appliquer les autres catégories non spécifiées dans l'ordre
+    -- Appliquer les autres catÃ©gories non spÃ©cifiÃ©es dans l'ordre
     local essentials = Config.EssentialsCategories
     for category, data in pairs(ClothesCache) do
-        if not contains(categoryOrder, category) and not contains(essentials, category) and data.model and data.model > 0 then
-            -- Vérifier que l'item existe dans MURPHY_ASSETS
-            if not MURPHY_ASSETS[gender][category] or not MURPHY_ASSETS[gender][category][data.model] then
+        if not contains(categoryOrder, category) and not contains(essentials, category) and data.model and data.model ~= 0 then
+            -- VÃ©rifier que l'item existe dans FDB_ASSETS
+            if not FDB_ASSETS[gender][category] or not FDB_ASSETS[gender][category][data.model] then
                 goto skip_category
             end
-            local drawable = MURPHY_ASSETS[gender][category][data.model].drawable or nil
+            local drawable = FDB_ASSETS[gender][category][data.model].drawable or nil
             if drawable then
-                -- Vérifier que data.texture existe et est une table
+                -- VÃ©rifier que data.texture existe et est une table
                 if not data.texture or type(data.texture) ~= "table" or not data.texture.palette then
                     goto skip_category
                 end
-                -- Vérifier que les variants existent
-                if not MURPHY_ASSETS[gender][category][data.model].variants or not MURPHY_ASSETS[gender][category][data.model].variants[data.texture.palette] then
+                -- VÃ©rifier que les variants existent
+                if not FDB_ASSETS[gender][category][data.model].variants or not FDB_ASSETS[gender][category][data.model].variants[data.texture.palette] then
                     goto skip_category
                 end
-                local albedo = MURPHY_ASSETS[gender][category][data.model].variants[data.texture.palette].albedo
-                local normal = MURPHY_ASSETS[gender][category][data.model].variants[data.texture.palette].normal
-                local material = MURPHY_ASSETS[gender][category][data.model].variants[data.texture.palette].material
-                local palette = MURPHY_ASSETS[gender][category][data.model].variants[data.texture.palette].palette
+                local albedo = FDB_ASSETS[gender][category][data.model].variants[data.texture.palette].albedo
+                local normal = FDB_ASSETS[gender][category][data.model].variants[data.texture.palette].normal
+                local material = FDB_ASSETS[gender][category][data.model].variants[data.texture.palette].material
+                local palette = FDB_ASSETS[gender][category][data.model].variants[data.texture.palette].palette
                 local tint0 = data.texture.tint0
                 local tint1 = data.texture.tint1
                 local tint2 = data.texture.tint2
@@ -1244,7 +1256,7 @@ function ReequipAllClothes(ped)
             else
                 if type(data.texture) == "table" then
                     NativeSetPedComponentEnabled(ped,
-                        MURPHY_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture.palette)].hash, false,
+                        FDB_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture.palette)].hash, false,
                         true,
                         true)
                     -- local catHash
@@ -1258,7 +1270,7 @@ function ReequipAllClothes(ped)
                     -- local drawable, albedo, normal, material = GetMetaPedAssetGuids(ped, componentIndex)
                     -- local palette, t0, t1, t2 = GetMetaPedAssetTint(ped, componentIndex)
                     -- RemoveShopItemFromPed(ped,
-                    --     MURPHY_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture.palette)].hash, 0, 0,
+                    --     FDB_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture.palette)].hash, 0, 0,
                     --     0)
                     -- local tint0 = data.texture.tint0
                     -- local tint1 = data.texture.tint1
@@ -1266,8 +1278,10 @@ function ReequipAllClothes(ped)
 
                     -- UpdateCustomClothes(ped, drawable, albedo, normal, material, palette, tint0, tint1, tint2)
                 else
+                    local texIdx = tonumber(data.texture)
+                    if not texIdx or texIdx < 1 then texIdx = 1 end
                     NativeSetPedComponentEnabled(ped, tonumber(
-                            MURPHY_ASSETS[gender][category][tonumber(data.model)][tonumber(data.texture)].hash), false,
+                            FDB_ASSETS[gender][category][tonumber(data.model)][texIdx].hash), false,
                         true, true)
                 end
             end
@@ -1275,7 +1289,7 @@ function ReequipAllClothes(ped)
         ::skip_category::
     end
     for category, data in pairs(ClothesCache) do
-        if data and data.model and data.model > 0 then
+        if data and data.model and data.model ~= 0 then
             if type(data.texture) == "table" then
                 local catHash
                 if type(category) ~= "number" then
@@ -1297,8 +1311,8 @@ function ReequipAllClothes(ped)
     end
 end
 
-RegisterNetEvent('murphy_clothes:clotheitem')
-AddEventHandler('murphy_clothes:clotheitem', function(ClothesComponents, outfitid, target, charid)
+RegisterNetEvent('fdb_clothes:clotheitem')
+AddEventHandler('fdb_clothes:clotheitem', function(ClothesComponents, outfitid, target, charid)
     Citizen.CreateThread(function()
         local _Target = PlayerPedId()
         if MannequinPed then
@@ -1307,7 +1321,7 @@ AddEventHandler('murphy_clothes:clotheitem', function(ClothesComponents, outfiti
         if target then
             _Target = target
         else
-            TriggerEvent("murphy_clothes:outfitchanged")
+            TriggerEvent("fdb_clothes:outfitchanged")
         end
         local buggedCategories = GetBuggedCategories(_Target)
         local gender
@@ -1323,7 +1337,7 @@ AddEventHandler('murphy_clothes:clotheitem', function(ClothesComponents, outfiti
                 end
             end
         end
-        for k, v in pairs(MURPHY_ASSETS[gender]) do
+        for k, v in pairs(FDB_ASSETS[gender]) do
             if ClothesCache[k] == nil then
                 ClothesCache[k] = {}
                 ClothesCache[k].model = 0
@@ -1331,15 +1345,15 @@ AddEventHandler('murphy_clothes:clotheitem', function(ClothesComponents, outfiti
             end
         end
         if not target then
-            TriggerServerEvent("murphy_clothes:updateclothes", ClothesCache, outfitid)
+            TriggerServerEvent("fdb_clothes:updateclothes", ClothesCache, outfitid)
             OldClothesCache = deepcopy(ClothesCache)
         end
         RemoveAllClothesExceptEssentials(_Target)
         ReequipAllClothes(_Target)
         Wait(100)
-        Callback.triggerServer('murphy_clothing:GetWearable', function(datatable)
+        Callback.triggerServer('fdb_clothing:GetWearable', function(datatable)
             if datatable then
-                TriggerEvent("murphy_clothes:applyWearable", datatable, _Target)
+                TriggerEvent("fdb_clothes:applyWearable", datatable, _Target)
                 WearableCache = datatable
             end
         end, outfitid, charid)
@@ -1359,7 +1373,7 @@ AddEventHandler('murphy_clothes:clotheitem', function(ClothesComponents, outfiti
 end)
 
 Equipped = {}
-RegisterNetEvent("murphy_clothes:itemclothes", function(cat, model, texture)
+RegisterNetEvent("fdb_clothes:itemclothes", function(cat, model, texture)
     local ped = PlayerPedId()
     local gender
     if IsPedMale(ped) then gender = "male" else gender = "female" end
@@ -1435,51 +1449,51 @@ RegisterNetEvent("murphy_clothes:itemclothes", function(cat, model, texture)
             end
         end
     else
-        if model > 0 then
-            -- Vérifier que l'item existe
-            if not MURPHY_ASSETS[gender] or not MURPHY_ASSETS[gender][cat] or not MURPHY_ASSETS[gender][cat][model] then
+        if model ~= 0 then
+            -- VÃ©rifier que l'item existe
+            if not FDB_ASSETS[gender] or not FDB_ASSETS[gender][cat] or not FDB_ASSETS[gender][cat][model] then
                 Equipped[cat] = true
                 return
             end
-            if MURPHY_ASSETS[gender][cat][model].drawable then
+            if FDB_ASSETS[gender][cat][model].drawable then
                 -- if cat ~= "cloaks" then
-                --     NativeSetPedComponentEnabled(ped, MURPHY_ASSETS[gender][cat][1][1].hash, false, true,
+                --     NativeSetPedComponentEnabled(ped, FDB_ASSETS[gender][cat][1][1].hash, false, true,
                 --  true)
                 --  NativeUpdatePedVariation(PlayerPedId())
                 -- end
-                local drawable = MURPHY_ASSETS[gender][cat][model].drawable
-                -- Vérifier que texture est une table et a une palette valide
+                local drawable = FDB_ASSETS[gender][cat][model].drawable
+                -- VÃ©rifier que texture est une table et a une palette valide
                 if type(texture) ~= "table" or not texture.palette then
                     Equipped[cat] = true
                     return
                 end
-                -- Vérifier que les variants existent
-                if not MURPHY_ASSETS[gender][cat][model].variants or not MURPHY_ASSETS[gender][cat][model].variants[texture.palette] then
+                -- VÃ©rifier que les variants existent
+                if not FDB_ASSETS[gender][cat][model].variants or not FDB_ASSETS[gender][cat][model].variants[texture.palette] then
                     Equipped[cat] = true
                     return
                 end
-                local albedo = MURPHY_ASSETS[gender][cat][model].variants[texture.palette].albedo
-                local normal = MURPHY_ASSETS[gender][cat][model].variants[texture.palette].normal
-                local material = MURPHY_ASSETS[gender][cat][model].variants[texture.palette].material
-                local palette = MURPHY_ASSETS[gender][cat][model].variants[texture.palette].palette
+                local albedo = FDB_ASSETS[gender][cat][model].variants[texture.palette].albedo
+                local normal = FDB_ASSETS[gender][cat][model].variants[texture.palette].normal
+                local material = FDB_ASSETS[gender][cat][model].variants[texture.palette].material
+                local palette = FDB_ASSETS[gender][cat][model].variants[texture.palette].palette
                 if type(texture) == "table" then
                     tint0 = texture.tint0
                     tint1 = texture.tint1
                     tint2 = texture.tint2
                 else
-                    tint0 = MURPHY_ASSETS[gender][cat][model].variants[texture.palette].tint0
-                    tint1 = MURPHY_ASSETS[gender][cat][model].variants[texture.palette].tint1
-                    tint2 = MURPHY_ASSETS[gender][cat][model].variants[texture.palette].tint2
+                    tint0 = FDB_ASSETS[gender][cat][model].variants[texture.palette].tint0
+                    tint1 = FDB_ASSETS[gender][cat][model].variants[texture.palette].tint1
+                    tint2 = FDB_ASSETS[gender][cat][model].variants[texture.palette].tint2
                 end
                 UpdateCustomClothes(ped, drawable, albedo, normal, material, palette, tint0, tint1, tint2)
                 NativeUpdatePedVariation(PlayerPedId())
             else
                 if type(texture) == "table" then
-                    NativeSetPedComponentEnabled(ped, MURPHY_ASSETS[gender][cat][model][texture.palette].hash, false,
+                    NativeSetPedComponentEnabled(ped, FDB_ASSETS[gender][cat][model][texture.palette].hash, false,
                         true,
                         true)
                     NativeUpdatePedVariation(PlayerPedId())
-                    local catHash = MURPHY_ASSETS[gender][cat][model][1]['category_hash_dec_signed']
+                    local catHash = FDB_ASSETS[gender][cat][model][1]['category_hash_dec_signed']
                     while GetComponentIndexByCategory(ped, catHash) == -1 do Wait(0) end
                     local componentIndex = GetComponentIndexByCategory(ped, catHash)
                     local drawable, albedo, normal, material = GetMetaPedAssetGuids(ped, componentIndex)
@@ -1489,7 +1503,9 @@ RegisterNetEvent("murphy_clothes:itemclothes", function(cat, model, texture)
                     local tint2 = texture.tint2
                     UpdateCustomClothes(ped, drawable, albedo, normal, material, palette, tint0, tint1, tint2)
                 else
-                    NativeSetPedComponentEnabled(ped, MURPHY_ASSETS[gender][cat][model][texture].hash, false, true,
+                    local texIdx = tonumber(texture)
+                    if not texIdx or texIdx < 1 then texIdx = 1 end
+                    NativeSetPedComponentEnabled(ped, FDB_ASSETS[gender][cat][model][texIdx].hash, false, true,
                         true)
                 end
             end
@@ -1531,11 +1547,11 @@ RegisterNetEvent("murphy_clothes:itemclothes", function(cat, model, texture)
     -- Trigger bandana status event if mask category was toggled
     if cat == "masks" or cat == "masks_large" then
         local hasBandana = IsBandanaEquipped()
-        TriggerEvent('murphy_clothes:ToggleBandana', hasBandana)
+        TriggerEvent('fdb_clothes:ToggleBandana', hasBandana)
     end
     
     -- Trigger clothing changed event for temperature/metabolism scripts
-    TriggerEvent('murphy_clothes:OnClothingChanged', cat, Equipped[cat])
+    TriggerEvent('fdb_clothes:OnClothingChanged', cat, Equipped[cat])
 end)
 
 
@@ -1554,7 +1570,7 @@ function SpawnMannequin(gender)
     local playerHeading = GetEntityHeading(playerPed)
     OrignalHeading = playerHeading
     -- Calculate position behind mannequin using radians
-    local rad = math.rad(playerHeading + 160.0) -- Convert heading to radians and add 180° to go behind
+    local rad = math.rad(playerHeading + 160.0) -- Convert heading to radians and add 180Â° to go behind
     local distance = 2.0                        -- Distance behind mannequin
 
     -- Calculate target coordinates behind mannequin
@@ -1603,14 +1619,14 @@ end
 
 WearableCache = {}
 OldWearableCache = nil
-RegisterNetEvent("murphy_clothes:applyWearable", function(data, target)
+RegisterNetEvent("fdb_clothes:applyWearable", function(data, target)
     local ped = target or PlayerPedId()
     WearableCache = {}
     for category, value in pairs(data) do
         WearableCache[category] = value
         ClothesCache[category] = WearableCache[category]
         if category == "bodies_upper" or category == "bodies_lower" then
-            if WearableCache[category].model > 0 then
+            if WearableCache[category].model ~= 0 then
                 local gender = "female"
                 if IsPedMale(ped) then gender = "male" end
                 local model = WearableCache[category].model
@@ -1622,7 +1638,7 @@ RegisterNetEvent("murphy_clothes:applyWearable", function(data, target)
             end
         else
             if type(value) == "table" then
-                if value.model > 0 then
+                if value.model ~= 0 then
                     ChangeWearable(category, value, ped)
                 end
             else
@@ -1636,27 +1652,27 @@ end)
 
 ----- DEV EVENTS ----
 
-RegisterNetEvent("murphy_clothes:ApplyClothesToCharid", function(charid, ped)
-    Callback.triggerServer('murphy_clothing:GetCurrentClothesCharid', function(datatable, id)
+RegisterNetEvent("fdb_clothes:ApplyClothesToCharid", function(charid, ped)
+    Callback.triggerServer('fdb_clothing:GetCurrentClothesCharid', function(datatable, id)
         if IsPedMale(ped) then SelectedGender = "male" else SelectedGender = "female" end
         if datatable then
             local loadclothes = false
             for k, v in pairs(datatable) do
-                if v.model > 0 then
+                if v.model ~= 0 then
                     loadclothes = true
                     break
                 end
             end
             if loadclothes then
-                TriggerEvent("murphy_clothes:clotheitem", datatable, id, ped, charid)
+                TriggerEvent("fdb_clothes:clotheitem", datatable, id, ped, charid)
             end
         end
     end, charid)
 end)
 
 
-RegisterNetEvent("murphy_clothes:Equip-UnequipCategory", function(category)
-    TriggerEvent("murphy_clothes:itemclothes", category, ClothesCache[category].model, ClothesCache[category].texture)
+RegisterNetEvent("fdb_clothes:Equip-UnequipCategory", function(category)
+    TriggerEvent("fdb_clothes:itemclothes", category, ClothesCache[category].model, ClothesCache[category].texture)
 end)
 
 ---Returns a table of currently equipped clothing categories
@@ -1665,7 +1681,7 @@ function GetEquippedCategories()
     local equippedCategories = {}
 
     for category, data in pairs(ClothesCache) do
-        if data.model and data.model > 0 then
+        if data.model and data.model ~= 0 then
             equippedCategories[category] = {
                 model = data.model,
                 texture = data.texture
@@ -1678,7 +1694,7 @@ end
 
 exports('GetEquippedCategories', GetEquippedCategories)
 
-RegisterNetEvent("murphy_clothes:OpenClothingMenu", function()
+RegisterNetEvent("fdb_clothes:OpenClothingMenu", function()
     OpenOutfitListMenu(true)
 end)
 
@@ -1698,23 +1714,23 @@ function ToggleHair(remove)
 
         HairCache = hairData
 
-        -- Enlève les cheveux en appliquant un modèle vide
+        -- EnlÃ¨ve les cheveux en appliquant un modÃ¨le vide
         SetPedComponentVariation(ped, 2, 0, 0, 0)
-        print("Cheveux enlevés et sauvegardés dans le cache.")
+        print("Cheveux enlevÃ©s et sauvegardÃ©s dans le cache.")
     else
-        -- Vérifie si des données sont disponibles dans le cache
+        -- VÃ©rifie si des donnÃ©es sont disponibles dans le cache
         if HairCache.guid then
-            -- Réapplique les cheveux avec les données sauvegardées
+            -- RÃ©applique les cheveux avec les donnÃ©es sauvegardÃ©es
             SetPedComponentVariation(ped, 2, HairCache.guid, 0, HairCache.palette)
             SetPedHairTint(ped, HairCache.tint)
-            print("Cheveux réappliqués depuis le cache.")
+            print("Cheveux rÃ©appliquÃ©s depuis le cache.")
         else
-            print("Aucune donnée de cheveux trouvée dans le cache.")
+            print("Aucune donnÃ©e de cheveux trouvÃ©e dans le cache.")
         end
     end
 end
 
-RegisterNetEvent("murphy_clothes:LoadBasSkin", function()
+RegisterNetEvent("fdb_clothes:LoadBasSkin", function()
     if type(baseskin) ~= "table" then
         baseskin = {}
     end
@@ -1748,14 +1764,14 @@ RegisterNetEvent("murphy_clothes:LoadBasSkin", function()
         tostring(baseskin["bodies_lower"]), tostring(baseskin["bodies_lower_albedo"])))
 end)
 
-RegisterNetEvent("murphy_clothes:Loadlowerbody", function(comp)
+RegisterNetEvent("fdb_clothes:Loadlowerbody", function(comp)
     if type(baseskin) ~= "table" then
         baseskin = {}
     end
     baseskin["bodies_lower"] = comp
 end)
 
-RegisterNetEvent("murphy_clothes:Loadupperbody", function(comp)
+RegisterNetEvent("fdb_clothes:Loadupperbody", function(comp)
     if type(baseskin) ~= "table" then
         baseskin = {}
     end
@@ -1793,14 +1809,14 @@ function EquipMultipleClothes(clothesData, ped)
     
     for category, data in pairs(clothesData) do
         if type(data) == "table" and data.model then
-            -- Validate that the category exists in MURPHY_ASSETS
-            if not MURPHY_ASSETS or not MURPHY_ASSETS[gender] or not MURPHY_ASSETS[gender][category] then
+            -- Validate that the category exists in FDB_ASSETS
+            if not FDB_ASSETS or not FDB_ASSETS[gender] or not FDB_ASSETS[gender][category] then
                 print(string.format("Warning: Category '%s' not found for gender '%s'", category, gender))
                 goto continue
             end
             
             -- Validate that the model exists
-            if not MURPHY_ASSETS[gender][category][data.model] then
+            if not FDB_ASSETS[gender][category][data.model] then
                 print(string.format("Warning: Model %d not found for category '%s'", data.model, category))
                 goto continue
             end
@@ -1813,21 +1829,21 @@ function EquipMultipleClothes(clothesData, ped)
             ClothesCache[category].model = model
             
             -- Check if this is a drawable-based clothing item
-            if MURPHY_ASSETS[gender][category][model].drawable then
+            if FDB_ASSETS[gender][category][model].drawable then
                 -- Set up texture data with palette
                 ClothesCache[category].texture = {}
                 ClothesCache[category].texture.palette = texture
                 
-                -- Get the default values from MURPHY_ASSETS if not provided
-                local variantData = MURPHY_ASSETS[gender][category][model].variants[texture] or 
-                                  MURPHY_ASSETS[gender][category][model].variants[1]
+                -- Get the default values from FDB_ASSETS if not provided
+                local variantData = FDB_ASSETS[gender][category][model].variants[texture] or 
+                                  FDB_ASSETS[gender][category][model].variants[1]
                 
                 if not variantData then
                     print(string.format("Warning: Texture %d not found for model %d in category '%s'", texture, model, category))
                     goto continue
                 end
                 
-                local drawable = MURPHY_ASSETS[gender][category][model].drawable
+                local drawable = FDB_ASSETS[gender][category][model].drawable
                 local albedo = variantData.albedo
                 local normal = variantData.normal
                 local material = variantData.material
@@ -1853,9 +1869,11 @@ function EquipMultipleClothes(clothesData, ped)
                 -- Get the hash for this texture variant
                 local clothingHash
                 if type(texture) == "table" then
-                    clothingHash = MURPHY_ASSETS[gender][category][model][texture.palette].hash
+                    clothingHash = FDB_ASSETS[gender][category][model][texture.palette].hash
                 else
-                    clothingHash = MURPHY_ASSETS[gender][category][model][texture].hash
+                    local texIdx = tonumber(texture)
+                    if not texIdx or texIdx < 1 then texIdx = 1 end
+                    clothingHash = FDB_ASSETS[gender][category][model][texIdx].hash
                 end
                 
                 if clothingHash then
@@ -1863,7 +1881,7 @@ function EquipMultipleClothes(clothesData, ped)
                     
                     -- If tint values are provided, apply them after the component is equipped
                     if data.tint0 or data.tint1 or data.tint2 then
-                        local catHash = MURPHY_ASSETS[gender][category][model][1]['category_hash_dec_signed']
+                        local catHash = FDB_ASSETS[gender][category][model][1]['category_hash_dec_signed']
                         while GetComponentIndexByCategory(ped, catHash) == -1 do Wait(0) end
                         local componentIndex = GetComponentIndexByCategory(ped, catHash)
                         local drawable, albedo, normal, material = GetMetaPedAssetGuids(ped, componentIndex)
@@ -1896,7 +1914,7 @@ end
 exports('EquipMultipleClothes', EquipMultipleClothes)
 
 -- Register event for equipping multiple clothes
-RegisterNetEvent("murphy_clothes:EquipMultipleClothes", function(clothesData, ped)
+RegisterNetEvent("fdb_clothes:EquipMultipleClothes", function(clothesData, ped)
     EquipMultipleClothes(clothesData, ped)
 end)
 
@@ -1909,7 +1927,7 @@ function IsBandanaEquipped()
     local maskCategories = {"masks", "masks_large"}
     
     for _, category in ipairs(maskCategories) do
-        if ClothesCache[category] and ClothesCache[category].model and ClothesCache[category].model > 0 then
+        if ClothesCache[category] and ClothesCache[category].model and ClothesCache[category].model ~= 0 then
             return true
         end
     end
@@ -1921,13 +1939,13 @@ end
 exports('IsBandanaEquipped', IsBandanaEquipped)
 
 -- Event to check bandana status - returns boolean
-RegisterNetEvent('murphy_clothes:CheckBandana', function()
+RegisterNetEvent('fdb_clothes:CheckBandana', function()
     local hasBandana = IsBandanaEquipped()
-    TriggerEvent('murphy_clothes:BandanaStatus', hasBandana)
+    TriggerEvent('fdb_clothes:BandanaStatus', hasBandana)
 end)
 
 -- Event compatible with syn_robbery format for doctorjob script
-RegisterNetEvent('murphy_clothes:ToggleBandana', function(state)
+RegisterNetEvent('fdb_clothes:ToggleBandana', function(state)
     -- This event is triggered when bandana state changes
     -- state: true = bandana up/equipped, false = bandana down/removed
     TriggerEvent('syn_robbery:bandana', state)
@@ -1935,7 +1953,7 @@ end)
 
 -- Server callback for other resources to check bandana status
 if lib and lib.callback then
-    lib.callback.register('murphy_clothes:IsBandanaEquipped', function()
+    lib.callback.register('fdb_clothes:IsBandanaEquipped', function()
         return IsBandanaEquipped()
     end)
 end
@@ -1950,7 +1968,7 @@ function GetEquippedClothing()
     local equipped = {}
     
     for category, data in pairs(ClothesCache) do
-        if data and data.model and data.model > 0 then
+        if data and data.model and data.model ~= 0 then
             equipped[category] = {
                 model = data.model,
                 texture = data.texture,
@@ -1969,7 +1987,7 @@ function GetTemperatureProtection()
     local equippedCategories = {}
     
     for category, data in pairs(ClothesCache) do
-        if data and data.model and data.model > 0 then
+        if data and data.model and data.model ~= 0 then
             table.insert(equippedCategories, category)
             
             -- Check temperature value from config
@@ -1998,7 +2016,7 @@ end
 
 -- Check if specific clothing category is equipped
 function IsClothingCategoryEquipped(category)
-    if ClothesCache[category] and ClothesCache[category].model and ClothesCache[category].model > 0 then
+    if ClothesCache[category] and ClothesCache[category].model and ClothesCache[category].model ~= 0 then
         return true
     end
     return false
@@ -2006,7 +2024,7 @@ end
 
 -- Get detailed clothing info for a specific category
 function GetClothingInfo(category)
-    if ClothesCache[category] and ClothesCache[category].model and ClothesCache[category].model > 0 then
+    if ClothesCache[category] and ClothesCache[category].model and ClothesCache[category].model ~= 0 then
         return {
             category = category,
             model = ClothesCache[category].model,
@@ -2024,14 +2042,15 @@ exports('IsClothingCategoryEquipped', IsClothingCategoryEquipped)
 exports('GetClothingInfo', GetClothingInfo)
 
 -- Events for metabolism scripts
-RegisterNetEvent('murphy_clothes:GetTemperatureProtection', function()
+RegisterNetEvent('fdb_clothes:GetTemperatureProtection', function()
     local protection = GetTemperatureProtection()
-    TriggerEvent('murphy_clothes:TemperatureProtectionData', protection)
+    TriggerEvent('fdb_clothes:TemperatureProtectionData', protection)
 end)
 
 -- Trigger event when clothing changes (for real-time updates)
-AddEventHandler('murphy_clothes:OnClothingChanged', function(category, equipped)
+AddEventHandler('fdb_clothes:OnClothingChanged', function(category, equipped)
     local protection = GetTemperatureProtection()
     -- Notify metabolism scripts about the change
-    TriggerEvent('murphy_clothes:TemperatureUpdate', protection)
+    TriggerEvent('fdb_clothes:TemperatureUpdate', protection)
 end)
+

@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | shared/slots.lua
+-- Character slot configuration
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 -- Slots configuration is now in config.lua
 -- This file maintains compatibility with existing code
 

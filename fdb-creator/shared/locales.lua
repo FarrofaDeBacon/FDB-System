@@ -1,5 +1,10 @@
+-- ============================================================
+-- FDB System | fdb-creator | shared/locales.lua
+-- Shared localization definitions
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 -- FDB Creator - Translation System
--- Système de Traduction pour FDB Creator
+-- SystÃ¨me de Traduction pour FDB Creator
 
 Lang = {}
 Lang.Locale = Config.Locale or "en" -- Set in config
@@ -258,7 +263,7 @@ Lang.en.Notifications = {
     selectionInProgress = "Character selection in progress, please wait...",
 }
 
--- French Translations (Français)
+-- French Translations (FranÃ§ais)
 Lang.fr = {}
 
 -- General UI
@@ -269,29 +274,29 @@ Lang.fr.UI = {
     back = "Retour",
     continue = "Continuer",
     delete = "Supprimer",
-    create = "Créer",
-    edit = "Éditer",
+    create = "CrÃ©er",
+    edit = "Ã‰diter",
     close = "Fermer",
-    reset = "Réinitialiser",
+    reset = "RÃ©initialiser",
     confirm = "Confirmer",
     yes = "Oui",
     no = "Non",
     play = "Jouer",
-    spawn = "Apparaître",
+    spawn = "ApparaÃ®tre",
     loading = "Chargement...",
     style = "Style",
     colour = "Couleur",
     variation = "Variation",
-    advanced = "Avancé",
+    advanced = "AvancÃ©",
 }
 
 -- Character Selection
 Lang.fr.CharSelect = {
-    title = "SÉLECTION DE PERSONNAGE",
-    createNew = "Créer Nouveau",
-    selectCharacter = "Sélectionner Personnage",
+    title = "SÃ‰LECTION DE PERSONNAGE",
+    createNew = "CrÃ©er Nouveau",
+    selectCharacter = "SÃ©lectionner Personnage",
     deleteWarning = "Attention!",
-    deleteMessage = "Êtes-vous sûr de vouloir supprimer ce personnage?",
+    deleteMessage = "ÃŠtes-vous sÃ»r de vouloir supprimer ce personnage?",
     cancelDeletion = "Annuler",
     confirmDeletion = "Supprimer",
     characterInfo = "Info Personnage",
@@ -302,36 +307,36 @@ Lang.fr.CharSelect = {
     birthday = "Date de Naissance",
     day = "Jour",
     month = "Mois",
-    year = "Année",
+    year = "AnnÃ©e",
     noLore = "Aucune histoire disponible",
 }
 
 -- Character Creation
 Lang.fr.CharCreation = {
-    title = "CRÉER PERSONNAGE",
-    editTitle = "ÉDITER PERSONNAGE",
-    firstname = "Prénom",
+    title = "CRÃ‰ER PERSONNAGE",
+    editTitle = "Ã‰DITER PERSONNAGE",
+    firstname = "PrÃ©nom",
     lastname = "Nom",
     characterLore = "Histoire du personnage...",
     playAsAPed = "Jouer en tant que PED",
-    selectPed = "Sélectionner PED",
-    cancelCreation = "Annuler la Création",
-    cancelWarning = "Vous allez perdre tous vos changements, êtes-vous sûr?",
+    selectPed = "SÃ©lectionner PED",
+    cancelCreation = "Annuler la CrÃ©ation",
+    cancelWarning = "Vous allez perdre tous vos changements, Ãªtes-vous sÃ»r?",
     cancelStop = "Annuler",
     confirmStop = "Continuer",
     birthDay = "Jour...",
     birthMonth = "Mois...",
-    birthYear = "Année...",
+    birthYear = "AnnÃ©e...",
 }
 
 -- Appearance Editor
 Lang.fr.Appearance = {
-    title = "ÉDITER L'APPARENCE",
-    globalSettings = "Paramètres Globaux",
-    skinSettings = "Paramètres de Peau",
-    eyeSettings = "Paramètres des Yeux",
+    title = "Ã‰DITER L'APPARENCE",
+    globalSettings = "ParamÃ¨tres Globaux",
+    skinSettings = "ParamÃ¨tres de Peau",
+    eyeSettings = "ParamÃ¨tres des Yeux",
     height = "Taille",
-    headSize = "Taille de Tête",
+    headSize = "Taille de TÃªte",
     body = "Corps",
     waist = "Taille",
     legs = "Jambes",
@@ -342,18 +347,18 @@ Lang.fr.Appearance = {
     skinColour = "Couleur de Peau",
     eyeColour = "Couleur des Yeux",
     cancel = "Annuler",
-    undress = "Déshabiller",
-    reset = "Réinitialiser",
-    resetWarning = "Êtes-vous sûr de vouloir réinitialiser vos changements?",
-    resetConfirm = "Réinitialiser",
+    undress = "DÃ©shabiller",
+    reset = "RÃ©initialiser",
+    resetWarning = "ÃŠtes-vous sÃ»r de vouloir rÃ©initialiser vos changements?",
+    resetConfirm = "RÃ©initialiser",
     resetCancel = "Annuler",
 }
 
 -- Body Parts / Face Features
 Lang.fr.BodyParts = {
-    head = "Tête",
-    headShape = "Forme de Tête",
-    headWidth = "Largeur de Tête",
+    head = "TÃªte",
+    headShape = "Forme de TÃªte",
+    headWidth = "Largeur de TÃªte",
     faceWidth = "Largeur du Visage",
     faceDepth = "Profondeur du Visage",
     foreheadSize = "Taille du Front",
@@ -373,11 +378,11 @@ Lang.fr.BodyParts = {
     browsWidth = "Largeur des Sourcils",
     browsDepth = "Profondeur des Sourcils",
     
-    eyelid = "Paupière",
-    eyelidHeight = "Hauteur de Paupière",
-    eyelidWidth = "Largeur de Paupière",
-    eyelidLeftOpen = "Ouverture Paupière Gauche",
-    eyelidRightOpen = "Ouverture Paupière Droite",
+    eyelid = "PaupiÃ¨re",
+    eyelidHeight = "Hauteur de PaupiÃ¨re",
+    eyelidWidth = "Largeur de PaupiÃ¨re",
+    eyelidLeftOpen = "Ouverture PaupiÃ¨re Gauche",
+    eyelidRightOpen = "Ouverture PaupiÃ¨re Droite",
     
     ears = "Oreilles",
     earsWidth = "Largeur des Oreilles",
@@ -390,10 +395,10 @@ Lang.fr.BodyParts = {
     cheekboneWidth = "Largeur des Pommettes",
     cheekboneDepth = "Profondeur des Pommettes",
     
-    jaw = "Mâchoire",
-    jawHeight = "Hauteur de Mâchoire",
-    jawWidth = "Largeur de Mâchoire",
-    jawDepth = "Profondeur de Mâchoire",
+    jaw = "MÃ¢choire",
+    jawHeight = "Hauteur de MÃ¢choire",
+    jawWidth = "Largeur de MÃ¢choire",
+    jawDepth = "Profondeur de MÃ¢choire",
     
     chin = "Menton",
     chinHeight = "Hauteur du Menton",
@@ -414,17 +419,17 @@ Lang.fr.BodyParts = {
     mouthX = "Bouche X",
     mouthY = "Bouche Y",
     
-    lips = "Lèvres",
-    lipUpperHeight = "Hauteur Lèvre Sup.",
-    lipUpperWidth = "Largeur Lèvre Sup.",
-    lipUpperDepth = "Profondeur Lèvre Sup.",
-    lipLowerHeight = "Hauteur Lèvre Inf.",
-    lipLowerWidth = "Largeur Lèvre Inf.",
-    lipLowerDepth = "Profondeur Lèvre Inf.",
+    lips = "LÃ¨vres",
+    lipUpperHeight = "Hauteur LÃ¨vre Sup.",
+    lipUpperWidth = "Largeur LÃ¨vre Sup.",
+    lipUpperDepth = "Profondeur LÃ¨vre Sup.",
+    lipLowerHeight = "Hauteur LÃ¨vre Inf.",
+    lipLowerWidth = "Largeur LÃ¨vre Inf.",
+    lipLowerDepth = "Profondeur LÃ¨vre Inf.",
     
-    shoulders = "Épaules",
-    shouldersSize = "Taille des Épaules",
-    shouldersThickness = "Épaisseur des Épaules",
+    shoulders = "Ã‰paules",
+    shouldersSize = "Taille des Ã‰paules",
+    shouldersThickness = "Ã‰paisseur des Ã‰paules",
     backMuscles = "Muscles du Dos",
     
     arms = "Bras",
@@ -446,7 +451,7 @@ Lang.fr.BodyParts = {
 
 -- Descriptors
 Lang.fr.Descriptors = {
-    narrow = "Étroit",
+    narrow = "Ã‰troit",
     wide = "Large",
     large = "Grand",
     small = "Petit",
@@ -457,15 +462,15 @@ Lang.fr.Descriptors = {
     up = "Haut",
     down = "Bas",
     open = "Ouvert",
-    close = "Fermé",
+    close = "FermÃ©",
     far = "Loin",
     near = "Proche",
     extruded = "Saillant",
-    retracted = "Rétracté",
-    raised = "Relevé",
-    lowered = "Abaissé",
-    detached = "Détaché",
-    stuck = "Collé",
+    retracted = "RÃ©tractÃ©",
+    raised = "RelevÃ©",
+    lowered = "AbaissÃ©",
+    detached = "DÃ©tachÃ©",
+    stuck = "CollÃ©",
 }
 
 -- Categories (Barber & Makeup)
@@ -473,7 +478,7 @@ Lang.fr.Categories = {
     hair = "Cheveux",
     hairBonnet = "Bonnet Cheveux",
     beard = "Barbe",
-    beardComplete = "Barbes Complètes",
+    beardComplete = "Barbes ComplÃ¨tes",
     beardMustache = "Moustaches",
     beardChops = "Favoris",
     beardChin = "Poils du Menton",
@@ -482,34 +487,34 @@ Lang.fr.Categories = {
     scars = "Cicatrices 1",
     scars2 = "Cicatrices 2",
     scars3 = "Cicatrices 3",
-    lipsticks = "Rouges à Lèvres",
-    acne = "Acné",
+    lipsticks = "Rouges Ã  LÃ¨vres",
+    acne = "AcnÃ©",
     shadows = "Ombres",
     beardStabble = "Barbe Naissante",
     paintedMasks = "Masques Peints",
     ageing = "Vieillissement",
-    blush = "Fard à Joues",
-    blush2 = "Fard à Joues 2",
+    blush = "Fard Ã  Joues",
+    blush2 = "Fard Ã  Joues 2",
     complex = "Complexe",
     disc = "Disque",
     foundation = "Fond de Teint",
     freckles = "Taches de Rousseur",
-    grime = "Saleté",
+    grime = "SaletÃ©",
     hairStabble = "Cheveux Courts",
-    moles = "Grains de Beauté",
+    moles = "Grains de BeautÃ©",
     spots = "Taches",
 }
 
 -- Notifications & Warnings
 Lang.fr.Notifications = {
-    pedWarning = "Vous utilisez un modèle PED, vous devrez personnaliser la coiffure et les vêtements. Les overlays de maquillage ne seront pas disponibles.",
-    characterCreated = "Personnage créé avec succès!",
-    characterUpdated = "Personnage mis à jour avec succès!",
-    characterDeleted = "Personnage supprimé avec succès!",
+    pedWarning = "Vous utilisez un modÃ¨le PED, vous devrez personnaliser la coiffure et les vÃªtements. Les overlays de maquillage ne seront pas disponibles.",
+    characterCreated = "Personnage crÃ©Ã© avec succÃ¨s!",
+    characterUpdated = "Personnage mis Ã  jour avec succÃ¨s!",
+    characterDeleted = "Personnage supprimÃ© avec succÃ¨s!",
     actionInProgress = "Action en cours, veuillez patienter...",
-    dataNotLoaded = "Données pas encore chargées, nouvelle tentative...",
-    errorOccurred = "Une erreur s'est produite, veuillez réessayer.",
-    selectionInProgress = "Sélection du personnage en cours, veuillez patienter...",
+    dataNotLoaded = "DonnÃ©es pas encore chargÃ©es, nouvelle tentative...",
+    errorOccurred = "Une erreur s'est produite, veuillez rÃ©essayer.",
+    selectionInProgress = "SÃ©lection du personnage en cours, veuillez patienter...",
 }
 
 -- Helper function to get translation
@@ -549,3 +554,4 @@ setmetatable(Lang.Categories, {
         return _U("Categories", key) or key
     end
 })
+

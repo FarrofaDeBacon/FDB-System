@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-barbers | config.lua
+-- Main configuration file for fdb-barbers
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 Config = {}
 
 Config.DistanceSpawn = 20.0 -- Distance before spawning/despawning the ped. (GTA Units.)
@@ -46,3 +51,4 @@ Config.BarberLocations =
         showblip = true
     }
 }
+

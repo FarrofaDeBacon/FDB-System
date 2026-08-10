@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | client/settings/overlays.lua
+-- Overlay configuration settings
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 overlays_info = {
 
     ["eyebrows"] = {

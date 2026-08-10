@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | client/settings/lang.lua
+-- Client localization definitions
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 Lang = {}
 
 
@@ -134,3 +139,4 @@ Lang.Categories = {
     ["spots"] = "Spots",
 
 }
+

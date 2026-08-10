@@ -1612,10 +1612,12 @@ window.addEventListener('message', function (event) {
         if (event.data.menu == "creator") {
             inCreatorMode = true;
             this.document.getElementById('CreateOutfit').classList.add('cache');
+            this.document.getElementById('CancelOutfit').innerHTML = "Confirm";
         }
         else {
             inCreatorMode = false;
             this.document.getElementById('CreateOutfit').classList.remove('cache');
+            this.document.getElementById('CancelOutfit').innerHTML = "Cancel";
         }
 
         outfitElemId = event.data.outfitId;

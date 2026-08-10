@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | client/function/decor.lua
+-- Entity decorators management
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 -- Build DecorSettings from Config (for compatibility with existing code)
 DecorSettings = {
     interior = Config.CharSelect.interior,
@@ -41,3 +46,4 @@ AddEventHandler("onResourceStop", function(resource)
         end
     end
 end)
+

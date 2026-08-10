@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | client/settings/fdb_assets.lua
+-- Creator asset registry
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 FDB_ASSETS = {
     ["male"] = {
         ["beards_mustache"] = {

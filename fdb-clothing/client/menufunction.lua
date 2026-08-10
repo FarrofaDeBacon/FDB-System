@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-clothing | client/menufunction.lua
+-- Menu interaction and display functions
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 ContextualDataOn = false
 function UpdateContextualDatas(value, category)
     if value then
@@ -27,11 +32,11 @@ function UpdateContextualDatas(value, category)
                     variationValue = 1
                 end
 
-                if MURPHY_ASSETS[SelectedGender][category][value].variants then
-                    variationAmount = #MURPHY_ASSETS[SelectedGender][category][value].variants
-                    tint0value = ClothesCache[category].texture and ClothesCache[category].texture.tint0 or MURPHY_ASSETS[SelectedGender][category][value].variants[1].tint[1] or 1
-                    tint1value = ClothesCache[category].texture and ClothesCache[category].texture.tint1 or MURPHY_ASSETS[SelectedGender][category][value].variants[1].tint[2] or 1
-                    tint2value = ClothesCache[category].texture and ClothesCache[category].texture.tint2 or MURPHY_ASSETS[SelectedGender][category][value].variants[1].tint[3] or 1
+                if FDB_ASSETS[SelectedGender][category][value].variants then
+                    variationAmount = #FDB_ASSETS[SelectedGender][category][value].variants
+                    tint0value = ClothesCache[category].texture and ClothesCache[category].texture.tint0 or FDB_ASSETS[SelectedGender][category][value].variants[1].tint[1] or 1
+                    tint1value = ClothesCache[category].texture and ClothesCache[category].texture.tint1 or FDB_ASSETS[SelectedGender][category][value].variants[1].tint[2] or 1
+                    tint2value = ClothesCache[category].texture and ClothesCache[category].texture.tint2 or FDB_ASSETS[SelectedGender][category][value].variants[1].tint[3] or 1
                     -- Ensure tint values are valid numbers
                     tint0value = tonumber(tint0value) or 1
                     tint1value = tonumber(tint1value) or 1
@@ -42,7 +47,7 @@ function UpdateContextualDatas(value, category)
                         {tintId = 3, value = tint2value}
                     }
                 else
-                    variationAmount = #MURPHY_ASSETS[SelectedGender][category][value]
+                    variationAmount = #FDB_ASSETS[SelectedGender][category][value]
                     if type(ClothesCache[category].texture) == "table" then 
                         tint0value = ClothesCache[category].texture.tint0 or 1
                         tint1value = ClothesCache[category].texture.tint1 or 1
@@ -104,11 +109,11 @@ function CalculatePrice()
     end
 	local price = 0
     local outfitmodifier = OutfitPrice or 0
-        for k,v in pairs(MURPHY_ASSETS[SelectedGender]) do
+        for k,v in pairs(FDB_ASSETS[SelectedGender]) do
             if k ~= "bodies_upper" and k ~= "bodies_lower" then
                 if OldClothesCache[k].model then 
                     if OldClothesCache[k].model ~= ClothesCache[k].model then
-                        if ClothesCache[k].model > 0 then
+                        if ClothesCache[k].model ~= 0 then
                             if Config.Price[k] then
                                 price = price + Config.Price[k]
                             else
@@ -117,7 +122,7 @@ function CalculatePrice()
                         end
                     end
                 else
-                    if ClothesCache[k].model > 0 then
+                    if ClothesCache[k].model ~= 0 then
                         if Config.Price[k] then
                             price = price + Config.Price[k]
                         else
@@ -139,3 +144,4 @@ function CalculatePrice()
 
 		return finalPrice
 end
+

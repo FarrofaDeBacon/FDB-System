@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | client/function/overlays.lua
+-- Ped overlay application functions
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 -------- OVERLAYS --------
 local textureId = -1
 

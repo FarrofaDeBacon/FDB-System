@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-barbers | shared/hairs.lua
+-- Hair asset definitions
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 hairs_list = {
     ['female'] = {
         ['hair'] = {

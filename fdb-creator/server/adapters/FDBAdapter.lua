@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | server/adapters/FDBAdapter.lua
+-- Server-side FDB Framework adapter
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 if Config.framework == 'fdb-core' then
     local RSGCore = exports['fdb-core']:GetCoreObject()
     local creatingCharacters = {} -- Track character creation by source to prevent duplicates
@@ -5,17 +10,20 @@ if Config.framework == 'fdb-core' then
 
     function GetCharIdentifier(targetID)
         targetID = tonumber(targetID)
-        return RSGCore.Functions.GetPlayer(targetID).PlayerData.citizenid
+        local player = RSGCore.Functions.GetPlayer(targetID)
+        if player then return player.PlayerData.citizenid else return nil end
     end
 
     function GetCharFirstname(targetID)
         targetID = tonumber(targetID)
-        return RSGCore.Functions.GetPlayer(targetID).PlayerData.charinfo.firstname
+        local player = RSGCore.Functions.GetPlayer(targetID)
+        if player then return player.PlayerData.charinfo.firstname else return nil end
     end
 
     function GetCharLastname(targetID)
         targetID = tonumber(targetID)
-        return RSGCore.Functions.GetPlayer(targetID).PlayerData.charinfo.lastname
+        local player = RSGCore.Functions.GetPlayer(targetID)
+        if player then return player.PlayerData.charinfo.lastname else return nil end
     end
 
     local plyChars = {} -- Table to store characters per player
@@ -316,9 +324,9 @@ if Config.framework == 'fdb-core' then
         end
     end)
 
-    -- ═══════════════════════════════════════════════════════════════════════════
+    -- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     -- Helper function to check if player can delete characters
-    -- ═══════════════════════════════════════════════════════════════════════════
+    -- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     function CanPlayerDeleteCharacter(source)
         if not Config.CharacterDeletion.enabled then
             return false
@@ -348,10 +356,10 @@ if Config.framework == 'fdb-core' then
         return false
     end
 
-    -- ═══════════════════════════════════════════════════════════════════════════
+    -- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     -- Admin command to delete a character by citizenid
     -- Usage: /deletechar [citizenid]
-    -- ═══════════════════════════════════════════════════════════════════════════
+    -- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     if Config.Commands and Config.Commands.deleteCharacter and Config.Commands.deleteCharacter.enabled then
         RegisterCommand(Config.Commands.deleteCharacter.command, function(source, args, rawCommand)
             local _source = source
@@ -434,10 +442,10 @@ if Config.framework == 'fdb-core' then
         end, false)
     end
 
-    -- ═══════════════════════════════════════════════════════════════════════════
+    -- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     -- "Second Chance" command - Reopen character customization menu for a player
     -- Usage: /secondchance [playerid]
-    -- ═══════════════════════════════════════════════════════════════════════════
+    -- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     if Config.Commands and Config.Commands.secondChance and Config.Commands.secondChance.enabled then
         RegisterCommand(Config.Commands.secondChance.command, function(source, args, rawCommand)
             local _source = source
@@ -624,3 +632,4 @@ if Config.framework == 'fdb-core' then
         end)
     end)
 end
+

@@ -1,5 +1,10 @@
+-- ============================================================
+-- FDB System | fdb-clothing | server/adapters/RSGAdapter.lua
+-- Server-side RSG Framework adapter
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 if Config.framework == 'rsg-core' then
-    local CORE = exports['rsg-core']:GetCoreObject()
+    local CORE = exports['fdb-core']:GetCoreObject()
 
     function GetCharJob(targetID)
         targetID = tonumber(targetID)
@@ -87,14 +92,14 @@ if Config.framework == 'rsg-core' then
         local outfit_id = item.info.outfit_id
         local datatable = {}
         MySQL.query(
-            'SELECT * FROM murphy_outfits WHERE `outfit_id`=@outfit_id;', {
+            'SELECT * FROM FDB_outfits WHERE `outfit_id`=@outfit_id;', {
                 outfit_id = outfit_id
             }, function(result)
                 if result[1] then
                     datatable = json.decode(result[1].clothes)
-                    TriggerClientEvent("murphy_clothes:clotheitem",_source, datatable, outfit_id)
+                    TriggerClientEvent("fdb_clothes:clotheitem",_source, datatable, outfit_id)
                 else
-                    TriggerClientEvent("murphy_notify:NotifyLeft", _source, "Clothes", "Clothes are torn !", "menu_textures", "menu_icon_cross", 3000)
+                    TriggerClientEvent("FDB_notify:NotifyLeft", _source, "Clothes", "Clothes are torn !", "menu_textures", "menu_icon_cross", 3000)
 
                 end
             end)
@@ -112,13 +117,13 @@ if Config.framework == 'rsg-core' then
                     local cat = value.cat
                     local model = value.model
                     local texture = value.texture
-                    TriggerClientEvent("murphy_clothes:itemclothes", _source, cat, model, texture)
+                    TriggerClientEvent("fdb_clothes:itemclothes", _source, cat, model, texture)
                 end
             end)
         end
     end)
 
-    RegisterServerEvent('murphy_clothes:LoadSkin', function(male)
+    RegisterServerEvent('fdb_clothes:LoadSkin', function(male)
         local _source = source
         local player = CORE.Functions.GetPlayer(_source)
         while not player do
@@ -132,10 +137,10 @@ if Config.framework == 'rsg-core' then
                     local decoded = json.decode(skin)
                     local body, legs = FindBody(male, decoded)
                     local data = {bodies_upper = body, bodies_lower = legs}
-                    TriggerClientEvent("murphy_clothes:GetSkin", _source, data)
+                    TriggerClientEvent("fdb_clothes:GetSkin", _source, data)
                 end
             end)
-            TriggerEvent("murphy_clothes:retrieveClothes", GetCharIdentifier(_source), function(result)
+            TriggerEvent("fdb_clothes:retrieveClothes", GetCharIdentifier(_source), function(result)
                 if result then
                     local clothes = json.decode(result.clothes)
                     local hairs = json.decode(result.hairs)
@@ -145,14 +150,14 @@ if Config.framework == 'rsg-core' then
                             clothes[k] = v
                         end
                     end
-                    TriggerClientEvent("murphy_clothes:GetLoadSkin", _source, clothes, skin)
+                    TriggerClientEvent("fdb_clothes:GetLoadSkin", _source, clothes, skin)
                 else
-                    TriggerClientEvent("murphy_clothes:GetLoadSkin", _source, {}, skin)
+                    TriggerClientEvent("fdb_clothes:GetLoadSkin", _source, {}, skin)
                 end
             end)
     end)
 
-    RegisterServerEvent('murphy_clothes:LoadSkinCharacter', function(male, ped, charid)
+    RegisterServerEvent('fdb_clothes:LoadSkinCharacter', function(male, ped, charid)
         local _source = source
             MySQL.query("SELECT * FROM playerskins WHERE `citizenid`=@citizenid;", {citizenid = charid}, function(skins)
                 if skins[1] then
@@ -160,10 +165,10 @@ if Config.framework == 'rsg-core' then
                     local decoded = json.decode(skin)
                     local body, legs = FindBody(male, decoded)
                     local data = {bodies_upper = body, bodies_lower = legs}
-                    TriggerClientEvent("murphy_clothes:GetSkin", _source, data)
+                    TriggerClientEvent("fdb_clothes:GetSkin", _source, data)
                 end
             end)
-            TriggerEvent("murphy_clothes:retrieveClothes", charid, function(result)
+            TriggerEvent("fdb_clothes:retrieveClothes", charid, function(result)
                 if result then
                     local clothes = json.decode(result.clothes)
                     local hairs = json.decode(result.hairs)
@@ -173,14 +178,14 @@ if Config.framework == 'rsg-core' then
                             clothes[k] = v
                         end
                     end
-                    TriggerClientEvent("murphy_clothes:GetLoadSkinCharacter", _source, ped, clothes, skin)
+                    TriggerClientEvent("fdb_clothes:GetLoadSkinCharacter", _source, ped, clothes, skin)
                 else
-                    TriggerClientEvent("murphy_clothes:GetLoadSkinCharacter", _source, ped, {}, skin)
+                    TriggerClientEvent("fdb_clothes:GetLoadSkinCharacter", _source, ped, {}, skin)
                 end
             end)
     end)
 
-    ---- TriggerServerEvent('murphy_clothes:LoadSkinCharacter', isPedMale(ped), ped, charid)
+    ---- TriggerServerEvent('fdb_clothes:LoadSkinCharacter', isPedMale(ped), ped, charid)
 
     local ComponentsFemale = {}
     local ComponentsMale = {}
@@ -333,3 +338,4 @@ if Config.framework == 'rsg-core' then
         end
     end
 end
+

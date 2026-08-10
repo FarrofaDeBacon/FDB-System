@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | shared/creatordata.lua
+-- Shared creator data definitions
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 
 DefaultChar = {
     Male = {

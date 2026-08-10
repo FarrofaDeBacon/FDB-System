@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | client/NUI/NUICallbacks_barber.lua
+-- NUI callback handlers for barber UI
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 
 RegisterNUICallback("backToOutfitList", function(data, cb)
     print ("backToOutfitList triggered")
@@ -13,7 +18,7 @@ RegisterNUICallback("backToOutfitList", function(data, cb)
     local x, y, z = table.unpack(GetEntityCoords(ped))
     if not baseHeading then
         baseHeading = GetEntityHeading(ped)
-        -- Stocker l'offset initial pour que 180 corresponde à baseHeading
+        -- Stocker l'offset initial pour que 180 corresponde Ã  baseHeading
         angleOffset = 180 - baseHeading
     end
     local targetHeading = (180 - angleOffset) % 360
@@ -84,7 +89,7 @@ RegisterNUICallback("itemValue", function(body, resultCallback)
                         }
                     )
                 end
-            elseif hairstyleCache[category] and hairstyleCache[category].model > 0 then
+            elseif hairstyleCache[category] and hairstyleCache[category].model ~= 0 then
                 -- if ContextualDataOn == false then
                 UpdateContextualDatas(hairstyleCache[category].model, category)
                 -- end

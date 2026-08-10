@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-barbers | shared/overlays.lua
+-- Overlay asset definitions
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
  overlays_info = {
 
     ["eyebrows"] = {

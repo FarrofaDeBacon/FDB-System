@@ -1,3 +1,8 @@
+-- ============================================================
+-- FDB System | fdb-creator | client/settings/pedlist.lua
+-- Allowed ped models list
+-- Author: FarrofaDeBacon | Last Modified: 2026-08-08
+-- ============================================================
 PedList = {
     ["Female"] = {
     [1] = {
