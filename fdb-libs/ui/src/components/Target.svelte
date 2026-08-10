@@ -30,7 +30,6 @@
     });
 
     function selectOption(index) {
-        if (!isMouseFree) return; // Só clica se o mouse estiver liberado
         fetch(`https://${GetParentResourceName()}/targetSelectOption`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

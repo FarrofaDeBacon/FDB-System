@@ -170,19 +170,25 @@ Citizen.CreateThread(function()
                 end
                 
                 SendNUIMessage({ action = "SET_TARGET_OPTIONS", data = { options = contextOptions } })
+                
+                -- Libera o mouse automaticamente quando tem opcoes para o jogador clicar
+                if not isMouseFree and #contextOptions > 0 then
+                    isMouseFree = true
+                    SetNuiFocus(true, true)
+                    SendNUIMessage({ action = "SET_TARGET_MOUSE", data = { free = true } })
+                end
             elseif not entity or not targetEntities[entity] then
                 if lastValidEntity ~= nil then
                     lastValidEntity = nil
                     activeCallbacks = {}
                     SendNUIMessage({ action = "SET_TARGET_OPTIONS", data = { options = {} } })
+                    -- Trava o mouse de volta quando perde o alvo
+                    if isMouseFree then
+                        isMouseFree = false
+                        SetNuiFocus(false, false)
+                        SendNUIMessage({ action = "SET_TARGET_MOUSE", data = { free = false } })
+                    end
                 end
-            end
-            
-            -- Botao Direito (INPUT_AIM / 0x4CC0E2FE) para liberar o mouse
-            if IsControlJustPressed(0, 0x4CC0E2FE) or IsDisabledControlJustPressed(0, 0x4CC0E2FE) then
-                isMouseFree = not isMouseFree
-                SetNuiFocus(isMouseFree, isMouseFree)
-                SendNUIMessage({ action = "SET_TARGET_MOUSE", data = { free = isMouseFree } })
             end
             
         else
