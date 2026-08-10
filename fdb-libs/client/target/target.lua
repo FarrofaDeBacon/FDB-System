@@ -140,9 +140,9 @@ Citizen.CreateThread(function()
             
             local entity = GetEntityInFrontOfPlayer(4.0)
             
-            -- Limpa os dados se não tiver entidade
+            -- Limpa os dados se nao tiver entidade
             lastValidEntity = nil
-            lastMenuItems = {}
+            local contextOptions = {}
             
             if entity and targetEntities[entity] then
                 if debugLastEntity ~= entity then
@@ -157,16 +157,19 @@ Citizen.CreateThread(function()
                 
                 for i, opt in ipairs(options) do
                     if dist <= (opt.distance or 2.5) then
-                        table.insert(lastMenuItems, {
-                            type = "button",
-                            id = opt.name,
+                        table.insert(contextOptions, {
                             label = opt.label,
-                            icon = opt.icon or "fa-solid fa-circle-dot"
+                            icon = opt.icon or "fa-solid fa-circle-dot",
+                            action = function()
+                                if type(opt.onSelect) == "function" then
+                                    opt.onSelect(entity)
+                                end
+                            end
                         })
                     end
                 end
                 
-                if #lastMenuItems > 0 then
+                if #contextOptions > 0 then
                     lastValidEntity = entity
                 end
             else
@@ -180,14 +183,12 @@ Citizen.CreateThread(function()
         -- Se o jogador SOLTOU o ALT Esquerdo
         if IsControlJustReleased(0, 0x8AAA0AD4) then
             print("[fdb-libs] [DEBUG] ALT SOLTO!")
-            if lastValidEntity and #lastMenuItems > 0 then
-                print("[fdb-libs] [DEBUG] ABRINDO MENU SVELTE PARA O ALVO " .. tostring(lastValidEntity))
-                currentTargetEntity = lastValidEntity
-                -- Abre a interface gráfica global da lib
-                fdb.menu.open({
-                    id = targetMenuId,
+            if lastValidEntity and #contextOptions > 0 then
+                print("[fdb-libs] [DEBUG] ABRINDO CONTEXT MENU PARA O ALVO " .. tostring(lastValidEntity))
+                -- Abre a interface de Contexto (flutuante perto da mira/mouse)
+                fdb.context.OpenContextMenu({
                     title = "Interagir",
-                    items = lastMenuItems
+                    options = contextOptions
                 })
             else
                 print("[fdb-libs] [DEBUG] NENHUM ALVO VALIDO NA MIRA NO MOMENTO QUE O ALT FOI SOLTO.")
@@ -195,31 +196,10 @@ Citizen.CreateThread(function()
             
             -- Reseta o estado
             lastValidEntity = nil
-            lastMenuItems = {}
+            contextOptions = {}
         end
 
         Wait(sleep)
-    end
-end)
-
--- ============================================================
--- Callback do Context Menu
--- ============================================================
-
-AddEventHandler('fdb-libs:menu:onChange', function(data)
-    if data.menuId == targetMenuId and data.itemId then
-        if currentTargetEntity and targetEntities[currentTargetEntity] then
-            for _, opt in ipairs(targetEntities[currentTargetEntity]) do
-                if opt.name == data.itemId then
-                    fdb.menu.close()
-                    if type(opt.onSelect) == "function" then
-                        opt.onSelect(currentTargetEntity)
-                    end
-                    currentTargetEntity = nil
-                    break
-                end
-            end
-        end
     end
 end)
 
