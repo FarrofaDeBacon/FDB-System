@@ -45,10 +45,11 @@ end
 -- Callback de clique do NUI
 RegisterNUICallback('contextClick', function(data, cb)
     local index = tonumber(data.index)
+    local callback = index and activeCallbacks[index]
     fdb.context.CloseContextMenu()
-    
-    if index and activeCallbacks[index] then
-        activeCallbacks[index]()
+
+    if callback then
+        callback()
     end
     cb('ok')
 end)
