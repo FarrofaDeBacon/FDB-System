@@ -128,82 +128,98 @@ local function GetEntityInFrontOfPlayer(distance)
     return nil
 end
 
-Citizen.CreateThread(function()
-    local lastValidEntity = nil
-    local contextOptions = {}
+local activeCallbacks = {}
 
+Citizen.CreateThread(function()
+    local isEyeOpen = false
+    local isMouseFree = false
+    local lastValidEntity = nil
+    
     while true do
         local sleep = 500
+        
         -- Verifica se o jogador ESTA SEGURANDO o ALT Esquerdo (INPUT_FRONTEND_ALT / 0x8AAA0AD4)
         if IsControlPressed(0, 0x8AAA0AD4) then
             sleep = 0
             
+            if not isEyeOpen then
+                isEyeOpen = true
+                SendNUIMessage({ action = "SET_TARGET_EYE", data = { visible = true } })
+            end
+            
             local entity = GetEntityInFrontOfPlayer(4.0)
             
-            -- Limpa os dados se nao tiver entidade
-            lastValidEntity = nil
-            contextOptions = {}
-            
-            if entity and targetEntities[entity] then
-                if debugLastEntity ~= entity then
-                    debugLastEntity = entity
-                    print("[fdb-libs] [DEBUG] ALVO VALIDO DETECTADO NA MIRA! (" .. tostring(entity) .. ")")
-                end
-                
+            if entity and entity ~= lastValidEntity and targetEntities[entity] then
+                lastValidEntity = entity
                 local options = targetEntities[entity]
                 local playerCoords = GetEntityCoords(PlayerPedId())
                 local entityCoords = GetEntityCoords(entity)
                 local dist = #(playerCoords - entityCoords)
                 
+                local contextOptions = {}
+                activeCallbacks = {}
+                
                 for i, opt in ipairs(options) do
                     if dist <= (opt.distance or 2.5) then
                         table.insert(contextOptions, {
                             label = opt.label,
-                            icon = opt.icon or "fa-solid fa-circle-dot",
-                            action = function()
-                                if type(opt.onSelect) == "function" then
-                                    opt.onSelect(entity)
-                                end
-                            end
+                            icon = opt.icon
                         })
+                        activeCallbacks[#contextOptions] = opt.onSelect
                     end
                 end
                 
-                if #contextOptions > 0 then
-                    lastValidEntity = entity
-                    -- Desenha um pequeno marcador visual (uma bolinha branca) sobre a entidade para o jogador saber que ela esta na mira
-                    DrawMarker(0, entityCoords.x, entityCoords.y, entityCoords.z + 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.1, 0.1, 255, 255, 255, 200, false, true, 2, false, false, false, false)
+                SendNUIMessage({ action = "SET_TARGET_OPTIONS", data = { options = contextOptions } })
+            elseif not entity or not targetEntities[entity] then
+                if lastValidEntity ~= nil then
+                    lastValidEntity = nil
+                    activeCallbacks = {}
+                    SendNUIMessage({ action = "SET_TARGET_OPTIONS", data = { options = {} } })
                 end
-            else
-                if debugLastEntity ~= nil then
-                    debugLastEntity = nil
-                    print("[fdb-libs] [DEBUG] ALVO PERDIDO DA MIRA.")
-                end
-            end
-        end
-
-        -- Se o jogador SOLTOU o ALT Esquerdo
-        if IsControlJustReleased(0, 0x8AAA0AD4) then
-            print("[fdb-libs] [DEBUG] ALT SOLTO!")
-            if lastValidEntity and #contextOptions > 0 then
-                print("[fdb-libs] [DEBUG] ABRINDO CONTEXT MENU PARA O ALVO " .. tostring(lastValidEntity))
-                -- Abre a interface de Contexto (flutuante perto da mira/mouse)
-                fdb.context.OpenContextMenu({
-                    title = "Interagir",
-                    options = contextOptions,
-                    position = "center"
-                })
-            else
-                print("[fdb-libs] [DEBUG] NENHUM ALVO VALIDO NA MIRA NO MOMENTO QUE O ALT FOI SOLTO.")
             end
             
-            -- Reseta o estado
-            lastValidEntity = nil
-            contextOptions = {}
+            -- Botao Direito (INPUT_AIM / 0x4CC0E2FE) para liberar o mouse
+            if IsControlJustPressed(0, 0x4CC0E2FE) or IsDisabledControlJustPressed(0, 0x4CC0E2FE) then
+                isMouseFree = not isMouseFree
+                SetNuiFocus(isMouseFree, isMouseFree)
+                SendNUIMessage({ action = "SET_TARGET_MOUSE", data = { free = isMouseFree } })
+            end
+            
+        else
+            -- Se soltou o ALT ou nao esta segurando
+            if isEyeOpen then
+                isEyeOpen = false
+                isMouseFree = false
+                lastValidEntity = nil
+                activeCallbacks = {}
+                SetNuiFocus(false, false)
+                SendNUIMessage({ action = "SET_TARGET_EYE", data = { visible = false } })
+            end
         end
 
         Wait(sleep)
     end
+end)
+
+-- Callback do clique do NUI
+RegisterNUICallback('targetSelectOption', function(data, cb)
+    local index = tonumber(data.index)
+    
+    -- Fecha tudo apos o clique
+    SetNuiFocus(false, false)
+    SendNUIMessage({ action = "SET_TARGET_EYE", data = { visible = false } })
+    
+    -- Dispara a acao do Lua
+    if index and activeCallbacks[index] then
+        if type(activeCallbacks[index]) == "function" then
+            -- OBS: lastValidEntity aqui ja e uma upvalue do escopo local
+            -- Porem, ele pode ter sido resetado pelo if (nao esta segurando alt).
+            -- Para evitar bugs, e bom passar a entidade que estava ativa.
+            activeCallbacks[index]() 
+        end
+    end
+    
+    if cb then cb('ok') end
 end)
 
 -- Exports compatíveis com ox_target
