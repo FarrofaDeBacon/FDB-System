@@ -6,7 +6,7 @@
 
 if Config.Framework ~= 'fdb' then return end
 
-local fdbCore = exports['FDB-Core']:GetCoreObject()
+local fdbCore = exports['fdb-core']:GetCoreObject()
 
 function Bridge.GetPlayer(source)
     return fdbCore.Functions.GetPlayer(source)
@@ -47,7 +47,7 @@ function Bridge.HasPermission(source, permission)
 end
 
 function Bridge.Notify(source, message, notifyType)
-    TriggerClientEvent('fdbCore:Notify', source, message, notifyType or 'primary')
+    TriggerClientEvent('ox_lib:notify', source, { title = message, type = notifyType or 'info', duration = 5000 })
 end
 
 -- ── Lado cliente (só roda se este arquivo também for client_script;
