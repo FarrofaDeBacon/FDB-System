@@ -143,6 +143,11 @@ Citizen.CreateThread(function()
             lastMenuItems = {}
             
             if entity and targetEntities[entity] then
+                if debugLastEntity ~= entity then
+                    debugLastEntity = entity
+                    print("[fdb-libs] [DEBUG] ALVO VALIDO DETECTADO NA MIRA! (" .. tostring(entity) .. ")")
+                end
+                
                 local options = targetEntities[entity]
                 local playerCoords = GetEntityCoords(PlayerPedId())
                 local entityCoords = GetEntityCoords(entity)
@@ -161,15 +166,20 @@ Citizen.CreateThread(function()
                 
                 if #lastMenuItems > 0 then
                     lastValidEntity = entity
-                    -- Aqui poderia ter um DrawText na tela indicando que achou o alvo, 
-                    -- mas o RedM nativamente já mostra um ponto (dot) ao segurar ALT.
+                end
+            else
+                if debugLastEntity ~= nil then
+                    debugLastEntity = nil
+                    print("[fdb-libs] [DEBUG] ALVO PERDIDO DA MIRA.")
                 end
             end
         end
 
         -- Se o jogador SOLTOU o ALT Esquerdo
         if IsControlJustReleased(0, 0x8AAA0AD4) then
+            print("[fdb-libs] [DEBUG] ALT SOLTO!")
             if lastValidEntity and #lastMenuItems > 0 then
+                print("[fdb-libs] [DEBUG] ABRINDO MENU SVELTE PARA O ALVO " .. tostring(lastValidEntity))
                 currentTargetEntity = lastValidEntity
                 -- Abre a interface gráfica global da lib
                 fdb.menu.open({
@@ -177,6 +187,8 @@ Citizen.CreateThread(function()
                     title = "Interagir",
                     items = lastMenuItems
                 })
+            else
+                print("[fdb-libs] [DEBUG] NENHUM ALVO VALIDO NA MIRA NO MOMENTO QUE O ALT FOI SOLTO.")
             end
             
             -- Reseta o estado
