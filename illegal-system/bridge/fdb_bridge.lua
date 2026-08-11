@@ -50,9 +50,5 @@ function Bridge.Notify(source, message, notifyType)
     exports['fdb-libs']:Notify(source, message, notifyType or 'info')
 end
 
-function Bridge.GetInventoryImageURL(item)
-    return 'nui://fdb-inventory/html/images/' .. item .. '.png'
-end
-
 -- ── Lado cliente (só roda se este arquivo também for client_script;
 --    hoje não é — client/core.lua tem seu próprio require de target) ──

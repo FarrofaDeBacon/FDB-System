@@ -50,9 +50,5 @@ function Bridge.Notify(source, message, notifyType)
     TriggerClientEvent('RSGCore:Notify', source, message, notifyType or 'primary')
 end
 
-function Bridge.GetInventoryImageURL(item)
-    return 'nui://rsg-inventory/html/images/' .. item .. '.png'
-end
-
 -- ── Lado cliente (só roda se este arquivo também for client_script;
 --    hoje não é — client/core.lua tem seu próprio require de target) ──

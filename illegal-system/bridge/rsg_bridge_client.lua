@@ -12,3 +12,11 @@ if Config.Framework ~= 'rsg' then return end
 function Bridge.RegisterTargetEntity(entity, options)
     exports.ox_target:addLocalEntity(entity, options)
 end
+
+function Bridge.RegisterGlobalPedTarget(options)
+    exports.ox_target:addGlobalPed(options)
+end
+
+function Bridge.GetInventoryImageURL(item)
+    return 'nui://rsg-inventory/html/images/' .. item .. '.png'
+end

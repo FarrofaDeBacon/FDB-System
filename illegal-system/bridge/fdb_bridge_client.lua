@@ -18,3 +18,7 @@ end
 function Bridge.RegisterGlobalPedTarget(options)
     exports.ox_target:addGlobalPed(options)
 end
+
+function Bridge.GetInventoryImageURL(item)
+    return 'nui://fdb-inventory/html/images/' .. item .. '.png'
+end
