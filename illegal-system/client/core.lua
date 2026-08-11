@@ -28,16 +28,19 @@ CreateThread(function()
 end)
 
 RegisterNetEvent('illegal-system:client:startNpcRobberyMinigame', function(data)
-    SetNuiFocus(true, false)
-    SendNUIMessage({
-        action = "START_MINIGAME",
-        time = 5.0,
-        images = data.images
+    local crimeConfig = Config.Crimes['npc_robbery']
+    
+    local images = {
+        common = Bridge.GetInventoryImageURL(data.items.common),
+        uncommon = Bridge.GetInventoryImageURL(data.items.uncommon),
+        rare = Bridge.GetInventoryImageURL(data.items.rare)
+    }
+    
+    local result = exports['fdb-libs']:StartMinigame(crimeConfig.minigame.type, {
+        duration = crimeConfig.minigame.duration,
+        images = images,
+        zones = crimeConfig.minigame.zones
     })
-end)
-
-RegisterNUICallback('minigameResult', function(data, cb)
-    SetNuiFocus(false, false)
-    TriggerServerEvent('illegal-system:server:finishNpcRobbery', data.success, data.tier)
-    cb('ok')
+    
+    TriggerServerEvent('illegal-system:server:finishNpcRobbery', result.success, result.tier, data.sessionToken)
 end)

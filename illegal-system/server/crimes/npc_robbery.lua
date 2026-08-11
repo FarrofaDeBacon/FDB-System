@@ -29,29 +29,38 @@ RegisterNetEvent('illegal-system:server:attemptNpcRobbery', function()
         rare = lootConfig.rare[math.random(#lootConfig.rare)]
     }
 
-    activeRobberies[source] = items
+    local sessionToken = math.random(100000, 999999)
+    activeRobberies[source] = {
+        items = items,
+        sessionToken = sessionToken,
+        startTime = os.time()
+    }
 
     -- Manda o client iniciar a UI do minigame com os itens selecionados
     TriggerClientEvent('illegal-system:client:startNpcRobberyMinigame', source, {
         items = items,
-        images = {
-            common = Config.InventoryURL .. items.common .. '.png',
-            uncommon = Config.InventoryURL .. items.uncommon .. '.png',
-            rare = Config.InventoryURL .. items.rare .. '.png'
-        }
+        sessionToken = sessionToken
     })
 end)
 
-RegisterNetEvent('illegal-system:server:finishNpcRobbery', function(success, tier)
+RegisterNetEvent('illegal-system:server:finishNpcRobbery', function(success, tier, token)
     local source = source
-    local activeItems = activeRobberies[source]
+    local robberyData = activeRobberies[source]
 
-    if not activeItems then return end
+    if not robberyData then return end
     activeRobberies[source] = nil -- limpa cache para evitar exploit
 
+    -- A1. Validação de segurança: token e tempo decorrido
+    -- Bloqueia o exploit trivial de F8 (success=true instantâneo).
+    -- Nota: Não confirma perfeitamente se o cursor passou pela zona certa.
+    local timeElapsed = os.time() - robberyData.startTime
+    if robberyData.sessionToken ~= token or timeElapsed < 1 or timeElapsed > 15 then
+        success = false
+    end
+
     local rewardItem = nil
-    if success and tier and activeItems[tier] then
-        rewardItem = activeItems[tier]
+    if success and tier and robberyData.items[tier] then
+        rewardItem = robberyData.items[tier]
     else
         success = false
     end

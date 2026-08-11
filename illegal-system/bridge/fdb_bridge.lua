@@ -47,7 +47,11 @@ function Bridge.HasPermission(source, permission)
 end
 
 function Bridge.Notify(source, message, notifyType)
-    TriggerClientEvent('ox_lib:notify', source, { title = message, type = notifyType or 'info', duration = 5000 })
+    exports['fdb-libs']:Notify(source, message, notifyType or 'info')
+end
+
+function Bridge.GetInventoryImageURL(item)
+    return 'nui://fdb-inventory/html/images/' .. item .. '.png'
 end
 
 -- ── Lado cliente (só roda se este arquivo também for client_script;

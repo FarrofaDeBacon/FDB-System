@@ -29,13 +29,6 @@ Config.CriminalLevels = {
 }
 
 -- ─────────────────────────────────────────────────────────
--- Configuração de Imagens (Inventário)
--- ─────────────────────────────────────────────────────────
--- Defina de onde a UI deve carregar as imagens.
--- Ex: 'nui://fdb-inventory/html/images/' ou 'nui://rsg-inventory/html/images/'
-Config.InventoryURL = 'nui://rsg-inventory/html/images/'
-
--- ─────────────────────────────────────────────────────────
 -- Catálogo de crimes. Cada entrada = 1 crime, sem precisar
 -- de código novo no Core pra existir.
 -- ─────────────────────────────────────────────────────────
@@ -60,6 +53,16 @@ Config.Crimes = {
             uncommon = { 'phone', 'rolex' },
             rare     = { 'goldbar', 'weapon_pistol' }
         },
+        
+        minigame = {
+            type = 'tierbar',
+            duration = 5.0,
+            zones = {
+                common   = { start = 10, ["end"] = 35 },
+                uncommon = { start = 50, ["end"] = 65 },
+                rare     = { start = 80, ["end"] = 88 },
+            }
+        }
     },
 
     -- próximos crimes entram aqui como novas entradas,
