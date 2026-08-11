@@ -12,9 +12,9 @@ if Config.Framework ~= 'fdb' then return end
 Bridge = Bridge or {}
 
 function Bridge.RegisterTargetEntity(entity, options)
-    exports['fdb-libs']:addLocalEntity(entity, options)
+    exports.ox_target:addLocalEntity(entity, options)
 end
 
 function Bridge.RegisterGlobalPedTarget(options)
-    exports['fdb-libs']:addGlobalPed(options)
+    exports.ox_target:addGlobalPed(options)
 end
