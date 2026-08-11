@@ -34,5 +34,6 @@ Bridge.Notify             = NotImplemented('Notify')            -- (source, mess
 
 -- ── Interação no mundo (cliente) ───────────────────────────
 Bridge.RegisterTargetEntity = NotImplemented('RegisterTargetEntity') -- (entity, options) -> nil
+Bridge.RegisterTargetModel = NotImplemented('RegisterTargetModel') -- (models, options) -> nil
 Bridge.RegisterGlobalPedTarget = NotImplemented('RegisterGlobalPedTarget') -- (options) -> nil
 Bridge.GetInventoryImageURL = NotImplemented('GetInventoryImageURL') -- (item) -> string

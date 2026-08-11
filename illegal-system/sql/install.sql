@@ -21,3 +21,9 @@ CREATE TABLE IF NOT EXISTS `crime_history` (
     PRIMARY KEY (`id`),
     KEY `idx_crime_history_citizenid` (`citizenid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `illegal_grave_state` (
+    `grave_id` VARCHAR(64) PRIMARY KEY,
+    `last_robbed_at` DATETIME NOT NULL,
+    `next_available_at` DATETIME NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

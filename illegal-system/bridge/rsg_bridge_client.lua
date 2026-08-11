@@ -13,6 +13,10 @@ function Bridge.RegisterTargetEntity(entity, options)
     exports.ox_target:addLocalEntity(entity, options)
 end
 
+function Bridge.RegisterTargetModel(models, options)
+    exports.ox_target:addModel(models, options)
+end
+
 function Bridge.RegisterGlobalPedTarget(options)
     exports.ox_target:addGlobalPed(options)
 end

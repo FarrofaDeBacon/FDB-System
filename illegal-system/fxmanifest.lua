@@ -18,13 +18,15 @@ server_scripts {
     'bridge/rsg_bridge.lua',
     'bridge/fdb_bridge.lua',
     'server/core.lua',
-    'server/crimes/npc_robbery.lua'
+    'server/crimes/npc_robbery.lua',
+    'server/crimes/grave_robbery.lua'
 }
 
 client_scripts {
     'bridge/rsg_bridge_client.lua',
     'bridge/fdb_bridge_client.lua',
-    'client/core.lua'
+    'client/core.lua',
+    'client/crimes/grave_robbery.lua'
 }
 
 dependencies {
