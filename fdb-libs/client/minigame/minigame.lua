@@ -1,66 +1,124 @@
 fdb = fdb or {}
 fdb.minigame = {}
 
+local registeredMinigames = {}
 local activeMinigameId = nil
-local minigameStatus = nil -- nil, "success", "failed"
+local minigameResult = nil -- nil | table { success, tier? }
 
-RegisterNUICallback('minigameResult', function(data, cb)
-    if data.success then
-        minigameStatus = "success"
-    else
-        minigameStatus = "failed"
+--- Registra um novo tipo de minigame.
+--- @param name string Identificador usado no config (ex: "lockpick", "tierbar")
+--- @param handler function(config) -> nil. Só precisa mandar o SendNUIMessage de abertura;
+---   o resultado chega via fdb.minigame.ReportResult (chamado pelo componente Svelte correspondente).
+function fdb.minigame.Register(name, handler)
+    registeredMinigames[name] = handler
+end
+
+--- Chamado pelo NUI (RegisterNUICallback central) quando qualquer minigame termina.
+--- Não precisa ser chamado manualmente fora do fluxo NUI -> Lua.
+function fdb.minigame.ReportResult(result)
+    minigameResult = result
+end
+
+--- Dispara o minigame pelo nome. Bloqueia (yield) até o resultado chegar.
+--- @param name string
+--- @param config table Config específica do tipo (repassada direto pro handler)
+--- @return table { success: boolean, tier: string|nil }
+function fdb.minigame.Start(name, config)
+    if activeMinigameId then
+        return { success = false, tier = nil }
     end
-    cb('ok')
-end)
 
---- Inicia o minijogo da barra de habilidade circular (skillbar)
----@param config table Configurações do minijogo:
----  - duration (number): tempo em ms para agulha dar uma volta completa (default: 2000)
----  - targetWidth (number): largura da área de acerto em % de 0 a 100 (default: 15)
----  - rounds (number): total de rodadas seguidas para vencer (default: 3)
----@return boolean success Retorna true se jogador venceu todas as rodadas, false se falhou ou cancelou
-function fdb.minigame.Start(config)
-    if activeMinigameId then return false end
+    local handler = registeredMinigames[name]
+    if not handler then
+        print(('[fdb-libs] [ERROR] fdb.minigame: tipo "%s" nao foi registrado. Registrados: %s')
+            :format(tostring(name), table.concat((function()
+                local keys = {}
+                for k in pairs(registeredMinigames) do table.insert(keys, k) end
+                return keys
+            end)(), ', ')))
+        return { success = false, tier = nil }
+    end
 
     config = config or {}
     local minigameId = GetGameTimer() + math.random(1000, 9999)
     activeMinigameId = minigameId
-    minigameStatus = nil
+    minigameResult = nil
 
-    -- Ativa foco apenas no teclado (sem mouse)
     SetNuiFocus(true, false)
+    handler(config)
 
-    SendNUIMessage({
-        action = "START_MINIGAME",
-        duration = config.duration or 2000,
-        targetWidth = config.targetWidth or 15,
-        rounds = config.rounds or 3
-    })
-
-    -- Loop síncrono de yielding
-    while activeMinigameId == minigameId and minigameStatus == nil do
+    while activeMinigameId == minigameId and minigameResult == nil do
         Wait(50)
     end
 
-    -- Desativa foco de input
     SetNuiFocus(false, false)
 
-    local success = (minigameStatus == "success")
+    local result = minigameResult or { success = false, tier = nil }
     activeMinigameId = nil
-    minigameStatus = nil
+    minigameResult = nil
 
-    return success
+    return result
 end
 
 function fdb.minigame.Cancel()
     if activeMinigameId then
-        SendNUIMessage({
-            action = "CANCEL_MINIGAME"
-        })
-        minigameStatus = "failed"
+        SendNUIMessage({ action = "CANCEL_MINIGAME" })
+        minigameResult = { success = false, tier = nil }
         activeMinigameId = nil
     end
 end
 
+-- ============================================================
+-- Callback único, central, pra qualquer tipo de minigame reportar resultado.
+-- Substitui o antigo RegisterNUICallback('minigameResult', ...) que só
+-- entendia boolean puro — agora aceita { success, tier } de qualquer tipo.
+-- ============================================================
+RegisterNUICallback('minigameResult', function(data, cb)
+    fdb.minigame.ReportResult({
+        success = data.success or false,
+        tier = data.tier or nil
+    })
+    cb('ok')
+end)
+
+-- ============================================================
+-- Tipo 1: "lockpick" — skillbar circular já existente, só adaptado
+-- pro formato de registro (comportamento idêntico ao de antes).
+-- ============================================================
+fdb.minigame.Register('lockpick', function(config)
+    SendNUIMessage({
+        action = "START_MINIGAME",
+        minigameType = "lockpick",
+        duration = config.duration or 2000,
+        targetWidth = config.targetWidth or 15,
+        rounds = config.rounds or 3
+    })
+end)
+
+-- ============================================================
+-- Tipo 2: "tierbar" — barra horizontal com zonas (comum/incomum/raro),
+-- cursor indo e voltando, Espaço pra parar. Baseado no minigame que
+-- já existia dentro do illegal-system.
+-- ============================================================
+--- Config esperada:
+---   duration (number, segundos, default 5.0)
+---   images { common, uncommon, rare } (urls opcionais)
+---   zones { common = {start,end}, uncommon = {start,end}, rare = {start,end} }
+---     (em % de 0-100; se omitido, usa o padrão abaixo)
+fdb.minigame.Register('tierbar', function(config)
+    SendNUIMessage({
+        action = "START_MINIGAME",
+        minigameType = "tierbar",
+        duration = config.duration or 5.0,
+        images = config.images or {},
+        zones = config.zones or {
+            common   = { start = 10, ["end"] = 35 },
+            uncommon = { start = 50, ["end"] = 65 },
+            rare     = { start = 80, ["end"] = 88 },
+        }
+    })
+end)
+
 exports('StartMinigame', fdb.minigame.Start)
 exports('CancelMinigame', fdb.minigame.Cancel)
+exports('RegisterMinigame', fdb.minigame.Register)

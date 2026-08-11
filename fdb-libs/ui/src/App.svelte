@@ -5,6 +5,7 @@
     import ProgressBar from './components/ProgressBar.svelte';
     import InputDialog from './components/InputDialog.svelte';
     import Minigame from './components/Minigame.svelte';
+    import TierBar from './components/TierBar.svelte';
     import ContextMenu from './components/ContextMenu.svelte';
     import ThemeEditor from './components/ThemeEditor.svelte';
 
@@ -14,9 +15,12 @@
 
     // Estado do minigame
     let isMinigameActive = false;
+    let activeMinigameType = 'lockpick';
     let minigameDuration = 2000;
     let minigameTargetWidth = 15;
     let minigameRounds = 3;
+    let minigameImages = {};
+    let minigameZones = {};
 
     // Estado do input dialog
     let isInputOpen = false;
@@ -84,11 +88,11 @@
         }).catch(() => {});
     }
 
-    function submitMinigame(success) {
+    function submitMinigame(success, tier = null) {
         isMinigameActive = false;
         fetch(`https://${GetParentResourceName()}/minigameResult`, {
             method: 'POST',
-            body: JSON.stringify({ success: success })
+            body: JSON.stringify({ success: success, tier: tier })
         }).catch(() => {});
     }
 
@@ -139,9 +143,22 @@
             } else if (data.action === 'CLOSE_INPUT') {
                 isInputOpen = false;
             } else if (data.action === 'START_MINIGAME') {
-                minigameDuration = data.duration || 2000;
-                minigameTargetWidth = data.targetWidth || 15;
-                minigameRounds = data.rounds || 3;
+                activeMinigameType = data.minigameType || 'lockpick';
+
+                if (activeMinigameType === 'tierbar') {
+                    minigameDuration = data.duration || 5.0;
+                    minigameImages = data.images || {};
+                    minigameZones = data.zones || {
+                        common: { start: 10, end: 35 },
+                        uncommon: { start: 50, end: 65 },
+                        rare: { start: 80, end: 88 }
+                    };
+                } else {
+                    minigameDuration = data.duration || 2000;
+                    minigameTargetWidth = data.targetWidth || 15;
+                    minigameRounds = data.rounds || 3;
+                }
+
                 isMinigameActive = true;
             } else if (data.action === 'CANCEL_MINIGAME') {
                 isMinigameActive = false;
@@ -220,13 +237,21 @@
         />
     {/if}
 
-    {#if isMinigameActive}
+    {#if isMinigameActive && activeMinigameType === 'lockpick'}
         <Minigame 
             active={isMinigameActive} 
             duration={minigameDuration} 
             targetWidth={minigameTargetWidth} 
             rounds={minigameRounds} 
             on:result={(e) => submitMinigame(e.detail.success)}
+        />
+    {:else if isMinigameActive && activeMinigameType === 'tierbar'}
+        <TierBar
+            active={isMinigameActive}
+            duration={minigameDuration}
+            images={minigameImages}
+            zones={minigameZones}
+            on:result={(e) => submitMinigame(e.detail.success, e.detail.tier)}
         />
     {/if}
 
