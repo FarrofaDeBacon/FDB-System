@@ -98,10 +98,14 @@ Config.Crimes = {
 -- Configurações Específicas: Roubo de Túmulo
 -- ─────────────────────────────────────────────────────────
 Config.GraveRespawn = {
-    mode = 'ingame_days',   -- ou 'restart'
-    minDays = 5,
-    maxDays = 9,
-    minutesPerIngameDay = 48,
+    -- 'restart' = O túmulo volta a ficar disponível toda vez que reiniciar o servidor/script
+    -- 'persistent' = Salva no banco de dados, e só volta após X dias do jogo
+    mode = 'restart', 
+    
+    -- Opções válidas apenas se o mode for 'persistent'
+    minDays = 3, -- Mínimo de dias in-game para o túmulo voltar
+    maxDays = 7, -- Máximo de dias in-game para o túmulo voltar
+    minutesPerIngameDay = 48 -- Quantos minutos da vida real dura um dia no seu servidor
 }
 
 Config.Digging = {
@@ -120,6 +124,7 @@ Config.DirtPile = {
 }
 
 Config.GraveModels = {
+    -2146427795, -- Lápide principal reportada em Valentine
     'p_gravestone01ax', 'p_gravestone01bx', 'p_gravestone01cx', 'p_gravestone01x',
     'p_gravestone02ax', 'p_gravestone02bx', 'p_gravestone02cx', 'p_gravestone02x',
     'p_gravestone03ax', 'p_gravestone03bx', 'p_gravestone03cx', 'p_gravestone03dx', 'p_gravestone03ex',

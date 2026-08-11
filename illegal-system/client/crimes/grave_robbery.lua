@@ -6,10 +6,12 @@ CreateThread(function()
 
     local targetOptions = {
         {
-            name = 'grave_robbery_action',
-            icon = 'fa-solid fa-shovel', -- ícone genérico se suportado
+            icon = 'fas fa-skull-crossbones',
             label = 'Saquear Túmulo',
-            distance = 2.0,
+            distance = 3.5,
+            canInteract = function(entity)
+                return true
+            end,
             onSelect = function(data)
                 local entity = data.entity
                 if not DoesEntityExist(entity) then return end
@@ -28,6 +30,41 @@ CreateThread(function()
 
     Bridge.RegisterTargetModel(Config.GraveModels, targetOptions)
 end)
+
+RegisterCommand('gravetest', function()
+    local testOptions = {
+        {
+            name = 'grave_robbery_test',
+            icon = 'fas fa-skull-crossbones',
+            label = 'Teste Saquear Túmulo',
+            distance = 3.5,
+            onSelect = function(data)
+                print("Target funcionou no túmulo!")
+            end
+        }
+    }
+    exports.ox_target:addModel(Config.GraveModels, testOptions)
+    print("Forçamos o registro de Target nos modelos de túmulo direto no ox_target!")
+end, false)
+
+RegisterCommand('getmodel', function()
+    local playerPed = PlayerPedId()
+    local coords = GetEntityCoords(playerPed)
+    local forward = GetEntityForwardVector(playerPed)
+    local rayStart = coords + vector3(0.0, 0.0, 0.5)
+    local rayEnd = rayStart + (forward * 5.0)
+    
+    local rayHandle = StartShapeTestRay(rayStart.x, rayStart.y, rayStart.z, rayEnd.x, rayEnd.y, rayEnd.z, -1, playerPed, 0)
+    local _, hit, hitCoords, _, entityHit = GetShapeTestResult(rayHandle)
+
+    if hit == 1 and entityHit ~= 0 then
+        local model = GetEntityModel(entityHit)
+        print('Entity Model Hash:', model)
+        TriggerEvent('chat:addMessage', { args = { '^2Model Hash', tostring(model) } })
+    else
+        TriggerEvent('chat:addMessage', { args = { '^1Erro', 'Não achou entidade na frente' } })
+    end
+end, false)
 
 RegisterNetEvent('illegal-system:client:startGraveRobberyMinigame', function(data)
     local crimeConfig = Config.Crimes['grave_robbery']

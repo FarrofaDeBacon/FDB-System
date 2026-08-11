@@ -23,6 +23,7 @@ server_scripts {
 }
 
 client_scripts {
+    'bridge/interface.lua',
     'bridge/rsg_bridge_client.lua',
     'bridge/fdb_bridge_client.lua',
     'client/core.lua',

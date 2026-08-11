@@ -59,8 +59,11 @@ RegisterNetEvent('illegal-system:server:startGraveRobbery', function(graveData)
         end
     end
 
-    if CrimeCore.IsOnCooldown(source, 'grave_robbery') then
-        Bridge.Notify(source, "Você está exausto demais para cavar outro túmulo agora.", "error")
+    local attempt = CrimeCore.AttemptCrime(source, 'grave_robbery')
+    if not attempt.ok then
+        if attempt.reason == 'cooldown' then
+            Bridge.Notify(source, "Você está exausto demais para cavar outro túmulo agora.", "error")
+        end
         return
     end
 
@@ -97,7 +100,7 @@ RegisterNetEvent('illegal-system:server:finishGraveRobbery', function(success, t
     activeGraveRobberies[source] = nil
 
     if not success then
-        CrimeCore.AttemptCrime(source, 'grave_robbery', false, 0)
+        CrimeCore.FinishCrime(source, 'grave_robbery', false, nil)
         Bridge.Notify(source, "Você não encontrou nada.", "error")
         return
     end
@@ -107,9 +110,10 @@ RegisterNetEvent('illegal-system:server:finishGraveRobbery', function(success, t
 
     local rewardItem = session.items[tier]
     
-    Bridge.AddItem(source, rewardItem, 1)
+    -- O FinishCrime já dá o item, não precisamos chamar Bridge.AddItem manualmente aqui
+    -- se passarmos o rewardItem pra ele (veja o core.lua linha 148).
+    CrimeCore.FinishCrime(source, 'grave_robbery', true, rewardItem)
     MarkGraveRobbed(session.graveId)
     
-    CrimeCore.AttemptCrime(source, 'grave_robbery', true, 0)
     Bridge.Notify(source, "Você encontrou algo no túmulo!", "success")
 end)

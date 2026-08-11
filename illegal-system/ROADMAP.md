@@ -30,26 +30,31 @@ Heat/XP → possível testemunha → histórico. Se esse fluxo estiver sólido, 
 crimes (túmulo, casa, loja...) são só configuração + um arquivo de crime específico,
 sem tocar no Core.
 
+## Etapa 3 — Roubo de Túmulos (entregue neste pacote)
+
+- [x] `client/crimes/grave_robbery.lua` — Client do roubo a túmulos (sistema de ox_target global com distância ajustada).
+- [x] `server/crimes/grave_robbery.lua` — Servidor do roubo a túmulos, controlando Loot Dinâmico, Integração ao Crime Core, e Segurança Anti-Exploit.
+- [x] Minigame de precisão (`circle_shake`).
+- [x] Mecanismo de Cooldown do Túmulo com banco de dados persistente (dias no jogo).
+- [x] Animações completas com pá e feedback visual de montes de terra na lápide (dirt pile).
+
 ## Próximas etapas (não entregues ainda — ordem sugerida)
 
 | Etapa | Conteúdo | Depende de |
 |---|---|---|
-| 3 | Roubo de túmulos | Core, loot tables |
-| 4 | Roubo de casas (múltiplos pontos, arrombamento, barulho) | Core, sistema de loot |
-| 5 | Loot tables + itens roubados (`stolen = true`) + receptadores | Core |
-| 6 | Evidências físicas completas (não só o roll — objeto no mundo, perícia) | Fase 1 (hook já existe) |
-| 7 | Integração com polícia (evento com descrição, não identidade) | Testemunha/evidência completos |
-| 8 | Carroças, lojas, diligências | Core, loot |
-| 9 | Contrabando + mercado negro + contratos | Receptadores, reputação |
-| 10 | Trem, banco | Tudo acima |
-| 11 | Gangues, território | Endgame — só depois do resto estável |
+| 4 | Roubo de Lojas (Hold-up em NPCs, arrombamento de caixas) | Core, sistema de loot |
+| 5 | Roubo de casas (múltiplos pontos, arrombamento, barulho) | Core, sistema de loot |
+| 6 | Loot tables + itens roubados (`stolen = true`) + receptadores | Core |
+| 7 | Evidências físicas completas (não só o roll — objeto no mundo, perícia) | Fase 1 (hook já existe) |
+| 8 | Integração com polícia (evento com descrição, não identidade) | Testemunha/evidência completos |
+| 9 | Carroças, diligências | Core, loot |
+| 10 | Contrabando + mercado negro + contratos | Receptadores, reputação |
+| 11 | Trem, banco | Tudo acima |
+| 12 | Gangues, território | Endgame — só depois do resto estável |
 
-## Pendências de decisão antes da Etapa 3
+## Pendências resolvidas na arquitetura base
 
-- **Target system**: o `client/core.lua` está escrito de forma agnóstica (função
-  `Bridge.RegisterTargetEntity` no bridge), mas você precisa me dizer se o servidor do
-  cliente usa `ox_target`, `rsg-target` ou outro — isso vai direto no `rsg_bridge.lua`.
-- **Inventário**: hoje o roubo de NPC só dá dinheiro (`AddMoney`). Pra dar item precisa
-  saber se é `ox_inventory` ou `rsg-inventory` (nomes de export diferem).
-- **oxmysql**: assumi que a base usa `oxmysql` (padrão atual do RSG-Core) pro `sql/install.sql`
-  e pro insert de histórico. Se for `ghmattimysql` ou outro, é só trocar o wrapper em `core.lua`.
+- **Target system**: O sistema usa `ox_target` para props/peds. Foi criada uma Bridge transparente (`fdb_bridge_client.lua` e `rsg_bridge_client.lua`) que trata o registro do `ox_target` independentemente da base.
+- **Minigames**: Utilização robusta da `fdb-libs`.
+- **Inventário**: Funções `HasItem`, `AddItem` centralizadas via Bridge.
+- **Banco de Dados**: Usamos `oxmysql` via comandos diretos no `CrimeCore`. Módulo totalmente plug-and-play.
