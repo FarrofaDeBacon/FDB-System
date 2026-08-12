@@ -71,9 +71,10 @@ RegisterNetEvent('illegal-system:client:startStoreRobbery', function(storeName, 
 
     elseif reaction == 'flee' then
         Bridge.Notify("Por favor, não me machuque!", "error")
-        -- FIX do bug de hoje: TaskSmartFleePed em vez de TaskGoToCoordAnyMeans.
-        -- Foge do jogador com desvio de obstáculo, não trava mais no balcão.
-        TaskSmartFleePed(ped, PlayerPedId(), 100.0, -1, false, false)
+        -- Como lojistas ficam presos atrás de um balcão apertado, qualquer corrida (Flee)
+        -- faz eles bugarem empurrando a madeira. A melhor reação para isso é TaskCower
+        -- (se encolher de medo no chão do balcão).
+        TaskCower(ped, -1)
         isRobbingStore = false
         TriggerServerEvent('illegal-system:server:cancelStoreRobbery', storeName, sessionToken)
     end
