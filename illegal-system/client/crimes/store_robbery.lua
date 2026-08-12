@@ -34,16 +34,8 @@ local function GetStoreZone(pedCoords)
     return nil
 end
 
-RegisterNetEvent('illegal-system:client:startStoreRobbery', function(storeName, sessionToken)
+RegisterNetEvent('illegal-system:client:startStoreRobbery', function(storeName, sessionToken, reaction)
     local ped = currentRobbedPed -- o NPC que foi mirado, salvo no passo 2
-
-    local reactionRoll = math.random(1, 100)
-    local crimeConfig = Config.Crimes['store_robbery']
-    local complyChance = crimeConfig.reactions.comply
-    local fightChance = complyChance + crimeConfig.reactions.fight
-    local reaction = reactionRoll <= complyChance and 'comply'
-        or reactionRoll <= fightChance and 'fight'
-        or 'flee'
 
     SetBlockingOfNonTemporaryEvents(ped, true)
     FreezeEntityPosition(ped, false) -- Descongela o NPC (o fdb-shops spawna eles congelados)
@@ -76,6 +68,10 @@ RegisterNetEvent('illegal-system:client:startStoreRobbery', function(storeName, 
 
     elseif reaction == 'flee' then
         Bridge.Notify("Por favor, não me machuque!", "error")
+        -- Se ele vai se acovardar, ele precisa ser mortal (fdb-shops spawna invencivel)
+        SetEntityCanBeDamaged(ped, true)
+        SetEntityInvincible(ped, false)
+        
         -- Como lojistas ficam presos atrás de um balcão apertado, qualquer corrida (Flee)
         -- faz eles bugarem empurrando a madeira. A melhor reação para isso é TaskCower
         -- (se encolher de medo no chão do balcão).
@@ -191,15 +187,15 @@ end)
 
 -- Iniciar Minigames do Burglary
 RegisterNetEvent('illegal-system:client:startBurglaryMinigame', function(storeName, targetType, sessionToken)
-    local minigameConfig = Config.Crimes['store_robbery'].minigame
+    local minigameConfig = Config.Crimes['store_burglary'].minigame[targetType]
     
-    if minigameConfig.type == 'tierbar' then
-        SendNUIMessage({
-            action = "START_MINIGAME",
-            duration = minigameConfig.duration,
-            zones = minigameConfig.zones
-        })
-        SetNuiFocus(true, false)
+    -- Tipo fixo como 'tierbar' já que foi simplificado no config
+    SendNUIMessage({
+        action = "START_MINIGAME",
+        duration = minigameConfig.duration,
+        zones = minigameConfig.zones
+    })
+    SetNuiFocus(true, false)
         
         -- Simular animação de arrombamento (kneel)
         TaskStartScenarioInPlace(PlayerPedId(), GetHashKey("WORLD_HUMAN_CROUCH_INSPECT"), -1, true, false, false, false)
@@ -227,5 +223,4 @@ RegisterNetEvent('illegal-system:client:startBurglaryMinigame', function(storeNa
         else
             Bridge.Notify("Você falhou no arrombamento!", "error")
         end
-    end
 end)

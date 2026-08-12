@@ -82,11 +82,20 @@ Config.Crimes = {
             common = { 'cannedbeans', 'apple', 'bread' },
             uncommon = { 'ammo_revolver', 'cigar' },
             rare = { 'goldnugget', 'pocketwatch' }
-        },
-        burglaryLoot = { -- Loot especial da registradora à noite
-            common = { 'cash_roll', 'silver_ring' },
-            uncommon = { 'gold_ring', 'pocketwatch' },
-            rare = { 'goldbar' }
+        }
+    },
+
+    ['store_burglary'] = {
+        label            = 'Arrombamento de Loja',
+        category         = 'roubo',
+        difficulty       = 2,
+        xp               = 15,
+        heat             = 10,
+        cooldown         = 300, -- 5 minutos de cooldown por jogador (apenas para evitar spam do minigame)
+        requiredItem     = 'lockpick',
+        minigame = {
+            door = { duration = 8.0, zones = { common = {start=20,["end"]=40} } },
+            register = { duration = 5.0, zones = { common = {start=30,["end"]=50} } }
         }
     },
 
@@ -125,12 +134,19 @@ Config.Crimes = {
 Config.GraveRespawn = {
     -- 'restart' = O túmulo volta a ficar disponível toda vez que reiniciar o servidor/script
     -- 'persistent' = Salva no banco de dados, e só volta após X dias do jogo
-    mode = 'restart', 
+    mode = 'persistent', 
     
     -- Opções válidas apenas se o mode for 'persistent'
     minDays = 3, -- Mínimo de dias in-game para o túmulo voltar
     maxDays = 7, -- Máximo de dias in-game para o túmulo voltar
     minutesPerIngameDay = 48 -- Quantos minutos da vida real dura um dia no seu servidor
+}
+
+Config.StoreRobberyRespawn = {
+    mode = 'persistent', 
+    minDays = 1, -- Mínimo de dias in-game para a registradora voltar a ter dinheiro
+    maxDays = 3, -- Máximo de dias in-game para a registradora voltar a ter dinheiro
+    minutesPerIngameDay = 48
 }
 
 Config.Digging = {
@@ -191,6 +207,7 @@ Config.Stores = {
         fleeCoords = vec3(-318.0, 808.0, 117.9), -- Coordenada para onde ele foge
         openHour = 6,
         closeHour = 22,
+        registerCash = { min = 15, max = 45 }
     },
     {
         name = "Valentine Gunsmith",
@@ -200,6 +217,7 @@ Config.Stores = {
         registerCoords = vec3(-278.0, 775.0, 119.52),
         openHour = 6,
         closeHour = 22,
+        registerCash = { min = 30, max = 80 }
     },
     {
         name = "Valentine Doctor",
@@ -209,5 +227,6 @@ Config.Stores = {
         registerCoords = vec3(-245.5, 781.5, 118.47),
         openHour = 6,
         closeHour = 22,
+        registerCash = { min = 20, max = 60 }
     }
 }
