@@ -78,20 +78,16 @@ end
 -------------------------
 CreateThread(function()
     local keybind = FDBCore.Shared.Keybinds[Config.Keybind] or Config.Keybind
+    local createdPrompts = {}
 
+    -- Inicialização: Cria blips e prompts (se não usar NPC) apenas uma vez
     for _, v in pairs(Config.StoreLocations) do
         if not v.name or not v.shopcoords then
             logWarn(locale('shop_skipped_missing_fields'))
             goto continue
         end
 
-        if Config.UseNPCs and v.npccoords then
-            local npc = SpawnShopNPC(v)
-            if npc then
-                spawnedNPCs[v.name] = npc
-                SetupNPCTarget(npc, v)
-            end
-        else
+        if not Config.UseNPCs or not v.npccoords then
             pcall(exports['fdb-core'].createPrompt, exports['fdb-core'],
                 v.name, v.shopcoords, keybind,
                 locale('lang_1') .. v.label, {
@@ -113,6 +109,41 @@ CreateThread(function()
         end
 
         ::continue::
+    end
+
+    -- Loop de gerenciamento dinâmico de NPCs (Ciclo Dia/Noite)
+    while true do
+        Wait(5000)
+        local hour = GetClockHours()
+        
+        for _, v in pairs(Config.StoreLocations) do
+            if Config.UseNPCs and v.npccoords then
+                local openH = v.openHour or Config.DefaultOpenHour
+                local closeH = v.closeHour or Config.DefaultCloseHour
+                
+                local isOpen = false
+                if openH < closeH then
+                    isOpen = (hour >= openH and hour < closeH)
+                else
+                    isOpen = (hour >= openH or hour < closeH)
+                end
+                
+                if isOpen and not spawnedNPCs[v.name] then
+                    local npc = SpawnShopNPC(v)
+                    if npc then
+                        spawnedNPCs[v.name] = npc
+                        SetupNPCTarget(npc, v)
+                    end
+                elseif not isOpen and spawnedNPCs[v.name] then
+                    local npc = spawnedNPCs[v.name]
+                    if DoesEntityExist(npc) then
+                        exports.ox_target:removeLocalEntity(npc)
+                        DeleteEntity(npc)
+                    end
+                    spawnedNPCs[v.name] = nil
+                end
+            end
+        end
     end
 end)
 

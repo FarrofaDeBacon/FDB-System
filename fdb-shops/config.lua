@@ -6,6 +6,8 @@ Config = {}
 Config.Keybind = 'J' -- keybind prompt to open shop
 Config.UseNPCs = true -- enable NPC spawning at shop locations
 Config.NPCModel = 's_m_m_unibutchers_01' -- default NPC model for shops
+Config.DefaultOpenHour = 6 -- Hora de abertura das lojas (0-23)
+Config.DefaultCloseHour = 22 -- Hora de fechamento das lojas (0-23)
 
 ---------------------------------
 -- shop items
