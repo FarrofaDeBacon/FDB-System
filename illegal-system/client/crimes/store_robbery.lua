@@ -2,6 +2,11 @@ local isRobbingStore = false
 local robbedPeds = {}
 local currentRobbedPed = 0
 
+-- Injeta atributos no lojista assim que o fdb-shops spawna ele
+AddEventHandler('fdb-shops:client:npcCreated', function(npc, shopData)
+    SetBlockingOfNonTemporaryEvents(npc, true)
+    SetPedFleeAttributes(npc, 0, false)
+end)
 local function GetStoreZone(pedCoords)
     for _, store in ipairs(Config.Stores) do
         local dist = #(pedCoords - store.coords)

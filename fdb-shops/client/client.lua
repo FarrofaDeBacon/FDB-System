@@ -40,8 +40,9 @@ local function SpawnShopNPC(shopData)
     SetEntityCanBeDamaged(npc, false)
     SetEntityInvincible(npc, true)
     FreezeEntityPosition(npc, true)
-    SetBlockingOfNonTemporaryEvents(npc, true)
-    SetPedFleeAttributes(npc, 0, false)
+
+    -- Permite que outros scripts (como o illegal-system) injetem lógica no NPC criado
+    TriggerEvent('fdb-shops:client:npcCreated', npc, shopData)
 
     if shopData.scenario then
         pcall(TaskStartScenarioInPlace, npc, joaat(shopData.scenario), -1, true, false, false, false)
