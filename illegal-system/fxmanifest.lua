@@ -21,7 +21,7 @@ server_scripts {
     'server/core.lua',
     'server/crimes/npc_robbery.lua',
     'server/crimes/grave_robbery.lua',
-    'server/crimes/store_robbery_v2.lua'
+    'server/crimes/store_robbery.lua'
 }
 
 client_scripts {
@@ -31,7 +31,7 @@ client_scripts {
     'client/core.lua',
     'client/crimes/dev_tool.lua',
     'client/crimes/grave_robbery.lua',
-    'client/crimes/store_robbery_v2.lua'
+    'client/crimes/store_robbery.lua'
 }
 
 dependencies {

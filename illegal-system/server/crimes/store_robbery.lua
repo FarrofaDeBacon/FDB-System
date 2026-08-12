@@ -1,6 +1,5 @@
 local crimeId = 'store_robbery'
 local activeBurglaries = {} -- Controle dos tokens de arrombamento (noite)
-local activeRobberies = {} -- Controle dos tokens de roubo (dia)
 
 local function GenerateToken()
     local charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -13,57 +12,47 @@ local function GenerateToken()
 end
 
 -- ==========================================
--- 1. MÉTODOS DIURNOS (Assalto Estático)
+-- 1. MÉTODOS DIURNOS (Assalto ao Lojista)
 -- ==========================================
-RegisterNetEvent('illegal-system:server:attemptStoreRobbery', function(storeName)
+RegisterNetEvent('illegal-system:server:attemptStoreRobbery', function(storeName, method)
     local source = source
     local attempt = CrimeCore.AttemptCrime(source, crimeId)
 
     if not attempt.ok then
-        Bridge.Notify(source, "A poeira ainda não baixou nessa área.", "error")
+        TriggerClientEvent('illegal-system:client:storeRobberyFailed', source, attempt.reason)
         return
     end
-
-    local sessionToken = GenerateToken()
-    activeRobberies[source] = {
-        token = sessionToken,
-        startTime = os.time(),
-        storeName = storeName
-    }
-
-    TriggerClientEvent('illegal-system:client:startStoreRobbery', source, storeName, sessionToken)
-end)
-
-RegisterNetEvent('illegal-system:server:finishStoreRobbery', function(storeName, sessionToken)
-    local source = source
-    local session = activeRobberies[source]
-    
-    if not session or session.token ~= sessionToken then
-        print(string.format("[illegal-system] EXPLOIT DETECTADO: Jogador ID %s tentou forçar o evento de store_robbery.", source))
-        return
-    end
-    
-    local elapsed = os.time() - session.startTime
-    -- O client demora 8 segundos no progressBar
-    if elapsed < 7 then
-        print(string.format("[illegal-system] EXPLOIT DETECTADO: Jogador ID %s burlou o tempo do assalto a loja.", source))
-        activeRobberies[source] = nil
-        return
-    end
-
-    activeRobberies[source] = nil
 
     local crimeConfig = Config.Crimes[crimeId]
-    local pool = Utils.GetRandomLootPool()
-    local items = crimeConfig.loot[pool]
-    local reward = items[math.random(#items)]
-    
-    CrimeCore.FinishCrime(source, crimeId, true, reward)
-end)
+    local reactionRoll = math.random(1, 100)
+    local reaction = 'comply'
 
-RegisterNetEvent('illegal-system:server:cancelStoreRobbery', function(storeName, sessionToken)
-    local source = source
-    activeRobberies[source] = nil
+    local complyChance = crimeConfig.reactions.comply
+    local fightChance = complyChance + crimeConfig.reactions.fight
+
+    if reactionRoll <= complyChance then
+        reaction = 'comply'
+    elseif reactionRoll <= fightChance then
+        reaction = 'fight'
+    else
+        reaction = 'flee'
+    end
+
+    TriggerClientEvent('illegal-system:client:storeRobberyReaction', source, reaction, storeName)
+
+    if reaction == 'comply' then
+        SetTimeout(5000, function()
+            local pool = Utils.GetRandomLootPool()
+            local items = crimeConfig.loot[pool]
+            local reward = items[math.random(#items)]
+            
+            CrimeCore.FinishCrime(source, crimeId, true, reward)
+        end)
+    else
+        -- Fugiu ou lutou, crime finalizado sem loot (mas com heat se quisermos no futuro)
+        -- Para evitar travar o jogador no cooldown sem loot, podemos não chamar FinishCrime ou chamar com success = false
+        CrimeCore.FinishCrime(source, crimeId, false, nil)
+    end
 end)
 
 -- ==========================================
@@ -106,9 +95,9 @@ RegisterNetEvent('illegal-system:server:finishBurglary', function(storeName, tar
     end
     
     local crimeConfig = Config.Crimes[crimeId]
-    local minExpected = 0.5 -- Minigame rápido
+    local minDuration = (crimeConfig.minigame.duration * 1000) - 1000
 
-    if (timeElapsed/1000) < minExpected then
+    if timeElapsed < minDuration then
         print(string.format("[illegal-system] EXPLOIT DETECTADO: Jogador ID %s burlou o tempo do minigame de burglary.", source))
         activeBurglaries[source] = nil
         return
@@ -118,9 +107,14 @@ RegisterNetEvent('illegal-system:server:finishBurglary', function(storeName, tar
 
     if targetType == 'door' then
         Bridge.Notify(source, "Porta destrancada!", "success")
-    else
-        local pool = Utils.GetRandomLootPool()
-        local items = crimeConfig.burglaryLoot[pool]
+        -- Se houvesse um script de portas (doorlock), abriríamos a porta aqui.
+        -- Como é um interior aberto, o minigame apenas serve de barreira de entrada RP.
+        -- (Futuramente pode teleportar para dentro se for um interior fechado)
+        
+    elseif targetType == 'register' then
+        local items = crimeConfig.burglaryLoot[tier]
+        if not items then return end
+        
         local reward = items[math.random(#items)]
         CrimeCore.FinishCrime(source, crimeId, true, reward)
     end
