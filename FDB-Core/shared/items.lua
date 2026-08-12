@@ -21,8 +21,8 @@ FDBShared.Items = {
     canteen25  = { name = 'canteen25',  label = 'Canteen',       weight = 200, type = 'item', image = 'canteen25.png',  unique = true,  useable = true, shouldClose = true, description = 'Canteen 25% Full'},
     canteen0   = { name = 'canteen0',   label = 'Empty Canteen', weight = 100, type = 'item', image = 'canteen0.png',   unique = true,  useable = true, shouldClose = true, description = 'Empty Canteen'},
     handcuffs  = { name = 'handcuffs',  label = 'Hand Cuffs',    weight = 100, type = 'item', image = 'handcuffs.png',  unique = false, useable = true, shouldClose = true, description = 'Used for cuffs' },
-
     -- tools
+    lockpick= { name = 'lockpick',label = 'Lockpick',weight = 100, type = 'item', image = 'lockpick.png', unique = false, useable = true, shouldClose = true, description = 'Ferramenta para arrombar portas' },
     pickaxe = { name = 'pickaxe', label = 'Pickaxe', weight = 1000, type = 'item', image = 'pickaxe.png', unique = false, useable = false, shouldClose = true, description = '' },
     axe     = { name = 'axe',     label = 'Axe',     weight = 1000, type = 'item', image = 'axe.png',     unique = false, useable = false, shouldClose = true, description = '' },
     shovel  = { name = 'shovel',  label = 'Shovel',  weight = 1000, type = 'item', image = 'shovel.png',  unique = false, useable = false, shouldClose = true, description = '' },
