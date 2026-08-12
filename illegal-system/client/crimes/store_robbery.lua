@@ -46,6 +46,7 @@ RegisterNetEvent('illegal-system:client:startStoreRobbery', function(storeName, 
         or 'flee'
 
     SetBlockingOfNonTemporaryEvents(ped, true)
+    FreezeEntityPosition(ped, false) -- Descongela o NPC (o fdb-shops spawna eles congelados)
 
     if reaction == 'comply' then
         TaskHandsUp(ped, 8000, PlayerPedId(), -1, true)
@@ -63,6 +64,10 @@ RegisterNetEvent('illegal-system:client:startStoreRobbery', function(storeName, 
 
     elseif reaction == 'fight' then
         Bridge.Notify("Você não vai levar nada meu!", "error")
+        -- Se ele vai atirar no jogador, ele precisa ser mortal (fdb-shops spawna invencivel)
+        SetEntityCanBeDamaged(ped, true)
+        SetEntityInvincible(ped, false)
+        
         GiveWeaponToPed_2(ped, 0x1D073A89, 50, true, true, 1, false, 0.5, 1.0, 1.0, true, 0, 0)
         SetPedCombatMovement(ped, 0) -- 0 = Stationary (Fica parado atirando)
         TaskCombatPed(ped, PlayerPedId(), 0, 16)
