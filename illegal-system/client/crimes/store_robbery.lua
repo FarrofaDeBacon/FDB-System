@@ -12,56 +12,56 @@ local function GetStoreZone(pedCoords)
     return nil
 end
 
-local function HandlePedReaction(ped, reaction, storeName)
-    local storeConfig = nil
-    for _, s in ipairs(Config.Stores) do
-        if s.name == storeName then
-            storeConfig = s
-            break
-        end
-    end
+RegisterNetEvent('illegal-system:client:startStoreRobbery', function(storeName, sessionToken)
+    local ped = currentRobbedPed -- o NPC que foi mirado, salvo no passo 2
+
+    local reactionRoll = math.random(1, 100)
+    local crimeConfig = Config.Crimes['store_robbery']
+    local complyChance = crimeConfig.reactions.comply
+    local fightChance = complyChance + crimeConfig.reactions.fight
+    local reaction = reactionRoll <= complyChance and 'comply'
+        or reactionRoll <= fightChance and 'fight'
+        or 'flee'
 
     SetBlockingOfNonTemporaryEvents(ped, true)
-    
+
     if reaction == 'comply' then
-        local dict = "mech_loco_m@generic@reaction@handsup@unarmed@normal"
-        local anim = "loop"
-        RequestAnimDict(dict)
-        while not HasAnimDictLoaded(dict) do Wait(10) end
-        
-        ClearPedTasksImmediately(ped)
-        TaskPlayAnim(ped, dict, anim, 8.0, -8.0, -1, 31, 0, false, 0, false, 0, false)
+        TaskHandsUp(ped, 8000, PlayerPedId(), -1, true)
         Bridge.Notify("Calma, calma! Leve tudo!", "success")
-        Wait(5000)
-        ClearPedTasks(ped)
-        TaskCower(ped, -1)
-        
+
+        if lib.progressBar({
+            duration = 8000, label = "Levando o dinheiro...",
+            disable = { car = true, move = true, combat = true }, canCancel = true
+        }) then
+            TriggerServerEvent('illegal-system:server:finishStoreRobbery', storeName, sessionToken)
+        else
+            TriggerServerEvent('illegal-system:server:cancelStoreRobbery', storeName, sessionToken)
+        end
+        isRobbingStore = false
+
     elseif reaction == 'fight' then
         Bridge.Notify("Você não vai levar nada meu!", "error")
         GiveWeaponToPed_2(ped, 0x1D073A89, 50, true, true, 1, false, 0.5, 1.0, 1.0, true, 0, 0)
         TaskCombatPed(ped, PlayerPedId(), 0, 16)
-        
+        isRobbingStore = false
+        TriggerServerEvent('illegal-system:server:cancelStoreRobbery', storeName, sessionToken)
+
     elseif reaction == 'flee' then
         Bridge.Notify("Por favor, não me machuque!", "error")
-        -- Fix do bug de colisão: TaskSmartFleePed foge do jogador de forma inteligente
+        -- FIX do bug de hoje: TaskSmartFleePed em vez de TaskGoToCoordAnyMeans.
+        -- Foge do jogador com desvio de obstáculo, não trava mais no balcão.
         TaskSmartFleePed(ped, PlayerPedId(), 100.0, -1, false, false)
+        isRobbingStore = false
+        TriggerServerEvent('illegal-system:server:cancelStoreRobbery', storeName, sessionToken)
     end
-    
+
     SetTimeout(30000, function()
         if DoesEntityExist(ped) then
             SetBlockingOfNonTemporaryEvents(ped, false)
             ClearPedTasks(ped)
         end
+        robbedPeds[ped] = nil
     end)
-end
-
-RegisterNetEvent('illegal-system:client:storeRobberyReaction', function(reaction, storeName)
-    if currentRobbedPed > 0 and DoesEntityExist(currentRobbedPed) then
-        HandlePedReaction(currentRobbedPed, reaction, storeName)
-        currentRobbedPed = 0
-    end
-    Wait(5000)
-    isRobbingStore = false
 end)
 
 RegisterNetEvent('illegal-system:client:storeRobberyFailed', function(reason)
