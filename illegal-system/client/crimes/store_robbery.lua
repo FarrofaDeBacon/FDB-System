@@ -24,7 +24,12 @@ local function HandlePedReaction(ped, reaction, storeName)
     SetBlockingOfNonTemporaryEvents(ped, true)
     
     if reaction == 'comply' then
-        TaskHandsUp(ped, 5000, PlayerPedId(), -1, true)
+        local dict = "script_proc@robberies@shop@strgen"
+        local anim = "handsup_register"
+        RequestAnimDict(dict)
+        while not HasAnimDictLoaded(dict) do Wait(10) end
+        
+        TaskPlayAnim(ped, dict, anim, 8.0, -8.0, -1, 1, 0, false, 0, false, 0, false)
         Bridge.Notify("Calma, calma! Leve tudo!", "success")
         Wait(5000)
         ClearPedTasks(ped)
