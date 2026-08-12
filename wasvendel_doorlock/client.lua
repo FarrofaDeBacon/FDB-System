@@ -299,6 +299,14 @@ local lockpicking = false
 
 local function runLockpick(cb)
     local cfg = Config.Lockpick or {}
+    
+    if cfg.resource == "fdb-lockpick" then
+        TriggerEvent('fdb-lockpick:client:openLockpick', function(success)
+            cb(success)
+        end)
+        return
+    end
+
     local res = cfg.resource or "lockpick"
     local exportName = cfg.export or "startLockpick"
 
@@ -428,11 +436,61 @@ local function drawStatus(lock)
     end
 end
 
+local targetZones = {}
+
+local function refreshTargets()
+    for _, id in ipairs(targetZones) do
+        exports.ox_target:removeZone(id)
+    end
+    targetZones = {}
+
+    for id, lock in pairs(Locks) do
+        local p = lock.prompt
+        if p then
+            local zoneId = exports.ox_target:addSphereZone({
+                coords = vec3(p.x, p.y, p.z),
+                radius = lock.promptRadius or 2.0,
+                debug = false,
+                options = {
+                    {
+                        name = 'door_toggle_'..id,
+                        icon = 'fa-solid fa-key',
+                        label = 'Abrir / Trancar',
+                        canInteract = function()
+                            return accessOk[id] == true
+                        end,
+                        onSelect = function()
+                            requestToggle(id)
+                        end
+                    },
+                    {
+                        name = 'door_lockpick_'..id,
+                        icon = 'fa-solid fa-unlock',
+                        label = 'Arrombar Porta',
+                        canInteract = function()
+                            if lock.locked and lock.canLockpick and accessOk[id] ~= true then
+                                return true
+                            end
+                            return false
+                        end,
+                        onSelect = function()
+                            local required = lock.lockpickItem
+                            TriggerEvent("wasvendel_doorlock:useLockpickItem", required and required or nil)
+                        end
+                    }
+                }
+            })
+            table.insert(targetZones, zoneId)
+        end
+    end
+end
+
 RegisterNetEvent("wasvendel_doorlock:syncAll", function(data)
     Locks = data or {}
     accessOk = {}
     accessInfo = {}
     applyAllVisuals()
+    refreshTargets()
 end)
 
 RegisterNetEvent("wasvendel_doorlock:syncOne", function(lockId, locked)
@@ -466,6 +524,7 @@ RegisterNetEvent("wasvendel_doorlock:menuSaved", function(data)
     accessOk = {}
     accessInfo = {}
     applyAllVisuals()
+    refreshTargets()
     SendNUIMessage({ action = "refresh", locks = Locks })
 end)
 
