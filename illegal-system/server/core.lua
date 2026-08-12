@@ -147,6 +147,7 @@ function CrimeCore.FinishCrime(source, crimeId, success, rewardItem)
         if rewardItem then
             Bridge.AddItem(source, rewardItem, 1)
             rewardGivenName = rewardItem
+            Bridge.Notify(source, "Você roubou 1x " .. rewardItem .. "!", "success")
         end
         record.xp = record.xp + crime.xp
         record.heat = math.min(Config.Heat.max, record.heat + crime.heat)
