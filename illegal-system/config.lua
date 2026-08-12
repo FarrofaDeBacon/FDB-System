@@ -65,6 +65,31 @@ Config.Crimes = {
         }
     },
 
+    ['store_robbery'] = {
+        label            = 'Assalto a Loja',
+        category         = 'roubo',
+        difficulty       = 3,
+        xp               = 30,
+        heat             = 20,
+        cooldown         = 3600,
+        requiredItem     = 'lockpick', -- Para a noite
+        reactions = {
+            comply = 60,
+            fight = 20,
+            flee = 20,
+        },
+        loot = {
+            common = { 'cannedbeans', 'apple', 'bread' },
+            uncommon = { 'ammo_revolver', 'cigar' },
+            rare = { 'goldnugget', 'pocketwatch' }
+        },
+        burglaryLoot = { -- Loot especial da registradora à noite
+            common = { 'cash_roll', 'silver_ring' },
+            uncommon = { 'gold_ring', 'pocketwatch' },
+            rare = { 'goldbar' }
+        }
+    },
+
     ['grave_robbery'] = {
         label            = 'Roubo de Túmulo',
         category         = 'roubo',
@@ -73,7 +98,7 @@ Config.Crimes = {
         heat             = 10,
         witnessChance    = 15,          -- % de gerar testemunha
         evidenceChance   = 20,          -- % de gerar evidência
-        cooldown         = 10 * 60,     -- segundos (por jogador)
+        cooldown         = 1,           -- 1 SEGUNDO (PARA TESTES!)
         requiredItem     = 'shovel',
 
         loot = {
@@ -118,48 +143,71 @@ Config.Digging = {
 }
 
 Config.DirtPile = {
-    Model = 'mp005_p_dirtpile_tall_unburied',
+    Models = {
+        'mp005_p_dirtpile_tall_unburied',
+        'p_coffin02x'
+    },
     OffsetForward = 0.6,
     OffsetZ = -1.0
 }
 
 Config.GraveModels = {
-    -2146427795, -- Lápide principal reportada em Valentine
-    'p_gravestone01ax', 'p_gravestone01bx', 'p_gravestone01cx', 'p_gravestone01x',
-    'p_gravestone02ax', 'p_gravestone02bx', 'p_gravestone02cx', 'p_gravestone02x',
-    'p_gravestone03ax', 'p_gravestone03bx', 'p_gravestone03cx', 'p_gravestone03dx', 'p_gravestone03ex',
-    'p_gravestone03x', 'p_gravestone04x', 'p_gravestone05x', 'p_gravestone06x', 'p_gravestone07x',
-    'p_gravestone08x', 'p_gravestone09x', 'p_gravestone10x', 'p_gravestone11x', 'p_gravestone12x',
-    'p_gravestone13x', 'p_gravestone14x', 'p_gravestone15x', 'p_gravestone16x', 'p_gravestone17x',
-    'p_gravestone18x', 'p_gravestone19x', 'p_gravestone20x', 'p_gravestone21x', 'p_gravestone22x',
-    'p_gravestone_anim01x', 'p_gravestone_anim02x', 'p_gravestone_anim03x', 'p_gravestone_anim04x',
-    'p_gravestone_anim05x', 'p_gravestone_anim06x', 'p_gravestone_anim07x', 'p_gravestone_anim08x',
-    'p_gravestone_anim09x', 'p_gravestone_anim10x', 'p_gravestone_broken01x', 'p_gravestone_broken02x',
-    'p_gravestone_broken03x', 'p_gravestone_broken04x', 'p_gravestone_broken05x', 'p_gravestone_broken06x',
-    'p_gravestone_broken07x', 'p_gravestone_broken08x', 'p_gravestone_broken09x', 'p_gravestone_broken10x',
-    'p_gravestone_broken11x', 'p_gravestone_broken12x', 'p_gravestone_broken13x', 'p_gravestone_broken14x',
-    'p_gravestone_broken15x', 'p_gravestone_broken16x', 'p_gravestone_broken17x', 'p_gravestone_broken18x',
-    'p_gravestone_broken19x', 'p_gravestone_clean01x', 'p_gravestone_clean02x', 'p_gravestone_clean03x',
-    'p_gravestone_clean04x', 'p_gravestone_clean05x', 'p_gravestone_clean06x', 'p_gravestone_clean07x',
-    'p_gravestone_de01x', 'p_gravestone_driftwood01x', 'p_gravestone_eb01x', 'p_gravestone_endless01x',
-    'p_gravestone_endless02x', 'p_gravestone_flat01x', 'p_gravestone_flat02x', 'p_gravestone_flat03x',
-    'p_gravestone_iron01x', 'p_gravestone_iron02x', 'p_gravestone_iron03x', 'p_gravestone_iron04x',
-    'p_gravestone_iron05x', 'p_gravestone_iron06x', 'p_gravestone_iron07x', 'p_gravestone_iron08x',
-    'p_gravestone_ironcross01x', 'p_gravestone_ironcross02x', 'p_gravestone_log01x', 'p_gravestone_obelisk01x',
-    'p_gravestone_obelisk02x', 'p_gravestone_obelisk03x', 'p_gravestone_obelisk04x', 'p_gravestone_rock01x',
-    'p_gravestone_rock02x', 'p_gravestone_rock03x', 'p_gravestone_rock04x', 'p_gravestone_rock05x',
-    'p_gravestone_rock06x', 'p_gravestone_rock07x', 'p_gravestone_rock08x', 'p_gravestone_rock09x',
-    'p_gravestone_rock10x', 'p_gravestone_rock11x', 'p_gravestone_rock12x', 'p_gravestone_rock13x',
-    'p_gravestone_rock14x', 'p_gravestone_rock15x', 'p_gravestone_rock16x', 'p_gravestone_rock17x',
-    'p_gravestone_statue01x', 'p_gravestone_tree01x', 'p_gravestone_vault01x', 'p_gravestone_vault02x',
-    'p_gravestone_vault03x', 'p_gravestone_vault04x', 'p_gravestone_vault05x', 'p_gravestone_vault06x',
-    'p_gravestone_wall01x', 'p_gravestone_wood01x', 'p_gravestone_wood02x', 'p_gravestone_wood03x',
-    'p_gravestone_wood04x', 'p_gravestone_wood05x', 'p_gravestone_wood06x', 'p_gravestone_wood07x',
-    'p_gravestone_wood08x', 'p_gravestone_wood09x', 'p_gravestone_wood10x', 'p_gravestone_wood11x',
-    'p_gravestone_wood12x', 'p_gravestone_wood13x', 'p_gravestone_woodcross01x', 'p_gravestone_woodcross02x',
-    'p_gravestone_woodcross03x', 'p_gravestone_woodcross04x', 'p_gravestone_woodcross05x', 'p_gravestone_woodcross06x',
-    'p_gravestone_woodcross07x', 'p_gravestone_woodcross08x', 'p_gravestone_woodcross09x', 'p_gravestone_woodcross10x',
-    'p_gravestone_woodcross11x', 'p_gravestone_woodcross12x', 'p_grave_mound_a', 'p_grave_mound_b',
-    'p_arthur_grave_b', 'p_arthur_grave_h', 'p_davey_grave', 'p_eagleflies_grave', 'p_hosea_grave', 'p_john_grave',
-    'p_kieran_grave', 'p_lenny_grave', 'p_mac_grave', 'p_sean_grave', 'p_susan_grave', 'p_uncle_grave'
+    -2146427795,
+    'p_gravestone01ax', 'p_gravestone01x', 'p_gravestone02x', 'p_gravestone03ax', 'p_gravestone03x',
+    'p_gravestone04x', 'p_gravestone05x', 'p_gravestone06x', 'p_gravestone07ax', 'p_gravestone07x',
+    'p_gravestone08ax', 'p_gravestone08x', 'p_gravestone09x', 'p_gravestone10x', 'p_gravestone11x',
+    'p_gravestone12x', 'p_gravestone13x', 'p_gravestone14ax', 'p_gravestone14x', 'p_gravestone15x',
+    'p_gravestone16ax', 'p_gravestone16x', 'p_gravestonebroken01x', 'p_gravestonebroken02x',
+    'p_gravestonebroken05x', 'p_gravestone_srd08x', 'p_gravestoneclean01x', 'p_gravestoneclean02ax',
+    'p_gravestoneclean02x', 'p_gravestoneclean03x', 'p_gravestoneclean04ax', 'p_gravestoneclean04x',
+    'p_gravestoneclean05ax', 'p_gravestoneclean05x', 'p_gravestoneclean06ax', 'p_gravestoneclean06x',
+    'p_gravestonegunslinger01x', 'p_gravestonejanedoe01x', 'p_gravestonejanedoe02x',
+    'p_gravestonejohndoe01x', 'p_gravestonejohndoe02x', 'p_grvestne_v_01x', 'p_grvestne_v_02x',
+    'p_grvestne_v_03x', 'p_grvestne_v_04x', 'p_grvestne_v_05x', 'p_grvestne_v_06x', 'p_grvestne_v_07x',
+    'p_gravemarker01x', 'p_gravemarker02x', 'p_graveplaque01x', 'p_gravemound01x', 'p_gravemound02x',
+    'p_gravemound03x', 'p_gravemound04x', 'p_gravefresh01x', 'p_graveindian01x', 'p_grave06x',
+    'p_gravefather01x', 'p_gravemother01x', 'p_williegrave01x', 'p_gravedug03x', 'p_gravedug06x',
+    'p_gravediggingopen2x', 'p_gravedugcover01x', 'p_gravedugcover02x', 'p_massgrave01x',
+    'p_massgrave02x', 'p_massgrave03x', 'p_arthur_grave_b', 'p_arthur_grave_g', 'p_davey_grave',
+    'p_hosea_grave', 'p_jenny_grave', 'p_kieran_grave', 'p_lenny_grave', 'p_sean_grave',
+    'p_susans_grave', 'p_eagle_grave', 'p_dea_01_grave_04', 'p_dea_01_grave_07', 'p_dea_grave_03',
+    'p_dea_grave_05', 'p_dea_grave_06', 'p_dea_grave_08', 'p_dea_grave_09', 'dea_01_grave_010',
+    'dea_01_grave_011', 'dea_01_grave_012', 'mp008_p_mp_gravemarker01x', 'sfe2_dis_defacedgrave_01',
+    'sfe2_dis_defacedgrave_02', 'sfe2_dis_defacedgrave_slod', 'sfe2_dis_defgrave_02_deb',
+    'wat_ext_grave', 'wat_ext_grave_lod'
+}
+
+
+
+
+Config.Stores = {
+    -- Zonas de lojas onde os NPCs podem ser assaltados
+    {
+        name = "Valentine General Store",
+        coords = vec3(-322.25, 804.05, 117.93),
+        radius = 20.0,
+        doorCoords = vec3(-324.23, 804.14, 117.93), -- Coordenada aproximada da porta de entrada
+        registerCoords = vec3(-323.5, 804.5, 117.93), -- Coordenada aproximada da registradora
+        fleeCoords = vec3(-318.0, 808.0, 117.9), -- Coordenada para onde ele foge
+        openHour = 6,
+        closeHour = 22,
+    },
+    {
+        name = "Valentine Gunsmith",
+        coords = vec3(-278.43, 775.12, 119.52),
+        radius = 20.0,
+        doorCoords = vec3(-276.5, 774.5, 119.52),
+        registerCoords = vec3(-278.0, 775.0, 119.52),
+        openHour = 6,
+        closeHour = 22,
+    },
+    {
+        name = "Valentine Doctor",
+        coords = vec3(-245.92, 781.08, 118.47),
+        radius = 20.0,
+        doorCoords = vec3(-247.5, 781.5, 118.47),
+        registerCoords = vec3(-245.5, 781.5, 118.47),
+        openHour = 6,
+        closeHour = 22,
+    }
 }

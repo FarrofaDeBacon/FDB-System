@@ -24,3 +24,7 @@ end
 function Bridge.GetInventoryImageURL(item)
     return 'nui://rsg-inventory/html/images/' .. item .. '.png'
 end
+
+function Bridge.Notify(message, type)
+    TriggerEvent('RSGCore:Notify', message, type)
+end

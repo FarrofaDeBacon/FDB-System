@@ -19,7 +19,8 @@ server_scripts {
     'bridge/fdb_bridge.lua',
     'server/core.lua',
     'server/crimes/npc_robbery.lua',
-    'server/crimes/grave_robbery.lua'
+    'server/crimes/grave_robbery.lua',
+    'server/crimes/store_robbery.lua'
 }
 
 client_scripts {
@@ -27,7 +28,9 @@ client_scripts {
     'bridge/rsg_bridge_client.lua',
     'bridge/fdb_bridge_client.lua',
     'client/core.lua',
-    'client/crimes/grave_robbery.lua'
+    'client/crimes/dev_tool.lua',
+    'client/crimes/grave_robbery.lua',
+    'client/crimes/store_robbery.lua'
 }
 
 dependencies {

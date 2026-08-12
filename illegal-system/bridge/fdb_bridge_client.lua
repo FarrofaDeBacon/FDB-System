@@ -26,3 +26,7 @@ end
 function Bridge.GetInventoryImageURL(item)
     return 'nui://fdb-inventory/html/images/' .. item .. '.png'
 end
+
+function Bridge.Notify(message, type)
+    TriggerEvent('fdbCore:Notify', message, type)
+end

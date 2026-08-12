@@ -5,19 +5,7 @@ local function GetGraveId(model, coords)
     return string.format("%s_%d_%d_%d", model, math.floor(coords.x*10), math.floor(coords.y*10), math.floor(coords.z*10))
 end
 
-local function IsGraveAvailable(graveId)
-    if Config.GraveRespawn.mode == 'restart' then
-        return not robbedGravesMemory[graveId]
-    end
-    local row = MySQL.single.await('SELECT next_available_at FROM illegal_grave_state WHERE grave_id = ?', { graveId })
-    if not row then return true end
-    -- Check if next_available_at is past current time. os.time() returns unix timestamp.
-    -- We'll convert next_available_at (which is a date string or unix timestamp)
-    -- Actually, row.next_available_at from node mysql2 often comes as a JS Date integer (Unix ms) or Date object in some frameworks.
-    -- To be safe with MySQL in FiveM, usually it's in ms if it's a date object, or we should use UNIX_TIMESTAMP in query.
-    -- Let's change the query to UNIX_TIMESTAMP to be perfectly safe with Lua.
-    return true -- Will fix this below to avoid logic errors
-end
+
 
 local function MarkGraveRobbed(graveId)
     if Config.GraveRespawn.mode == 'restart' then
@@ -94,6 +82,14 @@ RegisterNetEvent('illegal-system:server:finishGraveRobbery', function(success, t
 
     if not session or session.token ~= token then
         print(("[illegal-system] EXPLOIT DETECTADO: %s tentou forçar roubo de túmulo sem token ou com token inválido"):format(GetPlayerName(source)))
+        return
+    end
+
+    local elapsed = os.time() - session.startTime
+    local crimeConfig = Config.Crimes['grave_robbery']
+    local minExpected = 0.5 -- O minigame tierbar pode ser concluído muito rápido dependendo da zona.
+    if elapsed < minExpected then
+        print(("[illegal-system] EXPLOIT DETECTADO: %s respondeu rápido demais (%ds) pro grave_robbery"):format(GetPlayerName(source), elapsed))
         return
     end
 

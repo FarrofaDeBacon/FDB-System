@@ -108,9 +108,10 @@ RegisterNetEvent('illegal-system:client:startGraveRobberyMinigame', function(dat
     SetModelAsNoLongerNeeded(shovelHash)
     
     if result.success then
-        -- Spawna terra revirada (dirt pile)
+        -- Spawna terra revirada (dirt pile) ou outro prop sorteado
         local dirt = Config.DirtPile
-        local dirtHash = GetHashKey(dirt.Model)
+        local dirtModel = type(dirt.Models) == "table" and dirt.Models[math.random(#dirt.Models)] or dirt.Models[1]
+        local dirtHash = GetHashKey(dirtModel)
         RequestModel(dirtHash)
         while not HasModelLoaded(dirtHash) do Wait(10) end
         

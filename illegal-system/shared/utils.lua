@@ -18,3 +18,15 @@ end
 function Utils.Now()
     return os.time()
 end
+
+--- Sorteia uma categoria de loot baseada no tierbar/minigame ou chance
+function Utils.GetRandomLootPool()
+    local roll = math.random(1, 100)
+    if roll <= 10 then
+        return 'rare'
+    elseif roll <= 40 then
+        return 'uncommon'
+    else
+        return 'common'
+    end
+end
