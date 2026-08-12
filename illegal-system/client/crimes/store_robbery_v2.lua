@@ -89,10 +89,10 @@ end)
 CreateThread(function()
     for _, store in ipairs(Config.Stores) do
         -- Tranca da Porta (Somente à noite)
-        exports.ox_target:addBoxZone({
+        exports.ox_target:addSphereZone({
             coords = store.doorCoords,
-            size = vec3(2.0, 2.0, 3.0),
-            rotation = 0,
+            radius = 1.5,
+            debug = true,
             options = {
                 {
                     name = 'burglary_door_'..store.name,
@@ -111,10 +111,10 @@ CreateThread(function()
         })
         
         -- Caixa Registradora (Dia e Noite)
-        exports.ox_target:addBoxZone({
+        exports.ox_target:addSphereZone({
             coords = store.registerCoords,
-            size = vec3(1.5, 1.5, 1.5),
-            rotation = 0,
+            radius = 1.5,
+            debug = true,
             options = {
                 {
                     name = 'robbery_register_day_'..store.name,
