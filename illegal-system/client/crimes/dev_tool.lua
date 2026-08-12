@@ -38,6 +38,7 @@ RegisterCommand('robsystem', function()
         print("^5[E]^7 - Salvar Coordenada de Fuga do NPC (Rua)")
         print("^5[G]^7 - Salvar Coordenada da Porta (Burglary)")
         print("^5[H]^7 - Salvar Coordenada da Registradora (Burglary)")
+        print("^5[U]^7 - Salvar Hash e Coords da Porta para o fdb-doorlock")
         
         CreateThread(function()
             while devMode do
@@ -58,6 +59,27 @@ RegisterCommand('robsystem', function()
                     -- H
                     elseif IsControlJustPressed(0, 0x24978A28) then
                         PrintCoordinate("registerCoords", endCoords)
+                    -- U (Captura de Hash da Porta)
+                    elseif IsControlJustPressed(0, 0xD8F73058) then
+                        if entityHit and entityHit ~= 0 then
+                            local hash = GetEntityModel(entityHit)
+                            local coords = GetEntityCoords(entityHit)
+                            local rot = GetEntityRotation(entityHit, 2)
+                            
+                            print("\n^2========================================^7")
+                            print("^3[DOORLOCK CONFIG] Copie isso:^7")
+                            print(string.format("        authorizedJobs = { }, -- Adicione as jobs se quiser"))
+                            print(string.format("        doorid = %d,", hash))
+                            print(string.format("        objCoords  = vector3(%.2f, %.2f, %.2f),", coords.x, coords.y, coords.z))
+                            print(string.format("        textCoords  = vector3(%.2f, %.2f, %.2f),", coords.x, coords.y, coords.z + 1.0))
+                            print(string.format("        objYaw = %.2f,", rot.z))
+                            print(string.format("        locked = true,"))
+                            print(string.format("        distance = 1.5"))
+                            print("^2========================================^7\n")
+                            Bridge.Notify("Configuração da Porta salva no F8!", "success")
+                        else
+                            Bridge.Notify("Nenhuma entidade de porta detectada no laser!", "error")
+                        end
                     end
                 end
             end
