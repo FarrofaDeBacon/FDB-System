@@ -8,6 +8,7 @@ description 'Crime Core - sistema modular de criminalidade (Etapa 1 + Etapa 2: R
 version '0.1.0'
 
 shared_scripts {
+    '@ox_lib/init.lua',
     'config.lua',
     'shared/utils.lua'
 }
@@ -36,6 +37,7 @@ client_scripts {
 dependencies {
     'fdb-core',
     'fdb-libs',
+    'ox_lib',
     'ox_target',
     'oxmysql'
 }
