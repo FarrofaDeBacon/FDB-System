@@ -14,6 +14,8 @@ end
 -- ==========================================
 -- 1. MÉTODOS DIURNOS (Assalto ao Lojista)
 -- ==========================================
+local activeStoreRobberies = {} -- Controle dos tokens de assalto (dia)
+
 RegisterNetEvent('illegal-system:server:attemptStoreRobbery', function(storeName, method)
     local source = source
     local attempt = CrimeCore.AttemptCrime(source, crimeId)
@@ -23,34 +25,41 @@ RegisterNetEvent('illegal-system:server:attemptStoreRobbery', function(storeName
         return
     end
 
-    local crimeConfig = Config.Crimes[crimeId]
-    local reactionRoll = math.random(1, 100)
-    local reaction = 'comply'
+    local sessionToken = GenerateToken()
+    activeStoreRobberies[source] = {
+        token = sessionToken,
+        startTime = os.time(),
+        storeName = storeName
+    }
 
-    local complyChance = crimeConfig.reactions.comply
-    local fightChance = complyChance + crimeConfig.reactions.fight
+    TriggerClientEvent('illegal-system:client:startStoreRobbery', source, storeName, sessionToken)
+end)
 
-    if reactionRoll <= complyChance then
-        reaction = 'comply'
-    elseif reactionRoll <= fightChance then
-        reaction = 'fight'
-    else
-        reaction = 'flee'
+RegisterNetEvent('illegal-system:server:finishStoreRobbery', function(storeName, sessionToken)
+    local source = source
+    local session = activeStoreRobberies[source]
+
+    if not session or session.token ~= sessionToken then
+        print(string.format("[illegal-system] EXPLOIT DETECTADO: Jogador ID %s tentou forçar o evento de assalto diurno.", source))
+        return
     end
 
-    TriggerClientEvent('illegal-system:client:storeRobberyReaction', source, reaction, storeName)
+    activeStoreRobberies[source] = nil
 
-    if reaction == 'comply' then
-        SetTimeout(5000, function()
-            local pool = Utils.GetRandomLootPool()
-            local items = crimeConfig.loot[pool]
-            local reward = items[math.random(#items)]
-            
-            CrimeCore.FinishCrime(source, crimeId, true, reward)
-        end)
-    else
-        -- Fugiu ou lutou, crime finalizado sem loot (mas com heat se quisermos no futuro)
-        -- Para evitar travar o jogador no cooldown sem loot, podemos não chamar FinishCrime ou chamar com success = false
+    local crimeConfig = Config.Crimes[crimeId]
+    local pool = Utils.GetRandomLootPool()
+    local items = crimeConfig.loot[pool]
+    local reward = items[math.random(#items)]
+    
+    CrimeCore.FinishCrime(source, crimeId, true, reward)
+end)
+
+RegisterNetEvent('illegal-system:server:cancelStoreRobbery', function(storeName, sessionToken)
+    local source = source
+    local session = activeStoreRobberies[source]
+
+    if session and session.token == sessionToken then
+        activeStoreRobberies[source] = nil
         CrimeCore.FinishCrime(source, crimeId, false, nil)
     end
 end)
