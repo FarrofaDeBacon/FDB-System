@@ -9,7 +9,7 @@ CreateThread(function()
     exports.ox_target:addGlobalPlayer({
         {
             name = 'trade',
-            label = locale('ui.trade') or 'Trade',
+            label = 'Trade',
             icon = 'fas fa-handshake',
             onSelect = function(data)
                 local entity = data.entity

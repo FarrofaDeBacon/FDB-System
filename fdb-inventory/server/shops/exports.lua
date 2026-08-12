@@ -58,78 +58,28 @@ Shops.OpenShop = function(source, name)
     local FDBCore = exports['fdb-core']:GetCoreObject()
     local player = FDBCore.Functions.GetPlayer(source)
     if not player then return end
-    
-    local shopData = RegisteredShops[name]
-    if not shopData then return end
-
-    -- Дистанция
-    local ped = GetPlayerPed(source)
-    local playerCoords = GetEntityCoords(ped)
-    if shopData.coords then
-        if #(playerCoords - vector3(shopData.coords.x, shopData.coords.y, shopData.coords.z)) > Inventory.MAX_DIST then return end
-    end
-	
-    -- ОПТИМИЗАЦИЯ: Создаем карту цен магазина
-    local shopPriceMap = {}
-    -- Используем shopData.items, как в оригинале
-    if shopData.items then
-        for _, item in pairs(shopData.items) do
-            if item and item.name and item.buyPrice then
-                shopPriceMap[item.name] = item.buyPrice
-            end
+    if not RegisteredShops[name] then return end
+    local playerPed = GetPlayerPed(source)
+    local playerCoords = GetEntityCoords(playerPed)
+    if RegisteredShops[name].coords then
+        local shopDistance = vector3(RegisteredShops[name].coords.x, RegisteredShops[name].coords.y, RegisteredShops[name].coords.z)
+        if shopDistance then
+            local distance = #(playerCoords - shopDistance)
+            if distance > Inventory.MAX_DIST then return end
         end
     end
-
-    local EnrichedPlayerItems = {}
-    local playerItems = player.PlayerData.items
-
-    if playerItems then
-        for _, item in pairs(playerItems) do
-            if item then
-                -- Клонируем
-                local newItem = {}
-                for k, v in pairs(item) do newItem[k] = v end
-
-                -- Быстрая подстановка цены
-                if newItem.name and shopPriceMap[newItem.name] then
-                    newItem.buyPrice = shopPriceMap[newItem.name]
-                end
-
-                table.insert(EnrichedPlayerItems, newItem)
-            end
-        end
-    end
-
     local formattedInventory = {
-        name = 'shop-' .. shopData.name,
-        label = shopData.label,
-        maxweight = 500000,
-        slots = math.max(math.ceil(#shopData.items / 5) * 5, 25),
-        inventory = shopData.items, -- Оригинальный список товаров
-        persistentStock = shopData.persistentStock,
+        name = 'shop-' .. RegisteredShops[name].name,
+        label = RegisteredShops[name].label,
+        maxweight = 5000000,
+        slots = #RegisteredShops[name].items,
+        inventory = RegisteredShops[name].items,
+        persistentStock = RegisteredShops[name].persistentStock,
     }
-	
-	--print("PlayerITEMS = " .. json.encode(EnrichedPlayerItems))
-	--print("ShopITEMS = " .. json.encode(player.PlayerData.items))
 
     Player(source).state.inv_busy = true
     Inventory.CheckPlayerItemsDecay(player)
-    
-	--TriggerClientEvent('fdb-inventory:client:openInventory', source, player.PlayerData.items, formattedInventory)
-    TriggerClientEvent('fdb-inventory:client:openInventory', source, EnrichedPlayerItems, formattedInventory)
-end
-
-local function cloneTable(tbl)
-    local copy = {}
-    for k, v in pairs(tbl) do
-        copy[k] = v
-    end
-    return copy
-end
-
-function GetPlayerItems(player)
-	local items = player.PlayerData.items
-	return items
+    TriggerClientEvent('fdb-inventory:client:openInventory', source, player.PlayerData.items, formattedInventory)
 end
 
 exports('OpenShop', Shops.OpenShop)

@@ -64,7 +64,7 @@
     "drop_bag": "Tas laten vallen"
   },
   "ui": {
-    "title": "RSG Inventory",
+    "title": "FDB Inventory",
     "close": "Sluiten",
     "close_aria": "Inventory sluiten",
     "use": "Gebruik",

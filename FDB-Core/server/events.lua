@@ -23,7 +23,19 @@ local databaseConnected, bansTableExists = readyFunction == nil, readyFunction =
 if readyFunction ~= nil then
     MySQL.ready(function()
         databaseConnected = true
-    
+    end)
+end
+
+AddEventHandler('txAdmin:events:serverShuttingDown', function()
+    for src, Player in pairs(FDBCore.Players) do
+        if Player then
+            FDBCore.Player.SaveOffline(Player.PlayerData)
+        end
+    end
+end)
+
+if readyFunction ~= nil then
+    MySQL.ready(function()
         local DatabaseInfo = FDBCore.Functions.GetDatabaseInfo()
         if not DatabaseInfo or not DatabaseInfo.exists then return end
 

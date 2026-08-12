@@ -11,7 +11,7 @@ lib.callback.register('fdb-inventory:server:getPlayerName', function(source, tar
 end)
 
 -- Register a server callback for giving an item from one player to another
-lib.callback.register('fdb-inventory:server:giveItem', function(source, target, item, amount, slot, info)
+lib.callback.register('fdb-inventory:server:giveItem', function(source, target, item, amount, slot, info, fromInventory)
     -- Get the player object for the source (the giver)
     local player = FDBCore.Functions.GetPlayer(source)
     -- Check if the source player exists and is not dead, in last stand, or handcuffed
@@ -38,7 +38,18 @@ lib.callback.register('fdb-inventory:server:giveItem', function(source, target, 
     end
 
     -- Fetch the real item from the source's inventory by slot (don't trust client-sent info/metadata)
-    local invItem = Inventory.GetItemBySlot(source, slot)
+    local invItem
+    if fromInventory and fromInventory ~= 'player' then
+        if fromInventory == 'equipment' then
+            local Player = FDBCore.Functions.GetPlayer(source)
+            invItem = Player.PlayerData.metadata.equipmentSlots and Player.PlayerData.metadata.equipmentSlots[slot]
+        else
+            invItem = Inventory.GetItem(fromInventory, source, slot)
+        end
+    else
+        invItem = Inventory.GetItemBySlot(source, slot)
+    end
+
     if not invItem or invItem.name:lower() ~= item:lower() or invItem.amount <= 0 or tonumber(amount) > invItem.amount then
         return false
     end
@@ -50,17 +61,44 @@ lib.callback.register('fdb-inventory:server:giveItem', function(source, target, 
     local isMove = false
     if itemInfo.type == 'weapon' then
         isMove = true
-        Inventory.CheckWeapon(source, item) -- Check or remove the weapon from the source
+        -- FIX: pass the real server-fetched item (has .info.serie) instead of
+        -- just the item name string, so CheckWeapon can resolve the serial.
+        Inventory.CheckWeapon(source, invItem)
+    end
+
+    local fromId = source
+    if fromInventory and fromInventory ~= 'player' and fromInventory ~= 'equipment' then
+        fromId = Inventory.GetIdentifier(fromInventory, source)
     end
 
     -- Remove from source first, then add to target (prevents duplication)
-    if not Inventory.RemoveItem(source, item, amount, slot, ('Item given to ID #%s'):format(target), isMove) then
-        return false
+    if fromInventory == 'equipment' then
+        local metadata = Player.PlayerData.metadata
+        metadata.equipmentSlots[slot] = nil
+        Player.Functions.SetMetaData('equipmentSlots', metadata.equipmentSlots)
+        
+        -- Detach visual object
+        if slot == 'backpack' then
+            TriggerClientEvent('fdb-backpacks:client:detachBackpack', source)
+        elseif slot == 'satchel' then
+            TriggerClientEvent('fdb-backpacks:client:detachSatchel', source)
+        end
+    else
+        if not Inventory.RemoveItem(fromId, item, amount, slot, ('Item given to ID #%s'):format(target), isMove) then
+            return false
+        end
     end
 
     if not Inventory.AddItem(target, item, amount, false, serverInfo, ('Item given from ID #%s'):format(source)) then
         -- Rollback: give item back to source if add to target fails
-        Inventory.AddItem(source, item, amount, false, serverInfo, 'rollback give item')
+        if fromInventory == 'equipment' then
+            local metadata = Player.PlayerData.metadata
+            metadata.equipmentSlots[slot] = invItem
+            Player.Functions.SetMetaData('equipmentSlots', metadata.equipmentSlots)
+            TriggerClientEvent('fdb-backpacks:client:attachDirectly', source, invItem.stashId, invItem.itemName)
+        else
+            Inventory.AddItem(fromId, item, amount, false, serverInfo, 'rollback give item')
+        end
         return false
     end
 

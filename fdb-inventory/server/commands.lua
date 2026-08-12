@@ -1,7 +1,6 @@
 local FDBCore = exports['fdb-core']:GetCoreObject()
 local config = require 'shared.config'
 local items = FDBCore.Shared.Items
-lib.locale()
 
 -- Helper function to notify players
 local function notify(source, messageKey, type)
@@ -151,11 +150,8 @@ RegisterCommand('serversidehotbar', function(source)
     if not ply then return end
     if ply.PlayerData.metadata.isdead or ply.PlayerData.metadata.inlaststand or ply.PlayerData.metadata.ishandcuffed then return end
 
-    local hotbarItems = {}
-    for i = 1, 5 do
-        hotbarItems[i] = ply.PlayerData.items[i]
-    end
-    TriggerClientEvent('fdb-inventory:client:hotbar', source, hotbarItems)
+    local hotbarItems, activeSlots = Inventory.GetHotbarItems(ply)
+    TriggerClientEvent('fdb-inventory:client:hotbar', source, hotbarItems, activeSlots)
 end, false)
 
 -- /inventory command
@@ -167,5 +163,42 @@ RegisterCommand(config.CommandNames.Inventory, function(source)
 
     if not inventory then
         Inventory.OpenInventory(source)
+    else
+        Inventory.CloseInventory(source)
     end
+end, false)
+
+-- /checkslots command (temporary debug)
+RegisterCommand('checkslots', function(source)
+    local ply = FDBCore.Functions.GetPlayer(source)
+    if not ply then return end
+    print(string.format('[fdb-inventory] Player %s has %d slots configured in PlayerData.', GetPlayerName(source), ply.PlayerData.slots))
+    TriggerClientEvent('ox_lib:notify', source, { title = 'Slots', description = 'You have ' .. tostring(ply.PlayerData.slots) .. ' slots in pocket', type = 'info', duration = 5000 })
+end, false)
+
+-- /setslots command (fix for old characters — atualiza direto no banco)
+RegisterCommand('setslots', function(source, args)
+    local ply = FDBCore.Functions.GetPlayer(source)
+    if not ply then return end
+    local newSlots = tonumber(args[1]) or 12
+    local citizenid = ply.PlayerData.citizenid
+
+    -- Atualiza direto no banco de dados
+    MySQL.update('UPDATE players SET slots = ? WHERE citizenid = ?', { newSlots, citizenid }, function(rowsChanged)
+        if rowsChanged and rowsChanged > 0 then
+            -- Atualiza em memória também
+            ply.PlayerData.slots = newSlots
+            ply.Functions.UpdatePlayerData()
+            TriggerClientEvent('ox_lib:notify', source, {
+                title = 'Slots Corrigidos',
+                description = 'DB atualizado: ' .. tostring(newSlots) .. ' slots. Feche e reabra o inventário!',
+                type = 'success',
+                duration = 6000
+            })
+            print(('[setslots] %s -> slots = %d (DB OK)'):format(citizenid, newSlots))
+        else
+            TriggerClientEvent('ox_lib:notify', source, { title = 'Erro', description = 'Nenhuma linha afetada no DB.', type = 'error', duration = 5000 })
+            print(('[setslots] ERRO: nenhuma linha afetada para citizenid=' .. citizenid))
+        end
+    end)
 end, false)

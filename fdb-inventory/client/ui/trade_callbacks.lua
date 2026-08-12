@@ -1,56 +1,19 @@
-RegisterNUICallback('AcceptTradeRequest', function(data, cb)
-    if not data or not data.initiatorId or not data.token or not ValidateInventoryCbToken(data.token) then
-        cb(false)
-        return
-    end
-	
-	hideTradeInvite()
-    TriggerServerEvent('fdb-inventory:server:acceptTradeRequest', data.initiatorId)
-    cb(true)
-end)
-
-RegisterNUICallback('DeclineTradeRequest', function(data, cb)
-    if not data or not data.initiatorId or not data.token or not ValidateInventoryCbToken(data.token) then
-        cb(false)
-        return
-    end
-
-	hideTradeInvite()
-    TriggerServerEvent('fdb-inventory:server:declineTradeRequest', data.initiatorId)
-    cb(true)
-end)
-
-
-
-
 RegisterNUICallback('AddTradeItem', function(data, cb)
-	if not data or not data.item or not data.amount or not data.token or not ValidateInventoryCbToken(data.token) then
-        cb({ ok = false })
+    if not data or not data.item or not data.amount or not data.token or not ValidateInventoryCbToken(data.token) then
+        cb('ok')
         return
     end
-
-	local success = lib.callback.await('fdb-inventory:server:addTradeItem', false, data.tradeId, data.item, data.amount)
-    cb({ ok = success == true })
+    TriggerServerEvent('fdb-inventory:server:addTradeItem', data.tradeId, data.item, data.amount)
+    cb('ok')
 end)
 
 RegisterNUICallback('RemoveTradeItem', function(data, cb)
     if not data or not data.tradeId or not data.tradeSlot or not data.token or not ValidateInventoryCbToken(data.token) then
-        cb(false)
+        cb('ok')
         return
     end
-	
-    local tradeId = data.tradeId
-    local tradeSlot = tonumber(data.tradeSlot)
-    local targetSlot = tonumber(data.targetSlot)
-    local amount = tonumber(data.amount) or 1
-
-    if not tradeSlot or not targetSlot or amount < 1 then
-        cb(false)
-        return
-    end
-
-    local success = lib.callback.await('fdb-inventory:server:removeTradeItem', false, tradeId, tradeSlot, targetSlot, amount)
-    cb(success == true)
+    TriggerServerEvent('fdb-inventory:server:removeTradeItem', data.tradeId, data.tradeSlot)
+    cb('ok')
 end)
 
 RegisterNUICallback('ConfirmTrade', function(data, cb)

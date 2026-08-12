@@ -566,15 +566,23 @@ function FDBCore.Player.Save(source)
         slots = PlayerData.slots,
     }, function(result)
         local CurrentPlayer = FDBCore.Players[source]
-        if not CurrentPlayer then
-            return
+        
+        if CurrentPlayer then
+            CurrentPlayer.saveInProgress = false
+            FDBCore.ShowSuccess(GetCurrentResourceName(), PlayerData.name .. ' PLAYER SAVED!')
+        else
+            FDBCore.ShowSuccess(GetCurrentResourceName(), PlayerData.name .. ' OFFLINE PLAYER SAVED!')
         end
 
-        CurrentPlayer.saveInProgress = false
-        FDBCore.ShowSuccess(GetCurrentResourceName(), PlayerData.name .. ' PLAYER SAVED!')
-        if GetResourceState('fdb-inventory') ~= 'missing' then exports['fdb-inventory']:SaveInventory(source) end
+        if GetResourceState('fdb-inventory') ~= 'missing' then 
+            if CurrentPlayer then
+                exports['fdb-inventory']:SaveInventory(source) 
+            else
+                exports['fdb-inventory']:SaveInventory(PlayerData, true)
+            end
+        end
 
-        if CurrentPlayer.savePending then
+        if CurrentPlayer and CurrentPlayer.savePending then
             CurrentPlayer.savePending = false
             FDBCore.Player.Save(source)
         end

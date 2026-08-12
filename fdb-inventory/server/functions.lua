@@ -75,13 +75,28 @@ Inventory.GetIdentifier = function(inventoryId, src)
 end
 
 Inventory.CheckWeapon = function(source, item)
-    local currentWeapon = type(item) == 'table' and item.name or item
+    -- SECURITY/RENAME FIX: previously this fired 'fdb-weapons:client:UseWeapon',
+    -- which nothing listens to anymore after the fdb-weapons rename, so a weapon
+    -- that left the inventory (moved, dropped, traded) never actually left the
+    -- player's hand. Now we resolve the real serial (when available) and use
+    -- the dedicated fdb-weapons export, which both syncs server metadata and
+    -- forces the removal client-side.
+    local itemTable = type(item) == 'table' and item or nil
+    local currentWeaponName = itemTable and itemTable.name or item
+    local serial = itemTable and itemTable.info and itemTable.info.serie or nil
+
     local ped = GetPlayerPed(source)
     local weapon = GetSelectedPedWeapon(ped)
     local weaponInfo = FDBCore.Shared.Weapons[weapon]
-    if weaponInfo and weaponInfo.name == currentWeapon then
+    if weaponInfo and weaponInfo.name == currentWeaponName then
         RemoveWeaponFromPed(ped, weapon)
-        TriggerClientEvent('fdb-weapons:client:UseWeapon', source, { name = currentWeapon }, false)
+        if serial then
+            exports['fdb-weapons']:ForceRemoveWeapon(source, serial)
+        else
+            -- No serial available (caller only passed the item name) - warn so
+            -- this gets caught in testing rather than silently doing nothing.
+            print(("^1[fdb-inventory] Inventory.CheckWeapon: no serial available for '%s' (source %s) - weapon may remain in hand^7"):format(tostring(currentWeaponName), tostring(source)))
+        end
     end
 end
 
@@ -100,7 +115,7 @@ Inventory.GetFirstSlotByItemWithQuality = function(items, itemName, quality)
     return nil
 end
 
---- Checks and applies item decay over time.
+
 --- @param item table The item table.
 --- @param itemInfo table|nil Optional item definition from FDBCore.Shared.Items.
 --- @param currentTime number|nil Optional timestamp (defaults to os.time()).
@@ -124,13 +139,12 @@ Inventory.CheckItemDecay = function(item, itemInfo, currentTime, decayRateModifi
     local decayRate = (100 / (itemInfo.decay * 60)) * decayRateModifier
     local newQuality = math.max(0, item.info.quality - timeElapsed * decayRate)
     item.info.quality = math.round(newQuality, 1)
-	--item.info.quality = math.floor(newQuality + 0.5) --так получаем качество округленное без дробей
     item.info.lastUpdate = currentTime
 
     return true, item.info.quality, itemInfo.delete == true
 end
 
---- Applies decay to all items in an inventory.
+
 --- @param items table<number, table> Inventory items (indexed by slot).
 --- @param decayRateModifier number|nil Optional modifier for configured decay rate
 --- @return boolean needsUpdate Returns true if any item was updated or deleted.
@@ -154,7 +168,7 @@ Inventory.CheckItemsDecay = function(items, decayRateModifier)
     return needsUpdate, removedItems
 end
 
---- Applies decay to all items in a player's inventory and updates their data.
+
 --- @param player table The player object.
 Inventory.CheckPlayerItemsDecay = function(player)
     local needsUpdate, removedItems = Inventory.CheckItemsDecay(player.PlayerData.items)
@@ -167,7 +181,7 @@ Inventory.CheckPlayerItemsDecay = function(player)
     end
 end
 
---- Applies decay to single item in a player's inventory and updates their data.
+
 --- @param player table The player object.
 --- @param item table item object.
 Inventory.CheckPlayerItemDecay = function(player, item) 
@@ -183,6 +197,7 @@ Inventory.CheckPlayerItemDecay = function(player, item)
 
     return player.PlayerData.items[item.slot]
 end
+
 
 --- @param inventoryId string
 --- @param src? any
@@ -202,4 +217,72 @@ Inventory.GetCoords = function(inventoryId, src)
     else
         warn(("Unexpected inventory type - '%s'"):format(inventoryType))
     end
+end
+
+Inventory.GetHotbarItems = function(Player)
+    local items = {}
+    local activeSlots = {}
+    local config = require 'shared.config'
+
+    -- Posições 1-2: Bolso
+    for slot = 1, config.Hotbar.pocketSlots do
+        items[slot] = Player.Functions.GetItemBySlot(slot)
+        activeSlots[slot] = true
+    end
+
+    local metadata = Player.PlayerData.metadata
+    local equip = metadata.equipmentSlots or {}
+    local currentIdx = config.Hotbar.pocketSlots
+
+    local function getEquipItems(equipData, maxSlots)
+        local isActive = (equipData ~= nil)
+        for i = 1, maxSlots do
+            activeSlots[currentIdx + i] = isActive
+        end
+
+        if not equipData then return end
+        local stashId = equipData.stashId or (equipData.info and equipData.info.stashId)
+        if not stashId then return end
+        
+        local stashItems = {}
+        if Inventories[stashId] and Inventories[stashId].items then
+            stashItems = Inventories[stashId].items
+        else
+            local dbResult = MySQL.prepare.await('SELECT items FROM inventories WHERE identifier = ?', { stashId })
+            if dbResult then
+                local decoded = json.decode(dbResult)
+                if decoded then
+                    if not Inventories[stashId] then
+                        Inventory.InitializeInventory(stashId, { maxweight = config.StashSize.maxweight, slots = config.StashSize.slots })
+                    end
+                    Inventories[stashId].items = decoded
+                    stashItems = decoded
+                end
+            end
+        end
+
+        for _, item in pairs(stashItems) do
+            if type(item) == "table" and item.slot and item.slot <= maxSlots then
+                local clonedItem = {}
+                for k, v in pairs(item) do clonedItem[k] = v end
+                clonedItem.originalSlot = item.slot
+                clonedItem.stashId = stashId
+                clonedItem.slot = currentIdx + item.slot
+                items[clonedItem.slot] = clonedItem
+            end
+        end
+    end
+
+    -- Bolsa
+    if equip.satchel then getEquipItems(equip.satchel, config.Hotbar.satchelSlots) end
+    currentIdx = currentIdx + config.Hotbar.satchelSlots
+
+    -- Carteira
+    if equip.wallet then getEquipItems(equip.wallet, config.Hotbar.walletSlots) end
+    currentIdx = currentIdx + config.Hotbar.walletSlots
+
+    -- Cinto
+    if equip.holster then getEquipItems(equip.holster, config.Hotbar.holsterSlots) else getEquipItems(nil, config.Hotbar.holsterSlots) end
+
+    return items, activeSlots
 end

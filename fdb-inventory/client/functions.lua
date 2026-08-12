@@ -55,29 +55,3 @@ function Inventory.UseHotbarItem(slot)
 
     TriggerServerEvent('fdb-inventory:server:useItem', itemData)
 end
-
---[[ Inventory.FormatWeaponAttachments = function(itemdata)
-    if not itemdata.info or not itemdata.info.attachments or #itemdata.info.attachments == 0 then
-        return {}
-    end
-    local attachments = {}
-    local weaponName = itemdata.name
-    local WeaponAttachments = exports['fdb-weapons']:getConfigWeaponAttachments()
-    if not WeaponAttachments then return {} end
-    for attachmentType, weapons in pairs(WeaponAttachments) do
-        local componentHash = weapons[weaponName]
-        if componentHash then
-            for _, attachmentData in pairs(itemdata.info.attachments) do
-                if attachmentData.component == componentHash then
-                    local label = FDBCore.Shared.Items[attachmentType] and FDBCore.Shared.Items[attachmentType].label or 'Unknown'
-                    attachments[#attachments + 1] = {
-                        attachment = attachmentType,
-                        label = label
-                    }
-                end
-            end
-        end
-    end
-    return attachments
-end ]]
-

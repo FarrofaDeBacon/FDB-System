@@ -28,7 +28,6 @@ Inventory.LoadInventory = function(source, citizenid)
                     type = itemInfo['type'],
                     unique = itemInfo['unique'],
                     useable = itemInfo['useable'],
-                    squality = itemInfo['squality'],
                     image = itemInfo['image'],
                     shouldClose = itemInfo['shouldClose'],
                     slot = item.slot,
@@ -74,9 +73,9 @@ Inventory.SaveInventory = function(source, offline)
                 }
             end
         end
-        MySQL.prepare('UPDATE players SET inventory = ? WHERE citizenid = ?', { json.encode(ItemsJson), PlayerData.citizenid })
+        MySQL.update('UPDATE players SET inventory = ? WHERE citizenid = ?', { json.encode(ItemsJson), PlayerData.citizenid })
     else
-        MySQL.prepare('UPDATE players SET inventory = ? WHERE citizenid = ?', { '[]', PlayerData.citizenid })
+        MySQL.update('UPDATE players SET inventory = ? WHERE citizenid = ?', { '[]', PlayerData.citizenid })
     end
 end
 
@@ -323,6 +322,7 @@ Inventory.CanAddItem = function(source, item, amount)
     elseif Inventories[source] then
         local inventory = Inventories[source].items
         local inventoryWeight = Inventories[source].maxweight or 250000
+        local inventorySlots = Inventories[source].slots or 100
         local itemData = FDBCore.Shared.Items[item:lower()]
         
         if not itemData then return false end
@@ -332,6 +332,14 @@ Inventory.CanAddItem = function(source, item, amount)
         
         if totalWeight > inventoryWeight then
             return false, 'weight'
+        end
+
+        local slotsUsed = 0
+        for _, v in pairs(inventory) do
+            if v then slotsUsed = slotsUsed + 1 end
+        end
+        if slotsUsed >= inventorySlots then
+            return false, 'slots'
         end
 
         return true
@@ -448,13 +456,13 @@ exports('CloseInventory', Inventory.CloseInventory)
 --- @param source number - The player's server ID.
 --- @param targetId number - The ID of the player whose inventory will be opened.
 Inventory.OpenInventoryById = function(source, targetId)
-    local RSGPlayer = FDBCore.Functions.GetPlayer(source)
+    local FDBPlayer = FDBCore.Functions.GetPlayer(source)
     local TargetPlayer = FDBCore.Functions.GetPlayer(tonumber(targetId))
-    if not RSGPlayer or not TargetPlayer then return end
+    if not FDBPlayer or not TargetPlayer then return end
     if Player(targetId).state.inv_busy then Inventory.CloseInventory(targetId) end
-    Inventory.CheckPlayerItemsDecay(RSGPlayer)
+    Inventory.CheckPlayerItemsDecay(FDBPlayer)
     Inventory.CheckPlayerItemsDecay(TargetPlayer)
-    local playerItems = RSGPlayer.PlayerData.items
+    local playerItems = FDBPlayer.PlayerData.items
     local targetItems = TargetPlayer.PlayerData.items
     local formattedInventory = {
         name = 'otherplayer-' .. targetId,
@@ -479,7 +487,7 @@ Inventory.ClearStash = function(identifier)
     local inventory = Inventories[identifier]
     if not inventory then return end
     inventory.items = {}
-    MySQL.prepare('UPDATE inventories SET items = ? WHERE identifier = ?', { json.encode(inventory.items), identifier })
+    MySQL.update('UPDATE inventories SET items = ? WHERE identifier = ?', { json.encode(inventory.items), identifier })
 end
 
 exports('ClearStash', Inventory.ClearStash)
@@ -491,7 +499,7 @@ Inventory.SaveStash = function(identifier)
     local inventory = Inventories[identifier]
     if not inventory then return end
     local items = json.encode(inventory.items)
-    MySQL.prepare("INSERT INTO inventories (identifier, items) VALUES (?, ?) ON DUPLICATE KEY UPDATE items = ?",
+    MySQL.update("INSERT INTO inventories (identifier, items) VALUES (?, ?) ON DUPLICATE KEY UPDATE items = ?",
         { identifier, items, items })
 end
 
@@ -502,18 +510,23 @@ exports("SaveStash", Inventory.SaveStash)
 --- @param data table|nil Additional data for initializing the inventory.
 Inventory.OpenInventory = function (source, identifier, data)
     if Player(source).state.inv_busy then return end
-    local RSGPlayer = FDBCore.Functions.GetPlayer(source)
-    if not RSGPlayer then return end
+    local FDBPlayer = FDBCore.Functions.GetPlayer(source)
+    if not FDBPlayer then return end
 
     if not identifier then
         Player(source).state.inv_busy = true
-        Inventory.CheckPlayerItemsDecay(RSGPlayer)
-        TriggerClientEvent('fdb-inventory:client:openInventory', source, RSGPlayer.PlayerData.items)
+        Inventory.CheckPlayerItemsDecay(FDBPlayer)
+        -- Always read slots from DB to avoid stale in-memory value
+        local dbSlots = MySQL.scalar.await('SELECT slots FROM players WHERE citizenid = ?', { FDBPlayer.PlayerData.citizenid })
+        local slots = dbSlots or FDBPlayer.PlayerData.slots or 12
+        if FDBPlayer.PlayerData.slots ~= slots then
+            FDBPlayer.PlayerData.slots = slots -- keep in-memory in sync
+        end
+        TriggerClientEvent('fdb-inventory:client:openInventory', source, FDBPlayer.PlayerData.items, nil, slots)
         return
     end
 
     if type(identifier) ~= 'string' then
-        print('Inventory tried to open an invalid identifier')
         return
     end
 
@@ -535,17 +548,33 @@ Inventory.OpenInventory = function (source, identifier, data)
     inventory.label = (data and data.label) or (inventory and inventory.label) or identifier
     inventory.isOpen = source
 
+    local hotbarOffset = nil
+    local hotbarMaxSlots = nil
+    local equip = FDBPlayer.PlayerData.metadata.equipmentSlots or {}
+    if equip.satchel and equip.satchel.stashId == identifier then
+        hotbarOffset = config.Hotbar.pocketSlots
+        hotbarMaxSlots = config.Hotbar.satchelSlots
+    elseif equip.wallet and equip.wallet.stashId == identifier then
+        hotbarOffset = config.Hotbar.pocketSlots + config.Hotbar.satchelSlots
+        hotbarMaxSlots = config.Hotbar.walletSlots
+    elseif equip.holster and equip.holster.stashId == identifier then
+        hotbarOffset = config.Hotbar.pocketSlots + config.Hotbar.satchelSlots + config.Hotbar.walletSlots
+        hotbarMaxSlots = config.Hotbar.holsterSlots
+    end
+
     local formattedInventory = {
         name = identifier,
         label = inventory.label,
         maxweight = inventory.maxweight,
         slots = inventory.slots,
-        inventory = inventory.items
+        inventory = inventory.items,
+        hotbarOffset = hotbarOffset,
+        hotbarMaxSlots = hotbarMaxSlots
     }
     
     Player(source).state.inv_busy = true
-    Inventory.CheckPlayerItemsDecay(RSGPlayer)
-    TriggerClientEvent('fdb-inventory:client:openInventory', source, RSGPlayer.PlayerData.items, formattedInventory)
+    Inventory.CheckPlayerItemsDecay(FDBPlayer)
+    TriggerClientEvent('fdb-inventory:client:openInventory', source, FDBPlayer.PlayerData.items, formattedInventory)
 end
 
 exports('OpenInventory', Inventory.OpenInventory)
@@ -574,7 +603,6 @@ Inventory.ForceDropItem = function(source, item, amount, info, reason)
         type = itemInfo.type,
         unique = itemInfo.unique,
         useable = itemInfo.useable,
-		squality = itemInfo.squality,
         image = itemInfo.image,
         shouldClose = itemInfo.shouldClose,
         combinable = itemInfo.combinable
@@ -651,12 +679,11 @@ Inventory.AddItem = function(identifier, item, amount, slot, info, reason)
     if not inventory then
         return false
     end
-
+    
     Inventory.CheckItemsDecay(inventory, decayRate or 1)
     
     local totalWeight = Inventory.GetTotalWeight(inventory)
     if totalWeight + (itemInfo.weight * amount) > inventoryWeight then
-        -- If this is a player and not a forced add, try to drop on ground
         if player then
             Inventory.ForceDropItem(identifier, item, amount, info, reason or 'inventory full - weight')
         end
@@ -694,14 +721,8 @@ Inventory.AddItem = function(identifier, item, amount, slot, info, reason)
     end
 
     if not updated then
-        --slot = slot or Inventory.GetFirstFreeSlot(inventory, inventorySlots)
-		-- Если слот не подходит (нет или занят) → найти свободный
-		if not slot or inventory[slot] then
-			slot = Inventory.GetFirstFreeSlot(inventory, inventorySlots)
-		end
-		
+        slot = slot or Inventory.GetFirstFreeSlot(inventory, inventorySlots)
         if not slot then
-            -- If this is a player and not a forced add, try to drop on ground
             if player then
                 Inventory.ForceDropItem(identifier, item, amount, info, reason or 'inventory full - slots')
             end
@@ -718,7 +739,6 @@ Inventory.AddItem = function(identifier, item, amount, slot, info, reason)
             type = itemInfo.type,
             unique = itemInfo.unique,
             useable = itemInfo.useable,
-			squality = itemInfo.squality,
             image = itemInfo.image,
             shouldClose = itemInfo.shouldClose,
             slot = slot,
@@ -743,9 +763,10 @@ Inventory.AddItem = function(identifier, item, amount, slot, info, reason)
     end
 
     if player then 
-		player.Functions.SetPlayerData('items', inventory) 
-		TriggerEvent('fdb-inventory:server:updateHotbar', identifier)
-	end
+        player.Functions.SetPlayerData('items', inventory) 
+    elseif Inventories[identifier] then
+        Inventory.SaveStash(identifier)
+    end
     local invName = player and GetPlayerName(identifier) .. ' (' .. identifier .. ')' or identifier
     local addReason = reason or 'No reason specified'
     local resourceName = GetInvokingResource() or 'fdb-inventory'
@@ -760,7 +781,6 @@ Inventory.AddItem = function(identifier, item, amount, slot, info, reason)
         '**Reason:** ' .. addReason .. '\n' ..
         '**Resource:** ' .. resourceName
     )
-
     return true
 end
 
@@ -775,7 +795,6 @@ exports('AddItem', Inventory.AddItem)
 --- @return boolean - Returns true if the item was successfully removed, false otherwise.
 Inventory.RemoveItem = function(identifier, item, amount, slot, reason, isMove)
     if not FDBCore.Shared.Items[item:lower()] then
-        print('RemoveItem: Invalid item')
         return false
     end
 
@@ -793,10 +812,9 @@ Inventory.RemoveItem = function(identifier, item, amount, slot, reason, isMove)
     end
 
     if not inventory then
-        print('RemoveItem: Inventory not found')
         return false
     end
-
+    
     Inventory.CheckItemsDecay(inventory, decayRate or 1)
 
     amount = tonumber(amount) or 1
@@ -814,12 +832,40 @@ Inventory.RemoveItem = function(identifier, item, amount, slot, reason, isMove)
         end
 
         if not inventoryItem or inventoryItem.name:lower() ~= item:lower() then
-            print('RemoveItem: Item not found in slot')
+            -- Fallback para Hotbar usando item de stash (Fase H6)
+            local config = require 'shared.config'
+            if player and slot and slot > config.Hotbar.pocketSlots then
+                local hotbarItems, _ = Inventory.GetHotbarItems(player)
+                local hItem = hotbarItems[slot]
+                if hItem and hItem.name:lower() == item:lower() and hItem.stashId and hItem.originalSlot then
+                    local stashInv = Inventories[hItem.stashId]
+                    if stashInv and stashInv.items then
+                        local sItem = nil
+                        local sKey = nil
+                        for k, v in pairs(stashInv.items) do
+                            if v.slot == hItem.originalSlot then
+                                sItem = v
+                                sKey = k
+                                break
+                            end
+                        end
+                        if sItem and sItem.name:lower() == item:lower() and sItem.amount >= amount then
+                            sItem.amount = sItem.amount - amount
+                            if sItem.amount <= 0 then
+                                stashInv.items[sKey] = nil
+                            end
+                            Inventory.SaveStash(hItem.stashId)
+                            local resourceName = GetInvokingResource() or 'fdb-inventory'
+                            TriggerEvent('fdb-log:server:CreateLog', 'playerinventory', 'Item Removed (Hotbar Stash)', 'red', '**Inventory:** ' .. hItem.stashId .. ' (Slot: ' .. hItem.originalSlot .. ')\n**Item:** ' .. item .. '\n**Amount:** ' .. amount .. '\n**Reason:** ' .. (reason or 'No reason specified') .. '\n**Resource:** ' .. resourceName)
+                            return true
+                        end
+                    end
+                end
+            end
             return false
         end
 
         if inventoryItem.amount < amount then
-            print('RemoveItem: Not enough items in slot')
             return false
         end
 
@@ -854,7 +900,6 @@ Inventory.RemoveItem = function(identifier, item, amount, slot, reason, isMove)
         end
 
         if totalRemoved < amount then
-            print('RemoveItem: Not enough items in inventory')
             return false
         end
 
@@ -875,7 +920,8 @@ Inventory.RemoveItem = function(identifier, item, amount, slot, reason, isMove)
             info = inventoryItem.info
         }
         TriggerEvent("fdb-inventory:server:itemRemovedFromPlayerInventory", identifier, item, data, reason, isMove)
-		TriggerEvent('fdb-inventory:server:updateHotbar', identifier)
+    elseif Inventories[identifier] then
+        Inventory.SaveStash(identifier)
     end
 
     local invName = player and GetPlayerName(identifier) .. ' (' .. identifier .. ')' or identifier
@@ -893,7 +939,7 @@ Inventory.RemoveItem = function(identifier, item, amount, slot, reason, isMove)
         '**Reason:** ' .. removeReason .. '\n' ..
         '**Resource:** ' .. resourceName
     )
-	
+
     return true
 end
 
@@ -938,10 +984,140 @@ exports('CreateInventory', Inventory.CreateInventory)
 Inventory.DeleteInventory = function(identifier)
     if Inventories[identifier] then
         Inventories[identifier] = nil
-        print('[fdb-inventory] Deleted inventory: ' .. identifier)
         return true
     end
     return false
 end
 
 exports('DeleteInventory', Inventory.DeleteInventory)
+
+-- Gets total weight of items inside a stash (in grams)
+Inventory.GetStashWeight = function(identifier)
+    if not identifier then return 0 end
+    local weight = 0
+    local items = nil
+    
+    if Inventories[identifier] and Inventories[identifier].items then
+        items = Inventories[identifier].items
+    else
+        local dbResult = MySQL.prepare.await('SELECT items FROM inventories WHERE identifier = ?', { identifier })
+        if dbResult then
+            items = json.decode(dbResult)
+        end
+    end
+    
+    if items then
+        for _, item in pairs(items) do
+            if item and item.weight and item.amount then
+                weight = weight + (item.weight * item.amount)
+            end
+        end
+    end
+    
+    return weight
+end
+
+exports('GetStashWeight', Inventory.GetStashWeight)
+
+lib.callback.register('fdb-inventory:server:getBackpackStash', function(source, uid, model)
+    local maxWeight = 5000
+    local slots = 15
+    local label = "Mochila"
+
+    if model == "wallet_small" then
+        maxWeight = 1000
+        slots = 4
+        label = "Carteira Pequena"
+    elseif model == "wallet_large" then
+        maxWeight = 2000
+        slots = 8
+        label = "Carteira Grande"
+    elseif model == "holster_small" then
+        maxWeight = 5000
+        slots = 3
+        label = "Coldre Simples"
+    elseif model == "holster_large" then
+        maxWeight = 8000
+        slots = 5
+        label = "Coldre Reforçado"
+    elseif model == "backpack_tiny" then
+        maxWeight = 5000
+        slots = 4
+        label = "Mochila Mini"
+    elseif model == "backpack_small" then
+        maxWeight = 10000
+        slots = 6
+        label = "Mochila Pequena"
+    elseif model == "backpack_medium" then
+        maxWeight = 15000
+        slots = 10
+        label = "Mochila Média"
+    elseif model == "backpack_large" then
+        maxWeight = 20000
+        slots = 15
+        label = "Mochila Grande"
+    elseif model == "satchel_small" then
+        maxWeight = 15000
+        slots = 4
+        label = "Bolsa Pequena"
+    elseif model == "satchel_medium" then
+        maxWeight = 25000
+        slots = 8
+        label = "Bolsa Média"
+    elseif model == "satchel_large" then
+        maxWeight = 35000
+        slots = 12
+        label = "Bolsa Grande"
+    elseif string.find(model, "satchel") then
+        maxWeight = 35000
+        slots = 12
+        label = "Bolsa"
+    elseif qadr_backpacks and qadr_backpacks[model] then
+        maxWeight = qadr_backpacks[model].weight
+        slots = qadr_backpacks[model].slots or 15
+    end
+
+    -- Query durability from DB
+    local cleanUid = uid:sub(1, 3) == "bp_" and uid:sub(4) or uid
+    local dbResult = MySQL.query.await('SELECT durability FROM backpacks WHERE uid = ?', { cleanUid })
+    local durability = 100
+    if dbResult and dbResult[1] then
+        durability = dbResult[1].durability or 100
+    end
+
+    if durability < 50 then
+        maxWeight = math.floor(maxWeight * (durability / 100))
+    end
+
+    local stash = Inventories[uid]
+    if not stash then
+        stash = Inventory.InitializeInventory(uid, {
+            maxweight = maxWeight,
+            slots = slots,
+            label = label
+        })
+        local dbResult = MySQL.prepare.await('SELECT items FROM inventories WHERE identifier = ?', { uid })
+        if dbResult then
+            stash.items = json.decode(dbResult) or {}
+        end
+    end
+    
+    if stash then
+        stash.model = model
+    end
+
+    -- Se já existia em memória, atualiza a capacidade caso a durabilidade tenha mudado
+    stash.maxweight = maxWeight
+    stash.slots = slots
+    stash.label = label
+    
+    return {
+        uid = uid,
+        model = model,
+        items = stash.items or {},
+        maxweight = maxWeight,
+        slots = slots,
+        durability = durability
+    }
+end)
+

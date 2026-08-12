@@ -35,7 +35,6 @@ Shops.SetupShopItems = function(shopItems, shopData)
                     type = itemInfo['type'],
                     unique = itemInfo['unique'],
                     useable = itemInfo['useable'],
-					squality = itemInfo['squality'],
                     price = item.price,
                     buyPrice = item.buyPrice,
                     image = itemInfo['image'],
