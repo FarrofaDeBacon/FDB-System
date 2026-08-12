@@ -24,12 +24,13 @@ local function HandlePedReaction(ped, reaction, storeName)
     SetBlockingOfNonTemporaryEvents(ped, true)
     
     if reaction == 'comply' then
-        local dict = "script_proc@robberies@shop@strgen"
-        local anim = "handsup_register"
+        local dict = "mech_loco_m@generic@reaction@handsup@unarmed@normal"
+        local anim = "loop"
         RequestAnimDict(dict)
         while not HasAnimDictLoaded(dict) do Wait(10) end
         
-        TaskPlayAnim(ped, dict, anim, 8.0, -8.0, -1, 1, 0, false, 0, false, 0, false)
+        ClearPedTasksImmediately(ped)
+        TaskPlayAnim(ped, dict, anim, 8.0, -8.0, -1, 31, 0, false, 0, false, 0, false)
         Bridge.Notify("Calma, calma! Leve tudo!", "success")
         Wait(5000)
         ClearPedTasks(ped)
@@ -94,7 +95,7 @@ CreateThread(function()
                                 robbedPeds[targetEntity] = true
                                 isRobbingStore = true
                                 currentRobbedPed = targetEntity
-                                
+                                SetBlockingOfNonTemporaryEvents(targetEntity, true)
                                 TriggerServerEvent('illegal-system:server:attemptStoreRobbery', store.name, 'day')
                             end
                         end

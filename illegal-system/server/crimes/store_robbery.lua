@@ -41,7 +41,7 @@ RegisterNetEvent('illegal-system:server:attemptStoreRobbery', function(storeName
     TriggerClientEvent('illegal-system:client:storeRobberyReaction', source, reaction, storeName)
 
     if reaction == 'comply' then
-        SetTimeout(9000, function()
+        SetTimeout(5000, function()
             local pool = Utils.GetRandomLootPool()
             local items = crimeConfig.loot[pool]
             local reward = items[math.random(#items)]
