@@ -133,32 +133,8 @@ CreateThread(function()
         end
     end)
     
-    -- 2. Método Noturno: Burglary (Porta e Registradora)
+    -- 2. Método Noturno: Burglary (Registradora apenas — a porta é gerenciada pelo wasvendel_doorlock)
     for _, store in ipairs(Config.Stores) do
-        -- Tranca da Porta
-        exports.ox_target:addBoxZone({
-            coords = store.doorCoords,
-            size = vec3(2.0, 2.0, 3.0),
-            rotation = 0,
-            options = {
-                {
-                    name = 'burglary_door_'..store.name,
-                    icon = 'fa-solid fa-unlock',
-                    label = 'Arrombar Porta',
-                    canInteract = function()
-                        local hour = GetClockHours()
-                        if hour < store.openHour or hour >= store.closeHour then
-                            return true
-                        end
-                        return false
-                    end,
-                    onSelect = function()
-                        TriggerServerEvent('illegal-system:server:attemptBurglary', store.name, 'door')
-                    end
-                }
-            }
-        })
-        
         -- Caixa Registradora
         exports.ox_target:addBoxZone({
             coords = store.registerCoords,
@@ -177,7 +153,25 @@ CreateThread(function()
                         return false
                     end,
                     onSelect = function()
-                        TriggerServerEvent('illegal-system:server:attemptBurglary', store.name, 'register')
+                        -- Verifica se o fdb-lockpick está rodando
+                        if GetResourceState('fdb-lockpick') ~= 'started' then
+                            Bridge.Notify("Você precisa de ferramentas para isso.", "error")
+                            return
+                        end
+
+                        -- Animação de agachar e forçar a fechadura
+                        local ped = PlayerPedId()
+                        TaskStartScenarioInPlace(ped, GetHashKey("WORLD_HUMAN_CROUCH_INSPECT"), -1, true, false, false, false)
+
+                        -- Abre o minigame do fdb-lockpick
+                        TriggerEvent('fdb-lockpick:client:openLockpick', function(success)
+                            ClearPedTasks(ped)
+                            if success then
+                                TriggerServerEvent('illegal-system:server:attemptBurglary', store.name, 'register')
+                            else
+                                Bridge.Notify("Você falhou no arrombamento!", "error")
+                            end
+                        end)
                     end
                 }
             }
@@ -185,42 +179,5 @@ CreateThread(function()
     end
 end)
 
--- Iniciar Minigames do Burglary
-RegisterNetEvent('illegal-system:client:startBurglaryMinigame', function(storeName, targetType, sessionToken)
-    local minigameConfig = Config.Crimes['store_burglary'].minigame[targetType]
-    
-    -- Tipo fixo como 'tierbar' já que foi simplificado no config
-    SendNUIMessage({
-        action = "START_MINIGAME",
-        duration = minigameConfig.duration,
-        zones = minigameConfig.zones
-    })
-    SetNuiFocus(true, false)
-        
-        -- Simular animação de arrombamento (kneel)
-        TaskStartScenarioInPlace(PlayerPedId(), GetHashKey("WORLD_HUMAN_CROUCH_INSPECT"), -1, true, false, false, false)
-        
-        local timer = minigameConfig.duration * 1000
-        local elapsed = 0
-        local result = nil
-        
-        local listener
-        listener = RegisterNUICallback('minigameResult', function(data, cb)
-            result = data.tier
-            cb('ok')
-        end)
-        
-        while elapsed < timer and result == nil do
-            Wait(100)
-            elapsed = elapsed + 100
-        end
-        
-        SetNuiFocus(false, false)
-        ClearPedTasks(PlayerPedId())
-        
-        if result and result ~= 'fail' then
-            TriggerServerEvent('illegal-system:server:finishBurglary', storeName, targetType, sessionToken, result, elapsed)
-        else
-            Bridge.Notify("Você falhou no arrombamento!", "error")
-        end
-end)
+
+
