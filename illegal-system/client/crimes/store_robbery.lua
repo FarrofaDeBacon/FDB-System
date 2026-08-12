@@ -48,8 +48,8 @@ RegisterNetEvent('illegal-system:client:startStoreRobbery', function(storeName, 
     SetBlockingOfNonTemporaryEvents(ped, true)
 
     if reaction == 'comply' then
-        -- O NPC grita uma fala nativa de estar sendo roubado
-        Citizen.InvokeNative(0x8E04FEDD28D42462, ped, "ROBBERY", "SPEECH_PARAMS_FORCE", 0)
+        -- Fala genérica de medo do RDR2 (evita crash do áudio do GTA V)
+        Citizen.InvokeNative(0x8E04FEDD28D42462, ped, "GENERIC_FRIGHTENED_HIGH", "SPEECH_PARAMS_FORCE_SHOUTED_CRITICAL", 0)
         TaskHandsUp(ped, 8000, PlayerPedId(), -1, true)
         Bridge.Notify("Calma, calma! Leve tudo!", "success")
 
@@ -64,8 +64,8 @@ RegisterNetEvent('illegal-system:client:startStoreRobbery', function(storeName, 
         isRobbingStore = false
 
     elseif reaction == 'fight' then
-        -- O NPC grita mandando você sumir dali
-        Citizen.InvokeNative(0x8E04FEDD28D42462, ped, "GET_LOST", "SPEECH_PARAMS_FORCE_SHOUTED", 0)
+        -- Xingamento genérico do RDR2
+        Citizen.InvokeNative(0x8E04FEDD28D42462, ped, "GENERIC_CURSE_HIGH", "SPEECH_PARAMS_FORCE_SHOUTED_CRITICAL", 0)
         Bridge.Notify("Você não vai levar nada meu!", "error")
         GiveWeaponToPed_2(ped, 0x1D073A89, 50, true, true, 1, false, 0.5, 1.0, 1.0, true, 0, 0)
         TaskCombatPed(ped, PlayerPedId(), 0, 16)
@@ -74,7 +74,7 @@ RegisterNetEvent('illegal-system:client:startStoreRobbery', function(storeName, 
 
     elseif reaction == 'flee' then
         -- O NPC grita assustado e corre
-        Citizen.InvokeNative(0x8E04FEDD28D42462, ped, "ROBBERY", "SPEECH_PARAMS_FORCE_SHOUTED", 0)
+        Citizen.InvokeNative(0x8E04FEDD28D42462, ped, "GENERIC_FRIGHTENED_HIGH", "SPEECH_PARAMS_FORCE_SHOUTED_CRITICAL", 0)
         Bridge.Notify("Por favor, não me machuque!", "error")
         -- FIX do bug de hoje: TaskSmartFleePed em vez de TaskGoToCoordAnyMeans.
         -- Foge do jogador com desvio de obstáculo, não trava mais no balcão.
