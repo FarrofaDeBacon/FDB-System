@@ -102,6 +102,7 @@ AddEventHandler("onResourceStart", function(res)
     if ready then return end
     if res ~= GetCurrentResourceName()
         and res ~= "rsg-core" and res ~= "rsg_core"
+        and res ~= "fdb-core" and res ~= "fdb_core"
         and res ~= "vorp_core"
         and res ~= "rsg-inventory" and res ~= "vorp_inventory" then
         return
