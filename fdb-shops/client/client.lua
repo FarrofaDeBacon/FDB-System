@@ -41,6 +41,7 @@ local function SpawnShopNPC(shopData)
     SetEntityInvincible(npc, true)
     FreezeEntityPosition(npc, true)
     SetBlockingOfNonTemporaryEvents(npc, true)
+    SetPedFleeAttributes(npc, 0, false)
 
     if shopData.scenario then
         pcall(TaskStartScenarioInPlace, npc, joaat(shopData.scenario), -1, true, false, false, false)

@@ -73,25 +73,27 @@ RegisterNetEvent('illegal-system:client:storeRobberyFailed', function(reason)
 end)
 
 CreateThread(function()
-    -- 1. Método Diurno: Assalto à mão armada (Mirando no NPC)
     CreateThread(function()
         while true do
             Wait(250)
-            if not isRobbingStore and IsPedArmed(PlayerPedId(), 4) then
-                local isAiming, targetEntity = GetEntityPlayerIsFreeAimingAt(PlayerId())
-                if isAiming and targetEntity and DoesEntityExist(targetEntity) and not IsPedAPlayer(targetEntity) then
-                    local coords = GetEntityCoords(targetEntity)
-                    local store = GetStoreZone(coords)
-                    
-                    if store then
-                        local hour = GetClockHours()
-                        if hour >= store.openHour and hour < store.closeHour then
-                            if not robbedPeds[targetEntity] then
-                                robbedPeds[targetEntity] = true
-                                isRobbingStore = true
-                                currentRobbedPed = targetEntity
-                                SetBlockingOfNonTemporaryEvents(targetEntity, true)
-                                TriggerServerEvent('illegal-system:server:attemptStoreRobbery', store.name, 'day')
+            if not isRobbingStore then
+                local weapon = GetSelectedPedWeapon(PlayerPedId())
+                if weapon ~= GetHashKey('WEAPON_UNARMED') then
+                    local isAiming, targetEntity = GetEntityPlayerIsFreeAimingAt(PlayerId())
+                    if isAiming and targetEntity and DoesEntityExist(targetEntity) and not IsPedAPlayer(targetEntity) then
+                        local coords = GetEntityCoords(targetEntity)
+                        local store = GetStoreZone(coords)
+                        
+                        if store then
+                            local hour = GetClockHours()
+                            if hour >= store.openHour and hour < store.closeHour then
+                                if not robbedPeds[targetEntity] then
+                                    robbedPeds[targetEntity] = true
+                                    isRobbingStore = true
+                                    currentRobbedPed = targetEntity
+                                    SetBlockingOfNonTemporaryEvents(targetEntity, true)
+                                    TriggerServerEvent('illegal-system:server:attemptStoreRobbery', store.name, 'day')
+                                end
                             end
                         end
                     end
