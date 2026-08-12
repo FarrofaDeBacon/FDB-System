@@ -43,6 +43,7 @@ local function HandlePedReaction(ped, reaction, storeName)
         
     elseif reaction == 'flee' then
         Bridge.Notify("Por favor, não me machuque!", "error")
+        -- Fix do bug de colisão: TaskSmartFleePed foge do jogador de forma inteligente
         TaskSmartFleePed(ped, PlayerPedId(), 100.0, -1, false, false)
     end
     

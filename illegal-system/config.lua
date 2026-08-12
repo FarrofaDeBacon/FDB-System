@@ -188,6 +188,7 @@ Config.Stores = {
         radius = 20.0,
         doorCoords = vec3(-324.23, 804.14, 117.93), -- Coordenada aproximada da porta de entrada
         registerCoords = vec3(-323.5, 804.5, 117.93), -- Coordenada aproximada da registradora
+        fleeCoords = vec3(-318.0, 808.0, 117.9), -- Coordenada para onde ele foge
         openHour = 6,
         closeHour = 22,
     },
