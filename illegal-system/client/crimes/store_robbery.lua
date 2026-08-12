@@ -7,6 +7,23 @@ AddEventHandler('fdb-shops:client:npcCreated', function(npc, shopData)
     SetBlockingOfNonTemporaryEvents(npc, true)
     SetPedFleeAttributes(npc, 0, false)
 end)
+
+-- Bloqueia a IA nativa retroativamente nos NPCs que já existem
+CreateThread(function()
+    Wait(2000) -- Espera o fdb-shops iniciar caso reiniciem juntos
+    for _, store in ipairs(Config.Stores) do
+        local handle, ped = FindFirstPed()
+        local success
+        repeat
+            if #(GetEntityCoords(ped) - store.coords) <= store.radius then
+                SetBlockingOfNonTemporaryEvents(ped, true)
+                SetPedFleeAttributes(ped, 0, false)
+            end
+            success, ped = FindNextPed(handle)
+        until not success
+        EndFindPed(handle)
+    end
+end)
 local function GetStoreZone(pedCoords)
     for _, store in ipairs(Config.Stores) do
         local dist = #(pedCoords - store.coords)
