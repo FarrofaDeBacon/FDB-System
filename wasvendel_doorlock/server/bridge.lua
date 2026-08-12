@@ -42,7 +42,7 @@ local function groupInList(value, list)
 end
 
 local function getRsgCore()
-    for _, resName in ipairs({ "rsg-core", "rsg_core" }) do
+    for _, resName in ipairs({ "rsg-core", "rsg_core", "fdb-core", "fdb_core" }) do
         if GetResourceState(resName) == "started" then
             local ok, obj = pcall(function() return exports[resName]:GetCoreObject() end)
             if not ok or type(obj) ~= "table" then

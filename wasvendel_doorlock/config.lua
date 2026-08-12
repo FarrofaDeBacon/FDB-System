@@ -139,10 +139,6 @@ Config.Notify = function(source, message, ntype)
             TriggerClientEvent("wasvendel_doorlock:notify", source, message, ntype)
         end
     else
-        if Config.FrameworkKey == "VORP" and Config.Core then
-            Config.Core.NotifyRightTip(message, 3500)
-        elseif Config.FrameworkKey == "RSG" then
-            TriggerEvent("RSGCore:Notify", message, ntype, 3500)
-        end
+        TriggerEvent("ox_lib:notify", { title = message, type = ntype, duration = 3500 })
     end
 end
