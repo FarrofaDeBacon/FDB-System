@@ -51,16 +51,16 @@ RegisterCommand('robsystem', function()
                     DrawLine(plyCoords.x, plyCoords.y, plyCoords.z, endCoords.x, endCoords.y, endCoords.z, 255, 0, 0, 255)
                     
                     -- E
-                    if IsControlJustPressed(0, 0xCEFD9220) then
+                    if IsDisabledControlJustPressed(0, 0xCEFD9220) then
                         PrintCoordinate("fleeCoords", endCoords)
                     -- G
-                    elseif IsControlJustPressed(0, 0x760A9C6F) then
+                    elseif IsDisabledControlJustPressed(0, 0x760A9C6F) then
                         PrintCoordinate("doorCoords", endCoords)
                     -- H
-                    elseif IsControlJustPressed(0, 0x24978A28) then
+                    elseif IsDisabledControlJustPressed(0, 0x24978A28) then
                         PrintCoordinate("registerCoords", endCoords)
                     -- U (Captura de Hash da Porta)
-                    elseif IsControlJustPressed(0, 0xD8F73058) then
+                    elseif IsDisabledControlJustPressed(0, 0xD8F73058) then
                         if entityHit and entityHit ~= 0 then
                             local hash = GetEntityModel(entityHit)
                             local coords = GetEntityCoords(entityHit)
