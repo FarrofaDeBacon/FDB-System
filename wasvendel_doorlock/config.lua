@@ -4,7 +4,7 @@ Config.Command = "doorlock"
 Config.ToggleCommand = "togglelock"
 
 Config.MenuAccess = {
-    mode = "vorp_group",
+    mode = "rsg_ace",
     vorpGroups = { "admin", "superadmin", "acontroller", "manager" },
     rsgAce = { "admin", "god", "superadmin" },
     steamIds = {},
