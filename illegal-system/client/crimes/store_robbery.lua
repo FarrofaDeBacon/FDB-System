@@ -64,6 +64,7 @@ RegisterNetEvent('illegal-system:client:startStoreRobbery', function(storeName, 
     elseif reaction == 'fight' then
         Bridge.Notify("Você não vai levar nada meu!", "error")
         GiveWeaponToPed_2(ped, 0x1D073A89, 50, true, true, 1, false, 0.5, 1.0, 1.0, true, 0, 0)
+        SetPedCombatMovement(ped, 0) -- 0 = Stationary (Fica parado atirando)
         TaskCombatPed(ped, PlayerPedId(), 0, 16)
         isRobbingStore = false
         TriggerServerEvent('illegal-system:server:cancelStoreRobbery', storeName, sessionToken)
