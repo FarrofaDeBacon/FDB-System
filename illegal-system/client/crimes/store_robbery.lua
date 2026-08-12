@@ -82,8 +82,8 @@ CreateThread(function()
         while true do
             Wait(250)
             if not isRobbingStore then
-                local weapon = GetSelectedPedWeapon(PlayerPedId())
-                if weapon ~= GetHashKey('WEAPON_UNARMED') then
+                local hasWep, weaponHash = GetCurrentPedWeapon(PlayerPedId(), true, 0, true)
+                if hasWep and weaponHash ~= GetHashKey('WEAPON_UNARMED') then
                     local isAiming, targetEntity = GetEntityPlayerIsFreeAimingAt(PlayerId())
                     if isAiming and targetEntity and DoesEntityExist(targetEntity) and not IsPedAPlayer(targetEntity) then
                         local coords = GetEntityCoords(targetEntity)
