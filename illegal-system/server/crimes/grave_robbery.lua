@@ -101,7 +101,6 @@ RegisterNetEvent('illegal-system:server:finishGraveRobbery', function(success, t
         return
     end
 
-    local crimeConfig = Config.Crimes['grave_robbery']
     if not crimeConfig.loot[tier] then return end
 
     local rewardItem = session.items[tier]

@@ -79,8 +79,6 @@ CreateThread(function()
             if not isRobbingStore and IsPedArmed(PlayerPedId(), 4) then
                 local isAiming, targetEntity = GetEntityPlayerIsFreeAimingAt(PlayerId())
                 if isAiming and targetEntity and DoesEntityExist(targetEntity) and not IsPedAPlayer(targetEntity) then
-                    print("DEBUG Lojista - Entidade Mirada ID:", targetEntity)
-                    print("DEBUG Lojista - GetPedCanBeTargetted:", GetPedCanBeTargetted(targetEntity))
                     local coords = GetEntityCoords(targetEntity)
                     local store = GetStoreZone(coords)
                     

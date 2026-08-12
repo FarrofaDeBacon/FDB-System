@@ -76,12 +76,4 @@ RegisterCommand('test_grave_exploit', function()
     end
 end, false)
 
-RegisterCommand('test_target', function()
-    local isAiming, targetEntity = GetEntityPlayerIsFreeAimingAt(PlayerId())
-    if isAiming and targetEntity and DoesEntityExist(targetEntity) then
-        print("DEBUG Lojista - Entidade Mirada ID:", targetEntity)
-        print("DEBUG Lojista - GetPedCanBeTargetted:", GetPedCanBeTargetted(targetEntity))
-    else
-        print("Nao ta mirando em nada válido.")
-    end
-end, false)
+
