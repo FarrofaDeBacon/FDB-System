@@ -53,7 +53,7 @@ RegisterNetEvent('illegal-system:client:startStoreRobbery', function(storeName, 
 
         if lib.progressBar({
             duration = 8000, label = "Levando o dinheiro...",
-            disable = { car = true, move = true, combat = true }, canCancel = true
+            disable = { car = true, move = true, combat = false }, canCancel = true
         }) then
             TriggerServerEvent('illegal-system:server:finishStoreRobbery', storeName, sessionToken)
         else
