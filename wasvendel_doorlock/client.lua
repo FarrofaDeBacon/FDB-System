@@ -301,22 +301,9 @@ local function runLockpick(cb)
     local cfg = Config.Lockpick or {}
     
     local ped = PlayerPedId()
-    local dict = 'mech_doors@locked@door_knob@generic@handle_l@hand_l@try_door'
-    RequestAnimDict(dict)
-    local timeout = GetGameTimer() + 2000
-    while not HasAnimDictLoaded(dict) and GetGameTimer() < timeout do Wait(10) end
-    if HasAnimDictLoaded(dict) then
-        pcall(function()
-            TaskPlayAnim(ped, dict, 'try_door', 8.0, -8.0, -1, 1, 0.0, false, false, false)
-        end)
-    else
-        -- Fallback se a animação não carregar
-        TaskStartScenarioInPlace(ped, GetHashKey("WORLD_HUMAN_CROUCH_INSPECT"), -1, true, false, false, false)
-    end
     
     if cfg.resource == "fdb-lockpick" then
         TriggerEvent('fdb-lockpick:client:openLockpick', function(success)
-            ClearPedTasks(ped)
             cb(success)
         end)
         return
