@@ -126,6 +126,8 @@ end)
 -- O fdb-lockpick cuida do minigame no client.
 -- A porta é gerenciada pelo wasvendel_doorlock.
 -- ==========================================
+local activeBurglaries = {} -- Controle dos tokens de assalto noturno (registradora)
+
 RegisterNetEvent('illegal-system:server:startRegisterBurglary', function(storeName)
     local source = source
     local crimeConfig = Config.Crimes['store_robbery']
@@ -144,7 +146,9 @@ RegisterNetEvent('illegal-system:server:startRegisterBurglary', function(storeNa
     end
 
     -- Permite que o minigame inicie no client
-    TriggerClientEvent('illegal-system:client:allowRegisterMinigame', source, storeName)
+    local sessionToken = GenerateToken()
+    activeBurglaries[source] = sessionToken
+    TriggerClientEvent('illegal-system:client:allowRegisterMinigame', source, storeName, sessionToken)
     
     -- Rolagens de risco (Cachorro)
     if burglaryConfig.enabled and burglaryConfig.dog.enabled then
@@ -214,9 +218,26 @@ RegisterNetEvent('illegal-system:server:startRegisterBurglary', function(storeNa
     end
 end)
 
-RegisterNetEvent('illegal-system:server:attemptBurglary', function(storeName, targetType)
+RegisterNetEvent('illegal-system:server:attemptBurglary', function(storeName, targetType, sessionToken)
     local source = source
     if targetType ~= 'register' then return end
+
+    -- Verifica token da sessão
+    if not activeBurglaries[source] or activeBurglaries[source] ~= sessionToken then
+        print(string.format("[illegal-system] EXPLOIT DETECTADO: Jogador ID %s tentou forçar o evento de arrombamento noturno.", source))
+        return
+    end
+    
+    -- Invalida o token
+    activeBurglaries[source] = nil
+
+    local crimeConfig = Config.Crimes['store_robbery']
+    
+    -- Re-checa o item para segurança extra
+    if not Bridge.HasItem(source, crimeConfig.requiredItem, 1) then
+        Bridge.Notify(source, "Você precisa de um " .. crimeConfig.requiredItem .. " para isso.", "error")
+        return
+    end
 
     -- Re-checa cooldown global da registradora (para segurança)
     if storeRespawnTimes[storeName] and os.time() < storeRespawnTimes[storeName] then

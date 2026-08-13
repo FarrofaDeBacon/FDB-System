@@ -167,14 +167,14 @@ CreateThread(function()
     end
 end)
 
-RegisterNetEvent('illegal-system:client:allowRegisterMinigame', function(storeName)
+RegisterNetEvent('illegal-system:client:allowRegisterMinigame', function(storeName, sessionToken)
     local ped = PlayerPedId()
     TaskStartScenarioInPlace(ped, GetHashKey("WORLD_HUMAN_CROUCH_INSPECT"), -1, true, false, false, false)
     
     TriggerEvent('fdb-lockpick:client:openLockpick', function(success)
         ClearPedTasks(ped)
         if success then
-            TriggerServerEvent('illegal-system:server:attemptBurglary', storeName, 'register')
+            TriggerServerEvent('illegal-system:server:attemptBurglary', storeName, 'register', sessionToken)
         else
             Bridge.Notify("Você falhou no arrombamento!", "error")
         end
