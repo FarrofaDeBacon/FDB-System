@@ -82,6 +82,34 @@ Config.Crimes = {
             common = { 'cannedbeans', 'apple', 'bread' },
             uncommon = { 'ammo_revolver', 'cigar' },
             rare = { 'goldnugget', 'pocketwatch' }
+        },
+        burglary = {
+            enabled = true,
+            dog = {
+                enabled = true,
+                chance = 40,
+                barkDuration = 15,
+            },
+            witness = {
+                enabled = true,
+                chanceAfterDog = 30,
+                notifyLawman = true,
+                alertRadius = 300.0,
+                showMapBlip = true,
+                coordsJitter = 80.0,
+                alertText = "Latidos estranhos foram reportados perto de uma loja...",
+            },
+            armedNpc = {
+                enabled = true,
+                onlyIfNoCopsOnline = true,
+                delayAfterDog = { min = 20, max = 40 },
+                catchChance = 50,
+            },
+            caughtOutcome = {
+                knockoutChance = 60,
+                knockout = { enabled = true, damage = 0 },
+                jail = { enabled = false, minutes = 10 },
+            },
         }
     },
 
@@ -125,6 +153,16 @@ Config.Crimes = {
                 rare     = { start = 80, ["end"] = 88 },
             }
         }
+    },
+
+    door_lockpick = {
+        name             = 'Arrombamento de Porta',
+        xp               = 10,          -- XP ganho ao arrombar
+        heat             = 5,           -- Nível de Heat gerado
+        witnessChance    = 15.0,        -- 15% de chance de gerar testemunha
+        evidenceChance   = 20.0,        -- 20% de chance de deixar evidência
+        cooldown         = 0,           -- Cooldown de 0s (Doorlock já cuida de fechar a porta etc)
+        requiredItem     = 'lockpick',
     },
 }
 

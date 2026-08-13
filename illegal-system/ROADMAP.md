@@ -38,11 +38,58 @@ sem tocar no Core.
 - [x] Mecanismo de Cooldown do Túmulo com banco de dados persistente (dias no jogo).
 - [x] Animações completas com pá e feedback visual de montes de terra na lápide (dirt pile).
 
+## Etapa 4 — Roubo de Lojas (em andamento)
+
+Pivotado de "hold-up com NPC de dia" (travado em animação/reação) para um fluxo de
+**arrombamento noturno sem NPC**, que não depende de reação de ped nenhuma.
+
+### Fluxo
+- Ativo só das 22h às 06h (horário do jogo), usando `openHour`/`closeHour` já existentes
+  em `Config.Stores`.
+- Loja fecha de verdade à noite: NPC some, e o menu de compra do `fdb-shops` também
+  bloqueia server-side (não confia só no NPC sumir do client).
+- Precisa `lockpick` pra arrombar dois pontos: a porta (trancada) e a registradora.
+- Porta arrombada fica destrancada até a loja reabrir de manhã — não tranca de novo sozinha.
+- Registradora dá **dinheiro** (`registerCash = {min, max}` por loja via `Bridge.AddMoney`),
+  não item — substitui o `burglaryLoot` atual.
+- Motor do minigame de arrombamento configurável (`minigameEngine` no config, ex.
+  `fdb-lockpick` dedicado em vez do tierbar genérico, pra eliminar conflito de
+  `RegisterNUICallback('minigameResult', ...)` duplicado com o `fdb-libs`).
+
+### Cooldown — duas camadas separadas (não confundir)
+- **Porta/registradora não usam o `crimeId` genérico `'store_robbery'` do `CrimeCore`**
+  (esse é o cooldown do assalto diurno, por jogador — hoje ele é acionado ao arrombar a
+  porta e bloqueia a tentativa seguinte na registradora, quebrando o fluxo).
+- **Respawn da registradora é por loja, não por jogador**: mesmo padrão do
+  `grave_robbery` (`Config.GraveRespawn.mode` migrando de `'restart'` pra `'persistent'`),
+  espelhado em `Config.StoreRobberyRespawn` (dias de jogo aleatórios min/max). Enquanto
+  não passar o cooldown da loja, a registradora fica "vazia" pra qualquer jogador.
+
+### Mecânica de risco (arrombamento da registradora)
+Toda decidida no servidor (rolagens de chance e resultado final) — o client só recebe
+parâmetros prontos e encena. Cada camada com liga/desliga própria no config:
+
+1. **Cachorro** — chance de spawnar e latir ao iniciar o minigame da registradora.
+2. **Testemunha real** — chance (só se o cachorro latiu) de virar alerta pro `fdb-lawman`.
+   Filtra só LEO on-duty dentro de um raio da loja, manda coords com jitter (área
+   aproximada, não a posição exata), com opção de mostrar ou não marcador no mapa.
+   Reaproveita o evento client `fdb-lawman:client:lawmanAlert` que já existe — **sem
+   editar nada dentro do `fdb-lawman`**.
+3. **NPC armado** — só aparece se não tem nenhum LEO on-duty no servidor. Depois de um
+   delay após o latido, chance de tentar impedir o assalto.
+4. **Resultado se pegar o jogador** — aleatório entre nocaute (cosmético, dano
+   configurável) ou prisão. Prisão fica **desligada no config por enquanto**
+   (`jail.enabled = false`) — exigiria uma função nova no `fdb-lawman`
+   (`jailPlayerBySystem`, sem gate de LEO online) que não será criada nesta etapa;
+   o hook já fica pronto no código pra quando entrarmos na parte de polícia.
+
+Depende de: Core, sistema de loot, `fdb-lockpick`, `fdb-lawman` (só consumindo o alerta
+existente, sem alterações nele).
+
 ## Próximas etapas (não entregues ainda — ordem sugerida)
 
 | Etapa | Conteúdo | Depende de |
 |---|---|---|
-| 4 | Roubo de Lojas (Hold-up em NPCs, arrombamento de caixas) | Core, sistema de loot |
 | 5 | Roubo de casas (múltiplos pontos, arrombamento, barulho) | Core, sistema de loot |
 | 6 | Loot tables + itens roubados (`stolen = true`) + receptadores | Core |
 | 7 | Evidências físicas completas (não só o roll — objeto no mundo, perícia) | Fase 1 (hook já existe) |

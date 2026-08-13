@@ -1,13 +1,58 @@
 local crimeId = 'store_robbery'
-local burglaryCrimeId = 'store_burglary'
 local storeRespawnTimes = {} -- Controle de cooldown global persistente das registradoras
+local storeRobberyLocks = {} -- Armazena os lockIds para cada store
+local lastLockedDay = {} -- Para garantir que não tranque várias vezes no mesmo dia
+
+-- Inicializa os locks buscando no wasvendel_doorlock
+CreateThread(function()
+    Wait(2000) -- Espera recursos iniciarem
+    local locks = exports.wasvendel_doorlock:GetLocks()
+    if locks then
+        for _, store in ipairs(Config.Stores) do
+            local bestLockId = nil
+            local minStoreDist = 5.0 -- Tolerância de 5 metros
+            for id, lock in pairs(locks) do
+                if lock.coords then
+                    local dist = #(store.doorCoords - lock.coords)
+                    if dist < minStoreDist then
+                        minStoreDist = dist
+                        bestLockId = id
+                    end
+                end
+            end
+            if bestLockId then
+                storeRobberyLocks[store.name] = bestLockId
+            end
+        end
+    end
+end)
+
+-- Loop para trancar as portas automaticamente na hora de fechar (22h)
+CreateThread(function()
+    while true do
+        Wait(5000) -- Checa a cada 5 segundos para garantir que pegamos o minuto exato
+        local hour = GetClockHours()
+        local day = GetClockDayOfMonth()
+        
+        for _, store in ipairs(Config.Stores) do
+            if hour == store.closeHour then
+                if lastLockedDay[store.name] ~= day then
+                    local lockId = storeRobberyLocks[store.name]
+                    if lockId then
+                        exports.wasvendel_doorlock:SetLockState(lockId, true)
+                        lastLockedDay[store.name] = day
+                    end
+                end
+            end
+        end
+    end
+end)
 
 local function GenerateToken()
     local charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     local token = ""
     for i = 1, 16 do
         local rand = math.random(1, #charset)
-
         token = token .. charset:sub(rand, rand)
     end
     return token
@@ -81,13 +126,11 @@ end)
 -- O fdb-lockpick cuida do minigame no client.
 -- A porta é gerenciada pelo wasvendel_doorlock.
 -- ==========================================
-RegisterNetEvent('illegal-system:server:attemptBurglary', function(storeName, targetType)
+RegisterNetEvent('illegal-system:server:startRegisterBurglary', function(storeName)
     local source = source
-    local crimeConfig = Config.Crimes[burglaryCrimeId]
+    local crimeConfig = Config.Crimes['store_robbery']
+    local burglaryConfig = crimeConfig.burglary
     
-    -- Só registradora agora (porta é pelo wasvendel_doorlock)
-    if targetType ~= 'register' then return end
-
     -- Checa cooldown global da registradora
     if storeRespawnTimes[storeName] and os.time() < storeRespawnTimes[storeName] then
         Bridge.Notify(source, "A registradora já foi esvaziada recentemente.", "error")
@@ -99,14 +142,88 @@ RegisterNetEvent('illegal-system:server:attemptBurglary', function(storeName, ta
         Bridge.Notify(source, "Você precisa de um " .. crimeConfig.requiredItem .. " para isso.", "error")
         return
     end
+
+    -- Permite que o minigame inicie no client
+    TriggerClientEvent('illegal-system:client:allowRegisterMinigame', source, storeName)
     
-    local attempt = CrimeCore.AttemptCrime(source, burglaryCrimeId)
-    if not attempt.ok then
-        Bridge.Notify(source, "A poeira ainda não baixou nessa área.", "error")
+    -- Rolagens de risco (Cachorro)
+    if burglaryConfig.enabled and burglaryConfig.dog.enabled then
+        if math.random(1, 100) <= burglaryConfig.dog.chance then
+            -- Avisa o client para spawnar o cachorro e tocar o som
+            TriggerClientEvent('illegal-system:client:spawnDogRisk', source, storeName, burglaryConfig.dog.barkDuration)
+            
+            -- Se latiu, rola testemunha (LEO)
+            if burglaryConfig.witness.enabled and math.random(1, 100) <= burglaryConfig.witness.chanceAfterDog then
+                local storeConfig = nil
+                for _, s in ipairs(Config.Stores) do
+                    if s.name == storeName then storeConfig = s break end
+                end
+                
+                if storeConfig then
+                    local jitter = burglaryConfig.witness.coordsJitter
+                    local alertCoords = storeConfig.coords + vec3(math.random(-jitter, jitter), math.random(-jitter, jitter), 0)
+                    
+                    local players = GetPlayers()
+                    for _, pid in ipairs(players) do
+                        local pSrc = tonumber(pid)
+                        -- No fdb-bridge as funções seriam HasJobType / IsOnDuty, ou usar a Bridge local
+                        -- O CrimeCore já mapeia jobs e duty? A interface diz GetPlayer(source).job.type
+                        -- Usaremos a abstração Bridge da Etapa 1
+                        local pData = Bridge.GetPlayer(pSrc)
+                        if pData and pData.job and pData.job.type == 'leo' and pData.job.onduty then
+                            local pCoords = GetEntityCoords(GetPlayerPed(pSrc))
+                            if #(pCoords - storeConfig.coords) <= burglaryConfig.witness.alertRadius then
+                                if burglaryConfig.witness.showMapBlip then
+                                    TriggerClientEvent('fdb-lawman:client:lawmanAlert', pSrc, alertCoords, burglaryConfig.witness.alertText)
+                                else
+                                    Bridge.Notify(pSrc, burglaryConfig.witness.alertText, "error")
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            
+            -- NPC Armado (se não tem LEO onduty)
+            if burglaryConfig.armedNpc.enabled then
+                local hasLeo = false
+                local players = GetPlayers()
+                for _, pid in ipairs(players) do
+                    local pData = Bridge.GetPlayer(tonumber(pid))
+                    if pData and pData.job and pData.job.type == 'leo' and pData.job.onduty then
+                        hasLeo = true
+                        break
+                    end
+                end
+                
+                if (not burglaryConfig.armedNpc.onlyIfNoCopsOnline) or (not hasLeo) then
+                    local delay = math.random(burglaryConfig.armedNpc.delayAfterDog.min, burglaryConfig.armedNpc.delayAfterDog.max)
+                    SetTimeout(delay * 1000, function()
+                        -- Rola a chance do NPC pegar o jogador
+                        if math.random(1, 100) <= burglaryConfig.armedNpc.catchChance then
+                            local outcome = 'knockout'
+                            if burglaryConfig.caughtOutcome.jail.enabled and math.random(1, 100) <= (100 - burglaryConfig.caughtOutcome.knockoutChance) then
+                                outcome = 'jail'
+                            end
+                            TriggerClientEvent('illegal-system:client:armedNpcRisk', source, storeName, outcome)
+                        end
+                    end)
+                end
+            end
+        end
+    end
+end)
+
+RegisterNetEvent('illegal-system:server:attemptBurglary', function(storeName, targetType)
+    local source = source
+    if targetType ~= 'register' then return end
+
+    -- Re-checa cooldown global da registradora (para segurança)
+    if storeRespawnTimes[storeName] and os.time() < storeRespawnTimes[storeName] then
+        Bridge.Notify(source, "A registradora já foi esvaziada recentemente.", "error")
         return
     end
-
-    -- O jogador já passou no minigame do fdb-lockpick no client, então dá a recompensa
+    
     local storeConfig = nil
     for _, s in ipairs(Config.Stores) do
         if s.name == storeName then storeConfig = s break end
@@ -122,6 +239,6 @@ RegisterNetEvent('illegal-system:server:attemptBurglary', function(storeName, ta
         local secondsToRespawn = daysToRespawn * (respawnConfig.minutesPerIngameDay * 60)
         storeRespawnTimes[storeName] = os.time() + secondsToRespawn
         
-        CrimeCore.FinishCrime(source, burglaryCrimeId, true, "$" .. amount)
+        -- Sem chamadas ao CrimeCore para arrombamento, cooldown agora é 100% independente por loja
     end
 end)

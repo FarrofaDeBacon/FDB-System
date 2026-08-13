@@ -60,13 +60,19 @@ Config.Defaults = {
 -- Optional door categories shown in the editor / list filter.
 -- Existing locks without a category stay uncategorized (fully compatible).
 Config.Categories = {
-    "Bank",
-    "Jail",
-    "Sheriff",
+    "Apartamento Chines",
+    "Armeiro",
+    "Banco",
+    "Delegacia",
+    "Destilaria",
+    "Fazenda",
+    "Forja",
+    "Jornal",
+    "Medico",
+    "Mercado",
+    "Prisao",
     "Saloon",
-    "Store",
-    "House",
-    "Other",
+    "Taxidermista",
 }
 
 -- Quick-add job presets for the editor (name = job name, grade = minimum rank).

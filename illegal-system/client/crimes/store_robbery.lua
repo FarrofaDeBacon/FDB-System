@@ -158,20 +158,8 @@ CreateThread(function()
                             Bridge.Notify("Você precisa de ferramentas para isso.", "error")
                             return
                         end
-
-                        -- Animação de agachar e forçar a fechadura
-                        local ped = PlayerPedId()
-                        TaskStartScenarioInPlace(ped, GetHashKey("WORLD_HUMAN_CROUCH_INSPECT"), -1, true, false, false, false)
-
-                        -- Abre o minigame do fdb-lockpick
-                        TriggerEvent('fdb-lockpick:client:openLockpick', function(success)
-                            ClearPedTasks(ped)
-                            if success then
-                                TriggerServerEvent('illegal-system:server:attemptBurglary', store.name, 'register')
-                            else
-                                Bridge.Notify("Você falhou no arrombamento!", "error")
-                            end
-                        end)
+                        -- Inicia o processo no servidor (que vai rolar os riscos e retornar allowRegisterMinigame)
+                        TriggerServerEvent('illegal-system:server:startRegisterBurglary', store.name)
                     end
                 }
             }
@@ -179,5 +167,81 @@ CreateThread(function()
     end
 end)
 
+RegisterNetEvent('illegal-system:client:allowRegisterMinigame', function(storeName)
+    local ped = PlayerPedId()
+    TaskStartScenarioInPlace(ped, GetHashKey("WORLD_HUMAN_CROUCH_INSPECT"), -1, true, false, false, false)
+    
+    TriggerEvent('fdb-lockpick:client:openLockpick', function(success)
+        ClearPedTasks(ped)
+        if success then
+            TriggerServerEvent('illegal-system:server:attemptBurglary', storeName, 'register')
+        else
+            Bridge.Notify("Você falhou no arrombamento!", "error")
+        end
+    end)
+end)
 
+RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, barkDuration)
+    local playerPed = PlayerPedId()
+    local coords = GetEntityCoords(playerPed)
+    
+    -- Spawna um cachorro perto do jogador (apenas visual e sonoro para assustar)
+    local dogModel = GetHashKey("A_C_DogCollie_01")
+    RequestModel(dogModel)
+    while not HasModelLoaded(dogModel) do Wait(10) end
+    
+    local offset = GetOffsetFromEntityInWorldCoords(playerPed, math.random(-5.0, 5.0), math.random(-5.0, 5.0), 0.0)
+    local dogPed = CreatePed(dogModel, offset.x, offset.y, coords.z, 0.0, true, false, false, false)
+    SetEntityAsMissionEntity(dogPed, true, true)
+    
+    -- Faz o cachorro latir
+    PlayAmbientSpeech1(dogPed, "BARK", "SPEECH_PARAMS_FORCE_SHOUTED")
+    TaskTurnPedToFaceEntity(dogPed, playerPed, -1)
+    
+    -- Depois do barkDuration, o cachorro foge e é deletado
+    SetTimeout(barkDuration * 1000, function()
+        if DoesEntityExist(dogPed) then
+            TaskWanderStandard(dogPed, 10.0, 10)
+            Wait(5000)
+            DeleteEntity(dogPed)
+        end
+    end)
+end)
 
+RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outcome)
+    local playerPed = PlayerPedId()
+    local coords = GetEntityCoords(playerPed)
+    
+    -- Spawna NPC Armado agressivo
+    local npcModel = GetHashKey("A_M_M_BynRoughTravellers_01")
+    RequestModel(npcModel)
+    while not HasModelLoaded(npcModel) do Wait(10) end
+    
+    local offset = GetOffsetFromEntityInWorldCoords(playerPed, 0.0, -10.0, 0.0)
+    local armedPed = CreatePed(npcModel, offset.x, offset.y, coords.z, 0.0, true, false, false, false)
+    SetEntityAsMissionEntity(armedPed, true, true)
+    
+    GiveWeaponToPed_2(armedPed, GetHashKey("WEAPON_REVOLVER_CATTLEMAN"), 50, true, true, 1, false, 0.5, 1.0, 1.0, true, 0, 0)
+    TaskCombatPed(armedPed, playerPed, 0, 16)
+    
+    Bridge.Notify("Um morador te flagrou! Cuidado!", "error")
+    
+    -- Lógica simples: Se o jogador não matar o NPC em X segundos, o 'outcome' acontece
+    SetTimeout(10000, function()
+        if DoesEntityExist(armedPed) and not IsEntityDead(armedPed) and not IsEntityDead(playerPed) then
+            -- O NPC pegou o jogador!
+            if outcome == 'knockout' then
+                Bridge.Notify("Você foi nocauteado pelo morador!", "error")
+                SetPedToRagdoll(playerPed, 10000, 10000, 0, false, false, false)
+            elseif outcome == 'jail' then
+                -- Hook preparado para futura integração com polícia
+                Bridge.Notify("Você foi pego e seria mandado para a prisão (futuro).", "error")
+            end
+            
+            -- NPC foge após nocautear
+            TaskWanderStandard(armedPed, 10.0, 10)
+            Wait(10000)
+            if DoesEntityExist(armedPed) then DeleteEntity(armedPed) end
+        end
+    end)
+end)
