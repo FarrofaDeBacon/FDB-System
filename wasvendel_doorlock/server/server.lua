@@ -441,6 +441,13 @@ RegisterNetEvent("wasvendel_doorlock:lockpick", function(lockId)
     clearLockpickSession(src)
 end)
 
+RegisterNetEvent("wasvendel_doorlock:startLockpickSession", function(item)
+    local src = source
+    if lockpickSession[src] then return end
+    lockpickSession[src] = { item = item, at = GetGameTimer() }
+    TriggerClientEvent("wasvendel_doorlock:useLockpickItem", src, item)
+end)
+
 CreateThread(function()
     while not WVDL.IsReady() do Wait(200) end
     local cfg = Config.Lockpick or {}

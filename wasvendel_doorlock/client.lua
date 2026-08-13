@@ -477,7 +477,7 @@ local function refreshTargets()
                         end,
                         onSelect = function()
                             local required = lock.lockpickItem
-                            TriggerServerEvent("wasvendel_doorlock:useLockpickItem", required and required or nil)
+                            TriggerServerEvent("wasvendel_doorlock:startLockpickSession", required and required or nil)
                         end
                     }
                 }
