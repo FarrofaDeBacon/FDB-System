@@ -306,7 +306,9 @@ local function runLockpick(cb)
     local timeout = GetGameTimer() + 2000
     while not HasAnimDictLoaded(dict) and GetGameTimer() < timeout do Wait(10) end
     if HasAnimDictLoaded(dict) then
-        TaskPlayAnim(ped, dict, 'try_door', 8.0, -8.0, -1, 1, 0, false, false, false)
+        pcall(function()
+            TaskPlayAnim(ped, dict, 'try_door', 8.0, -8.0, -1, 1, 0.0, false, false, false)
+        end)
     else
         -- Fallback se a animação não carregar
         TaskStartScenarioInPlace(ped, GetHashKey("WORLD_HUMAN_CROUCH_INSPECT"), -1, true, false, false, false)
@@ -336,7 +338,6 @@ local function runLockpick(cb)
         else
             result = exports[res][exportName](tries)
         end
-        ClearPedTasks(ped)
         cb(result == true)
     end)
 end

@@ -135,34 +135,6 @@ CreateThread(function()
     
     -- 2. Método Noturno: Burglary
     for _, store in ipairs(Config.Stores) do
-        -- Tranca da Porta
-        exports.ox_target:addBoxZone({
-            coords = store.doorCoords,
-            size = vec3(2.0, 2.0, 3.0),
-            rotation = 0,
-            options = {
-                {
-                    name = 'burglary_door_'..store.name,
-                    icon = 'fa-solid fa-unlock',
-                    label = 'Arrombar Porta',
-                    canInteract = function()
-                        local hour = GetClockHours()
-                        if hour < store.openHour or hour >= store.closeHour then
-                            return true
-                        end
-                        return false
-                    end,
-                    onSelect = function()
-                        if GetResourceState('fdb-lockpick') ~= 'started' then
-                            Bridge.Notify("Você precisa de ferramentas para isso.", "error")
-                            return
-                        end
-                        TriggerServerEvent('illegal-system:server:startDoorBurglary', store.name)
-                    end
-                }
-            }
-        })
-        
         -- Caixa Registradora
         exports.ox_target:addBoxZone({
             coords = store.registerCoords,
