@@ -28,22 +28,20 @@ CreateThread(function()
     end
 end)
 
--- Loop para trancar as portas automaticamente na hora de fechar (22h)
-CreateThread(function()
-    while true do
-        Wait(5000) -- Checa a cada 5 segundos para garantir que pegamos o minuto exato
-        local hour = GetClockHours()
-        local day = GetClockDayOfMonth()
-        
-        for _, store in ipairs(Config.Stores) do
-            if hour == store.closeHour then
-                if lastLockedDay[store.name] ~= day then
-                    local lockId = storeRobberyLocks[store.name]
-                    if lockId then
-                        exports.wasvendel_doorlock:SetLockState(lockId, true)
-                        lastLockedDay[store.name] = day
-                    end
-                end
+-- Recebe o aviso do cliente para trancar a porta no fim do expediente
+RegisterNetEvent("illegal-system:server:autoLockDoor", function(storeName)
+    local day = os.date("%d") -- Usamos o dia real no servidor para evitar re-lock spam
+    local store = nil
+    for _, s in ipairs(Config.Stores) do
+        if s.name == storeName then store = s break end
+    end
+    
+    if store then
+        if lastLockedDay[store.name] ~= day then
+            local lockId = storeRobberyLocks[store.name]
+            if lockId then
+                exports.wasvendel_doorlock:SetLockState(lockId, true)
+                lastLockedDay[store.name] = day
             end
         end
     end

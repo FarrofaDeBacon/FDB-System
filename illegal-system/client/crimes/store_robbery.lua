@@ -259,3 +259,22 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
         end
     end)
 end)
+
+-- Loop para verificar a hora de fechar a loja e avisar o servidor
+CreateThread(function()
+    local lastLockedDay = {}
+    while true do
+        Wait(5000)
+        local hour = GetClockHours()
+        local day = GetClockDayOfMonth()
+        
+        for _, store in ipairs(Config.Stores) do
+            if hour == store.closeHour then
+                if lastLockedDay[store.name] ~= day then
+                    lastLockedDay[store.name] = day
+                    TriggerServerEvent("illegal-system:server:autoLockDoor", store.name)
+                end
+            end
+        end
+    end
+end)
