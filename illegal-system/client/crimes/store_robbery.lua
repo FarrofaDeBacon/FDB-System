@@ -98,40 +98,7 @@ RegisterNetEvent('illegal-system:client:storeRobberyFailed', function(reason)
 end)
 
 CreateThread(function()
-    CreateThread(function()
-        while true do
-            Wait(250)
-            if not isRobbingStore then
-                local hasWep, weaponHash = GetCurrentPedWeapon(PlayerPedId(), true, 0, true)
-                if hasWep and weaponHash ~= GetHashKey('WEAPON_UNARMED') then
-                    local isFreeAiming, targetFreeAim = GetEntityPlayerIsFreeAimingAt(PlayerId())
-                    local isTargeting, targetLockOn = GetPlayerTargetEntity(PlayerId())
-                    local isAiming = isFreeAiming or isTargeting
-                    local targetEntity = isFreeAiming and targetFreeAim or targetLockOn
 
-                    if isAiming and targetEntity and DoesEntityExist(targetEntity) and not IsPedAPlayer(targetEntity) then
-                        local coords = GetEntityCoords(targetEntity)
-                        local store = GetStoreZone(coords)
-                        
-                        if store then
-                            local hour = GetClockHours()
-                            if hour >= store.openHour and hour < store.closeHour then
-                                if not robbedPeds[targetEntity] then
-                                    robbedPeds[targetEntity] = true
-                                    isRobbingStore = true
-                                    currentRobbedPed = targetEntity
-                                    SetBlockingOfNonTemporaryEvents(targetEntity, true)
-                                    TriggerServerEvent('illegal-system:server:attemptStoreRobbery', store.name, 'day')
-                                end
-                            end
-                        end
-                    end
-                end
-            else
-                Wait(1000)
-            end
-        end
-    end)
     
     -- 2. Método Noturno: Burglary
     for _, store in ipairs(Config.Stores) do
