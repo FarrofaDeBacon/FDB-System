@@ -147,7 +147,10 @@ RegisterNetEvent('illegal-system:server:startRegisterBurglary', function(storeNa
 
     -- Permite que o minigame inicie no client
     local sessionToken = GenerateToken()
-    activeBurglaries[source] = sessionToken
+    activeBurglaries[source] = {
+        token = sessionToken,
+        storeName = storeName
+    }
     TriggerClientEvent('illegal-system:client:allowRegisterMinigame', source, storeName, sessionToken)
     
     -- Rolagens de risco (Cachorro)
@@ -222,9 +225,11 @@ RegisterNetEvent('illegal-system:server:attemptBurglary', function(storeName, ta
     local source = source
     if targetType ~= 'register' then return end
 
-    -- Verifica token da sessão
-    if not activeBurglaries[source] or activeBurglaries[source] ~= sessionToken then
-        print(string.format("[illegal-system] EXPLOIT DETECTADO: Jogador ID %s tentou forçar o evento de arrombamento noturno.", source))
+    local session = activeBurglaries[source]
+
+    -- Verifica token da sessão e se a loja bate
+    if not session or session.token ~= sessionToken or session.storeName ~= storeName then
+        print(string.format("[illegal-system] EXPLOIT DETECTADO: Jogador ID %s tentou forçar o evento de arrombamento noturno ou manipular a loja.", source))
         return
     end
     
