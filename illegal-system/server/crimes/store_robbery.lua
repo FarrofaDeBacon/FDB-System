@@ -12,8 +12,9 @@ CreateThread(function()
             local bestLockId = nil
             local minStoreDist = 5.0 -- Tolerância de 5 metros
             for id, lock in pairs(locks) do
-                if lock.coords then
-                    local dist = #(store.doorCoords - lock.coords)
+                if lock.prompt and lock.prompt.x then
+                    local lockCoords = vec3(lock.prompt.x, lock.prompt.y, lock.prompt.z)
+                    local dist = #(store.doorCoords - lockCoords)
                     if dist < minStoreDist then
                         minStoreDist = dist
                         bestLockId = id
