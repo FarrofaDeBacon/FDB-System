@@ -133,8 +133,36 @@ CreateThread(function()
         end
     end)
     
-    -- 2. Método Noturno: Burglary (Registradora apenas — a porta é gerenciada pelo wasvendel_doorlock)
+    -- 2. Método Noturno: Burglary
     for _, store in ipairs(Config.Stores) do
+        -- Tranca da Porta
+        exports.ox_target:addBoxZone({
+            coords = store.doorCoords,
+            size = vec3(2.0, 2.0, 3.0),
+            rotation = 0,
+            options = {
+                {
+                    name = 'burglary_door_'..store.name,
+                    icon = 'fa-solid fa-unlock',
+                    label = 'Arrombar Porta',
+                    canInteract = function()
+                        local hour = GetClockHours()
+                        if hour < store.openHour or hour >= store.closeHour then
+                            return true
+                        end
+                        return false
+                    end,
+                    onSelect = function()
+                        if GetResourceState('fdb-lockpick') ~= 'started' then
+                            Bridge.Notify("Você precisa de ferramentas para isso.", "error")
+                            return
+                        end
+                        TriggerServerEvent('illegal-system:server:startDoorBurglary', store.name)
+                    end
+                }
+            }
+        })
+        
         -- Caixa Registradora
         exports.ox_target:addBoxZone({
             coords = store.registerCoords,
@@ -175,6 +203,20 @@ RegisterNetEvent('illegal-system:client:allowRegisterMinigame', function(storeNa
         ClearPedTasks(ped)
         if success then
             TriggerServerEvent('illegal-system:server:attemptBurglary', storeName, 'register', sessionToken)
+        else
+            Bridge.Notify("Você falhou no arrombamento!", "error")
+        end
+    end)
+end)
+
+RegisterNetEvent('illegal-system:client:allowDoorMinigame', function(storeName)
+    local ped = PlayerPedId()
+    TaskStartScenarioInPlace(ped, GetHashKey("WORLD_HUMAN_CROUCH_INSPECT"), -1, true, false, false, false)
+    
+    TriggerEvent('fdb-lockpick:client:openLockpick', function(success)
+        ClearPedTasks(ped)
+        if success then
+            TriggerServerEvent('illegal-system:server:attemptDoorBurglary', storeName)
         else
             Bridge.Notify("Você falhou no arrombamento!", "error")
         end

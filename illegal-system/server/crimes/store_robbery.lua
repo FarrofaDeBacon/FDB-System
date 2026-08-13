@@ -250,7 +250,7 @@ RegisterNetEvent('illegal-system:server:attemptBurglary', function(storeName, ta
         Bridge.Notify(source, "A registradora já foi esvaziada recentemente.", "error")
         return
     end
-    
+
     local storeConfig = nil
     for _, s in ipairs(Config.Stores) do
         if s.name == storeName then storeConfig = s break end
@@ -267,5 +267,37 @@ RegisterNetEvent('illegal-system:server:attemptBurglary', function(storeName, ta
         storeRespawnTimes[storeName] = os.time() + secondsToRespawn
         
         -- Sem chamadas ao CrimeCore para arrombamento, cooldown agora é 100% independente por loja
+    end
+end)
+
+RegisterNetEvent('illegal-system:server:startDoorBurglary', function(storeName)
+    local source = source
+    local crimeConfig = Config.Crimes['door_lockpick']
+    
+    if not Bridge.HasItem(source, crimeConfig.requiredItem, 1) then
+        Bridge.Notify(source, "Você precisa de um " .. crimeConfig.requiredItem .. " para isso.", "error")
+        return
+    end
+
+    TriggerClientEvent('illegal-system:client:allowDoorMinigame', source, storeName)
+end)
+
+RegisterNetEvent('illegal-system:server:attemptDoorBurglary', function(storeName)
+    local source = source
+    local crimeConfig = Config.Crimes['door_lockpick']
+    
+    if not Bridge.HasItem(source, crimeConfig.requiredItem, 1) then
+        return
+    end
+
+    local lockId = storeRobberyLocks[storeName]
+    if lockId then
+        exports.wasvendel_doorlock:SetLockState(lockId, false)
+        Bridge.Notify(source, "Porta destrancada!", "success")
+        
+        -- Aplica Heat/XP do arrombamento de porta
+        if crimeConfig.heat > 0 or crimeConfig.xp > 0 then
+            TriggerEvent('illegal-system:server:addHeatAndXP', source, crimeConfig.heat, crimeConfig.xp)
+        end
     end
 end)
