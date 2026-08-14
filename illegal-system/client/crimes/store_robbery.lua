@@ -6,9 +6,26 @@ local currentRobbedPed = 0
 AddEventHandler('fdb-shops:client:npcCreated', function(npc, shopData)
     SetBlockingOfNonTemporaryEvents(npc, true)
     SetPedFleeAttributes(npc, 0, false)
-end)
 
--- Bloqueia a IA nativa retroativamente nos NPCs que já existem
+    -- Adiciona o Target para Assaltar o NPC (Apenas de dia!)
+    exports.ox_target:addLocalEntity(npc, {
+        {
+            name = 'rob_store_npc_' .. shopData.name,
+            icon = 'fa-solid fa-gun',
+            label = 'Assaltar Lojista',
+            distance = 3.0,
+            canInteract = function()
+                -- Só aparece de dia, o que faz sentido já que à noite o NPC nem existe!
+                return true
+            end,
+            onSelect = function()
+                currentRobbedPed = npc
+                -- Usa o 'label' do shopData pois o illegal-system usa o nome completo (ex: "Valentine General Store")
+                TriggerServerEvent('illegal-system:server:attemptStoreRobbery', shopData.label, 'threaten')
+            end
+        }
+    })
+end)
 CreateThread(function()
     Wait(2000) -- Espera o fdb-shops iniciar caso reiniciem juntos
     for _, store in ipairs(Config.Stores) do

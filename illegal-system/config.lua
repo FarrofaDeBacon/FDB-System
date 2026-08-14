@@ -268,5 +268,16 @@ Config.Stores = {
         openHour = 6,
         closeHour = 22,
         registerCash = { min = 20, max = 60 }
+    },
+    {
+        name = "Rhodes General Store",
+        coords = vec3(1329.80, -1294.37, 77.02),
+        radius = 20.0,
+        doorCoords = vec3(1328.0, -1293.0, 77.02), -- Coordenadas aproximadas (Ajustar no jogo)
+        registerCoords = vec3(1329.80, -1294.37, 77.02), -- Coordenadas aproximadas (Ajustar no jogo)
+        registerHeading = 60.0,
+        openHour = 6,
+        closeHour = 22,
+        registerCash = { min = 25, max = 70 }
     }
 }
