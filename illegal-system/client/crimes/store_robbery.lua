@@ -254,19 +254,29 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
     end)
 end)
 
--- Loop para verificar a hora de fechar a loja e avisar o servidor
+-- Loop para verificar a hora de fechar/abrir a loja e avisar o servidor
 CreateThread(function()
     local lastLockedDay = {}
+    local lastUnlockedDay = {}
     while true do
         Wait(5000)
         local hour = GetClockHours()
         local day = GetClockDayOfMonth()
         
         for _, store in ipairs(Config.Stores) do
+            -- Lógica para trancar a loja no fechamento
             if hour == store.closeHour then
                 if lastLockedDay[store.name] ~= day then
                     lastLockedDay[store.name] = day
                     TriggerServerEvent("illegal-system:server:autoLockDoor", store.name)
+                end
+            end
+            
+            -- Lógica para destrancar a loja na abertura
+            if hour == store.openHour then
+                if lastUnlockedDay[store.name] ~= day then
+                    lastUnlockedDay[store.name] = day
+                    TriggerServerEvent("illegal-system:server:autoUnlockDoor", store.name)
                 end
             end
         end

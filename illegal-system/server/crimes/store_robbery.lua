@@ -2,6 +2,7 @@ local crimeId = 'store_robbery'
 local storeRespawnTimes = {} -- Controle de cooldown global persistente das registradoras
 local storeRobberyLocks = {} -- Armazena os lockIds para cada store
 local lastLockedDay = {} -- Para garantir que não tranque várias vezes no mesmo dia
+local lastUnlockedDay = {} -- Para garantir que não destranque várias vezes no mesmo dia
 
 -- Inicializa os locks buscando no wasvendel_doorlock
 CreateThread(function()
@@ -42,6 +43,25 @@ RegisterNetEvent("illegal-system:server:autoLockDoor", function(storeName)
             if lockId then
                 exports.wasvendel_doorlock:SetLockState(lockId, true)
                 lastLockedDay[store.name] = day
+            end
+        end
+    end
+end)
+
+-- Recebe o aviso do cliente para destrancar a porta no início do expediente
+RegisterNetEvent("illegal-system:server:autoUnlockDoor", function(storeName)
+    local day = os.date("%d")
+    local store = nil
+    for _, s in ipairs(Config.Stores) do
+        if s.name == storeName then store = s break end
+    end
+    
+    if store then
+        if lastUnlockedDay[store.name] ~= day then
+            local lockId = storeRobberyLocks[store.name]
+            if lockId then
+                exports.wasvendel_doorlock:SetLockState(lockId, false)
+                lastUnlockedDay[store.name] = day
             end
         end
     end
