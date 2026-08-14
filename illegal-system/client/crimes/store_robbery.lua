@@ -137,8 +137,17 @@ end)
 
 RegisterNetEvent('illegal-system:client:allowRegisterMinigame', function(storeName, sessionToken)
     local ped = PlayerPedId()
+
+    local storeConfig = nil
+    for _, s in ipairs(Config.Stores) do
+        if s.name == storeName then storeConfig = s break end
+    end
+
+    if storeConfig and storeConfig.registerHeading then
+        SetEntityHeading(ped, storeConfig.registerHeading)
+    end
+
     TaskStartScenarioInPlace(ped, GetHashKey("WORLD_HUMAN_CROUCH_INSPECT"), -1, true, false, false, false)
-    
     TriggerEvent('fdb-lockpick:client:openLockpick', function(success)
         ClearPedTasks(ped)
         if success then

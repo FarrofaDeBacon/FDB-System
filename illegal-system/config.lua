@@ -252,7 +252,8 @@ Config.Stores = {
         coords = vec3(-278.43, 775.12, 119.52),
         radius = 20.0,
         doorCoords = vec3(-276.5, 774.5, 119.52),
-        registerCoords = vec3(-278.0, 775.0, 119.52),
+        registerCoords = vec3(-280.1812, 778.8729, 119.5040),
+        registerHeading = 301.1332,
         openHour = 6,
         closeHour = 22,
         registerCash = { min = 30, max = 80 }
@@ -262,7 +263,8 @@ Config.Stores = {
         coords = vec3(-245.92, 781.08, 118.47),
         radius = 20.0,
         doorCoords = vec3(-247.5, 781.5, 118.47),
-        registerCoords = vec3(-245.5, 781.5, 118.47),
+        registerCoords = vec3(-288.2099, 805.1098, 119.3859),
+        registerHeading = 358.5668,
         openHour = 6,
         closeHour = 22,
         registerCash = { min = 20, max = 60 }
