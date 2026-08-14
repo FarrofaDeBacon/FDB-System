@@ -6,63 +6,89 @@ local lastUnlockedDay = {} -- Para garantir que não destranque várias vezes no
 
 -- Inicializa os locks buscando no wasvendel_doorlock
 CreateThread(function()
-    Wait(2000) -- Espera recursos iniciarem
+    Wait(5000) -- Espera recursos iniciarem (aumentado para garantir que o wasvendel carregou)
+    print("[illegal-system] SERVER: Iniciando busca de locks no wasvendel_doorlock...")
     local locks = exports.wasvendel_doorlock:GetLocks()
-    if locks then
-        for _, store in ipairs(Config.Stores) do
-            local bestLockId = nil
-            local minStoreDist = 5.0 -- Tolerância de 5 metros
-            for id, lock in pairs(locks) do
-                if lock.prompt and lock.prompt.x then
-                    local lockCoords = vec3(lock.prompt.x, lock.prompt.y, lock.prompt.z)
-                    local dist = #(store.doorCoords - lockCoords)
-                    if dist < minStoreDist then
-                        minStoreDist = dist
-                        bestLockId = id
-                    end
-                end
-            end
-            if bestLockId then
-                storeRobberyLocks[store.name] = bestLockId
-            end
+    if not locks then
+        print("[illegal-system] SERVER: ERRO! GetLocks() retornou nil!")
+        return
+    end
+    
+    local lockCount = 0
+    for id, lock in pairs(locks) do
+        lockCount = lockCount + 1
+        if lock.prompt and lock.prompt.x then
+            print("[illegal-system] SERVER: Lock ID=" .. tostring(id) .. " | name=" .. tostring(lock.name) .. " | prompt=" .. tostring(lock.prompt.x) .. ", " .. tostring(lock.prompt.y) .. ", " .. tostring(lock.prompt.z))
+        else
+            print("[illegal-system] SERVER: Lock ID=" .. tostring(id) .. " | name=" .. tostring(lock.name) .. " | SEM PROMPT!")
         end
     end
+    print("[illegal-system] SERVER: Total de locks encontrados: " .. lockCount)
+    
+    for _, store in ipairs(Config.Stores) do
+        local bestLockId = nil
+        local minStoreDist = 5.0 -- Tolerância de 5 metros
+        print("[illegal-system] SERVER: Procurando lock para loja '" .. store.name .. "' perto de doorCoords=" .. tostring(store.doorCoords))
+        for id, lock in pairs(locks) do
+            if lock.prompt and lock.prompt.x then
+                local lockCoords = vec3(lock.prompt.x, lock.prompt.y, lock.prompt.z)
+                local dist = #(store.doorCoords - lockCoords)
+                print("[illegal-system] SERVER:   -> Lock ID=" .. tostring(id) .. " dist=" .. string.format("%.2f", dist) .. "m")
+                if dist < minStoreDist then
+                    minStoreDist = dist
+                    bestLockId = id
+                end
+            end
+        end
+        if bestLockId then
+            storeRobberyLocks[store.name] = bestLockId
+            print("[illegal-system] SERVER: ✓ Loja '" .. store.name .. "' pareada com Lock ID=" .. tostring(bestLockId) .. " (dist=" .. string.format("%.2f", minStoreDist) .. "m)")
+        else
+            print("[illegal-system] SERVER: ✗ Loja '" .. store.name .. "' NAO encontrou nenhum lock dentro de 5m!")
+        end
+    end
+    print("[illegal-system] SERVER: Inicialização completa! storeRobberyLocks tem " .. lockCount .. " entradas.")
 end)
 
 -- Recebe o aviso do cliente para trancar a porta no fim do expediente
 RegisterNetEvent("illegal-system:server:autoLockDoor", function(storeName)
-    local day = os.date("%d") -- Usamos o dia real no servidor para evitar re-lock spam
+    local src = source
+    print("[illegal-system] Tentando trancar loja: " .. storeName)
+    TriggerClientEvent("illegal-system:client:debugMsg", src, "SERVER RECEBEU autoLockDoor para " .. storeName)
     local store = nil
     for _, s in ipairs(Config.Stores) do
         if s.name == storeName then store = s break end
     end
     
     if store then
-        if lastLockedDay[store.name] ~= day then
-            local lockId = storeRobberyLocks[store.name]
-            if lockId then
-                exports.wasvendel_doorlock:SetLockState(lockId, true)
-                lastLockedDay[store.name] = day
-            end
+        local lockId = storeRobberyLocks[store.name]
+        TriggerClientEvent("illegal-system:client:debugMsg", src, "LockID para " .. storeName .. " = " .. tostring(lockId))
+        if lockId then
+            exports.wasvendel_doorlock:SetLockState(lockId, true)
+            TriggerClientEvent("illegal-system:client:debugMsg", src, "TRANCOU com sucesso!")
+        else
+            TriggerClientEvent("illegal-system:client:debugMsg", src, "FALHOU! lockId é nil! Porta não encontrada no wasvendel.")
         end
+    else
+        TriggerClientEvent("illegal-system:client:debugMsg", src, "FALHOU! Loja '" .. storeName .. "' não existe no Config.Stores!")
     end
 end)
 
 -- Recebe o aviso do cliente para destrancar a porta no início do expediente
 RegisterNetEvent("illegal-system:server:autoUnlockDoor", function(storeName)
-    local day = os.date("%d")
+    local src = source
+    print("[illegal-system] Tentando destrancar loja: " .. storeName)
     local store = nil
     for _, s in ipairs(Config.Stores) do
         if s.name == storeName then store = s break end
     end
     
     if store then
-        if lastUnlockedDay[store.name] ~= day then
-            local lockId = storeRobberyLocks[store.name]
-            if lockId then
-                exports.wasvendel_doorlock:SetLockState(lockId, false)
-                lastUnlockedDay[store.name] = day
-            end
+        local lockId = storeRobberyLocks[store.name]
+        print("[illegal-system] LockID para " .. storeName .. " é " .. tostring(lockId))
+        if lockId then
+            exports.wasvendel_doorlock:SetLockState(lockId, false)
+            print("[illegal-system] Sucesso ao destrancar a porta no wasvendel.")
         end
     end
 end)

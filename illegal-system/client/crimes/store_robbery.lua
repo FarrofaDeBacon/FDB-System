@@ -2,6 +2,11 @@ local isRobbingStore = false
 local robbedPeds = {}
 local currentRobbedPed = 0
 
+-- Debug: recebe mensagens do servidor e mostra no F8
+RegisterNetEvent("illegal-system:client:debugMsg", function(msg)
+    print("[illegal-system] SERVER -> " .. msg)
+end)
+
 -- Injeta atributos no lojista assim que o fdb-shops spawna ele
 AddEventHandler('fdb-shops:client:npcCreated', function(npc, shopData)
     SetBlockingOfNonTemporaryEvents(npc, true)
@@ -256,27 +261,37 @@ end)
 
 -- Loop para verificar a hora de fechar/abrir a loja e avisar o servidor
 CreateThread(function()
-    local lastLockedDay = {}
-    local lastUnlockedDay = {}
+    local lastStoreState = {} -- Armazena "open" ou "closed"
+    print("[illegal-system] CLIENT: Loop de horário iniciado! Stores: " .. #Config.Stores)
+    
     while true do
         Wait(5000)
         local hour = GetClockHours()
-        local day = GetClockDayOfMonth()
+        print("[illegal-system] CLIENT: Hora atual = " .. tostring(hour) .. " | Stores = " .. #Config.Stores)
         
         for _, store in ipairs(Config.Stores) do
-            -- Lógica para trancar a loja no fechamento
-            if hour == store.closeHour then
-                if lastLockedDay[store.name] ~= day then
-                    lastLockedDay[store.name] = day
-                    TriggerServerEvent("illegal-system:server:autoLockDoor", store.name)
-                end
+            -- Verifica se estamos no horário de funcionamento
+            local isBusinessHour = false
+            if store.openHour < store.closeHour then
+                isBusinessHour = (hour >= store.openHour and hour < store.closeHour)
+            else
+                -- Caso a loja abra de noite e feche de dia (ex: 22h às 6h)
+                isBusinessHour = (hour >= store.openHour or hour < store.closeHour)
             end
             
-            -- Lógica para destrancar a loja na abertura
-            if hour == store.openHour then
-                if lastUnlockedDay[store.name] ~= day then
-                    lastUnlockedDay[store.name] = day
+            print("[illegal-system] CLIENT: " .. store.name .. " | open=" .. store.openHour .. " close=" .. store.closeHour .. " | isBusinessHour=" .. tostring(isBusinessHour) .. " | lastState=" .. tostring(lastStoreState[store.name]))
+            
+            if isBusinessHour then
+                if lastStoreState[store.name] ~= "open" then
+                    lastStoreState[store.name] = "open"
+                    print("[illegal-system] CLIENT: Enviando autoUnlockDoor para " .. store.name)
                     TriggerServerEvent("illegal-system:server:autoUnlockDoor", store.name)
+                end
+            else
+                if lastStoreState[store.name] ~= "closed" then
+                    lastStoreState[store.name] = "closed"
+                    print("[illegal-system] CLIENT: Enviando autoLockDoor para " .. store.name)
+                    TriggerServerEvent("illegal-system:server:autoLockDoor", store.name)
                 end
             end
         end
