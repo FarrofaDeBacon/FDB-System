@@ -453,6 +453,9 @@ RegisterNetEvent('illegal-system:server:attemptBurglary', function(storeName, ta
         local amount = math.random(storeConfig.registerCash.min, storeConfig.registerCash.max)
         Bridge.AddMoney(source, amount, 'store_robbery')
         
+        -- Loga o crime com recompensa em dinheiro
+        exports['illegal-system']:LogCrimeEvent(source, 'store_robbery', true, 'cash', tostring(amount), false, false)
+        
         -- Aplica cooldown global na registradora dessa loja específica
         local respawnConfig = Config.StoreRobberyRespawn
         local daysToRespawn = math.random(respawnConfig.minDays, respawnConfig.maxDays)

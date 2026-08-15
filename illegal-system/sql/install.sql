@@ -10,14 +10,15 @@ CREATE TABLE IF NOT EXISTS `player_criminal` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `crime_history` (
-    `id`         INT NOT NULL AUTO_INCREMENT,
-    `citizenid`  VARCHAR(50) NOT NULL,
-    `crime_id`   VARCHAR(50) NOT NULL,
-    `success`    TINYINT(1) NOT NULL DEFAULT 0,
-    `reward`     INT NOT NULL DEFAULT 0,
-    `witness`    TINYINT(1) NOT NULL DEFAULT 0,
-    `evidence`   TINYINT(1) NOT NULL DEFAULT 0,
-    `created_at` DATETIME NOT NULL,
+    `id`           INT NOT NULL AUTO_INCREMENT,
+    `citizenid`    VARCHAR(50) NOT NULL,
+    `crime_id`     VARCHAR(50) NOT NULL,
+    `success`      TINYINT(1) NOT NULL DEFAULT 0,
+    `reward_type`  VARCHAR(10) NOT NULL DEFAULT 'item',
+    `reward_value` VARCHAR(255) NOT NULL DEFAULT '',
+    `witness`      TINYINT(1) NOT NULL DEFAULT 0,
+    `evidence`     TINYINT(1) NOT NULL DEFAULT 0,
+    `created_at`   DATETIME NOT NULL,
     PRIMARY KEY (`id`),
     KEY `idx_crime_history_citizenid` (`citizenid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

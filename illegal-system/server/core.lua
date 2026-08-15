@@ -79,12 +79,14 @@ end
 --- crime pro sistema de polícia poder consumir só a descrição/testemunha
 --- (ver ROADMAP Etapa 7) — a ligação citizenid -> crime fica isolada aqui,
 --- só pra dossiê do próprio jogador e pra investigação policial resolver depois.
-local function LogCrimeHistory(citizenid, crimeId, success, rewardGiven, witnessGenerated, evidenceGenerated)
+--- @param rewardType string 'item' | 'cash' — tipo de recompensa
+--- @param rewardValue string nome do item ou valor em dinheiro (como string)
+local function LogCrimeHistory(citizenid, crimeId, success, rewardType, rewardValue, witnessGenerated, evidenceGenerated)
     MySQL.insert(
         [[INSERT INTO crime_history
-            (citizenid, crime_id, success, reward, witness, evidence, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, NOW())]],
-        { citizenid, crimeId, success, rewardGiven, witnessGenerated, evidenceGenerated }
+            (citizenid, crime_id, success, reward_type, reward_value, witness, evidence, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, NOW())]],
+        { citizenid, crimeId, success, rewardType or 'item', rewardValue or '', witnessGenerated, evidenceGenerated }
     )
 end
 
@@ -141,12 +143,13 @@ function CrimeCore.FinishCrime(source, crimeId, success, rewardItem)
 
     local witnessGenerated = RollWitness(crime)
     local evidenceGenerated = RollEvidence(crime)
-    local rewardGivenName = ""
+    local rewardType = 'item'
+    local rewardValue = ''
 
     if success then
         if rewardItem then
             Bridge.AddItem(source, rewardItem, 1)
-            rewardGivenName = rewardItem
+            rewardValue = rewardItem
             Bridge.Notify(source, "Você roubou 1x " .. rewardItem .. "!", "success")
         end
         record.xp = record.xp + crime.xp
@@ -156,15 +159,23 @@ function CrimeCore.FinishCrime(source, crimeId, success, rewardItem)
     end
 
     PersistCriminalRecord(citizenid)
-    LogCrimeHistory(citizenid, crimeId, success, rewardGivenName, witnessGenerated, evidenceGenerated)
+    LogCrimeHistory(citizenid, crimeId, success, rewardType, rewardValue, witnessGenerated, evidenceGenerated)
 
     return {
         success          = success,
-        reward           = rewardGivenName,
+        reward           = rewardValue,
         witnessGenerated = witnessGenerated,
         evidenceGenerated= evidenceGenerated,
         newLevel         = GetCriminalLevel(record.xp),
     }
+end
+
+--- Expõe a capacidade de logar o crime no histórico para fluxos que dão
+--- recompensas customizadas (ex: dinheiro no burglary)
+function CrimeCore.LogCrimeEvent(source, crimeId, success, rewardType, rewardValue, witnessGenerated, evidenceGenerated)
+    local citizenid = Bridge.GetIdentifier(source)
+    if not citizenid then return end
+    LogCrimeHistory(citizenid, crimeId, success, rewardType, rewardValue, witnessGenerated, evidenceGenerated)
 end
 
 function CrimeCore.GetCriminalStatus(source)
@@ -198,3 +209,4 @@ end)
 exports('AttemptCrime', CrimeCore.AttemptCrime)
 exports('FinishCrime', CrimeCore.FinishCrime)
 exports('GetCriminalStatus', CrimeCore.GetCriminalStatus)
+exports('LogCrimeEvent', CrimeCore.LogCrimeEvent)
