@@ -193,7 +193,7 @@ RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, barkD
     RequestModel(dogModel)
     while not HasModelLoaded(dogModel) do Wait(10) end
     
-    local offset = GetOffsetFromEntityInWorldCoords(playerPed, math.random(-5.0, 5.0), math.random(-5.0, 5.0), 0.0)
+    local offset = GetOffsetFromEntityInWorldCoords(playerPed, math.random(-5, 5), math.random(-5, 5), 0.0)
     local dogPed = CreatePed(dogModel, offset.x, offset.y, coords.z, 0.0, true, false, false, false)
     SetEntityAsMissionEntity(dogPed, true, true)
     

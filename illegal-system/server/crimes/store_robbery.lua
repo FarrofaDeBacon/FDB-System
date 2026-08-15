@@ -1,12 +1,19 @@
 local crimeId = 'store_robbery'
-local storeRespawnTimes = {} -- Controle de cooldown global persistente das registradoras
+local storeRespawnTimes = {} -- Controle de cooldown global das registradoras (Fase D vai persistir)
 local storeRobberyLocks = {} -- Armazena os lockIds para cada store
-local lastLockedDay = {} -- Para garantir que não tranque várias vezes no mesmo dia
-local lastUnlockedDay = {} -- Para garantir que não destranque várias vezes no mesmo dia
+local activeRiskSessions = {} -- [source] = { storeName, sessionId, barkCount, tickCount, active }
+
+-- Helper: busca o Config.Stores entry pelo nome
+local function GetStoreConfig(storeName)
+    for _, s in ipairs(Config.Stores) do
+        if s.name == storeName then return s end
+    end
+    return nil
+end
 
 -- Inicializa os locks buscando no wasvendel_doorlock
 CreateThread(function()
-    Wait(5000) -- Espera recursos iniciarem (aumentado para garantir que o wasvendel carregou)
+    Wait(5000) -- Espera recursos iniciarem
     print("[illegal-system] SERVER: Iniciando busca de locks no wasvendel_doorlock...")
     local locks = exports.wasvendel_doorlock:GetLocks()
     if not locks then
@@ -27,7 +34,7 @@ CreateThread(function()
     
     for _, store in ipairs(Config.Stores) do
         local bestLockId = nil
-        local minStoreDist = 5.0 -- Tolerância de 5 metros
+        local minStoreDist = 5.0
         print("[illegal-system] SERVER: Procurando lock para loja '" .. store.name .. "' perto de doorCoords=" .. tostring(store.doorCoords))
         for id, lock in pairs(locks) do
             if lock.prompt and lock.prompt.x then
@@ -47,53 +54,219 @@ CreateThread(function()
             print("[illegal-system] SERVER: ✗ Loja '" .. store.name .. "' NAO encontrou nenhum lock dentro de 5m!")
         end
     end
-    print("[illegal-system] SERVER: Inicialização completa! storeRobberyLocks tem " .. lockCount .. " entradas.")
+    print("[illegal-system] SERVER: Inicialização completa!")
 end)
 
 -- Recebe o aviso do cliente para trancar a porta no fim do expediente
 RegisterNetEvent("illegal-system:server:autoLockDoor", function(storeName)
     local src = source
-    print("[illegal-system] Tentando trancar loja: " .. storeName)
-    TriggerClientEvent("illegal-system:client:debugMsg", src, "SERVER RECEBEU autoLockDoor para " .. storeName)
-    local store = nil
-    for _, s in ipairs(Config.Stores) do
-        if s.name == storeName then store = s break end
-    end
+    local store = GetStoreConfig(storeName)
+    if not store then return end
     
-    if store then
-        local lockId = storeRobberyLocks[store.name]
-        TriggerClientEvent("illegal-system:client:debugMsg", src, "LockID para " .. storeName .. " = " .. tostring(lockId))
-        if lockId then
-            exports.wasvendel_doorlock:SetLockState(lockId, true)
-            TriggerClientEvent("illegal-system:client:debugMsg", src, "TRANCOU com sucesso!")
-        else
-            TriggerClientEvent("illegal-system:client:debugMsg", src, "FALHOU! lockId é nil! Porta não encontrada no wasvendel.")
-        end
-    else
-        TriggerClientEvent("illegal-system:client:debugMsg", src, "FALHOU! Loja '" .. storeName .. "' não existe no Config.Stores!")
+    local lockId = storeRobberyLocks[store.name]
+    if lockId then
+        exports.wasvendel_doorlock:SetLockState(lockId, true)
+        print("[illegal-system] Loja '" .. storeName .. "' trancada (lockId=" .. tostring(lockId) .. ")")
     end
 end)
 
 -- Recebe o aviso do cliente para destrancar a porta no início do expediente
 RegisterNetEvent("illegal-system:server:autoUnlockDoor", function(storeName)
     local src = source
-    print("[illegal-system] Tentando destrancar loja: " .. storeName)
-    local store = nil
-    for _, s in ipairs(Config.Stores) do
-        if s.name == storeName then store = s break end
-    end
+    local store = GetStoreConfig(storeName)
+    if not store then return end
     
-    if store then
-        local lockId = storeRobberyLocks[store.name]
-        print("[illegal-system] LockID para " .. storeName .. " é " .. tostring(lockId))
-        if lockId then
-            exports.wasvendel_doorlock:SetLockState(lockId, false)
-            print("[illegal-system] Sucesso ao destrancar a porta no wasvendel.")
-        end
+    local lockId = storeRobberyLocks[store.name]
+    if lockId then
+        exports.wasvendel_doorlock:SetLockState(lockId, false)
+        print("[illegal-system] Loja '" .. storeName .. "' destrancada (lockId=" .. tostring(lockId) .. ")")
     end
 end)
 
--- Gancho: quando o wasvendel_doorlock confirma um lockpick bem-sucedido,
+-- ==========================================
+-- SISTEMA DE RISCO — Sessão tick-based
+-- ==========================================
+
+local function EndRiskSession(src, reason)
+    local session = activeRiskSessions[src]
+    if not session then return end
+    
+    session.active = false
+    activeRiskSessions[src] = nil
+    print("[illegal-system] RISCO: Sessão encerrada para jogador " .. tostring(src) .. " | Loja: " .. session.storeName .. " | Motivo: " .. reason)
+end
+
+local function AlertPolice(storeName, storeConfig, burglaryConfig)
+    if not burglaryConfig.witness.alertsPolice then return end
+    
+    local jitter = burglaryConfig.witness.coordsJitter
+    local alertCoords = storeConfig.coords + vec3(math.random(-jitter, jitter), math.random(-jitter, jitter), 0)
+    
+    local players = GetPlayers()
+    for _, pid in ipairs(players) do
+        local pSrc = tonumber(pid)
+        local pData = Bridge.GetPlayer(pSrc)
+        if pData and pData.job and pData.job.type == 'leo' and pData.job.onduty then
+            local pCoords = GetEntityCoords(GetPlayerPed(pSrc))
+            if #(pCoords - storeConfig.coords) <= burglaryConfig.witness.alertRadius then
+                if burglaryConfig.witness.showMapBlip then
+                    TriggerClientEvent('fdb-lawman:client:lawmanAlert', pSrc, alertCoords, burglaryConfig.witness.alertText)
+                else
+                    Bridge.Notify(pSrc, burglaryConfig.witness.alertText, "error")
+                end
+            end
+        end
+    end
+end
+
+local function StartRiskSession(src, storeName)
+    -- Não permite sessão duplicada
+    if activeRiskSessions[src] then
+        EndRiskSession(src, "nova sessão substituindo anterior")
+    end
+    
+    local storeConfig = GetStoreConfig(storeName)
+    if not storeConfig then return end
+    
+    local crimeConfig = Config.Crimes['store_robbery']
+    local burglaryConfig = crimeConfig.burglary
+    if not burglaryConfig or not burglaryConfig.enabled then return end
+    
+    local sessionId = tostring(src) .. "_" .. tostring(os.time()) .. "_" .. tostring(math.random(100000, 999999))
+    
+    activeRiskSessions[src] = {
+        storeName = storeName,
+        sessionId = sessionId,
+        barkCount = 0,
+        tickCount = 0,
+        active = true,
+    }
+    
+    print("[illegal-system] RISCO: Sessão iniciada para jogador " .. tostring(src) .. " | Loja: " .. storeName .. " | Session: " .. sessionId)
+    
+    -- Aviso de entrada
+    if burglaryConfig.warning and burglaryConfig.warning.enabled then
+        Bridge.Notify(src, burglaryConfig.warning.message, "info")
+    end
+    
+    -- Loop de risco em thread própria
+    if burglaryConfig.dog and burglaryConfig.dog.enabled then
+        CreateThread(function()
+            local mySessionId = sessionId
+            
+            while true do
+                Wait(burglaryConfig.dog.checkInterval)
+                
+                -- Verifica se a sessão ainda está ativa e é a mesma
+                local session = activeRiskSessions[src]
+                if not session or not session.active or session.sessionId ~= mySessionId then
+                    print("[illegal-system] RISCO: Thread de risco encerrada (sessão inativa) | Session: " .. mySessionId)
+                    return
+                end
+                
+                -- Verifica se o jogador ainda está na área da loja
+                local ped = GetPlayerPed(src)
+                if ped == 0 then
+                    EndRiskSession(src, "jogador sem ped (desconectado?)")
+                    return
+                end
+                
+                local playerCoords = GetEntityCoords(ped)
+                local dist = #(playerCoords - storeConfig.coords)
+                if dist > storeConfig.radius then
+                    EndRiskSession(src, "jogador saiu da área (" .. string.format("%.1f", dist) .. "m)")
+                    return
+                end
+                
+                session.tickCount = session.tickCount + 1
+                
+                -- Calcula chance crescente
+                local chance = math.min(
+                    burglaryConfig.dog.baseChance + (burglaryConfig.dog.chanceIncreasePerTick * (session.tickCount - 1)),
+                    burglaryConfig.dog.maxChance
+                )
+                
+                local roll = math.random(1, 100)
+                print("[illegal-system] RISCO: Tick #" .. session.tickCount .. " | Chance: " .. chance .. "% | Roll: " .. roll .. " | Session: " .. mySessionId)
+                
+                if roll <= chance then
+                    -- Cachorro latiu!
+                    session.barkCount = session.barkCount + 1
+                    print("[illegal-system] RISCO: LATIDO #" .. session.barkCount .. " | Session: " .. mySessionId)
+                    
+                    if burglaryConfig.dog.notifyOnBark then
+                        Bridge.Notify(src, burglaryConfig.dog.barkMessage, "warning")
+                    end
+                    
+                    -- Spawna cachorro no client
+                    TriggerClientEvent('illegal-system:client:spawnDogRisk', src, storeName, burglaryConfig.dog.barkDuration)
+                    
+                    -- Witness: rola se requiresDogBark
+                    if burglaryConfig.witness and burglaryConfig.witness.enabled and burglaryConfig.witness.requiresDogBark then
+                        if math.random(1, 100) <= burglaryConfig.witness.chance then
+                            print("[illegal-system] RISCO: TESTEMUNHA gerada! Alertando polícia... | Session: " .. mySessionId)
+                            AlertPolice(storeName, storeConfig, burglaryConfig)
+                        end
+                    end
+                    
+                    -- ArmedNpc: checa se bateu o threshold de latidos
+                    if burglaryConfig.armedNpc and burglaryConfig.armedNpc.enabled and burglaryConfig.armedNpc.requiresDogBark then
+                        if session.barkCount >= burglaryConfig.armedNpc.barksToTrigger then
+                            print("[illegal-system] RISCO: NPC ARMADO disparado (latidos >= " .. burglaryConfig.armedNpc.barksToTrigger .. ") | Session: " .. mySessionId)
+                            local outcome = 'knockout'
+                            if burglaryConfig.caughtOutcome and burglaryConfig.caughtOutcome.jail and burglaryConfig.caughtOutcome.jail.enabled then
+                                if math.random(1, 100) > burglaryConfig.caughtOutcome.knockoutChance then
+                                    outcome = 'jail'
+                                end
+                            end
+                            TriggerClientEvent('illegal-system:client:armedNpcRisk', src, storeName, outcome)
+                            EndRiskSession(src, "NPC armado disparado")
+                            return
+                        end
+                    end
+                end
+                
+                -- Witness: rola independente do cachorro se requiresDogBark = false
+                if burglaryConfig.witness and burglaryConfig.witness.enabled and not burglaryConfig.witness.requiresDogBark then
+                    if math.random(1, 100) <= burglaryConfig.witness.chance then
+                        print("[illegal-system] RISCO: TESTEMUNHA (independente) gerada! | Session: " .. mySessionId)
+                        AlertPolice(storeName, storeConfig, burglaryConfig)
+                    end
+                end
+                
+                -- ArmedNpc: rola independente do cachorro se requiresDogBark = false
+                if burglaryConfig.armedNpc and burglaryConfig.armedNpc.enabled and not burglaryConfig.armedNpc.requiresDogBark then
+                    if math.random(1, 100) <= burglaryConfig.armedNpc.standaloneChance then
+                        print("[illegal-system] RISCO: NPC ARMADO (independente) disparado! | Session: " .. mySessionId)
+                        local outcome = 'knockout'
+                        if burglaryConfig.caughtOutcome and burglaryConfig.caughtOutcome.jail and burglaryConfig.caughtOutcome.jail.enabled then
+                            if math.random(1, 100) > burglaryConfig.caughtOutcome.knockoutChance then
+                                outcome = 'jail'
+                            end
+                        end
+                        TriggerClientEvent('illegal-system:client:armedNpcRisk', src, storeName, outcome)
+                        EndRiskSession(src, "NPC armado independente disparado")
+                        return
+                    end
+                end
+            end
+        end)
+    end
+end
+
+-- Limpeza de sessão quando jogador desconecta
+AddEventHandler('playerDropped', function()
+    local src = source
+    if activeRiskSessions[src] then
+        EndRiskSession(src, "playerDropped")
+    end
+end)
+
+-- ==========================================
+-- Gancho: wasvendel_doorlock:lockpick → início de sessão de risco
+-- ==========================================
+
+-- Quando o wasvendel_doorlock confirma um lockpick bem-sucedido,
 -- verificamos se a porta pertence a uma loja monitorada e iniciamos a sessão de risco.
 -- Não precisa checar horário: se a porta estava trancada, é porque o autoLockDoor
 -- já determinou que era noite. O gate de horário está implícito.
@@ -113,9 +286,37 @@ AddEventHandler("wasvendel_doorlock:lockpick", function(lockId)
 
     if not matchedStore then return end -- Não é porta de loja monitorada
 
+    -- Anti-exploit: checagem de distância contra a coordenada REAL do lock no wasvendel.
+    -- Usa GetLocks()[lockId].prompt como fonte de verdade, store.doorCoords é fallback.
+    local storeConfig = GetStoreConfig(matchedStore)
+    local checkCoords = nil
+    local locks = exports.wasvendel_doorlock:GetLocks()
+    if locks and locks[lockId] and locks[lockId].prompt and locks[lockId].prompt.x then
+        checkCoords = vec3(locks[lockId].prompt.x, locks[lockId].prompt.y, locks[lockId].prompt.z)
+    elseif storeConfig then
+        -- Fallback: store.doorCoords (premissa: pode não ser a coordenada exata, verificar se necessário)
+        checkCoords = storeConfig.doorCoords
+    end
+
+    if checkCoords then
+        local ped = GetPlayerPed(src)
+        if ped ~= 0 then
+            local playerCoords = GetEntityCoords(ped)
+            local dist = #(playerCoords - checkCoords)
+            if dist > 10.0 then
+                print("[illegal-system] ANTI-EXPLOIT: Jogador " .. tostring(src) .. " disparou lockpick para '" .. matchedStore .. "' mas está a " .. string.format("%.1f", dist) .. "m da porta. Ignorando.")
+                return
+            end
+        end
+    end
+
     print("[illegal-system] Porta de loja arrombada via lockpick! Loja: " .. matchedStore .. " | Jogador: " .. tostring(src))
-    -- TODO Fase B: StartRiskSession(src, matchedStore)
+    StartRiskSession(src, matchedStore)
 end)
+
+-- ==========================================
+-- 1. MÉTODOS DIURNOS (Assalto ao Lojista)
+-- ==========================================
 
 local function GenerateToken()
     local charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -127,9 +328,6 @@ local function GenerateToken()
     return token
 end
 
--- ==========================================
--- 1. MÉTODOS DIURNOS (Assalto ao Lojista)
--- ==========================================
 local activeStoreRobberies = {} -- Controle dos tokens de assalto (dia)
 
 RegisterNetEvent('illegal-system:server:attemptStoreRobbery', function(storeName, method)
@@ -188,8 +386,6 @@ RegisterNetEvent('illegal-system:server:cancelStoreRobbery', function(storeName,
     end
 end)
 
-
-
 -- ==========================================
 -- 2. MÉTODOS NOTURNOS (Burglary - Registradora)
 -- O fdb-lockpick cuida do minigame no client.
@@ -200,7 +396,6 @@ local activeBurglaries = {} -- Controle dos tokens de assalto noturno (registrad
 RegisterNetEvent('illegal-system:server:startRegisterBurglary', function(storeName)
     local source = source
     local crimeConfig = Config.Crimes['store_robbery']
-    local burglaryConfig = crimeConfig.burglary
     
     -- Checa cooldown global da registradora
     if storeRespawnTimes[storeName] and os.time() < storeRespawnTimes[storeName] then
@@ -221,73 +416,6 @@ RegisterNetEvent('illegal-system:server:startRegisterBurglary', function(storeNa
         storeName = storeName
     }
     TriggerClientEvent('illegal-system:client:allowRegisterMinigame', source, storeName, sessionToken)
-    
-    -- Rolagens de risco (Cachorro)
-    if burglaryConfig.enabled and burglaryConfig.dog.enabled then
-        if math.random(1, 100) <= burglaryConfig.dog.chance then
-            -- Avisa o client para spawnar o cachorro e tocar o som
-            TriggerClientEvent('illegal-system:client:spawnDogRisk', source, storeName, burglaryConfig.dog.barkDuration)
-            
-            -- Se latiu, rola testemunha (LEO)
-            if burglaryConfig.witness.enabled and math.random(1, 100) <= burglaryConfig.witness.chanceAfterDog then
-                local storeConfig = nil
-                for _, s in ipairs(Config.Stores) do
-                    if s.name == storeName then storeConfig = s break end
-                end
-                
-                if storeConfig then
-                    local jitter = burglaryConfig.witness.coordsJitter
-                    local alertCoords = storeConfig.coords + vec3(math.random(-jitter, jitter), math.random(-jitter, jitter), 0)
-                    
-                    local players = GetPlayers()
-                    for _, pid in ipairs(players) do
-                        local pSrc = tonumber(pid)
-                        -- No fdb-bridge as funções seriam HasJobType / IsOnDuty, ou usar a Bridge local
-                        -- O CrimeCore já mapeia jobs e duty? A interface diz GetPlayer(source).job.type
-                        -- Usaremos a abstração Bridge da Etapa 1
-                        local pData = Bridge.GetPlayer(pSrc)
-                        if pData and pData.job and pData.job.type == 'leo' and pData.job.onduty then
-                            local pCoords = GetEntityCoords(GetPlayerPed(pSrc))
-                            if #(pCoords - storeConfig.coords) <= burglaryConfig.witness.alertRadius then
-                                if burglaryConfig.witness.showMapBlip then
-                                    TriggerClientEvent('fdb-lawman:client:lawmanAlert', pSrc, alertCoords, burglaryConfig.witness.alertText)
-                                else
-                                    Bridge.Notify(pSrc, burglaryConfig.witness.alertText, "error")
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-            
-            -- NPC Armado (se não tem LEO onduty)
-            if burglaryConfig.armedNpc.enabled then
-                local hasLeo = false
-                local players = GetPlayers()
-                for _, pid in ipairs(players) do
-                    local pData = Bridge.GetPlayer(tonumber(pid))
-                    if pData and pData.job and pData.job.type == 'leo' and pData.job.onduty then
-                        hasLeo = true
-                        break
-                    end
-                end
-                
-                if (not burglaryConfig.armedNpc.onlyIfNoCopsOnline) or (not hasLeo) then
-                    local delay = math.random(burglaryConfig.armedNpc.delayAfterDog.min, burglaryConfig.armedNpc.delayAfterDog.max)
-                    SetTimeout(delay * 1000, function()
-                        -- Rola a chance do NPC pegar o jogador
-                        if math.random(1, 100) <= burglaryConfig.armedNpc.catchChance then
-                            local outcome = 'knockout'
-                            if burglaryConfig.caughtOutcome.jail.enabled and math.random(1, 100) <= (100 - burglaryConfig.caughtOutcome.knockoutChance) then
-                                outcome = 'jail'
-                            end
-                            TriggerClientEvent('illegal-system:client:armedNpcRisk', source, storeName, outcome)
-                        end
-                    end)
-                end
-            end
-        end
-    end
 end)
 
 RegisterNetEvent('illegal-system:server:attemptBurglary', function(storeName, targetType, sessionToken)
@@ -319,10 +447,7 @@ RegisterNetEvent('illegal-system:server:attemptBurglary', function(storeName, ta
         return
     end
 
-    local storeConfig = nil
-    for _, s in ipairs(Config.Stores) do
-        if s.name == storeName then storeConfig = s break end
-    end
+    local storeConfig = GetStoreConfig(storeName)
     
     if storeConfig and storeConfig.registerCash then
         local amount = math.random(storeConfig.registerCash.min, storeConfig.registerCash.max)
@@ -333,10 +458,8 @@ RegisterNetEvent('illegal-system:server:attemptBurglary', function(storeName, ta
         local daysToRespawn = math.random(respawnConfig.minDays, respawnConfig.maxDays)
         local secondsToRespawn = daysToRespawn * (respawnConfig.minutesPerIngameDay * 60)
         storeRespawnTimes[storeName] = os.time() + secondsToRespawn
-        
-        -- Sem chamadas ao CrimeCore para arrombamento, cooldown agora é 100% independente por loja
     end
+    
+    -- Encerra a sessão de risco (jogador concluiu o roubo)
+    EndRiskSession(source, "roubo concluído")
 end)
-
--- [REMOVIDO] startDoorBurglary e attemptDoorBurglary — código morto.
--- O gancho de entrada agora é via AddEventHandler("wasvendel_doorlock:lockpick") acima.

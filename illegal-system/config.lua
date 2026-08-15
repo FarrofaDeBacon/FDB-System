@@ -85,26 +85,42 @@ Config.Crimes = {
         },
         burglary = {
             enabled = true,
+
+            warning = {
+                enabled = true,
+                message = "Você está dentro. Seja rápido e não faça barulho.",
+            },
+
             dog = {
                 enabled = true,
-                chance = 40,
-                barkDuration = 15,
+                checkInterval = 15000,       -- ms entre checagens enquanto o jogador está dentro
+                baseChance = 15,             -- % de chance no 1º tick
+                chanceIncreasePerTick = 10,  -- soma por tick que o jogador continua dentro
+                maxChance = 80,              -- teto de chance
+                notifyOnBark = true,
+                barkMessage = "Um cachorro começou a latir por perto!",
+                barkDuration = 15,           -- segundos que o cachorro fica no mundo
             },
+
             witness = {
                 enabled = true,
-                chanceAfterDog = 30,
-                notifyLawman = true,
+                requiresDogBark = true,   -- true = só rola depois do cachorro latir
+                chance = 30,               -- % de chance de virar testemunha, por latido
+                alertsPolice = true,
                 alertRadius = 300.0,
                 showMapBlip = true,
                 coordsJitter = 80.0,
                 alertText = "Latidos estranhos foram reportados perto de uma loja...",
             },
+
             armedNpc = {
                 enabled = true,
-                onlyIfNoCopsOnline = true,
-                delayAfterDog = { min = 20, max = 40 },
-                catchChance = 50,
+                requiresDogBark = true,   -- true = só aparece após X latidos
+                barksToTrigger = 2,        -- usado só se requiresDogBark = true
+                standaloneChance = 20,     -- usado só se requiresDogBark = false
+                knockoutTime = 10000,      -- ms até o "morador" derrubar o jogador
             },
+
             caughtOutcome = {
                 knockoutChance = 60,
                 knockout = { enabled = true, damage = 0 },
