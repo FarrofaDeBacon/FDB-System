@@ -397,10 +397,18 @@ RegisterNetEvent('illegal-system:server:startRegisterBurglary', function(storeNa
     local source = source
     local crimeConfig = Config.Crimes['store_robbery']
     
-    -- Checa cooldown global da registradora
-    if storeRespawnTimes[storeName] and os.time() < storeRespawnTimes[storeName] then
-        Bridge.Notify(source, "A registradora já foi esvaziada recentemente.", "error")
-        return
+    -- Checa cooldown global da registradora (Persistente)
+    if Config.StoreRobberyRespawn.mode == 'restart' then
+        if storeRespawnTimes[storeName] then
+            Bridge.Notify(source, "A registradora já foi esvaziada recentemente.", "error")
+            return
+        end
+    else
+        local row = MySQL.single.await('SELECT UNIX_TIMESTAMP(next_available_at) as next_time FROM robbed_stores WHERE store_name = ?', { storeName })
+        if row and os.time() < row.next_time then
+            Bridge.Notify(source, "A registradora já foi esvaziada recentemente.", "error")
+            return
+        end
     end
     
     -- Checa item (lockpick)
@@ -442,9 +450,17 @@ RegisterNetEvent('illegal-system:server:attemptBurglary', function(storeName, ta
     end
 
     -- Re-checa cooldown global da registradora (para segurança)
-    if storeRespawnTimes[storeName] and os.time() < storeRespawnTimes[storeName] then
-        Bridge.Notify(source, "A registradora já foi esvaziada recentemente.", "error")
-        return
+    if Config.StoreRobberyRespawn.mode == 'restart' then
+        if storeRespawnTimes[storeName] then
+            Bridge.Notify(source, "A registradora já foi esvaziada recentemente.", "error")
+            return
+        end
+    else
+        local row = MySQL.single.await('SELECT UNIX_TIMESTAMP(next_available_at) as next_time FROM robbed_stores WHERE store_name = ?', { storeName })
+        if row and os.time() < row.next_time then
+            Bridge.Notify(source, "A registradora já foi esvaziada recentemente.", "error")
+            return
+        end
     end
 
     local storeConfig = GetStoreConfig(storeName)
@@ -457,10 +473,19 @@ RegisterNetEvent('illegal-system:server:attemptBurglary', function(storeName, ta
         exports['illegal-system']:LogCrimeEvent(source, 'store_robbery', true, 'cash', tostring(amount), false, false)
         
         -- Aplica cooldown global na registradora dessa loja específica
-        local respawnConfig = Config.StoreRobberyRespawn
-        local daysToRespawn = math.random(respawnConfig.minDays, respawnConfig.maxDays)
-        local secondsToRespawn = daysToRespawn * (respawnConfig.minutesPerIngameDay * 60)
-        storeRespawnTimes[storeName] = os.time() + secondsToRespawn
+        if Config.StoreRobberyRespawn.mode == 'restart' then
+            storeRespawnTimes[storeName] = true
+        else
+            local respawnConfig = Config.StoreRobberyRespawn
+            local daysToRespawn = math.random(respawnConfig.minDays, respawnConfig.maxDays)
+            local secondsToRespawn = daysToRespawn * (respawnConfig.minutesPerIngameDay * 60)
+            local nextAvailable = os.time() + secondsToRespawn
+            MySQL.insert.await([[
+                INSERT INTO robbed_stores (store_name, last_robbed_at, next_available_at)
+                VALUES (?, NOW(), FROM_UNIXTIME(?))
+                ON DUPLICATE KEY UPDATE last_robbed_at = NOW(), next_available_at = FROM_UNIXTIME(?)
+            ]], { storeName, nextAvailable, nextAvailable })
+        end
     end
     
     -- Encerra a sessão de risco (jogador concluiu o roubo)

@@ -28,3 +28,9 @@ CREATE TABLE IF NOT EXISTS `illegal_grave_state` (
     `last_robbed_at` DATETIME NOT NULL,
     `next_available_at` DATETIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `robbed_stores` (
+    `store_name` VARCHAR(100) PRIMARY KEY,
+    `last_robbed_at` DATETIME NOT NULL,
+    `next_available_at` DATETIME NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
