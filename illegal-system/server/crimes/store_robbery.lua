@@ -93,6 +93,30 @@ RegisterNetEvent("illegal-system:server:autoUnlockDoor", function(storeName)
     end
 end)
 
+-- Gancho: quando o wasvendel_doorlock confirma um lockpick bem-sucedido,
+-- verificamos se a porta pertence a uma loja monitorada e iniciamos a sessão de risco.
+-- Não precisa checar horário: se a porta estava trancada, é porque o autoLockDoor
+-- já determinou que era noite. O gate de horário está implícito.
+AddEventHandler("wasvendel_doorlock:lockpick", function(lockId)
+    local src = source
+    lockId = tonumber(lockId)
+    if not lockId then return end
+
+    -- Reverse-lookup: lockId -> storeName
+    local matchedStore = nil
+    for storeName, storedLockId in pairs(storeRobberyLocks) do
+        if storedLockId == lockId then
+            matchedStore = storeName
+            break
+        end
+    end
+
+    if not matchedStore then return end -- Não é porta de loja monitorada
+
+    print("[illegal-system] Porta de loja arrombada via lockpick! Loja: " .. matchedStore .. " | Jogador: " .. tostring(src))
+    -- TODO Fase B: StartRiskSession(src, matchedStore)
+end)
+
 local function GenerateToken()
     local charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     local token = ""
@@ -314,34 +338,5 @@ RegisterNetEvent('illegal-system:server:attemptBurglary', function(storeName, ta
     end
 end)
 
-RegisterNetEvent('illegal-system:server:startDoorBurglary', function(storeName)
-    local source = source
-    local crimeConfig = Config.Crimes['door_lockpick']
-    
-    if not Bridge.HasItem(source, crimeConfig.requiredItem, 1) then
-        Bridge.Notify(source, "Você precisa de um " .. crimeConfig.requiredItem .. " para isso.", "error")
-        return
-    end
-
-    TriggerClientEvent('illegal-system:client:allowDoorMinigame', source, storeName)
-end)
-
-RegisterNetEvent('illegal-system:server:attemptDoorBurglary', function(storeName)
-    local source = source
-    local crimeConfig = Config.Crimes['door_lockpick']
-    
-    if not Bridge.HasItem(source, crimeConfig.requiredItem, 1) then
-        return
-    end
-
-    local lockId = storeRobberyLocks[storeName]
-    if lockId then
-        exports.wasvendel_doorlock:SetLockState(lockId, false)
-        Bridge.Notify(source, "Porta destrancada!", "success")
-        
-        -- Aplica Heat/XP do arrombamento de porta
-        if crimeConfig.heat > 0 or crimeConfig.xp > 0 then
-            TriggerEvent('illegal-system:server:addHeatAndXP', source, crimeConfig.heat, crimeConfig.xp)
-        end
-    end
-end)
+-- [REMOVIDO] startDoorBurglary e attemptDoorBurglary — código morto.
+-- O gancho de entrada agora é via AddEventHandler("wasvendel_doorlock:lockpick") acima.

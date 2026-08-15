@@ -180,19 +180,9 @@ RegisterNetEvent('illegal-system:client:allowRegisterMinigame', function(storeNa
     end)
 end)
 
-RegisterNetEvent('illegal-system:client:allowDoorMinigame', function(storeName)
-    local ped = PlayerPedId()
-    TaskStartScenarioInPlace(ped, GetHashKey("WORLD_HUMAN_CROUCH_INSPECT"), -1, true, false, false, false)
-    
-    TriggerEvent('fdb-lockpick:client:openLockpick', function(success)
-        ClearPedTasks(ped)
-        if success then
-            TriggerServerEvent('illegal-system:server:attemptDoorBurglary', storeName)
-        else
-            Bridge.Notify("Você falhou no arrombamento!", "error")
-        end
-    end)
-end)
+-- [REMOVIDO] allowDoorMinigame — código morto.
+-- O gancho de entrada agora é via AddEventHandler("wasvendel_doorlock:lockpick") no server.
+
 
 RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, barkDuration)
     local playerPed = PlayerPedId()

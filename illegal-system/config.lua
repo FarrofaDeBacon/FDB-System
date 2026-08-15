@@ -154,17 +154,8 @@ Config.Crimes = {
             }
         }
     },
-
-    door_lockpick = {
-        name             = 'Arrombamento de Porta',
-        xp               = 10,          -- XP ganho ao arrombar
-        heat             = 5,           -- Nível de Heat gerado
-        witnessChance    = 15.0,        -- 15% de chance de gerar testemunha
-        evidenceChance   = 20.0,        -- 20% de chance de deixar evidência
-        cooldown         = 0,           -- Cooldown de 0s (Doorlock já cuida de fechar a porta etc)
-        requiredItem     = 'lockpick',
-    },
 }
+
 
 -- ─────────────────────────────────────────────────────────
 -- Configurações Específicas: Roubo de Túmulo
