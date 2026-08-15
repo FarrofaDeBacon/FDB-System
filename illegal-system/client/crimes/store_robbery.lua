@@ -248,10 +248,19 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
         end
     end)
 end)
+local lastStoreState = {} -- Armazena "open" ou "closed"
+
+-- Sincroniza estado se o wasvendel_doorlock for reiniciado
+AddEventHandler('onResourceStart', function(resourceName)
+    if resourceName ~= 'wasvendel_doorlock' then return end
+    Wait(1000) -- Aguarda o wasvendel terminar de carregar os locks
+    for _, store in ipairs(Config.Stores) do
+        lastStoreState[store.name] = nil
+    end
+end)
 
 -- Loop para verificar a hora de fechar/abrir a loja e avisar o servidor
 CreateThread(function()
-    local lastStoreState = {} -- Armazena "open" ou "closed"
     print("[illegal-system] CLIENT: Loop de horário iniciado! Stores: " .. #Config.Stores)
     
     while true do
