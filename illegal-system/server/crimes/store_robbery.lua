@@ -270,7 +270,7 @@ end)
 -- verificamos se a porta pertence a uma loja monitorada e iniciamos a sessão de risco.
 -- Não precisa checar horário: se a porta estava trancada, é porque o autoLockDoor
 -- já determinou que era noite. O gate de horário está implícito.
-AddEventHandler("wasvendel_doorlock:lockpick", function(lockId)
+RegisterNetEvent("wasvendel_doorlock:lockpick", function(lockId)
     local src = source
     lockId = tonumber(lockId)
     if not lockId then return end
