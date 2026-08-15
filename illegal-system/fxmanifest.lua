@@ -39,5 +39,6 @@ dependencies {
     'fdb-libs',
     'ox_lib',
     'ox_target',
-    'oxmysql'
+    'oxmysql',
+    'wasvendel_doorlock'
 }

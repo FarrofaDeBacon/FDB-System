@@ -13,11 +13,17 @@ end
 
 -- Inicializa os locks buscando no wasvendel_doorlock
 CreateThread(function()
-    Wait(5000) -- Espera recursos iniciarem
-    print("[illegal-system] SERVER: Iniciando busca de locks no wasvendel_doorlock...")
-    local locks = exports.wasvendel_doorlock:GetLocks()
+    print("[illegal-system] SERVER: Aguardando inicialização do wasvendel_doorlock...")
+    local locks = nil
+    local retries = 0
+    while not locks and retries < 20 do
+        Wait(2000)
+        locks = exports.wasvendel_doorlock:GetLocks()
+        retries = retries + 1
+    end
+
     if not locks then
-        print("[illegal-system] SERVER: ERRO! GetLocks() retornou nil!")
+        print("[illegal-system] SERVER: ERRO CRÍTICO! wasvendel_doorlock não carregou os locks a tempo.")
         return
     end
     
