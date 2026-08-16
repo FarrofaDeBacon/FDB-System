@@ -94,19 +94,19 @@ Config.Crimes = {
 
             dog = {
                 enabled = true,
-                checkInterval = 15000,       -- ms entre checagens enquanto o jogador está dentro
-                baseChance = 15,             -- % de chance no 1º tick
+                checkInterval = 5000,        -- 5s entre checagens para teste rápido
+                baseChance = 100,            -- 100% de chance no 1º tick para garantir o teste do cachorro
                 chanceIncreasePerTick = 10,  -- soma por tick que o jogador continua dentro
-                maxChance = 80,              -- teto de chance
+                maxChance = 100,             -- teto de chance
                 notifyOnBark = true,
                 barkMessage = "Um cachorro começou a latir por perto!",
-                barkDuration = 15,           -- segundos que o cachorro fica no mundo
+                barkDuration = 10,           -- segundos que o cachorro fica no mundo
             },
 
             witness = {
                 enabled = true,
                 requiresDogBark = true,   -- true = só rola depois do cachorro latir
-                chance = 30,               -- % de chance de virar testemunha, por latido
+                chance = 100,              -- 100% de chance no teste
                 alertsPolice = true,
                 alertRadius = 300.0,
                 showMapBlip = true,
@@ -117,7 +117,7 @@ Config.Crimes = {
             armedNpc = {
                 enabled = true,
                 requiresDogBark = true,   -- true = só aparece após X latidos
-                barksToTrigger = 2,        -- usado só se requiresDogBark = true
+                barksToTrigger = 2,        -- aparece no 2º latido (10s após entrar)
                 standaloneChance = 20,     -- usado só se requiresDogBark = false
                 knockoutTime = 10000,      -- ms até o "morador" derrubar o jogador
             },
