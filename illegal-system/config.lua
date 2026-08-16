@@ -5,6 +5,7 @@ Config = {}
 -- corresponder a isso (rsg_bridge.lua ⇄ 'rsg').
 -- ─────────────────────────────────────────────────────────
 Config.Framework = 'fdb'
+Config.Debug = true -- Se true, habilita prints detalhados de diagnóstico do sistema (desligar em produção)
 
 -- ─────────────────────────────────────────────────────────
 -- Heat: decai com o tempo, independente de XP/Reputação.

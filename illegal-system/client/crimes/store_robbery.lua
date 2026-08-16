@@ -184,6 +184,19 @@ end)
 -- O gancho de entrada agora é via AddEventHandler("wasvendel_doorlock:lockpick") no server.
 
 
+local function CleanupOrphanDogs()
+    local dogModel = GetHashKey("A_C_DogCollie_01")
+    if GetGamePool then
+        local peds = GetGamePool('CPed')
+        for _, ped in ipairs(peds) do
+            if DoesEntityExist(ped) and GetEntityModel(ped) == dogModel and not IsPedAPlayer(ped) then
+                SetEntityAsMissionEntity(ped, true, true)
+                DeleteEntity(ped)
+            end
+        end
+    end
+end
+
 RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, barkDuration)
     local playerPed = PlayerPedId()
     local coords = GetEntityCoords(playerPed)
@@ -197,18 +210,23 @@ RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, barkD
     local dogPed = CreatePed(dogModel, offset.x, offset.y, coords.z, 0.0, true, false, false, false)
     SetEntityAsMissionEntity(dogPed, true, true)
     
-    -- Faz o cachorro latir
-    PlayAmbientSpeech1(dogPed, "BARK", "SPEECH_PARAMS_FORCE_SHOUTED")
-    TaskTurnPedToFaceEntity(dogPed, playerPed, -1)
-    
-    -- Depois do barkDuration, o cachorro foge e é deletado
-    SetTimeout(barkDuration * 1000, function()
+    -- Registra a limpeza antecipadamente para evitar peds órfãos caso ocorra qualquer falha
+    local duration = (barkDuration or 10) * 1000
+    SetTimeout(duration, function()
         if DoesEntityExist(dogPed) then
             TaskWanderStandard(dogPed, 10.0, 10)
             Wait(5000)
-            DeleteEntity(dogPed)
+            if DoesEntityExist(dogPed) then
+                DeleteEntity(dogPed)
+            end
         end
     end)
+
+    -- Faz o cachorro latir (4 parâmetros exigidos no RedM, protegido por pcall)
+    pcall(function()
+        PlayAmbientSpeech1(dogPed, "BARK", "SPEECH_PARAMS_FORCE_SHOUTED", 1)
+    end)
+    TaskTurnPedToFaceEntity(dogPed, playerPed, -1)
 end)
 
 RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outcome)
@@ -250,12 +268,21 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
 end)
 local lastStoreState = {} -- Armazena "open" ou "closed"
 
--- Sincroniza estado se o wasvendel_doorlock for reiniciado
+-- Sincroniza estado se o wasvendel_doorlock for reiniciado e limpa entidades órfãs
 AddEventHandler('onResourceStart', function(resourceName)
-    if resourceName ~= 'wasvendel_doorlock' then return end
-    Wait(1000) -- Aguarda o wasvendel terminar de carregar os locks
-    for _, store in ipairs(Config.Stores) do
-        lastStoreState[store.name] = nil
+    if resourceName == GetCurrentResourceName() then
+        CleanupOrphanDogs()
+    elseif resourceName == 'wasvendel_doorlock' then
+        Wait(1000) -- Aguarda o wasvendel terminar de carregar os locks
+        for _, store in ipairs(Config.Stores) do
+            lastStoreState[store.name] = nil
+        end
+    end
+end)
+
+AddEventHandler('onResourceStop', function(resourceName)
+    if resourceName == GetCurrentResourceName() then
+        CleanupOrphanDogs()
     end
 end)
 
