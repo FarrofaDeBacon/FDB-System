@@ -403,7 +403,6 @@ end)
 RegisterNetEvent("wasvendel_doorlock:lockpick", function(lockId)
     local src = source
     local session = lockpickSession[src]
-    if not session then return end
 
     lockId = tonumber(lockId)
     local lock = Locks[lockId]
@@ -418,9 +417,9 @@ RegisterNetEvent("wasvendel_doorlock:lockpick", function(lockId)
 
     local required = lock.lockpickItem
     if required == false or required == "" then required = nil end
-    local used = session.item or (Config.Lockpick and Config.Lockpick.item)
+    local used = (session and session.item) or (Config.Lockpick and Config.Lockpick.item) or "lockpick"
     if required then
-        if tostring(required) ~= tostring(used) or WVDL.InvCount(src, required) < 1 then
+        if (session and session.item and tostring(required) ~= tostring(session.item)) or WVDL.InvCount(src, required) < 1 then
             Config.Notify(src, L("missingItem"), "error")
             clearLockpickSession(src)
             return

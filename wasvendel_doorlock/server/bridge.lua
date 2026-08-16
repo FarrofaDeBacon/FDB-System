@@ -463,19 +463,24 @@ function WVDL.InvCount(src, item)
     src = tonumber(src)
     if not src or not item or item == "" then return 0 end
 
-    if fw == "RSG" then
-        if GetResourceState("rsg-inventory") == "started" then
-            local ok, n = pcall(function() return exports["rsg-inventory"]:GetItemCount(src, item) end)
-            if ok and n ~= nil then return tonumber(n) or 0 end
+    if GetResourceState("fdb-inventory") == "started" then
+        local ok, n = pcall(function() return exports["fdb-inventory"]:GetItemCount(src, item) end)
+        if ok and n ~= nil then return tonumber(n) or 0 end
+    end
+    if GetResourceState("rsg-inventory") == "started" then
+        local ok, n = pcall(function() return exports["rsg-inventory"]:GetItemCount(src, item) end)
+        if ok and n ~= nil then return tonumber(n) or 0 end
+    end
+    local Player = rsgPlayer(src)
+    if Player and Player.Functions and Player.Functions.GetItemByName then
+        local ok, it = pcall(function() return Player.Functions.GetItemByName(item) end)
+        if ok and type(it) == "table" then
+            return tonumber(it.amount or it.count or it.quantity) or 0
         end
-        local Player = rsgPlayer(src)
-        if Player and Player.Functions and Player.Functions.GetItemByName then
-            local ok, it = pcall(function() return Player.Functions.GetItemByName(item) end)
-            if ok and type(it) == "table" then
-                return tonumber(it.amount or it.count or it.quantity) or 0
-            end
-        end
-        return 0
+    end
+    if Player and Player.Functions and Player.Functions.HasItem then
+        local ok, has = pcall(function() return Player.Functions.HasItem(item, 1) end)
+        if ok and has then return 1 end
     end
 
     if GetResourceState("vorp_inventory") ~= "started" then return 0 end
@@ -494,19 +499,22 @@ function WVDL.InvRemove(src, item, amount)
     amount = tonumber(amount) or 1
     if not src or not item or item == "" then return false end
 
-    if fw == "RSG" then
-        if GetResourceState("rsg-inventory") == "started" then
-            local ok, res = pcall(function()
-                return exports["rsg-inventory"]:RemoveItem(src, item, amount, nil, "wasvendel_doorlock")
-            end)
-            if ok and res ~= false then return true end
-        end
-        local Player = rsgPlayer(src)
-        if Player and Player.Functions and Player.Functions.RemoveItem then
-            local ok, res = pcall(function() return Player.Functions.RemoveItem(item, amount) end)
-            return ok and res ~= false
-        end
-        return false
+    if GetResourceState("fdb-inventory") == "started" then
+        local ok, res = pcall(function()
+            return exports["fdb-inventory"]:RemoveItem(src, item, amount)
+        end)
+        if ok and res ~= false then return true end
+    end
+    if GetResourceState("rsg-inventory") == "started" then
+        local ok, res = pcall(function()
+            return exports["rsg-inventory"]:RemoveItem(src, item, amount, nil, "wasvendel_doorlock")
+        end)
+        if ok and res ~= false then return true end
+    end
+    local Player = rsgPlayer(src)
+    if Player and Player.Functions and Player.Functions.RemoveItem then
+        local ok, res = pcall(function() return Player.Functions.RemoveItem(item, amount) end)
+        return ok and res ~= false
     end
 
     if GetResourceState("vorp_inventory") ~= "started" then return false end
@@ -575,6 +583,11 @@ function WVDL.Notify(src, message, ntype, ms)
     ntype = ntype or "info"
     ms = tonumber(ms) or 3500
     if not src then return end
+
+    if GetResourceState("fdb-libs") == "started" then
+        pcall(function() exports['fdb-libs']:Notify(src, message, ntype) end)
+        return
+    end
 
     if fw == "RSG" then
         TriggerClientEvent("RSGCore:Notify", src, message, ntype, ms)
