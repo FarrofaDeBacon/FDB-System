@@ -42,8 +42,8 @@ Config.Lockpick = {
     export = "startLockpick",
     difficulty = 2,
     item = "lockpick",
-    removeOnSuccess = true, -- take lockpick when minigame succeeds
-    removeOnFail = true,    -- take lockpick when minigame fails
+    removeOnSuccess = false, -- Não consome o lockpick em caso de sucesso
+    removeOnFail = true,    -- Consome o lockpick se falhar no minigame
 }
 
 Config.Defaults = {

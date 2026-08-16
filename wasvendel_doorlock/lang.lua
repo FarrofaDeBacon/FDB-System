@@ -94,12 +94,11 @@ Lang = {
     promptUnlock = "Unlock",
     promptLockpick = "Lockpick",
     noAccess = "No access.",
-    gradeTooLow = "Grade too low (%s / %s).",
-    lockpicked = "Lockpicked.",
-    lockpickFailed = "Lockpick failed.",
-    lockpickNotNear = "You are not near a door that can be lockpicked.",
-    missingItem = "Missing item.",
-    captureDone = "Captured.",
+    lockpicked = "Porta arrombada com sucesso!",
+    lockpickFailed = "Você falhou e o lockpick quebrou.",
+    lockpickNotNear = "Você não está perto de uma porta que possa ser arrombada.",
+    missingItem = "Você precisa de um lockpick no inventário.",
+    captureDone = "Capturado.",
 }
 
 function L(key)
