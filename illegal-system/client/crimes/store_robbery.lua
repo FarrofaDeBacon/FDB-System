@@ -209,7 +209,7 @@ RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, durat
     
     local spawnCoords = coords
     if storeConfig and storeConfig.doorCoords then
-        spawnCoords = vec3(storeConfig.doorCoords.x, storeConfig.doorCoords.y, storeConfig.doorCoords.z + 1.0)
+        spawnCoords = storeConfig.doorCoords
     end
 
     local dogModel = GetHashKey("A_C_DogCollie_01")
@@ -261,7 +261,7 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
     
     local spawnCoords = coords
     if storeConfig and storeConfig.doorCoords then
-        spawnCoords = vec3(storeConfig.doorCoords.x, storeConfig.doorCoords.y, storeConfig.doorCoords.z + 1.0)
+        spawnCoords = storeConfig.doorCoords
     end
 
     local npcModel = GetHashKey("A_M_M_ValTownfolk_01")
