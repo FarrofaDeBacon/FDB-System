@@ -226,7 +226,6 @@ RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, durat
     print("[illegal-system] Modelo do cachorro carregado com sucesso, criando ped...")
 
     local dogPed = CreatePed(dogModel, spawnCoords.x, spawnCoords.y, spawnCoords.z, 0.0, true, true, false, false)
-    Citizen.InvokeNative(0x283978A15512B2FE, dogPed, true) -- Aplica um outfit visível ao Ped
     SetEntityAsMissionEntity(dogPed, true, true)
 
     -- Cachorro agora apenas late para alertar/assustar, não ataca
