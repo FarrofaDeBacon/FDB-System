@@ -289,6 +289,7 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
     SetPedFleeAttributes(armedPed, 0, false)
     SetPedCombatAttributes(armedPed, 46, true) -- BF_AlwaysFight
     SetPedCombatAttributes(armedPed, 5, true)  -- BF_AlwaysFight (variante)
+    SetBlockingOfNonTemporaryEvents(armedPed, true)
     
     GiveWeaponToPed_2(armedPed, GetHashKey("WEAPON_REVOLVER_CATTLEMAN"), 50, true, true, 1, false, 0.5, 1.0, 1.0, true, 0, 0)
     TaskCombatPed(armedPed, playerPed, 0, 16)
