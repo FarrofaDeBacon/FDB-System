@@ -13,12 +13,17 @@ end
 
 -- Inicializa os locks buscando no wasvendel_doorlock
 local function InitializeLocks()
-    print("[illegal-system] SERVER: Aguardando inicialização do wasvendel_doorlock...")
+    print("[illegal-system] SERVER: Aguardando inicialização do wasvendel_doorlock (5s para carga do DB)...")
+    Wait(5000) -- Dá tempo de sobra para o wasvendel ler do banco
+    
     local locks = nil
     local retries = 0
-    while not locks and retries < 20 do
-        Wait(2000)
+    while retries < 20 do
         locks = exports.wasvendel_doorlock:GetLocks()
+        if locks and type(locks) == "table" and next(locks) ~= nil then
+            break -- Encontrou locks!
+        end
+        Wait(2000)
         retries = retries + 1
     end
 
