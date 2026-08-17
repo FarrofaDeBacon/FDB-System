@@ -232,22 +232,17 @@ RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, barkD
         end
     end)
 
-    -- Define se o cachorro vai só latir (70%) ou atacar de verdade (30%)
-    if math.random() < 0.3 then
-        TaskCombatPed(dogPed, playerPed, 0, 16)
-        pcall(function() PlayAmbientSpeech1(dogPed, "BARK", "SPEECH_PARAMS_FORCE_SHOUTED", 1) end)
-    else
-        TaskTurnPedToFaceEntity(dogPed, playerPed, -1)
-        CreateThread(function()
-            local endBark = GetGameTimer() + duration
-            while GetGameTimer() < endBark and DoesEntityExist(dogPed) do
-                pcall(function()
-                    PlayAmbientSpeech1(dogPed, "BARK", "SPEECH_PARAMS_FORCE_SHOUTED", 1)
-                end)
-                Wait(math.random(1500, 2500)) -- Late repetidamente a cada ~2 segundos
-            end
-        end)
-    end
+    -- Cachorro agora apenas late para alertar/assustar, não ataca
+    TaskTurnPedToFaceEntity(dogPed, playerPed, -1)
+    CreateThread(function()
+        local endBark = GetGameTimer() + duration
+        while GetGameTimer() < endBark and DoesEntityExist(dogPed) do
+            pcall(function()
+                PlayAmbientSpeech1(dogPed, "BARK", "SPEECH_PARAMS_FORCE_SHOUTED", 1)
+            end)
+            Wait(math.random(1500, 2500)) -- Late repetidamente a cada ~2 segundos
+        end
+    end)
 end)
 
 RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outcome)
