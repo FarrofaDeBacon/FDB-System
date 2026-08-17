@@ -189,7 +189,7 @@ Config.GraveRespawn = {
 }
 
 Config.StoreRobberyRespawn = {
-    mode = 'persistent', 
+    mode = 'restart', -- Alterado temporariamente para 'restart' para facilitar os testes! 
     minDays = 1, -- Mínimo de dias in-game para a registradora voltar a ter dinheiro
     maxDays = 3, -- Máximo de dias in-game para a registradora voltar a ter dinheiro
     minutesPerIngameDay = 48

@@ -443,8 +443,16 @@ end)
 RegisterNetEvent("wasvendel_doorlock:startLockpickSession", function(item)
     local src = source
     if lockpickSession[src] then return end
-    lockpickSession[src] = { item = item, at = GetGameTimer() }
-    TriggerClientEvent("wasvendel_doorlock:useLockpickItem", src, item)
+    
+    -- Verifica o inventário ANTES de iniciar o minigame
+    local used = item or (Config.Lockpick and Config.Lockpick.item) or "lockpick"
+    if WVDL.InvCount(src, used) < 1 then
+        Config.Notify(src, L("missingItem"), "error")
+        return
+    end
+    
+    lockpickSession[src] = { item = used, at = GetGameTimer() }
+    TriggerClientEvent("wasvendel_doorlock:useLockpickItem", src, used)
 end)
 
 CreateThread(function()

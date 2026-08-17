@@ -463,6 +463,15 @@ function WVDL.InvCount(src, item)
     src = tonumber(src)
     if not src or not item or item == "" then return 0 end
 
+    local Player = rsgPlayer(src)
+    if Player and Player.Functions and Player.Functions.GetItemByName then
+        local ok, it = pcall(function() return Player.Functions.GetItemByName(item) end)
+        if ok and type(it) == "table" then
+            local count = tonumber(it.amount or it.count or it.quantity) or 0
+            if count > 0 then return count end
+        end
+    end
+
     if GetResourceState("fdb-inventory") == "started" then
         local ok, n = pcall(function() return exports["fdb-inventory"]:GetItemCount(src, item) end)
         if ok and n ~= nil then return tonumber(n) or 0 end
@@ -471,17 +480,21 @@ function WVDL.InvCount(src, item)
         local ok, n = pcall(function() return exports["rsg-inventory"]:GetItemCount(src, item) end)
         if ok and n ~= nil then return tonumber(n) or 0 end
     end
-    local Player = rsgPlayer(src)
-    if Player and Player.Functions and Player.Functions.GetItemByName then
-        local ok, it = pcall(function() return Player.Functions.GetItemByName(item) end)
-        if ok and type(it) == "table" then
-            return tonumber(it.amount or it.count or it.quantity) or 0
-        end
-    end
+    
     if Player and Player.Functions and Player.Functions.HasItem then
         local ok, has = pcall(function() return Player.Functions.HasItem(item, 1) end)
         if ok and has then return 1 end
     end
+    
+    return 0
+end
+
+RegisterCommand("testinv", function(source, args)
+    local src = args[1] and tonumber(args[1]) or source
+    if src == 0 then src = 1 end
+    local item = args[2] or "lockpick"
+    print("TestInvCount for src " .. tostring(src) .. " item " .. tostring(item) .. " = " .. tostring(WVDL.InvCount(src, item)))
+end, true)
 
     if GetResourceState("vorp_inventory") ~= "started" then return 0 end
     local done, count = false, 0

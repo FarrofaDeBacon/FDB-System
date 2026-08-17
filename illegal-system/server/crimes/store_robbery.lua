@@ -155,6 +155,13 @@ local function StartRiskSession(src, storeName)
         Bridge.Notify(src, burglaryConfig.warning.message, "info")
     end
     
+    -- Testemunha (separada e independente do loop de cachorro/NPC)
+    if burglaryConfig.enabled and Utils.RollChance(crimeConfig.witnessChance) then
+        Bridge.Notify(src, "Alguém percebeu o barulho e vai avisar a polícia!", "error")
+        -- Hook preparado pra futura integração real de polícia (Etapa 7) — por
+        -- enquanto é só aviso, sem dispatch de verdade ainda.
+    end
+    
     -- Loop de risco em thread própria
     if burglaryConfig.dog and burglaryConfig.dog.enabled then
         CreateThread(function()

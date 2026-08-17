@@ -206,7 +206,8 @@ RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, barkD
     RequestModel(dogModel)
     while not HasModelLoaded(dogModel) do Wait(10) end
     
-    local offset = GetOffsetFromEntityInWorldCoords(playerPed, math.random(-5, 5), math.random(-5, 5), 0.0)
+    -- Spawna o cachorro bem perto do jogador
+    local offset = GetOffsetFromEntityInWorldCoords(playerPed, 0.0, 1.5, 0.0)
     local dogPed = CreatePed(dogModel, offset.x, offset.y, coords.z, 0.0, true, false, false, false)
     SetEntityAsMissionEntity(dogPed, true, true)
     
@@ -222,47 +223,46 @@ RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, barkD
         end
     end)
 
-    -- Faz o cachorro latir (4 parâmetros exigidos no RedM, protegido por pcall)
-    pcall(function()
-        PlayAmbientSpeech1(dogPed, "BARK", "SPEECH_PARAMS_FORCE_SHOUTED", 1)
-    end)
-    TaskTurnPedToFaceEntity(dogPed, playerPed, -1)
+    -- Define se o cachorro vai só latir (70%) ou atacar de verdade (30%)
+    if math.random() < 0.3 then
+        TaskCombatPed(dogPed, playerPed, 0, 16)
+        pcall(function() PlayAmbientSpeech1(dogPed, "BARK", "SPEECH_PARAMS_FORCE_SHOUTED", 1) end)
+    else
+        TaskTurnPedToFaceEntity(dogPed, playerPed, -1)
+        CreateThread(function()
+            local endBark = GetGameTimer() + duration
+            while GetGameTimer() < endBark and DoesEntityExist(dogPed) do
+                pcall(function()
+                    PlayAmbientSpeech1(dogPed, "BARK", "SPEECH_PARAMS_FORCE_SHOUTED", 1)
+                end)
+                Wait(math.random(1500, 2500)) -- Late repetidamente a cada ~2 segundos
+            end
+        end)
+    end
 end)
 
 RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outcome)
     local playerPed = PlayerPedId()
     local coords = GetEntityCoords(playerPed)
-    
-    -- Spawna NPC Armado agressivo
+
     local npcModel = GetHashKey("A_M_M_BynRoughTravellers_01")
     RequestModel(npcModel)
     while not HasModelLoaded(npcModel) do Wait(10) end
-    
+
     local offset = GetOffsetFromEntityInWorldCoords(playerPed, 0.0, -10.0, 0.0)
     local armedPed = CreatePed(npcModel, offset.x, offset.y, coords.z, 0.0, true, false, false, false)
     SetEntityAsMissionEntity(armedPed, true, true)
-    
+
     GiveWeaponToPed_2(armedPed, GetHashKey("WEAPON_REVOLVER_CATTLEMAN"), 50, true, true, 1, false, 0.5, 1.0, 1.0, true, 0, 0)
     TaskCombatPed(armedPed, playerPed, 0, 16)
-    
+
     Bridge.Notify("Um morador te flagrou! Cuidado!", "error")
-    
-    -- Lógica simples: Se o jogador não matar o NPC em X segundos, o 'outcome' acontece
-    SetTimeout(10000, function()
-        if DoesEntityExist(armedPed) and not IsEntityDead(armedPed) and not IsEntityDead(playerPed) then
-            -- O NPC pegou o jogador!
-            if outcome == 'knockout' then
-                Bridge.Notify("Você foi nocauteado pelo morador!", "error")
-                SetPedToRagdoll(playerPed, 10000, 10000, 0, false, false, false)
-            elseif outcome == 'jail' then
-                -- Hook preparado para futura integração com polícia
-                Bridge.Notify("Você foi pego e seria mandado para a prisão (futuro).", "error")
-            end
-            
-            -- NPC foge após nocautear
+
+    -- Limpeza: depois de um tempo, se o NPC ainda existir (você fugiu ou ele
+    -- desistiu), ele volta a vagar normalmente, sem punir o jogador por isso.
+    SetTimeout(30000, function()
+        if DoesEntityExist(armedPed) and not IsEntityDead(armedPed) then
             TaskWanderStandard(armedPed, 10.0, 10)
-            Wait(10000)
-            if DoesEntityExist(armedPed) then DeleteEntity(armedPed) end
         end
     end)
 end)
