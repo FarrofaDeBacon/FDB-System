@@ -249,7 +249,7 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
     local playerPed = PlayerPedId()
     local coords = GetEntityCoords(playerPed)
 
-    local npcModel = GetHashKey("A_M_M_BynRoughTravellers_01")
+    local npcModel = GetHashKey("A_M_M_ValTownfolk_01")
     RequestModel(npcModel)
     
     local npcTimeout = GetGameTimer() + 5000
@@ -281,6 +281,11 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
     local armedPed = CreatePed(npcModel, spawnCoords.x, spawnCoords.y, finalZ, 0.0, true, false, false, false)
     SetEntityAsMissionEntity(armedPed, true, true)
 
+    -- Configura para que o NPC não fuja e ataque de forma letal
+    SetPedFleeAttributes(armedPed, 0, false)
+    SetPedCombatAttributes(armedPed, 46, true) -- BF_AlwaysFight
+    SetPedCombatAttributes(armedPed, 5, true)  -- BF_AlwaysFight (variante)
+    
     GiveWeaponToPed_2(armedPed, GetHashKey("WEAPON_REVOLVER_CATTLEMAN"), 50, true, true, 1, false, 0.5, 1.0, 1.0, true, 0, 0)
     TaskCombatPed(armedPed, playerPed, 0, 16)
 
@@ -291,6 +296,7 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
     SetTimeout(30000, function()
         if DoesEntityExist(armedPed) and not IsEntityDead(armedPed) then
             TaskWanderStandard(armedPed, 10.0, 10)
+            SetModelAsNoLongerNeeded(npcModel)
         end
     end)
 end)
