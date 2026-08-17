@@ -249,8 +249,23 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
     RequestModel(npcModel)
     while not HasModelLoaded(npcModel) do Wait(10) end
 
-    local offset = GetOffsetFromEntityInWorldCoords(playerPed, 0.0, -10.0, 0.0)
-    local armedPed = CreatePed(npcModel, offset.x, offset.y, coords.z, 0.0, true, false, false, false)
+    -- Tenta 5 metros atrás do jogador
+    local spawnCoords = GetOffsetFromEntityInWorldCoords(playerPed, 0.0, -5.0, 0.0)
+    
+    -- Checa se tem alguma parede no caminho até esse ponto (Raio 0.5m)
+    local rayHandle = StartShapeTestCapsule(coords.x, coords.y, coords.z + 1.0, spawnCoords.x, spawnCoords.y, spawnCoords.z + 1.0, 0.5, 511, playerPed, 7)
+    local _, hit = GetShapeTestResult(rayHandle)
+    
+    if hit == 1 then
+        -- Se bateu em algo, o espaço de trás é apertado. Joga 3 metros pra FRENTE do jogador (perto da porta)
+        spawnCoords = GetOffsetFromEntityInWorldCoords(playerPed, 0.0, 3.0, 0.0)
+    end
+
+    -- Pega a altura correta do chão (Z) no ponto, se não achar usa a altura do jogador (coords.z)
+    local foundGround, groundZ = GetGroundZFor_3dCoord(spawnCoords.x, spawnCoords.y, spawnCoords.z + 2.0, false)
+    local finalZ = foundGround and groundZ or coords.z
+    
+    local armedPed = CreatePed(npcModel, spawnCoords.x, spawnCoords.y, finalZ, 0.0, true, false, false, false)
     SetEntityAsMissionEntity(armedPed, true, true)
 
     GiveWeaponToPed_2(armedPed, GetHashKey("WEAPON_REVOLVER_CATTLEMAN"), 50, true, true, 1, false, 0.5, 1.0, 1.0, true, 0, 0)
