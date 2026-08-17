@@ -227,6 +227,10 @@ RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, durat
 
     local dogPed = CreatePed(dogModel, spawnCoords.x, spawnCoords.y, spawnCoords.z, 0.0, true, true, false, false)
     SetEntityAsMissionEntity(dogPed, true, true)
+    PlaceEntityOnGroundProperly(dogPed)
+    
+    local finalCoords = GetEntityCoords(dogPed)
+    print(("[illegal-system] Cachorro criado em: %.2f, %.2f, %.2f"):format(finalCoords.x, finalCoords.y, finalCoords.z))
 
     -- Cachorro agora apenas late para alertar/assustar, não ataca
     TaskTurnPedToFaceEntity(dogPed, playerPed, -1)
@@ -276,6 +280,10 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
     local armedPed = CreatePed(npcModel, spawnCoords.x, spawnCoords.y, spawnCoords.z, 0.0, true, true, false, false)
     Citizen.InvokeNative(0x283978A15512B2FE, armedPed, true) -- Aplica um outfit visível ao Ped
     SetEntityAsMissionEntity(armedPed, true, true)
+    PlaceEntityOnGroundProperly(armedPed)
+    
+    local finalCoords = GetEntityCoords(armedPed)
+    print(("[illegal-system] NPC armado criado em: %.2f, %.2f, %.2f"):format(finalCoords.x, finalCoords.y, finalCoords.z))
 
     -- Configura para que o NPC não fuja e ataque de forma letal
     SetPedFleeAttributes(armedPed, 0, false)
