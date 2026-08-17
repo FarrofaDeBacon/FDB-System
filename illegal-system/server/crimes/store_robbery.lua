@@ -12,7 +12,7 @@ local function GetStoreConfig(storeName)
 end
 
 -- Inicializa os locks buscando no wasvendel_doorlock
-CreateThread(function()
+local function InitializeLocks()
     print("[illegal-system] SERVER: Aguardando inicialização do wasvendel_doorlock...")
     local locks = nil
     local retries = 0
@@ -30,23 +30,16 @@ CreateThread(function()
     local lockCount = 0
     for id, lock in pairs(locks) do
         lockCount = lockCount + 1
-        if lock.prompt and lock.prompt.x then
-            print("[illegal-system] SERVER: Lock ID=" .. tostring(id) .. " | name=" .. tostring(lock.name) .. " | prompt=" .. tostring(lock.prompt.x) .. ", " .. tostring(lock.prompt.y) .. ", " .. tostring(lock.prompt.z))
-        else
-            print("[illegal-system] SERVER: Lock ID=" .. tostring(id) .. " | name=" .. tostring(lock.name) .. " | SEM PROMPT!")
-        end
     end
     print("[illegal-system] SERVER: Total de locks encontrados: " .. lockCount)
     
     for _, store in ipairs(Config.Stores) do
         local bestLockId = nil
         local minStoreDist = 5.0
-        print("[illegal-system] SERVER: Procurando lock para loja '" .. store.name .. "' perto de doorCoords=" .. tostring(store.doorCoords))
         for id, lock in pairs(locks) do
             if lock.prompt and lock.prompt.x then
                 local lockCoords = vec3(lock.prompt.x, lock.prompt.y, lock.prompt.z)
                 local dist = #(store.doorCoords - lockCoords)
-                print("[illegal-system] SERVER:   -> Lock ID=" .. tostring(id) .. " dist=" .. string.format("%.2f", dist) .. "m")
                 if dist < minStoreDist then
                     minStoreDist = dist
                     bestLockId = id
@@ -61,6 +54,19 @@ CreateThread(function()
         end
     end
     print("[illegal-system] SERVER: Inicialização completa!")
+end
+
+CreateThread(function()
+    InitializeLocks()
+end)
+
+AddEventHandler('onResourceStart', function(resourceName)
+    if resourceName == 'wasvendel_doorlock' then
+        CreateThread(function()
+            Wait(2000) -- Aguarda wasvendel subir completamente
+            InitializeLocks()
+        end)
+    end
 end)
 
 -- Recebe o aviso do cliente para trancar a porta no fim do expediente
