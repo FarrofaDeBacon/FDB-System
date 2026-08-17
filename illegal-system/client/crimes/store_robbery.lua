@@ -204,7 +204,16 @@ RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, barkD
     -- Spawna um cachorro perto do jogador (apenas visual e sonoro para assustar)
     local dogModel = GetHashKey("A_C_DogCollie_01")
     RequestModel(dogModel)
-    while not HasModelLoaded(dogModel) do Wait(10) end
+    
+    local modelTimeout = GetGameTimer() + 5000
+    while not HasModelLoaded(dogModel) do 
+        Wait(10) 
+        if GetGameTimer() > modelTimeout then
+            print("[illegal-system] ERRO: modelo do cachorro nao carregou em 5s: " .. tostring(dogModel))
+            return
+        end
+    end
+    print("[illegal-system] Modelo do cachorro carregado com sucesso, criando ped...")
     
     -- Spawna o cachorro bem perto do jogador
     local offset = GetOffsetFromEntityInWorldCoords(playerPed, 0.0, 1.5, 0.0)
@@ -247,7 +256,16 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
 
     local npcModel = GetHashKey("A_M_M_BynRoughTravellers_01")
     RequestModel(npcModel)
-    while not HasModelLoaded(npcModel) do Wait(10) end
+    
+    local npcTimeout = GetGameTimer() + 5000
+    while not HasModelLoaded(npcModel) do 
+        Wait(10) 
+        if GetGameTimer() > npcTimeout then
+            print("[illegal-system] ERRO: modelo do NPC armado nao carregou em 5s: " .. tostring(npcModel))
+            return
+        end
+    end
+    print("[illegal-system] Modelo do NPC carregado com sucesso, criando ped...")
 
     -- Tenta 5 metros atrás do jogador
     local spawnCoords = GetOffsetFromEntityInWorldCoords(playerPed, 0.0, -5.0, 0.0)
