@@ -197,50 +197,50 @@ local function CleanupOrphanDogs()
     end
 end
 
-RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, barkDuration)
+RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, duration)
     local playerPed = PlayerPedId()
     local coords = GetEntityCoords(playerPed)
+
+    -- Busca a loja para pegar a coordenada da porta
+    local storeConfig = nil
+    for _, s in ipairs(Config.Stores) do
+        if s.name == storeName then storeConfig = s break end
+    end
     
-    -- Spawna um cachorro perto do jogador (apenas visual e sonoro para assustar)
+    local spawnCoords = coords
+    if storeConfig and storeConfig.doorCoords then
+        spawnCoords = storeConfig.doorCoords
+    end
+
     local dogModel = GetHashKey("A_C_DogCollie_01")
     RequestModel(dogModel)
     
-    local modelTimeout = GetGameTimer() + 5000
+    local dogTimeout = GetGameTimer() + 5000
     while not HasModelLoaded(dogModel) do 
         Wait(10) 
-        if GetGameTimer() > modelTimeout then
+        if GetGameTimer() > dogTimeout then
             print("[illegal-system] ERRO: modelo do cachorro nao carregou em 5s: " .. tostring(dogModel))
             return
         end
     end
     print("[illegal-system] Modelo do cachorro carregado com sucesso, criando ped...")
-    
-    -- Spawna o cachorro bem perto do jogador
-    local offset = GetOffsetFromEntityInWorldCoords(playerPed, 0.0, 1.5, 0.0)
-    local dogPed = CreatePed(dogModel, offset.x, offset.y, coords.z, 0.0, true, false, false, false)
+
+    local dogPed = CreatePed(dogModel, spawnCoords.x, spawnCoords.y, spawnCoords.z, 0.0, true, true, false, false)
     SetEntityAsMissionEntity(dogPed, true, true)
-    
-    -- Registra a limpeza antecipadamente para evitar peds órfãos caso ocorra qualquer falha
-    local duration = (barkDuration or 10) * 1000
-    SetTimeout(duration, function()
-        if DoesEntityExist(dogPed) then
-            TaskWanderStandard(dogPed, 10.0, 10)
-            Wait(5000)
-            if DoesEntityExist(dogPed) then
-                DeleteEntity(dogPed)
-            end
-        end
-    end)
 
     -- Cachorro agora apenas late para alertar/assustar, não ataca
     TaskTurnPedToFaceEntity(dogPed, playerPed, -1)
     CreateThread(function()
-        local endBark = GetGameTimer() + duration
+        local endBark = GetGameTimer() + (duration * 1000)
         while GetGameTimer() < endBark and DoesEntityExist(dogPed) do
             pcall(function()
                 PlayAmbientSpeech1(dogPed, "BARK", "SPEECH_PARAMS_FORCE_SHOUTED", 1)
             end)
             Wait(math.random(1500, 2500)) -- Late repetidamente a cada ~2 segundos
+        end
+        if DoesEntityExist(dogPed) then
+            TaskWanderStandard(dogPed, 10.0, 10)
+            SetModelAsNoLongerNeeded(dogModel)
         end
     end)
 end)
@@ -248,6 +248,17 @@ end)
 RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outcome)
     local playerPed = PlayerPedId()
     local coords = GetEntityCoords(playerPed)
+
+    -- Busca a loja para pegar a coordenada da porta
+    local storeConfig = nil
+    for _, s in ipairs(Config.Stores) do
+        if s.name == storeName then storeConfig = s break end
+    end
+    
+    local spawnCoords = coords
+    if storeConfig and storeConfig.doorCoords then
+        spawnCoords = storeConfig.doorCoords
+    end
 
     local npcModel = GetHashKey("A_M_M_ValTownfolk_01")
     RequestModel(npcModel)
@@ -262,23 +273,7 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
     end
     print("[illegal-system] Modelo do NPC carregado com sucesso, criando ped...")
 
-    -- Tenta 5 metros atrás do jogador
-    local spawnCoords = GetOffsetFromEntityInWorldCoords(playerPed, 0.0, -5.0, 0.0)
-    
-    -- Checa se tem alguma parede no caminho até esse ponto (Raio 0.5m)
-    local rayHandle = StartShapeTestCapsule(coords.x, coords.y, coords.z + 1.0, spawnCoords.x, spawnCoords.y, spawnCoords.z + 1.0, 0.5, 511, playerPed, 7)
-    local _, hit = GetShapeTestResult(rayHandle)
-    
-    if hit == 1 then
-        -- Se bateu em algo, o espaço de trás é apertado. Joga 3 metros pra FRENTE do jogador (perto da porta)
-        spawnCoords = GetOffsetFromEntityInWorldCoords(playerPed, 0.0, 3.0, 0.0)
-    end
-
-    -- Pega a altura correta do chão (Z) no ponto, se não achar usa a altura do jogador (coords.z)
-    local foundGround, groundZ = GetGroundZFor_3dCoord(spawnCoords.x, spawnCoords.y, spawnCoords.z + 2.0, false)
-    local finalZ = foundGround and groundZ or coords.z
-    
-    local armedPed = CreatePed(npcModel, spawnCoords.x, spawnCoords.y, finalZ, 0.0, true, false, false, false)
+    local armedPed = CreatePed(npcModel, spawnCoords.x, spawnCoords.y, spawnCoords.z, 0.0, true, true, false, false)
     SetEntityAsMissionEntity(armedPed, true, true)
 
     -- Configura para que o NPC não fuja e ataque de forma letal
@@ -327,7 +322,7 @@ CreateThread(function()
     while true do
         Wait(5000)
         local hour = GetClockHours()
-        print("[illegal-system] CLIENT: Hora atual = " .. tostring(hour) .. " | Stores = " .. #Config.Stores)
+        -- print("[illegal-system] CLIENT: Hora atual = " .. tostring(hour) .. " | Stores = " .. #Config.Stores)
         
         for _, store in ipairs(Config.Stores) do
             -- Verifica se estamos no horário de funcionamento
@@ -339,7 +334,7 @@ CreateThread(function()
                 isBusinessHour = (hour >= store.openHour or hour < store.closeHour)
             end
             
-            print("[illegal-system] CLIENT: " .. store.name .. " | open=" .. store.openHour .. " close=" .. store.closeHour .. " | isBusinessHour=" .. tostring(isBusinessHour) .. " | lastState=" .. tostring(lastStoreState[store.name]))
+            -- print("[illegal-system] CLIENT: " .. store.name .. " | open=" .. store.openHour .. " close=" .. store.closeHour .. " | isBusinessHour=" .. tostring(isBusinessHour) .. " | lastState=" .. tostring(lastStoreState[store.name]))
             
             if isBusinessHour then
                 if lastStoreState[store.name] ~= "open" then

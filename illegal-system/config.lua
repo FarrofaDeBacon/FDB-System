@@ -139,8 +139,8 @@ Config.Crimes = {
         cooldown         = 300, -- 5 minutos de cooldown por jogador (apenas para evitar spam do minigame)
         requiredItem     = 'lockpick',
         minigame = {
-            door = { duration = 8.0, zones = { common = {start=20,["end"]=40} } },
-            register = { duration = 5.0, zones = { common = {start=30,["end"]=50} } }
+            door = { duration = 8.0, zones = { common = {start=0,["end"]=100} } },
+            register = { duration = 5.0, zones = { common = {start=0,["end"]=100} } }
         }
     },
 
