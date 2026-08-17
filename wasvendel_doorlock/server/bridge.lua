@@ -486,24 +486,17 @@ function WVDL.InvCount(src, item)
         if ok and has then return 1 end
     end
     
+    if GetResourceState("vorp_inventory") == "started" then
+        local done, count = false, 0
+        pcall(function()
+            exports.vorp_inventory:getItemCount(src, function(c) count = tonumber(c) or 0; done = true end, item)
+        end)
+        local t = GetGameTimer() + 2500
+        while not done and GetGameTimer() < t do Wait(0) end
+        return count
+    end
+    
     return 0
-end
-
-RegisterCommand("testinv", function(source, args)
-    local src = args[1] and tonumber(args[1]) or source
-    if src == 0 then src = 1 end
-    local item = args[2] or "lockpick"
-    print("TestInvCount for src " .. tostring(src) .. " item " .. tostring(item) .. " = " .. tostring(WVDL.InvCount(src, item)))
-end, true)
-
-    if GetResourceState("vorp_inventory") ~= "started" then return 0 end
-    local done, count = false, 0
-    pcall(function()
-        exports.vorp_inventory:getItemCount(src, function(c) count = tonumber(c) or 0; done = true end, item)
-    end)
-    local t = GetGameTimer() + 2500
-    while not done and GetGameTimer() < t do Wait(0) end
-    return count
 end
 
 function WVDL.InvRemove(src, item, amount)
