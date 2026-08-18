@@ -227,7 +227,6 @@ RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, durat
 
     local dogPed = CreatePed(dogModel, spawnCoords.x, spawnCoords.y, spawnCoords.z, 0.0, true, true, false, false)
     SetEntityAsMissionEntity(dogPed, true, true)
-    PlaceEntityOnGroundProperly(dogPed)
     
     local finalCoords = GetEntityCoords(dogPed)
     print(("[illegal-system] Cachorro criado em: %.2f, %.2f, %.2f"):format(finalCoords.x, finalCoords.y, finalCoords.z))
@@ -291,10 +290,6 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
     SetPedCombatAttributes(armedPed, 5, true)  -- BF_AlwaysFight (variante)
     SetBlockingOfNonTemporaryEvents(armedPed, true)
     
-    SetPedRelationshipGroupHash(armedPed, GetHashKey("HATES_PLAYER"))
-    SetPedCombatAbility(armedPed, 2) -- Professional
-    SetPedCombatMovement(armedPed, 2) -- Will advance
-
     GiveWeaponToPed_2(armedPed, GetHashKey("WEAPON_REVOLVER_CATTLEMAN"), 50, true, true, 1, false, 0.5, 1.0, 1.0, true, 0, 0)
     TaskCombatPed(armedPed, playerPed, 0, 16)
 
