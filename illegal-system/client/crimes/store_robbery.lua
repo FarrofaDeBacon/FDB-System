@@ -207,10 +207,10 @@ RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, durat
         if s.name == storeName then storeConfig = s break end
     end
     
-    local spawnCoords = coords
-    if storeConfig and storeConfig.doorCoords then
-        spawnCoords = storeConfig.doorCoords
-    end
+    -- Para evitar bugs da porta (nascer no telhado ou cair no limbo),
+    -- vamos gerar o ped sempre perto do jogador (onde sabemos que o chão é válido).
+    local spawnCoords = GetOffsetFromEntityInWorldCoords(playerPed, 0.0, -2.0, 0.0)
+    spawnCoords = vec3(spawnCoords.x, spawnCoords.y, coords.z)
 
     local dogModel = GetHashKey("A_C_DogCollie_01")
     RequestModel(dogModel)
@@ -259,10 +259,10 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
         if s.name == storeName then storeConfig = s break end
     end
     
-    local spawnCoords = coords
-    if storeConfig and storeConfig.doorCoords then
-        spawnCoords = storeConfig.doorCoords
-    end
+    -- Para evitar bugs da porta (nascer no telhado ou cair no limbo),
+    -- vamos gerar o ped sempre perto do jogador (onde sabemos que o chão é válido).
+    local spawnCoords = GetOffsetFromEntityInWorldCoords(playerPed, 0.0, -2.0, 0.0)
+    spawnCoords = vec3(spawnCoords.x, spawnCoords.y, coords.z)
 
     local npcModel = GetHashKey("A_M_M_ValTownfolk_01")
     RequestModel(npcModel)
@@ -291,6 +291,10 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
     SetPedCombatAttributes(armedPed, 5, true)  -- BF_AlwaysFight (variante)
     SetBlockingOfNonTemporaryEvents(armedPed, true)
     
+    SetPedRelationshipGroupHash(armedPed, GetHashKey("HATES_PLAYER"))
+    SetPedCombatAbility(armedPed, 2) -- Professional
+    SetPedCombatMovement(armedPed, 2) -- Will advance
+
     GiveWeaponToPed_2(armedPed, GetHashKey("WEAPON_REVOLVER_CATTLEMAN"), 50, true, true, 1, false, 0.5, 1.0, 1.0, true, 0, 0)
     TaskCombatPed(armedPed, playerPed, 0, 16)
 
