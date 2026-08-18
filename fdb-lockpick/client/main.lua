@@ -5,12 +5,20 @@ end)
 
 RegisterNUICallback('callback', function(data, cb)
     openLockpick(false)
-	lockpickCallback(data.success)
+    if lockpickCallback then
+        lockpickCallback(data.success)
+        lockpickCallback = nil
+    end
     cb('ok')
 end)
 
-RegisterNUICallback('exit', function()
+RegisterNUICallback('exit', function(data, cb)
     openLockpick(false)
+    if lockpickCallback then
+        lockpickCallback(false)
+        lockpickCallback = nil
+    end
+    if cb then cb('ok') end
 end)
 
 openLockpick = function(bool)
