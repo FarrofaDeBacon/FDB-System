@@ -171,7 +171,7 @@ RegisterNetEvent('illegal-system:client:allowRegisterMinigame', function(storeNa
 
     TaskStartScenarioInPlace(ped, GetHashKey("WORLD_HUMAN_CROUCH_INSPECT"), -1, true, false, false, false)
     TriggerEvent('fdb-lockpick:client:openLockpick', function(success)
-        ClearPedTasks(ped)
+        ClearPedTasksImmediately(ped)
         if success then
             TriggerServerEvent('illegal-system:server:attemptBurglary', storeName, 'register', sessionToken)
         else
