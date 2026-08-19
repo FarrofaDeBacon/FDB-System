@@ -19,6 +19,7 @@ server_scripts {
     'bridge/rsg_bridge.lua',
     'bridge/fdb_bridge.lua',
     'server/core.lua',
+    'server/editor.lua',
     'server/crimes/npc_robbery.lua',
     'server/crimes/grave_robbery.lua',
     'server/crimes/store_robbery.lua'
