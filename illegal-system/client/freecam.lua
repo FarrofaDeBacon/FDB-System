@@ -31,7 +31,7 @@ local Config = {
         heightUp = { key = 0x27D1C284 }, -- Q
         heightDown = { key = 0xE8342FF2 }, -- E
         snapGround = { key = 0xCF8A4ECA }, -- LAlt
-        place = { key = 0x07CE1E61 }, -- Left Click
+        place = { key = 0xC7B5340A }, -- Enter (INPUT_FRONTEND_ACCEPT)
         cancel = { key = 0x156F7119 }, -- ESC
     }
 }

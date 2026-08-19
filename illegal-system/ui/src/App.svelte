@@ -251,7 +251,7 @@
     <p>Use <b>WASD</b> para mover a câmera</p>
     <p>Use <b>Mouse</b> para olhar</p>
     <p>Role o <b>Scroll do Mouse</b> para girar o objeto</p>
-    <p>Clique com <b>Botão Esquerdo</b> para confirmar</p>
+    <p>Pressione <b>Enter</b> para confirmar</p>
     <p>Pressione <b>ESC</b> para cancelar</p>
 </div>
 {/if}
