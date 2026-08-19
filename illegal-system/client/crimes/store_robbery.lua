@@ -219,6 +219,12 @@ RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, durat
     -- vamos gerar o ped sempre perto do jogador (onde sabemos que o chão é válido).
     local spawnCoords = GetOffsetFromEntityInWorldCoords(playerPed, 0.0, -2.0, 0.0)
     spawnCoords = vec3(spawnCoords.x, spawnCoords.y, coords.z)
+    local spawnHeading = 0.0
+
+    if storeConfig and storeConfig.riskSpawns and storeConfig.riskSpawns.dog then
+        spawnCoords = storeConfig.riskSpawns.dog.spawnCoords
+        spawnHeading = storeConfig.riskSpawns.dog.spawnHeading or 0.0
+    end
 
     local dogModel = GetHashKey("A_C_DogCollie_01")
     RequestModel(dogModel)
@@ -233,7 +239,7 @@ RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, durat
     end
     print("[illegal-system] Modelo do cachorro carregado com sucesso, criando ped...")
 
-    local dogPed = CreatePed(dogModel, spawnCoords.x, spawnCoords.y, spawnCoords.z, 0.0, true, true, false, false)
+    local dogPed = CreatePed(dogModel, spawnCoords.x, spawnCoords.y, spawnCoords.z, spawnHeading, true, true, false, false)
     SetEntityAsMissionEntity(dogPed, true, true)
     
     local finalCoords = GetEntityCoords(dogPed)
@@ -270,6 +276,14 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
     -- vamos gerar o ped sempre perto do jogador (onde sabemos que o chão é válido).
     local spawnCoords = GetOffsetFromEntityInWorldCoords(playerPed, 0.0, -2.0, 0.0)
     spawnCoords = vec3(spawnCoords.x, spawnCoords.y, coords.z)
+    local spawnHeading = 0.0
+
+    if storeConfig and storeConfig.riskSpawns and storeConfig.riskSpawns.guards and #storeConfig.riskSpawns.guards > 0 then
+        local idx = math.random(1, #storeConfig.riskSpawns.guards)
+        local guardData = storeConfig.riskSpawns.guards[idx]
+        spawnCoords = guardData.spawnCoords
+        spawnHeading = guardData.spawnHeading or 0.0
+    end
 
     local npcModel = GetHashKey("A_M_M_ValTownfolk_01")
     RequestModel(npcModel)
@@ -284,7 +298,7 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
     end
     print("[illegal-system] Modelo do NPC carregado com sucesso, criando ped...")
 
-    local armedPed = CreatePed(npcModel, spawnCoords.x, spawnCoords.y, spawnCoords.z, 0.0, true, true, false, false)
+    local armedPed = CreatePed(npcModel, spawnCoords.x, spawnCoords.y, spawnCoords.z, spawnHeading, true, true, false, false)
     Citizen.InvokeNative(0x283978A15512B2FE, armedPed, true) -- Aplica um outfit visível ao Ped
     SetEntityAsMissionEntity(armedPed, true, true)
     PlaceEntityOnGroundProperly(armedPed)

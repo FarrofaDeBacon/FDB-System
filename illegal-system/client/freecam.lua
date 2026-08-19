@@ -415,31 +415,43 @@ local function getPlacementStartPos()
 end
 
 local function SpawnGhost(modelHash, isPed)
-    if not IsModelInCdimage(modelHash) then return end
-    RequestModel(modelHash)
-    
-    local timeout = 0
-    while not HasModelLoaded(modelHash) and timeout < 100 do 
-        Wait(10) 
-        timeout = timeout + 1
+    if not IsModelInCdimage(modelHash) then
+        print("[illegal-system] EDITOR ERRO: modelo " .. tostring(modelHash) .. " não existe no CD image. Fantasma não pode ser criado.")
+        Bridge.Notify("Modelo inválido para preview. Veja o console (F8).", "error")
+        return
     end
-    
-    if HasModelLoaded(modelHash) then
-        local pos = GetEntityCoords(PlayerPedId())
+    RequestModel(modelHash)
+
+    -- Antes eram só 100 tentativas de 10ms (1 segundo) -- curto demais pra
+    -- modelos que ainda não foram cacheados nesta sessão. Alinhado ao mesmo
+    -- timeout de 5s usado no spawn real (spawnDogRisk / armedNpcRisk).
+    local deadline = GetGameTimer() + 5000
+    while not HasModelLoaded(modelHash) do
+        Wait(10)
+        if GetGameTimer() > deadline then
+            print("[illegal-system] EDITOR ERRO: modelo " .. tostring(modelHash) .. " não carregou em 5s. Fantasma não pode ser criado.")
+            Bridge.Notify("Falha ao carregar o modelo do preview (timeout).", "error")
+            return
+        end
+    end
+
+    local pos = GetEntityCoords(PlayerPedId())
+    if isPed then
+        ghostEntity = CreatePed(modelHash, pos.x, pos.y, pos.z, 0.0, false, false, 0, 0)
+    else
+        ghostEntity = CreateObject(modelHash, pos.x, pos.y, pos.z, false, false, false)
+    end
+
+    if ghostEntity and ghostEntity ~= 0 then
+        SetEntityAlpha(ghostEntity, 150, false)
+        SetEntityCollision(ghostEntity, false, false)
         if isPed then
-            ghostEntity = CreatePed(modelHash, pos.x, pos.y, pos.z, 0.0, false, false, 0, 0)
-        else
-            ghostEntity = CreateObject(modelHash, pos.x, pos.y, pos.z, false, false, false)
+            SetBlockingOfNonTemporaryEvents(ghostEntity, true)
         end
-        
-        if ghostEntity and ghostEntity ~= 0 then
-            SetEntityAlpha(ghostEntity, 150, false)
-            SetEntityCollision(ghostEntity, false, false)
-            if isPed then
-                SetBlockingOfNonTemporaryEvents(ghostEntity, true)
-            end
-            SetEntityInvincible(ghostEntity, true)
-        end
+        SetEntityInvincible(ghostEntity, true)
+    else
+        print("[illegal-system] EDITOR ERRO: CreatePed/CreateObject retornou handle inválido para " .. tostring(modelHash))
+        Bridge.Notify("Falha ao criar o preview (handle inválido).", "error")
     end
 end
 
@@ -508,6 +520,10 @@ local function finish(ok)
     if ghostEntity then
         DeleteEntity(ghostEntity)
         ghostEntity = nil
+    end
+
+    if placementModel then
+        SetModelAsNoLongerNeeded(GetHashKey(placementModel))
     end
 
     local resultData = nil
