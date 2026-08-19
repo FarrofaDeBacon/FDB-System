@@ -334,7 +334,7 @@ end)
 
 -- Loop para verificar a hora de fechar/abrir a loja e avisar o servidor
 CreateThread(function()
-    while not ActiveStores or #ActiveStores == 0 do Wait(1000) end
+    while #ActiveStores == 0 do Wait(1000) end
     print("[illegal-system] CLIENT: Loop de horário iniciado! Stores: " .. #ActiveStores)
     
     while true do
