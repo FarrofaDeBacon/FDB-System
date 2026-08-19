@@ -21,6 +21,20 @@
     // Select bindings
     let guardModel = 'A_M_M_ValTownfolk_01';
     let dogModel = 'A_C_DogHusky_01';
+    let spawnQuantity = 1;
+
+    function updateGhosts() {
+        fetch(`https://${GetParentResourceName()}/updateEditorMarkers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+            body: JSON.stringify({
+                store: currentCoords,
+                door: doorCoords,
+                register: registerCoords,
+                spawns: currentSpawns
+            })
+        });
+    }
 
     onMount(() => {
         window.addEventListener('message', (event) => {
@@ -32,6 +46,7 @@
             }
             if (data.action === "closeEditor") {
                 isEditorOpen = false;
+                fetch(`https://${GetParentResourceName()}/clearEditorGhosts`, { method: 'POST', body: '{}' });
             }
             if (data.action === "startPlacement") {
                 isEditorOpen = false;
@@ -53,10 +68,12 @@
                             type: data.spawnType,
                             model: data.model,
                             coords: data.result,
-                            heading: data.heading || 0.0
+                            heading: data.heading || 0.0,
+                            quantity: spawnQuantity
                         }];
                     }
                 }
+                updateGhosts();
             }
         });
     });
@@ -70,6 +87,7 @@
 
     function closeEditor() {
         isEditorOpen = false;
+        fetch(`https://${GetParentResourceName()}/clearEditorGhosts`, { method: 'POST', body: '{}' });
         post('closeEditor');
     }
 
@@ -87,6 +105,7 @@
         registerHeading = store.registerHeading || 0.0;
         currentSpawns = store.spawns || [];
         currentTab = 'editor';
+        updateGhosts();
     }
 
     function createStore() {
@@ -98,19 +117,21 @@
         registerHeading = 0.0;
         currentSpawns = [];
         currentTab = 'editor';
+        updateGhosts();
     }
 
     function removeSpawn(index) {
         currentSpawns = currentSpawns.filter((_, i) => i !== index);
+        updateGhosts();
     }
 
     function startSpawn(type) {
         let model = "";
         if (type === "guard") model = guardModel;
         if (type === "dog") model = dogModel;
-        if (type === "store") model = "p_cs_paperboy01x";
-        if (type === "door") model = "p_door01x";
-        if (type === "register") model = "p_cashregister01x";
+        if (type === "store") model = "A_M_M_ValTownfolk_01";
+        if (type === "door") model = "p_crate01x";
+        if (type === "register") model = "p_crate01x";
         
         isEditorOpen = false;
         isPlacementMode = true;
@@ -199,6 +220,10 @@
                             <option value="A_C_DogRufus_01">Rufus</option>
                         </select>
                     </div>
+                    <div style="flex: 0.5;">
+                        <label>Qtd.</label>
+                        <input type="number" bind:value={spawnQuantity} min="1" max="5" style="width: 100%; padding: 10px; background-color: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 4px; outline: none;">
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -231,7 +256,7 @@
 
                     {#each currentSpawns as spawn, index}
                         <div class="spawn-item">
-                            <span><b>{spawn.type.toUpperCase()}</b>: {spawn.model || 'N/A'}</span>
+                            <span><b>{spawn.type.toUpperCase()}</b> x{spawn.quantity || 1}: {spawn.model || 'N/A'}</span>
                             <button class="admin-button" style="width: auto; margin-top: 0; padding: 2px 10px; background: #e74c3c;" on:click={() => removeSpawn(index)}>X</button>
                         </div>
                     {/each}
@@ -246,12 +271,51 @@
 {/if}
 
 {#if isPlacementMode}
-<div id="placement-hud">
-    <h3>Modo de Posicionamento</h3>
-    <p>Use <b>WASD</b> para mover a câmera</p>
-    <p>Use <b>Mouse</b> para olhar</p>
-    <p>Role o <b>Scroll do Mouse</b> para girar o objeto</p>
-    <p>Pressione <b>Enter</b> para confirmar</p>
-    <p>Pressione <b>ESC</b> para cancelar</p>
+<div class="noclip-hud noclip-hud--visible" aria-hidden="false">
+    <div class="noclip-hud__inner">
+        <div class="noclip-hud__head">
+            <span class="noclip-hud__title" id="ph-title">Posicionamento</span>
+            <span class="noclip-hud__speed" id="ph-speed">Normal</span>
+        </div>
+        <div class="noclip-hud__accent"></div>
+        <ul class="noclip-hud__lines" id="ph-lines">
+            <li class="noclip-hud__row">
+                <div class="noclip-hud__keys">
+                    <span class="noclip-hud__kbd">W</span><span class="noclip-hud__kbd">A</span><span class="noclip-hud__kbd">S</span><span class="noclip-hud__kbd">D</span>
+                </div>
+                <div class="noclip-hud__desc">Mover marcador</div>
+            </li>
+            <li class="noclip-hud__row">
+                <div class="noclip-hud__keys">
+                    <span class="noclip-hud__kbd">Q</span><span class="noclip-hud__kbd">E</span>
+                </div>
+                <div class="noclip-hud__desc">Subir / Descer</div>
+            </li>
+            <li class="noclip-hud__row">
+                <div class="noclip-hud__keys">
+                    <span class="noclip-hud__kbd">LAlt</span>
+                </div>
+                <div class="noclip-hud__desc">Grudar no chão</div>
+            </li>
+            <li class="noclip-hud__row">
+                <div class="noclip-hud__keys">
+                    <span class="noclip-hud__kbd">Scroll</span>
+                </div>
+                <div class="noclip-hud__desc">Girar fantasma</div>
+            </li>
+            <li class="noclip-hud__row">
+                <div class="noclip-hud__keys">
+                    <span class="noclip-hud__kbd">Enter</span>
+                </div>
+                <div class="noclip-hud__desc">Confirmar</div>
+            </li>
+            <li class="noclip-hud__row">
+                <div class="noclip-hud__keys">
+                    <span class="noclip-hud__kbd">Backspace</span>
+                </div>
+                <div class="noclip-hud__desc">Cancelar</div>
+            </li>
+        </ul>
+    </div>
 </div>
 {/if}

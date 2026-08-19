@@ -66,3 +66,63 @@ RegisterCommand("editillegal", function()
     })
 end, false)
 
+
+local editorGhosts = {}
+
+local function ClearGhosts()
+    for _, entity in ipairs(editorGhosts) do
+        if DoesEntityExist(entity) then
+            DeleteEntity(entity)
+        end
+    end
+    editorGhosts = {}
+end
+
+RegisterNUICallback("clearEditorGhosts", function(data, cb)
+    ClearGhosts()
+    cb('ok')
+end)
+
+RegisterNUICallback("updateEditorMarkers", function(data, cb)
+    ClearGhosts()
+    
+    local function SpawnGhost(model, coords, heading)
+        local hash = GetHashKey(model)
+        if not IsModelInCdimage(hash) then return end
+        RequestModel(hash)
+        while not HasModelLoaded(hash) do Wait(0) end
+        
+        local isPed = string.find(model, "Townfolk") or string.find(model, "Dog") or string.find(model, "Bounty") or string.find(model, "A_M_") or string.find(model, "A_C_") or string.find(model, "G_M_") or string.find(model, "U_M_")
+        
+        local entity
+        if isPed then
+            entity = CreatePed(hash, coords.x, coords.y, coords.z - 0.95, heading, false, false, false, false)
+            SetEntityAlpha(entity, 150, false)
+            SetEntityCollision(entity, false, false)
+            FreezeEntityPosition(entity, true)
+            SetBlockingOfNonTemporaryEvents(entity, true)
+            TaskStandStill(entity, -1)
+        else
+            entity = CreateObjectNoOffset(hash, coords.x, coords.y, coords.z, false, false, false)
+            SetEntityAlpha(entity, 150, false)
+            SetEntityCollision(entity, false, false)
+            SetEntityHeading(entity, heading)
+            FreezeEntityPosition(entity, true)
+        end
+        
+        SetModelAsNoLongerNeeded(hash)
+        table.insert(editorGhosts, entity)
+    end
+    
+    if data.store then SpawnGhost("A_M_M_ValTownfolk_01", data.store, 0.0) end
+    if data.door then SpawnGhost("p_crate01x", data.door, 0.0) end
+    if data.register then SpawnGhost("p_crate01x", data.register, data.registerHeading or 0.0) end
+    
+    if data.spawns then
+        for _, sp in ipairs(data.spawns) do
+            SpawnGhost(sp.model, sp.coords, sp.heading or 0.0)
+        end
+    end
+    
+    cb('ok')
+end)
