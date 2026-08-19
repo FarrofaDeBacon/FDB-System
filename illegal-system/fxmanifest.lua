@@ -31,6 +31,7 @@ client_scripts {
     'bridge/fdb_bridge_client.lua',
     'client/core.lua',
     'client/stores.lua',
+    'client/freecam.lua',
     'client/editor.lua',
     'client/crimes/dev_tool.lua',
     'client/crimes/grave_robbery.lua',
