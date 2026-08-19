@@ -74,3 +74,58 @@ end)
 lib.callback.register('illegal-system:server:GetActiveStores', function(source)
     return ActiveStores
 end)
+
+lib.callback.register('illegal-system:server:SaveStore', function(source, data)
+    if not Bridge.HasPermission(source, 'illegal.admin') then
+        return false, "Sem permissão."
+    end
+    
+    local query = [[
+        INSERT INTO illegal_stores (name, coords_x, coords_y, coords_z, door_x, door_y, door_z, register_x, register_y, register_z, register_heading)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE 
+            coords_x=VALUES(coords_x), coords_y=VALUES(coords_y), coords_z=VALUES(coords_z),
+            door_x=VALUES(door_x), door_y=VALUES(door_y), door_z=VALUES(door_z),
+            register_x=VALUES(register_x), register_y=VALUES(register_y), register_z=VALUES(register_z), register_heading=VALUES(register_heading)
+    ]]
+    
+    MySQL.query.await(query, {
+        data.name,
+        data.coords.x, data.coords.y, data.coords.z,
+        data.doorCoords and data.doorCoords.x or nil, data.doorCoords and data.doorCoords.y or nil, data.doorCoords and data.doorCoords.z or nil,
+        data.registerCoords and data.registerCoords.x or nil, data.registerCoords and data.registerCoords.y or nil, data.registerCoords and data.registerCoords.z or nil,
+        data.registerHeading or 0.0
+    })
+    
+    LoadStoresFromDB()
+    TriggerClientEvent('illegal-system:client:UpdateActiveStores', -1, ActiveStores)
+    
+    return true, "Loja salva com sucesso."
+end)
+
+lib.callback.register('illegal-system:server:SaveStoreSpawns', function(source, storeName, spawns)
+    if not Bridge.HasPermission(source, 'illegal.admin') then
+        return false, "Sem permissão."
+    end
+    
+    local storeId = MySQL.scalar.await('SELECT id FROM illegal_stores WHERE name = ?', {storeName})
+    if not storeId then
+        return false, "Loja não encontrada no banco."
+    end
+    
+    MySQL.query.await('DELETE FROM illegal_store_risk_spawns WHERE store_id = ?', {storeId})
+    
+    if spawns and #spawns > 0 then
+        local insertParams = {}
+        for _, sp in ipairs(spawns) do
+            table.insert(insertParams, {storeId, sp.type, sp.coords.x, sp.coords.y, sp.coords.z, sp.heading or 0.0})
+        end
+        -- oxmysql permite bulk insert enviando uma tabela de tabelas para o placeholer ?
+        MySQL.insert.await('INSERT INTO illegal_store_risk_spawns (store_id, type, x, y, z, heading) VALUES ?', {insertParams})
+    end
+    
+    LoadStoresFromDB()
+    TriggerClientEvent('illegal-system:client:UpdateActiveStores', -1, ActiveStores)
+    
+    return true, "Spawns salvos com sucesso."
+end)
