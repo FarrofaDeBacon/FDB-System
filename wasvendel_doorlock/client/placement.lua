@@ -611,3 +611,17 @@ AddEventHandler("onResourceStop", function(res)
     if res ~= GetCurrentResourceName() then return end
     if isPlacing then finish(false) end
 end)
+
+exports("StartPlacement", function(data, callback)
+    if type(callback) ~= "function" then
+        return false
+    end
+    return DLPlacement.Start(data, callback)
+end)
+
+exports("CancelPlacement", function()
+    if DLPlacement and DLPlacement.Cancel then
+        return DLPlacement.Cancel()
+    end
+    return false
+end)
