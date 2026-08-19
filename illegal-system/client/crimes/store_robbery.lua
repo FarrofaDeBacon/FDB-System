@@ -31,23 +31,67 @@ AddEventHandler('fdb-shops:client:npcCreated', function(npc, shopData)
         }
     })
 end)
-CreateThread(function()
-    Wait(2000) -- Espera o fdb-shops iniciar caso reiniciem juntos
-    for _, store in ipairs(Config.Stores) do
+local registerZones = {}
+
+AddEventHandler('illegal-system:client:StoresLoaded', function(stores)
+    -- 1. Criação das zonas do ox_target para arrombamento
+    for _, zoneId in ipairs(registerZones) do
+        exports.ox_target:removeZone(zoneId)
+    end
+    registerZones = {}
+
+    for _, store in ipairs(stores) do
+        if store.registerCoords then
+            local zoneId = exports.ox_target:addBoxZone({
+                coords = store.registerCoords,
+                size = vec3(1.5, 1.5, 1.5),
+                rotation = 0,
+                debug = true,
+                options = {
+                    {
+                        name = 'burglary_register_'..store.name,
+                        icon = 'fa-solid fa-cash-register',
+                        label = 'Arrombar Registradora',
+                        canInteract = function()
+                            local hour = GetClockHours()
+                            if hour < store.openHour or hour >= store.closeHour then
+                                return true
+                            end
+                            return false
+                        end,
+                        onSelect = function()
+                            if GetResourceState('fdb-lockpick') ~= 'started' then
+                                Bridge.Notify("Você precisa de ferramentas para isso.", "error")
+                                return
+                            end
+                            TriggerServerEvent('illegal-system:server:startRegisterBurglary', store.name)
+                        end
+                    }
+                }
+            })
+            table.insert(registerZones, zoneId)
+        end
+    end
+
+    -- 2. Configura os NPCs (lojistas) para não fugirem
+    CreateThread(function()
+        Wait(2000) -- Espera o fdb-shops iniciar caso reiniciem juntos
         local handle, ped = FindFirstPed()
         local success
         repeat
-            if #(GetEntityCoords(ped) - store.coords) <= store.radius then
-                SetBlockingOfNonTemporaryEvents(ped, true)
-                SetPedFleeAttributes(ped, 0, false)
+            for _, s in ipairs(stores) do
+                if #(GetEntityCoords(ped) - s.coords) <= s.radius then
+                    SetBlockingOfNonTemporaryEvents(ped, true)
+                    SetPedFleeAttributes(ped, 0, false)
+                end
             end
             success, ped = FindNextPed(handle)
         until not success
         EndFindPed(handle)
-    end
+    end)
 end)
 local function GetStoreZone(pedCoords)
-    for _, store in ipairs(Config.Stores) do
+    for _, store in ipairs(ActiveStores) do
         local dist = #(pedCoords - store.coords)
         if dist <= store.radius then
             return store
@@ -119,49 +163,13 @@ RegisterNetEvent('illegal-system:client:storeRobberyFailed', function(reason)
     currentRobbedPed = 0
 end)
 
-CreateThread(function()
-
-    
-    -- 2. Método Noturno: Burglary
-    for _, store in ipairs(Config.Stores) do
-        -- Caixa Registradora
-        exports.ox_target:addBoxZone({
-            coords = store.registerCoords,
-            size = vec3(1.5, 1.5, 1.5),
-            rotation = 0,
-            debug = true,
-            options = {
-                {
-                    name = 'burglary_register_'..store.name,
-                    icon = 'fa-solid fa-cash-register',
-                    label = 'Arrombar Registradora',
-                    canInteract = function()
-                        local hour = GetClockHours()
-                        if hour < store.openHour or hour >= store.closeHour then
-                            return true
-                        end
-                        return false
-                    end,
-                    onSelect = function()
-                        -- Verifica se o fdb-lockpick está rodando
-                        if GetResourceState('fdb-lockpick') ~= 'started' then
-                            Bridge.Notify("Você precisa de ferramentas para isso.", "error")
-                            return
-                        end
-                        -- Inicia o processo no servidor (que vai rolar os riscos e retornar allowRegisterMinigame)
-                        TriggerServerEvent('illegal-system:server:startRegisterBurglary', store.name)
-                    end
-                }
-            }
-        })
-    end
-end)
+-- Criacao das zonas foi movida para o evento StoresLoaded acima
 
 RegisterNetEvent('illegal-system:client:allowRegisterMinigame', function(storeName, sessionToken)
     local ped = PlayerPedId()
 
     local storeConfig = nil
-    for _, s in ipairs(Config.Stores) do
+    for _, s in ipairs(ActiveStores) do
         if s.name == storeName then storeConfig = s break end
     end
 
@@ -203,7 +211,7 @@ RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, durat
 
     -- Busca a loja para pegar a coordenada da porta
     local storeConfig = nil
-    for _, s in ipairs(Config.Stores) do
+    for _, s in ipairs(ActiveStores) do
         if s.name == storeName then storeConfig = s break end
     end
     
@@ -254,7 +262,7 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
 
     -- Busca a loja para pegar a coordenada da porta
     local storeConfig = nil
-    for _, s in ipairs(Config.Stores) do
+    for _, s in ipairs(ActiveStores) do
         if s.name == storeName then storeConfig = s break end
     end
     
@@ -312,7 +320,7 @@ AddEventHandler('onResourceStart', function(resourceName)
         CleanupOrphanDogs()
     elseif resourceName == 'wasvendel_doorlock' then
         Wait(1000) -- Aguarda o wasvendel terminar de carregar os locks
-        for _, store in ipairs(Config.Stores) do
+        for _, store in ipairs(ActiveStores) do
             lastStoreState[store.name] = nil
         end
     end
@@ -326,14 +334,15 @@ end)
 
 -- Loop para verificar a hora de fechar/abrir a loja e avisar o servidor
 CreateThread(function()
-    print("[illegal-system] CLIENT: Loop de horário iniciado! Stores: " .. #Config.Stores)
+    while not ActiveStores or #ActiveStores == 0 do Wait(1000) end
+    print("[illegal-system] CLIENT: Loop de horário iniciado! Stores: " .. #ActiveStores)
     
     while true do
         Wait(5000)
         local hour = GetClockHours()
-        -- print("[illegal-system] CLIENT: Hora atual = " .. tostring(hour) .. " | Stores = " .. #Config.Stores)
+        -- print("[illegal-system] CLIENT: Hora atual = " .. tostring(hour) .. " | Stores = " .. #ActiveStores)
         
-        for _, store in ipairs(Config.Stores) do
+        for _, store in ipairs(ActiveStores) do
             -- Verifica se estamos no horário de funcionamento
             local isBusinessHour = false
             if store.openHour < store.closeHour then
