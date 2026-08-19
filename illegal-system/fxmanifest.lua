@@ -30,6 +30,7 @@ client_scripts {
     'bridge/rsg_bridge_client.lua',
     'bridge/fdb_bridge_client.lua',
     'client/core.lua',
+    'client/stores.lua',
     'client/crimes/dev_tool.lua',
     'client/crimes/grave_robbery.lua',
     'client/crimes/store_robbery.lua'
