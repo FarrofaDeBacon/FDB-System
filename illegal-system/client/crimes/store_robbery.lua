@@ -244,7 +244,9 @@ RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, durat
     print("[illegal-system] Modelo do cachorro carregado com sucesso, criando ped...")
 
     local dogPed = CreatePed(dogModel, spawnCoords.x, spawnCoords.y, spawnCoords.z, spawnHeading, true, true, false, false)
+    Citizen.InvokeNative(0x283978A15512B2FE, dogPed, true) -- Aplica outfit para não ficar invisível
     SetEntityAsMissionEntity(dogPed, true, true)
+    PlaceEntityOnGroundProperly(dogPed)
     
     local finalCoords = GetEntityCoords(dogPed)
     print(("[illegal-system] Cachorro criado em: %.2f, %.2f, %.2f"):format(finalCoords.x, finalCoords.y, finalCoords.z))
