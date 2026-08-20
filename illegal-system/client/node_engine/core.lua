@@ -60,8 +60,8 @@ RegisterCommand('heistdebugc', function()
     print("currentNodeToken: " .. tostring(currentNodeToken))
 end, false)
 
-RegisterCommand('startheist', function()
-    local coords = GetEntityCoords(PlayerPedId())
-    print("[NodeEngine Debug] Enviando pedido de StartHeist para o servidor com coords: " .. tostring(coords))
-    TriggerServerEvent("node_engine:server:ForceStartHeist", coords)
+RegisterCommand('startheist', function(source, args)
+    local heistId = args[1] or 'test_heist_isolated'
+    print("[NodeEngine Debug] Enviando pedido de StartHeist para o servidor. ID: " .. tostring(heistId))
+    TriggerServerEvent("node_engine:server:ForceStartHeist", heistId)
 end, false)

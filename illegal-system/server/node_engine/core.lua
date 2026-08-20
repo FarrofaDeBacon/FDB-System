@@ -1,6 +1,29 @@
 NodeEngine = {}
 NodeEngine.Types = {}
+NodeEngine.RegisteredHeists = {}
 local activeSessions = {}
+
+-- Carrega os assaltos do banco de dados na inicialização
+CreateThread(function()
+    -- Dá um tempinho para o oxmysql estar 100% pronto
+    Wait(1000)
+    MySQL.Async.fetchAll('SELECT * FROM illegal_heists WHERE active = 1', {}, function(results)
+        if not results then return end
+        
+        local count = 0
+        for _, row in ipairs(results) do
+            local success, parsedGraph = pcall(json.decode, row.graph)
+            if success and parsedGraph then
+                -- Opcional: Se for vetor no JSON, precisamos garantir que as funções vector3 funcionem, mas o ox_target aceita table com x,y,z
+                NodeEngine.RegisteredHeists[row.id] = parsedGraph
+                count = count + 1
+            else
+                print("[NodeEngine] ERRO: Falha ao decodificar JSON do assalto ID: " .. tostring(row.id))
+            end
+        end
+        print("[NodeEngine] " .. count .. " assaltos carregados do banco de dados.")
+    end)
+end)
 
 -- Utility to generate unique tokens
 local function GenerateToken()
@@ -118,42 +141,22 @@ RegisterCommand('heistdebug', function(source)
     end
 end, false)
 
-RegisterNetEvent('node_engine:server:ForceStartHeist', function(coords)
+RegisterNetEvent('node_engine:server:ForceStartHeist', function(heistId)
     local source = source
-    print("[NodeEngine Debug] Evento ForceStartHeist invocado por: " .. tostring(source))
-    if not coords then return end
+    print("[NodeEngine Debug] Evento ForceStartHeist invocado por: " .. tostring(source) .. " para o assalto: " .. tostring(heistId))
     
-    print("[NodeEngine Debug] Coordenadas recebidas do client: " .. tostring(coords))
+    if not heistId then 
+        print("[NodeEngine Debug] ID de assalto não fornecido.")
+        return 
+    end
     
-    local dynamicGraph = {
-        nodes = {
-            ["node_start"] = { type = "start", data = {} },
-            ["node_door"] = { 
-                type = "open_door", 
-                data = { 
-                    coords = coords, 
-                    minTime = 5,
-                    prompt = "Arrombar Porta"
-                } 
-            },
-            ["node_register"] = { 
-                type = "crack_register", 
-                data = { 
-                    coords = coords + vector3(2.0, 0.0, 0.0), -- 2 metros pro lado
-                    heading = 101.4,
-                    minTime = 3,
-                    reward = "money",
-                    prompt = "Roubar Caixa"
-                } 
-            }
-        },
-        edges = {
-            { source = "node_start", target = "node_door" },
-            { source = "node_door", target = "node_register" }
-        }
-    }
+    local graph = NodeEngine.RegisteredHeists[heistId]
+    if not graph then
+        print("[NodeEngine Debug] Assalto ID '" .. tostring(heistId) .. "' não encontrado em NodeEngine.RegisteredHeists.")
+        return
+    end
 
-    NodeEngine.StartHeist(source, "Dynamic Test Heist", dynamicGraph)
+    NodeEngine.StartHeist(source, heistId, graph)
 end)
 
 -- Tipos de Nó
