@@ -113,6 +113,17 @@ body {
     display: block;
 }
 
+.list-container {
+    overflow-y: auto;
+}
+.list-container::-webkit-scrollbar {
+    width: 6px;
+}
+.list-container::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 3px;
+}
+
 .form-group {
     margin-bottom: 15px;
 }
