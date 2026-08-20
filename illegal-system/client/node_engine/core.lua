@@ -4,6 +4,7 @@ local currentNodeToken = nil
 local currentZoneId = nil
 
 RegisterNetEvent('node_engine:client:StartNodeAction', function(type, data, token)
+    print("[NodeEngine Debug] Recebido StartNodeAction. Tipo: " .. tostring(type))
     currentNodeType = type
     currentNodeData = data
     currentNodeToken = token
@@ -14,6 +15,7 @@ RegisterNetEvent('node_engine:client:StartNodeAction', function(type, data, toke
     end
 
     if type == "open_door" or type == "crack_register" then
+        print("[NodeEngine Debug] Criando ox_target zone para: " .. type)
         currentZoneId = exports.ox_target:addSphereZone({
             coords = data.coords,
             radius = 1.5,

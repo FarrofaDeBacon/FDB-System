@@ -41,6 +41,7 @@ local function AdvanceNode(playerId, session, nextNodeId)
 end
 
 function NodeEngine.StartHeist(playerId, heistName, graph)
+    print("[NodeEngine Debug] StartHeist invocado para jogador: " .. tostring(playerId))
     -- Find start node
     local startNodeId = nil
     for id, node in pairs(graph.nodes) do
@@ -55,6 +56,7 @@ function NodeEngine.StartHeist(playerId, heistName, graph)
         return
     end
 
+    print("[NodeEngine Debug] Nó 'start' encontrado: " .. startNodeId)
     activeSessions[playerId] = {
         heistName = heistName,
         graph = graph,
@@ -117,10 +119,12 @@ RegisterCommand('heistdebug', function(source)
 end, false)
 
 RegisterCommand('startheist', function(source)
+    print("[NodeEngine Debug] Comando /startheist invocado por: " .. tostring(source))
     if source == 0 then return end
     
     local ped = GetPlayerPed(source)
     local coords = GetEntityCoords(ped)
+    print("[NodeEngine Debug] Coordenadas capturadas: " .. tostring(coords))
     
     local dynamicGraph = {
         nodes = {
@@ -171,6 +175,7 @@ NodeEngine.RegisterNodeType("start", {
 NodeEngine.RegisterNodeType("open_door", {
     OnEnter = function(playerId, session, nodeData, nodeToken)
         TriggerClientEvent('node_engine:client:StartNodeAction', playerId, "open_door", nodeData, nodeToken)
+        print("[NodeEngine Debug] Enviou StartNodeAction para client: open_door")
     end,
     OnClientReport = function(playerId, session, nodeData, reportData)
         local timeElapsed = os.time() - session.nodeStartTime
