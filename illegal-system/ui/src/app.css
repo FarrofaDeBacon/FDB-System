@@ -14,9 +14,10 @@ body {
 #admin-menu {
     position: absolute;
     top: 50%;
-    left: 10%;
+    right: 5%;
     transform: translateY(-50%);
-    width: 400px;
+    width: auto;
+    min-width: 450px;
     background-color: #111111;
     color: #e0e0e0;
     border-radius: 8px;

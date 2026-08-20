@@ -126,7 +126,9 @@ RegisterNetEvent('illegal-system:client:startStoreRobbery', function(storeName, 
         SetEntityCanBeDamaged(ped, true)
         SetEntityInvincible(ped, false)
         
-        GiveWeaponToPed_2(ped, 0x1D073A89, 50, true, true, 1, false, 0.5, 1.0, 1.0, true, 0, 0)
+        Wait(200)
+        GiveWeaponToPed(ped, 0x1D073A89, 50, true, true, 0, false, 0.5, 1.0, 1.0, true, 0, 0)
+        SetCurrentPedWeapon(ped, 0x1D073A89, true)
         SetPedCombatMovement(ped, 0) -- 0 = Stationary (Fica parado atirando)
         TaskCombatPed(ped, PlayerPedId(), 0, 16)
         isRobbingStore = false
@@ -322,7 +324,9 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
     SetPedCombatAttributes(armedPed, 5, true)  -- BF_AlwaysFight (variante)
     SetBlockingOfNonTemporaryEvents(armedPed, true)
     
-    GiveWeaponToPed_2(armedPed, GetHashKey("WEAPON_REVOLVER_CATTLEMAN"), 50, true, true, 1, false, 0.5, 1.0, 1.0, true, 0, 0)
+    Wait(200)
+    GiveWeaponToPed(armedPed, GetHashKey("WEAPON_REVOLVER_CATTLEMAN"), 50, true, true, 0, false, 0.5, 1.0, 1.0, true, 0, 0)
+    SetCurrentPedWeapon(armedPed, GetHashKey("WEAPON_REVOLVER_CATTLEMAN"), true)
     
     if reaction == 'combat' then
         TaskCombatPed(armedPed, playerPed, 0, 16)
