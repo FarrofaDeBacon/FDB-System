@@ -407,3 +407,15 @@ CreateThread(function()
         end
     end
 end)
+
+RegisterNetEvent('illegal-system:client:showRiskBar', function(config)
+    exports['fdb-libs']:ShowRiskBar(config)
+end)
+
+RegisterNetEvent('illegal-system:client:updateRiskBar', function(value)
+    exports['fdb-libs']:UpdateRiskBar(value)
+end)
+
+RegisterNetEvent('illegal-system:client:hideRiskBar', function()
+    exports['fdb-libs']:HideRiskBar()
+end)
