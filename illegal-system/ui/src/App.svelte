@@ -20,7 +20,9 @@
     
     // Select bindings
     let guardModel = 'A_M_M_ValTownfolk_01';
+    let guardReaction = 'combat';
     let dogModel = 'A_C_DogHusky_01';
+    let dogReaction = 'combat';
     let guardQuantity = 1;
     let dogQuantity = 1;
 
@@ -64,12 +66,14 @@
                     } else if (data.spawnType === "register") {
                         registerCoords = data.result;
                         registerHeading = data.heading || 0.0;
-                    } else {
+                    } else if (data.spawnType === "guard" || data.spawnType === "dog") {
                         currentSpawns = [...currentSpawns, {
+                            id: data.spawnType + '_' + Date.now(),
                             type: data.spawnType,
                             model: data.model,
                             coords: data.result,
                             heading: data.heading || 0.0,
+                            reaction: data.spawnType === "guard" ? guardReaction : dogReaction,
                             quantity: data.spawnType === "guard" ? guardQuantity : (data.spawnType === "dog" ? dogQuantity : 1)
                         }];
                     }
@@ -121,11 +125,6 @@
         updateGhosts();
     }
 
-    function removeSpawn(index) {
-        currentSpawns = currentSpawns.filter((_, i) => i !== index);
-        updateGhosts();
-    }
-
     function startSpawn(type) {
         let model = "";
         if (type === "guard") model = guardModel;
@@ -171,11 +170,7 @@
     </div>
 
     <div class="admin-tabs">
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
         <div class="tab-label" class:active={currentTab === 'stores'} on:click={() => currentTab = 'stores'}>Lojas</div>
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
         <div class="tab-label" class:active={currentTab === 'editor'} on:click={() => currentTab = 'editor'}>Configurar</div>
     </div>
 
@@ -212,6 +207,14 @@
                             <option value="U_M_M_BHT_BANDITOMINE">Bandito Mine</option>
                         </select>
                     </div>
+                    <div style="flex: 0.8;">
+                        <label>Reação</label>
+                        <select bind:value={guardReaction} style="width: 100%; padding: 10px; background-color: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 4px; outline: none;">
+                            <option value="combat">Atacar</option>
+                            <option value="flee">Fugir</option>
+                            <option value="surrender">Render-se</option>
+                        </select>
+                    </div>
                     <div style="flex: 0.3;">
                         <label>Qtd.</label>
                         <input type="number" bind:value={guardQuantity} min="1" max="5" style="width: 100%; padding: 10px; background-color: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 4px; outline: none;">
@@ -229,6 +232,13 @@
                             <option value="A_C_DogCollie_01">Collie</option>
                             <option value="A_C_DogHound_01">Hound</option>
                             <option value="A_C_DogRufus_01">Rufus</option>
+                        </select>
+                    </div>
+                    <div style="flex: 0.8;">
+                        <label>Reação</label>
+                        <select bind:value={dogReaction} style="width: 100%; padding: 10px; background-color: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 4px; outline: none;">
+                            <option value="combat">Atacar</option>
+                            <option value="flee">Fugir</option>
                         </select>
                     </div>
                     <div style="flex: 0.3;">
@@ -260,10 +270,13 @@
                     <div class="spawn-item"><span><b>CAIXA</b> definida</span></div>
                     {/if}
 
-                    {#each currentSpawns as spawn, index}
+                    {#each currentSpawns as spawn}
                         <div class="spawn-item">
-                            <span><b>{spawn.type.toUpperCase()}</b> x{spawn.quantity || 1}: {spawn.model || 'N/A'}</span>
-                            <button class="admin-button" style="width: auto; margin-top: 0; padding: 2px 10px; background: #e74c3c;" on:click={() => removeSpawn(index)}>X</button>
+                            <span>
+                                <b>{spawn.type === 'guard' ? 'GUARD' : 'DOG'}</b> x{spawn.quantity}: {spawn.model}
+                                <br><small>Reação: {spawn.reaction}</small>
+                            </span>
+                            <button class="admin-button" style="background-color: #e74c3c; width: auto; padding: 5px 10px; margin: 0;" on:click={() => currentSpawns = currentSpawns.filter(s => s.id !== spawn.id)}>X</button>
                         </div>
                     {/each}
                 </div>
@@ -306,6 +319,12 @@
             <li class="noclip-hud__row">
                 <div class="noclip-hud__keys">
                     <span class="noclip-hud__kbd">Scroll</span>
+                </div>
+                <div class="noclip-hud__desc">Afastar/Aproximar</div>
+            </li>
+            <li class="noclip-hud__row">
+                <div class="noclip-hud__keys">
+                    <span class="noclip-hud__kbd">←</span> <span class="noclip-hud__kbd">→</span>
                 </div>
                 <div class="noclip-hud__desc">Girar fantasma</div>
             </li>

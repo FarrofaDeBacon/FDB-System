@@ -221,9 +221,11 @@ RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, durat
     spawnCoords = vec3(spawnCoords.x, spawnCoords.y, coords.z)
     local spawnHeading = 0.0
 
+    local reaction = 'combat'
     if storeConfig and storeConfig.riskSpawns and storeConfig.riskSpawns.dog then
         spawnCoords = storeConfig.riskSpawns.dog.spawnCoords
         spawnHeading = storeConfig.riskSpawns.dog.spawnHeading or 0.0
+        reaction = storeConfig.riskSpawns.dog.reaction or 'combat'
     end
 
     local dogModel = GetHashKey("A_C_DogCollie_01")
@@ -245,8 +247,14 @@ RegisterNetEvent('illegal-system:client:spawnDogRisk', function(storeName, durat
     local finalCoords = GetEntityCoords(dogPed)
     print(("[illegal-system] Cachorro criado em: %.2f, %.2f, %.2f"):format(finalCoords.x, finalCoords.y, finalCoords.z))
 
-    -- Cachorro agora apenas late para alertar/assustar, não ataca
-    TaskTurnPedToFaceEntity(dogPed, playerPed, -1)
+    if reaction == 'combat' then
+        TaskCombatPed(dogPed, playerPed, 0, 16)
+    elseif reaction == 'flee' then
+        TaskSmartFleePed(dogPed, playerPed, 1000.0, -1, 0, 0)
+    else
+        TaskTurnPedToFaceEntity(dogPed, playerPed, -1)
+    end
+    
     CreateThread(function()
         local endBark = GetGameTimer() + (duration * 1000)
         while GetGameTimer() < endBark and DoesEntityExist(dogPed) do
@@ -278,11 +286,13 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
     spawnCoords = vec3(spawnCoords.x, spawnCoords.y, coords.z)
     local spawnHeading = 0.0
 
+    local reaction = 'combat'
     if storeConfig and storeConfig.riskSpawns and storeConfig.riskSpawns.guards and #storeConfig.riskSpawns.guards > 0 then
         local idx = math.random(1, #storeConfig.riskSpawns.guards)
         local guardData = storeConfig.riskSpawns.guards[idx]
         spawnCoords = guardData.spawnCoords
         spawnHeading = guardData.spawnHeading or 0.0
+        reaction = guardData.reaction or 'combat'
     end
 
     local npcModel = GetHashKey("A_M_M_ValTownfolk_01")
@@ -313,7 +323,16 @@ RegisterNetEvent('illegal-system:client:armedNpcRisk', function(storeName, outco
     SetBlockingOfNonTemporaryEvents(armedPed, true)
     
     GiveWeaponToPed_2(armedPed, GetHashKey("WEAPON_REVOLVER_CATTLEMAN"), 50, true, true, 1, false, 0.5, 1.0, 1.0, true, 0, 0)
-    TaskCombatPed(armedPed, playerPed, 0, 16)
+    
+    if reaction == 'combat' then
+        TaskCombatPed(armedPed, playerPed, 0, 16)
+    elseif reaction == 'flee' then
+        TaskSmartFleePed(armedPed, playerPed, 1000.0, -1, 0, 0)
+    elseif reaction == 'surrender' then
+        TaskHandsUp(armedPed, 10000, playerPed, -1, true)
+    else
+        TaskCombatPed(armedPed, playerPed, 0, 16)
+    end
 
     Bridge.Notify("Um morador te flagrou! Cuidado!", "error")
 

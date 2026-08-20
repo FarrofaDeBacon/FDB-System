@@ -473,9 +473,11 @@ local function drawPointMarker()
         255, 225, 138, 120,
         false, false, 2, false, nil, nil, false)
 
-    -- Rotacionar fantasma (Scroll)
-    if IsDisabledControlJustPressed(0, 0x295175BF) then ghostHeading = ghostHeading + 15.0 end
-    if IsDisabledControlJustPressed(0, 0x3698B813) then ghostHeading = ghostHeading - 15.0 end
+    -- Rotacionar fantasma (Setas)
+    if IsDisabledControlPressed(0, 0xA65EBAB4) then ghostHeading = ghostHeading + 2.0 end
+    if IsDisabledControlPressed(0, 0xDEB34313) then ghostHeading = ghostHeading - 2.0 end
+    if IsDisabledControlJustPressed(0, 0xA65EBAB4) then ghostHeading = ghostHeading + 2.0 end
+    if IsDisabledControlJustPressed(0, 0xDEB34313) then ghostHeading = ghostHeading - 2.0 end
 
     if ghostEntity then
         SetEntityCoordsNoOffset(ghostEntity, mx, my, mz, false, false, false)
@@ -510,6 +512,14 @@ local function handlePointInput()
     local hStep = (tonumber(p.heightStep) or 1.2) * dt * mult
     if bindHeld(c.heightUp) then placementPosZ = placementPosZ + hStep end
     if bindHeld(c.heightDown) then placementPosZ = placementPosZ - hStep end
+
+    -- Zoom (Scroll)
+    if IsDisabledControlJustPressed(0, 0xCC1075A7) or IsDisabledControlJustPressed(0, 0x07CE1E61) then
+        placementCamDistance = math.max(1.0, placementCamDistance - 0.5)
+    end
+    if IsDisabledControlJustPressed(0, 0x28CEB6DC) or IsDisabledControlJustPressed(0, 0xFBD7B3E6) then
+        placementCamDistance = math.min(15.0, placementCamDistance + 0.5)
+    end
 end
 
 local function finish(ok)

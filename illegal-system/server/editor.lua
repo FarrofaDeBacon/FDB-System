@@ -45,12 +45,14 @@ local function LoadStoresFromDB()
             if spawn.type == 'dog' then
                 store.riskSpawns.dog = {
                     spawnCoords = vec3(spawn.x, spawn.y, spawn.z),
-                    spawnHeading = spawn.heading or 0.0
+                    spawnHeading = spawn.heading or 0.0,
+                    reaction = spawn.reaction or 'combat'
                 }
             elseif spawn.type == 'guard' then
                 table.insert(store.riskSpawns.guards, {
                     spawnCoords = vec3(spawn.x, spawn.y, spawn.z),
-                    spawnHeading = spawn.heading or 0.0
+                    spawnHeading = spawn.heading or 0.0,
+                    reaction = spawn.reaction or 'combat'
                 })
             end
         end
@@ -68,6 +70,12 @@ end
 
 AddEventHandler('onResourceStart', function(resourceName)
     if (GetCurrentResourceName() ~= resourceName) then return end
+    
+    -- Migração automática de DB para suportar a coluna reaction
+    pcall(function()
+        MySQL.query.await("ALTER TABLE illegal_store_risk_spawns ADD COLUMN IF NOT EXISTS reaction VARCHAR(50) DEFAULT 'combat'")
+    end)
+    
     LoadStoresFromDB()
 end)
 
@@ -118,10 +126,10 @@ lib.callback.register('illegal-system:server:SaveStoreSpawns', function(source, 
     if spawns and #spawns > 0 then
         local insertParams = {}
         for _, sp in ipairs(spawns) do
-            table.insert(insertParams, {storeId, sp.type, sp.coords.x, sp.coords.y, sp.coords.z, sp.heading or 0.0})
+            table.insert(insertParams, {storeId, sp.type, sp.coords.x, sp.coords.y, sp.coords.z, sp.heading or 0.0, sp.reaction or 'combat'})
         end
         -- oxmysql permite bulk insert enviando uma tabela de tabelas para o placeholer ?
-        MySQL.insert.await('INSERT INTO illegal_store_risk_spawns (store_id, type, x, y, z, heading) VALUES ?', {insertParams})
+        MySQL.insert.await('INSERT INTO illegal_store_risk_spawns (store_id, type, x, y, z, heading, reaction) VALUES ?', {insertParams})
     end
     
     LoadStoresFromDB()
