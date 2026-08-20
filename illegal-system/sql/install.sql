@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS `illegal_store_risk_spawns` (
     `store_id` INT NOT NULL,
     `type` ENUM('dog', 'guard') NOT NULL,
     `x` FLOAT NOT NULL, `y` FLOAT NOT NULL, `z` FLOAT NOT NULL, `heading` FLOAT,
+    `reaction` VARCHAR(50) DEFAULT 'combat',
     FOREIGN KEY (`store_id`) REFERENCES `illegal_stores`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
