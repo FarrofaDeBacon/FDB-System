@@ -51,8 +51,9 @@ RegisterNetEvent('node_engine:client:StartNodeAction', function(type, data, toke
                         -- Simula a execução do minigame/ação (aguardando o tempo mínimo pro servidor validar)
                         local minTime = (data.minTime or 1) * 1000
                         
-                        exports['fdb-libs']:DrawText3D(data.coords.x, data.coords.y, data.coords.z, "Executando...", 255, 255, 255)
+                        lib.showTextUI("Executando...")
                         Wait(minTime + 500) -- Aguarda o tempo mais uma margem de segurança
+                        lib.hideTextUI()
                         
                         TriggerServerEvent('node_engine:server:ReportNodeCompletion', currentNodeToken, { success = true })
                     end

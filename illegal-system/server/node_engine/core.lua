@@ -123,7 +123,7 @@ local hardcodedGraph = {
         ["node_door"] = { 
             type = "open_door", 
             data = { 
-                coords = vec3(-322.25, 804.14, 117.92), 
+                coords = vec3(-300.0, 800.0, 118.0), -- Coordenadas isoladas num campo aberto perto de Valentine
                 minTime = 5,
                 prompt = "Arrombar Porta"
             } 
@@ -131,7 +131,7 @@ local hardcodedGraph = {
         ["node_register"] = { 
             type = "crack_register", 
             data = { 
-                coords = vec3(-325.26, 804.81, 117.96), 
+                coords = vec3(-298.0, 800.0, 118.0), -- 2 metros de distância do node_door
                 heading = 101.4,
                 minTime = 3,
                 reward = "money",
