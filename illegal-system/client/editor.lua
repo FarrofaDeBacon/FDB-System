@@ -68,6 +68,37 @@ end, false)
 
 
 local editorGhosts = {}
+local editorMarkers = {}
+
+local function Draw3DText(x, y, z, text)
+    local onScreen, _x, _y = GetScreenCoordFromWorldCoord(x, y, z)
+    if onScreen then
+        SetTextScale(0.35, 0.35)
+        SetTextFontForCurrentCommand(1)
+        SetTextColor(255, 255, 255, 215)
+        SetTextCentre(1)
+        DisplayText(CreateVarString(10, "LITERAL_STRING", text), _x, _y)
+    end
+end
+
+CreateThread(function()
+    while true do
+        Wait(0)
+        if isEditorOpen and not isPlacing then
+            if editorMarkers.store then
+                Draw3DText(editorMarkers.store.x, editorMarkers.store.y, editorMarkers.store.z + 1.0, "📍 LOJA")
+            end
+            if editorMarkers.door then
+                Draw3DText(editorMarkers.door.x, editorMarkers.door.y, editorMarkers.door.z + 1.0, "🚪 PORTA")
+            end
+            if editorMarkers.register then
+                Draw3DText(editorMarkers.register.x, editorMarkers.register.y, editorMarkers.register.z + 1.0, "💰 REGISTRADORA")
+            end
+        else
+            Wait(500)
+        end
+    end
+end)
 
 local function ClearGhosts()
     for _, entity in ipairs(editorGhosts) do
@@ -115,9 +146,9 @@ RegisterNUICallback("updateEditorMarkers", function(data, cb)
         table.insert(editorGhosts, entity)
     end
     
-    if data.store then SpawnGhost("A_M_M_ValTownfolk_01", data.store, 0.0) end
-    if data.door then SpawnGhost("p_crate01x", data.door, 0.0) end
-    if data.register then SpawnGhost("p_crate01x", data.register, data.registerHeading or 0.0) end
+    editorMarkers.store = data.store
+    editorMarkers.door = data.door
+    editorMarkers.register = data.register
     
     if data.spawns then
         for _, sp in ipairs(data.spawns) do
