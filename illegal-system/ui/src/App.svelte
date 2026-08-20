@@ -259,12 +259,18 @@
                     {/if}
 
                     {#each currentSpawns as spawn}
-                        <div class="spawn-item">
+                        <div class="spawn-item" style="display: flex; align-items: center; justify-content: space-between;">
                             <span>
                                 <b>{spawn.type === 'guard' ? 'GUARD' : 'DOG'}</b>: {spawn.model}
-                                <br><small>Reação: {spawn.reaction}</small>
                             </span>
-                            <button class="admin-button" style="background-color: #e74c3c; width: auto; padding: 5px 10px; margin: 0;" on:click={() => currentSpawns = currentSpawns.filter(s => s.id !== spawn.id)}>X</button>
+                            <div style="display: flex; gap: 5px;">
+                                <select bind:value={spawn.reaction} on:change={() => currentSpawns = [...currentSpawns]} style="padding: 5px; background-color: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 4px; outline: none;">
+                                    <option value="combat">Atacar</option>
+                                    <option value="flee">Fugir</option>
+                                    {#if spawn.type === 'guard'}<option value="surrender">Render-se</option>{/if}
+                                </select>
+                                <button class="admin-button" style="background-color: #e74c3c; width: auto; padding: 5px 10px; margin: 0;" on:click={() => { currentSpawns = currentSpawns.filter(s => s.id !== spawn.id); updateGhosts(); }}>X</button>
+                            </div>
                         </div>
                     {/each}
                 </div>
