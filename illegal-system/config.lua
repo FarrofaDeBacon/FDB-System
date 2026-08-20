@@ -94,9 +94,9 @@ Config.Crimes = {
 
             dog = {
                 enabled = true,
-                checkInterval = 5000,        -- 5s entre checagens para teste rápido
-                baseChance = 100,            -- 100% de chance no 1º tick para garantir o teste do cachorro
-                chanceIncreasePerTick = 10,  -- soma por tick que o jogador continua dentro
+                checkInterval = 5000,        -- 5s entre checagens
+                baseChance = 5,              -- Começa em 5%
+                chanceIncreasePerTick = 10,  -- Soma por tick que o jogador continua dentro
                 maxChance = 100,             -- teto de chance
                 notifyOnBark = true,
                 barkMessage = "Um cachorro começou a latir por perto!",
