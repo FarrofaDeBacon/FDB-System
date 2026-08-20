@@ -480,7 +480,11 @@ local function drawPointMarker()
     if IsDisabledControlJustPressed(0, 0xDEB34313) then ghostHeading = ghostHeading - 2.0 end
 
     if ghostEntity then
-        SetEntityCoordsNoOffset(ghostEntity, mx, my, mz, false, false, false)
+        local zOffset = 0.0
+        if IsEntityAPed(ghostEntity) then
+            zOffset = 1.0
+        end
+        SetEntityCoordsNoOffset(ghostEntity, mx, my, mz + zOffset, false, false, false)
         SetEntityHeading(ghostEntity, ghostHeading)
     end
 end
