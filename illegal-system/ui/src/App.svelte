@@ -155,7 +155,6 @@
             spawns: currentSpawns
         }).then(() => {
             currentTab = 'stores';
-            post('refreshStores'); // if you have a refresh endpoint or just close
             closeEditor();
         });
     }
