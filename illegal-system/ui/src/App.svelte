@@ -21,7 +21,8 @@
     // Select bindings
     let guardModel = 'A_M_M_ValTownfolk_01';
     let dogModel = 'A_C_DogHusky_01';
-    let spawnQuantity = 1;
+    let guardQuantity = 1;
+    let dogQuantity = 1;
 
     function updateGhosts() {
         fetch(`https://${GetParentResourceName()}/updateEditorMarkers`, {
@@ -69,7 +70,7 @@
                             model: data.model,
                             coords: data.result,
                             heading: data.heading || 0.0,
-                            quantity: spawnQuantity
+                            quantity: data.spawnType === "guard" ? guardQuantity : (data.spawnType === "dog" ? dogQuantity : 1)
                         }];
                     }
                 }
@@ -211,6 +212,16 @@
                             <option value="U_M_M_BHT_BANDITOMINE">Bandito Mine</option>
                         </select>
                     </div>
+                    <div style="flex: 0.3;">
+                        <label>Qtd.</label>
+                        <input type="number" bind:value={guardQuantity} min="1" max="5" style="width: 100%; padding: 10px; background-color: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 4px; outline: none;">
+                    </div>
+                    <div style="display: flex; align-items: flex-end;">
+                        <button class="admin-button spawn-btn" style="margin: 0; height: 41px; padding: 0 15px;" on:click={() => startSpawn('guard')}>👮 Add</button>
+                    </div>
+                </div>
+
+                <div class="form-group" style="display: flex; gap: 10px;">
                     <div style="flex: 1;">
                         <label>Modelo do Cachorro</label>
                         <select bind:value={dogModel} style="width: 100%; padding: 10px; background-color: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 4px; outline: none;">
@@ -220,9 +231,12 @@
                             <option value="A_C_DogRufus_01">Rufus</option>
                         </select>
                     </div>
-                    <div style="flex: 0.5;">
+                    <div style="flex: 0.3;">
                         <label>Qtd.</label>
-                        <input type="number" bind:value={spawnQuantity} min="1" max="5" style="width: 100%; padding: 10px; background-color: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 4px; outline: none;">
+                        <input type="number" bind:value={dogQuantity} min="1" max="5" style="width: 100%; padding: 10px; background-color: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 4px; outline: none;">
+                    </div>
+                    <div style="display: flex; align-items: flex-end;">
+                        <button class="admin-button spawn-btn" style="margin: 0; height: 41px; padding: 0 15px;" on:click={() => startSpawn('dog')}>🐕 Add</button>
                     </div>
                 </div>
 
@@ -232,14 +246,6 @@
                         <button class="admin-button spawn-btn" on:click={() => startSpawn('store')}>📍 Centro da Loja</button>
                         <button class="admin-button spawn-btn" on:click={() => startSpawn('door')}>🚪 Porta Principal</button>
                         <button class="admin-button spawn-btn" on:click={() => startSpawn('register')}>💰 Registradora</button>
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-top: 10px;">
-                    <label>Pontos de Risco (Spawns Dinâmicos)</label>
-                    <div class="spawn-buttons">
-                        <button class="admin-button spawn-btn" on:click={() => startSpawn('guard')}>👮 Add Guarda</button>
-                        <button class="admin-button spawn-btn" on:click={() => startSpawn('dog')}>🐕 Add Cachorro</button>
                     </div>
                 </div>
 

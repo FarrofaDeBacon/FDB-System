@@ -97,6 +97,7 @@ RegisterNUICallback("updateEditorMarkers", function(data, cb)
         local entity
         if isPed then
             entity = CreatePed(hash, coords.x, coords.y, coords.z - 0.95, heading, false, false, false, false)
+            Citizen.InvokeNative(0x283978A15512B2FE, entity, true)
             SetEntityAlpha(entity, 150, false)
             SetEntityCollision(entity, false, false)
             FreezeEntityPosition(entity, true)

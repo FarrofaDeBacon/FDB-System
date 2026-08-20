@@ -28,8 +28,8 @@ local Config = {
         moveBack = { key = 0xD27782E3 }, -- S
         moveRight = { key = 0xB4E465B4 }, -- D
         moveLeft = { key = 0x7065027D }, -- A
-        heightUp = { key = 0x27D1C284 }, -- Q
-        heightDown = { key = 0xE8342FF2 }, -- E
+        heightUp = { key = 0xDE794E3E }, -- Q (INPUT_COVER)
+        heightDown = { key = 0xCEFD9220 }, -- E (INPUT_INTERACT_ANIMAL)
         snapGround = { key = 0xCF8A4ECA }, -- LAlt
         place = { key = 0xC7B5340A }, -- Enter (INPUT_FRONTEND_ACCEPT)
         cancel = { key = 0x156F7119 }, -- ESC
@@ -438,6 +438,7 @@ local function SpawnGhost(modelHash, isPed)
     local pos = GetEntityCoords(PlayerPedId())
     if isPed then
         ghostEntity = CreatePed(modelHash, pos.x, pos.y, pos.z, 0.0, false, false, 0, 0)
+        Citizen.InvokeNative(0x283978A15512B2FE, ghostEntity, true)
     else
         ghostEntity = CreateObject(modelHash, pos.x, pos.y, pos.z, false, false, false)
     end
