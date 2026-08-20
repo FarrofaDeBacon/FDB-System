@@ -116,34 +116,42 @@ RegisterCommand('heistdebug', function(source)
     end
 end, false)
 
--- Grafo hardcoded da Fase 1 (Valentine General Store)
-local hardcodedGraph = {
-    nodes = {
-        ["node_start"] = { type = "start", data = {} },
-        ["node_door"] = { 
-            type = "open_door", 
-            data = { 
-                coords = vec3(-300.0, 800.0, 118.0), -- Coordenadas isoladas num campo aberto perto de Valentine
-                minTime = 5,
-                prompt = "Arrombar Porta"
-            } 
+RegisterCommand('startheist', function(source)
+    if source == 0 then return end
+    
+    local ped = GetPlayerPed(source)
+    local coords = GetEntityCoords(ped)
+    
+    local dynamicGraph = {
+        nodes = {
+            ["node_start"] = { type = "start", data = {} },
+            ["node_door"] = { 
+                type = "open_door", 
+                data = { 
+                    coords = coords, 
+                    minTime = 5,
+                    prompt = "Arrombar Porta"
+                } 
+            },
+            ["node_register"] = { 
+                type = "crack_register", 
+                data = { 
+                    coords = coords + vector3(2.0, 0.0, 0.0), -- 2 metros pro lado
+                    heading = 101.4,
+                    minTime = 3,
+                    reward = "money",
+                    prompt = "Roubar Caixa"
+                } 
+            }
         },
-        ["node_register"] = { 
-            type = "crack_register", 
-            data = { 
-                coords = vec3(-298.0, 800.0, 118.0), -- 2 metros de distância do node_door
-                heading = 101.4,
-                minTime = 3,
-                reward = "money",
-                prompt = "Roubar Caixa"
-            } 
+        edges = {
+            { source = "node_start", target = "node_door" },
+            { source = "node_door", target = "node_register" }
         }
-    },
-    edges = {
-        { source = "node_start", target = "node_door" },
-        { source = "node_door", target = "node_register" }
     }
-}
+
+    NodeEngine.StartHeist(source, "Dynamic Test Heist", dynamicGraph)
+end, false)
 
 -- Tipos de Nó
 NodeEngine.RegisterNodeType("start", {
@@ -189,7 +197,4 @@ NodeEngine.RegisterNodeType("crack_register", {
     end
 })
 
-RegisterCommand('startheist', function(source)
-    if source == 0 then return end
-    NodeEngine.StartHeist(source, "Valentine General Store", hardcodedGraph)
-end, false)
+
