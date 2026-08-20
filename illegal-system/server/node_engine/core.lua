@@ -118,13 +118,12 @@ RegisterCommand('heistdebug', function(source)
     end
 end, false)
 
-RegisterCommand('startheist', function(source)
-    print("[NodeEngine Debug] Comando /startheist invocado por: " .. tostring(source))
-    if source == 0 then return end
+RegisterNetEvent('node_engine:server:ForceStartHeist', function(coords)
+    local source = source
+    print("[NodeEngine Debug] Evento ForceStartHeist invocado por: " .. tostring(source))
+    if not coords then return end
     
-    local ped = GetPlayerPed(source)
-    local coords = GetEntityCoords(ped)
-    print("[NodeEngine Debug] Coordenadas capturadas: " .. tostring(coords))
+    print("[NodeEngine Debug] Coordenadas recebidas do client: " .. tostring(coords))
     
     local dynamicGraph = {
         nodes = {
@@ -155,7 +154,7 @@ RegisterCommand('startheist', function(source)
     }
 
     NodeEngine.StartHeist(source, "Dynamic Test Heist", dynamicGraph)
-end, false)
+end)
 
 -- Tipos de Nó
 NodeEngine.RegisterNodeType("start", {
