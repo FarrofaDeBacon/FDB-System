@@ -1,16 +1,15 @@
 <script>
     import { SvelteFlow, Controls, Background } from '@xyflow/svelte';
     import '@xyflow/svelte/dist/style.css';
-    import { writable } from 'svelte/store';
 
-    export let isPlacementMode = false;
+    let { isPlacementMode = $bindable(false) } = $props();
     
-    const nodes = writable([]);
-    const edges = writable([]);
+    let nodes = $state.raw([]);
+    let edges = $state.raw([]);
     
     let nextId = 1;
-    let heistId = "novo_assalto";
-    let heistName = "Novo Assalto";
+    let heistId = $state("novo_assalto");
+    let heistName = $state("Novo Assalto");
     
     // Lista de tipos permitidos na diretiva
     const nodeTypesList = [
@@ -26,8 +25,8 @@
         { type: 'player_notification', label: 'Notification (Feedback)', color: '#f1c40f' }
     ];
 
-    let selectedNodeId = null;
-    let selectedNodeData = null;
+    let selectedNodeId = $state(null);
+    let selectedNodeData = $state(null);
 
     function onDragStart(event, nodeType) {
         event.dataTransfer.setData('application/svelteflow', nodeType);
@@ -64,7 +63,7 @@
         // Salvamos o tipo original dentro dos dados pra podermos exportar depois
         newNode.data.realType = type;
 
-        nodes.update(ns => [...ns, newNode]);
+        nodes = [...nodes, newNode];
     }
 
     function onDragOver(event) {
@@ -104,19 +103,13 @@
             return;
         }
 
-        const currentNodes = [];
-        nodes.subscribe(v => currentNodes.push(...v))();
-        
-        const currentEdges = [];
-        edges.subscribe(v => currentEdges.push(...v))();
-
         const graph = {
             nodes: {},
             edges: []
         };
 
         // Formata os nós pro padrão exato exigido nas Fases 1/2
-        currentNodes.forEach(n => {
+        nodes.forEach(n => {
             const nodeExport = {
                 type: n.data.realType,
                 data: {}
@@ -133,7 +126,7 @@
         });
 
         // Formata as arestas
-        currentEdges.forEach(e => {
+        edges.forEach(e => {
             graph.edges.push({
                 source: e.source,
                 target: e.target
@@ -158,20 +151,18 @@
                 // Atualiza as coords do nó
                 const nodeId = event.data.extra?.nodeId;
                 if (nodeId) {
-                    nodes.update(ns => {
-                        return ns.map(n => {
-                            if (n.id === nodeId) {
-                                n.data = {
-                                    ...n.data,
-                                    coords: event.data.result,
-                                    heading: event.data.result.h || 0.0
-                                };
-                                if (selectedNodeId === nodeId) {
-                                    selectedNodeData = n.data; // Atualiza sidebar
-                                }
+                    nodes = nodes.map(n => {
+                        if (n.id === nodeId) {
+                            n.data = {
+                                ...n.data,
+                                coords: event.data.result,
+                                heading: event.data.result.h || 0.0
+                            };
+                            if (selectedNodeId === nodeId) {
+                                selectedNodeData = n.data; // Atualiza sidebar
                             }
-                            return n;
-                        });
+                        }
+                        return n;
                     });
                 }
             }
@@ -219,11 +210,11 @@
             {#if ['open_door', 'lockpick_door', 'crack_register', 'minigame'].includes(selectedNodeData.realType)}
                 <div class="form-group">
                     <label>Tempo Mínimo (s)</label>
-                    <input type="number" bind:value={selectedNodeData.minTime} on:input={() => nodes.update(ns => [...ns])} />
+                    <input type="number" bind:value={selectedNodeData.minTime} on:input={() => nodes = [...nodes]} />
                 </div>
                 <div class="form-group">
                     <label>Texto do Alvo (Prompt)</label>
-                    <input type="text" bind:value={selectedNodeData.prompt} on:input={() => nodes.update(ns => [...ns])} />
+                    <input type="text" bind:value={selectedNodeData.prompt} on:input={() => nodes = [...nodes]} />
                 </div>
                 
                 <div class="form-group">
@@ -240,7 +231,7 @@
             {#if selectedNodeData.realType === 'wait'}
                 <div class="form-group">
                     <label>Duração (ms)</label>
-                    <input type="number" bind:value={selectedNodeData.durationMs} on:input={() => nodes.update(ns => [...ns])} />
+                    <input type="number" bind:value={selectedNodeData.durationMs} on:input={() => nodes = [...nodes]} />
                 </div>
             {/if}
         {/if}
