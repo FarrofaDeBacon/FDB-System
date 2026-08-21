@@ -90,8 +90,8 @@
         fetch(`https://${GetParentResourceName()}/startPlacement`, {
             method: 'POST',
             body: JSON.stringify({
-                type: 'door', // Usamos door como um proxy visual pro ghost prop p_crate01x
-                model: 'p_crate01x',
+                type: 'point', // Tipo generico para pegar só a coordenada
+                model: '',     // Vazio para não carregar prop nenhum (apenas o marker)
                 callbackAction: 'stopPlacementNode',
                 extraData: { nodeId: selectedNodeId }
             })

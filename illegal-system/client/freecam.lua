@@ -417,6 +417,8 @@ local function getPlacementStartPos()
 end
 
 local function SpawnGhost(modelHash, isPed)
+    if not modelHash or modelHash == 0 then return end
+    
     if not IsModelInCdimage(modelHash) then
         print("[illegal-system] EDITOR ERRO: modelo " .. tostring(modelHash) .. " não existe no CD image. Fantasma não pode ser criado.")
         Bridge.Notify("Modelo inválido para preview. Veja o console (F8).", "error")
