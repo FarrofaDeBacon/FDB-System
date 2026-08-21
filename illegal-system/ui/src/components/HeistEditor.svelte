@@ -73,8 +73,7 @@
         event.dataTransfer.dropEffect = 'move';
     }
 
-    function selectNode(event) {
-        const node = event.detail.node;
+    function selectNode({ node }) {
         selectedNodeId = node.id;
         selectedNodeData = node.data;
     }
