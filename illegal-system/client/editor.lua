@@ -28,6 +28,16 @@ RegisterNUICallback("saveStore", function(data, cb)
     cb('ok')
 end)
 
+RegisterNUICallback("saveHeistGraph", function(data, cb)
+    local success, msg = lib.callback.await('illegal-system:server:SaveHeistGraph', 5000, data.id, data.name, data.graph)
+    if success then
+        Bridge.Notify("Assalto (Nodes) salvo com sucesso!", "success")
+    else
+        Bridge.Notify("Erro ao salvar assalto: " .. tostring(msg), "error")
+    end
+    cb('ok')
+end)
+
 RegisterNUICallback("closeEditor", function(data, cb)
     isEditorOpen = false
     SetNuiFocus(false, false)

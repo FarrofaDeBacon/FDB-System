@@ -161,7 +161,7 @@ end)
 
 -- Salvar Grafo no Banco
 lib.callback.register('illegal-system:server:SaveHeistGraph', function(source, id, name, graphData)
-    if not Bridge.HasPermission(source) then 
+    if not Bridge.HasPermission(source, 'illegal.admin') then 
         return false, "Sem permissão."
     end
     

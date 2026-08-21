@@ -164,7 +164,7 @@
                                 n.data = {
                                     ...n.data,
                                     coords: event.data.result,
-                                    heading: event.data.heading || 0.0
+                                    heading: event.data.result.h || 0.0
                                 };
                                 if (selectedNodeId === nodeId) {
                                     selectedNodeData = n.data; // Atualiza sidebar
