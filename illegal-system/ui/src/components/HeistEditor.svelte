@@ -89,19 +89,21 @@
         // Pede pra NUI iniciar a camera no client
         fetch(`https://${GetParentResourceName()}/startPlacement`, {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json; charset=UTF-8' },
             body: JSON.stringify({
                 type: 'point', // Tipo generico para pegar só a coordenada
                 model: '',     // Vazio para não carregar prop nenhum (apenas o marker)
                 callbackAction: 'stopPlacementNode',
                 extraData: { nodeId: selectedNodeId }
             })
-        });
+        }).catch(err => console.error(err));
     }
 
     // Exportador de JSON para salvar no banco
     function saveHeist() {
         if (!heistId.trim() || !heistName.trim()) {
             console.log("ID ou Nome vazio");
+            alert("Preencha o ID e o Nome do assalto antes de salvar!");
             return;
         }
 
@@ -137,12 +139,13 @@
 
         fetch(`https://${GetParentResourceName()}/saveHeistGraph`, {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json; charset=UTF-8' },
             body: JSON.stringify({
                 id: heistId,
                 name: heistName,
                 graph: graph
             })
-        });
+        }).catch(err => console.error("Error sending NUI message:", err));
     }
     
     // Escutador global caso voltemos do placement
