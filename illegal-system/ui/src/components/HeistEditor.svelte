@@ -33,16 +33,7 @@
         event.dataTransfer.effectAllowed = 'move';
     }
 
-    function onDrop(event) {
-        event.preventDefault();
-        const type = event.dataTransfer.getData('application/svelteflow');
-        if (!type) return;
-
-        const position = {
-            x: event.clientX - 250, // offset do sidebar
-            y: event.clientY - 50
-        };
-
+    function addNode(type, position = { x: 250, y: 150 }) {
         const config = nodeTypesList.find(n => n.type === type);
         
         let initialData = { label: config.label };
@@ -60,10 +51,21 @@
             style: `background: ${config.color}; color: white; border: none; border-radius: 4px; padding: 10px; min-width: 120px; text-align: center;`
         };
         
-        // Salvamos o tipo original dentro dos dados pra podermos exportar depois
         newNode.data.realType = type;
-
         nodes = [...nodes, newNode];
+    }
+
+    function onDrop(event) {
+        event.preventDefault();
+        const type = event.dataTransfer.getData('application/svelteflow');
+        if (!type) return;
+
+        const position = {
+            x: event.clientX - 300, // offset do sidebar aproximado
+            y: event.clientY - 50
+        };
+
+        addNode(type, position);
     }
 
     function onDragOver(event) {
@@ -189,14 +191,15 @@
         <hr style="border-color: #333; margin: 20px 0;">
 
         <h3>Nós Disponíveis</h3>
-        <p style="font-size: 12px; color: #888;">Arraste para o canvas:</p>
+        <p style="font-size: 12px; color: #888;">Clique para adicionar ao canvas:</p>
         <div class="nodes-palette">
             {#each nodeTypesList as node}
                 <div 
                     class="palette-node" 
                     style="border-left: 4px solid {node.color}"
                     draggable={true} 
-                    on:dragstart={(e) => onDragStart(e, node.type)}>
+                    on:dragstart={(e) => onDragStart(e, node.type)}
+                    on:click={() => addNode(node.type)}>
                     {node.label}
                 </div>
             {/each}
