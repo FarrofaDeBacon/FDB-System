@@ -4,8 +4,8 @@
 
     let { isPlacementMode = $bindable(false) } = $props();
     
-    let nodes = $state.raw([]);
-    let edges = $state.raw([]);
+    let nodes = $state([]);
+    let edges = $state([]);
     
     let nextId = 1;
     let heistId = $state("novo_assalto");
@@ -188,7 +188,7 @@
             <label>Nome Visível</label>
             <input type="text" bind:value={heistName} />
         </div>
-        <button class="admin-button" style="background: #27ae60;" on:click={saveHeist}>Salvar no Banco</button>
+        <button class="admin-button" style="background: #27ae60;" onclick={saveHeist}>Salvar no Banco</button>
 
         <hr style="border-color: #333; margin: 20px 0;">
 
@@ -200,8 +200,8 @@
                     class="palette-node" 
                     style="border-left: 4px solid {node.color}"
                     draggable={true} 
-                    on:dragstart={(e) => onDragStart(e, node.type)}
-                    on:click={() => addNode(node.type)}>
+                    ondragstart={(e) => onDragStart(e, node.type)}
+                    onclick={() => addNode(node.type)}>
                     {node.label}
                 </div>
             {/each}
@@ -215,11 +215,11 @@
             {#if ['open_door', 'lockpick_door', 'crack_register', 'minigame'].includes(selectedNodeData.realType)}
                 <div class="form-group">
                     <label>Tempo Mínimo (s)</label>
-                    <input type="number" bind:value={selectedNodeData.minTime} on:input={() => nodes = [...nodes]} />
+                    <input type="number" bind:value={selectedNodeData.minTime} oninput={() => nodes = [...nodes]} />
                 </div>
                 <div class="form-group">
                     <label>Texto do Alvo (Prompt)</label>
-                    <input type="text" bind:value={selectedNodeData.prompt} on:input={() => nodes = [...nodes]} />
+                    <input type="text" bind:value={selectedNodeData.prompt} oninput={() => nodes = [...nodes]} />
                 </div>
                 
                 <div class="form-group">
@@ -229,23 +229,23 @@
                     {:else}
                         <p style="font-size: 11px; color: #e74c3c;">Não definidas</p>
                     {/if}
-                    <button class="admin-button" on:click={startPlacement}>Setar Posição 3D</button>
+                    <button class="admin-button" onclick={startPlacement}>Setar Posição 3D</button>
                 </div>
             {/if}
             
             {#if selectedNodeData.realType === 'wait'}
                 <div class="form-group">
                     <label>Duração (ms)</label>
-                    <input type="number" bind:value={selectedNodeData.durationMs} on:input={() => nodes = [...nodes]} />
+                    <input type="number" bind:value={selectedNodeData.durationMs} oninput={() => nodes = [...nodes]} />
                 </div>
             {/if}
         {/if}
     </div>
 
-    <div class="canvas-area" on:drop={onDrop} on:dragover={onDragOver}>
-        <SvelteFlow {nodes} {edges} on:nodeclick={selectNode} on:paneclick={onPaneClick}>
+    <div class="canvas-area" ondrop={onDrop} ondragover={onDragOver}>
+        <SvelteFlow bind:nodes={nodes} bind:edges={edges} onnodeclick={selectNode} onpaneclick={onPaneClick}>
             <Controls />
-            <Background />
+            <Background variant="dots" gap={12} size={1} />
         </SvelteFlow>
     </div>
 </div>
