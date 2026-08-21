@@ -269,7 +269,9 @@
     }
     .canvas-area {
         flex: 1;
+        height: 100%;
         position: relative;
+        overflow: hidden;
     }
     .palette-node {
         background: #2a2a2a;

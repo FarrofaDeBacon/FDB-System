@@ -84,8 +84,7 @@ lib.callback.register('illegal-system:server:GetActiveStores', function(source)
 end)
 
 lib.callback.register('illegal-system:server:SaveStore', function(source, data)
-    local allowed = IsPlayerAceAllowed(source, 'command') or Bridge.HasPermission(source, 'illegal.admin')
-    if not allowed then
+    if not IsPlayerAceAllowed(source, 'illegal.admin') then
         return false, "Sem permissão."
     end
     
@@ -113,8 +112,7 @@ lib.callback.register('illegal-system:server:SaveStore', function(source, data)
 end)
 
 lib.callback.register('illegal-system:server:SaveStoreSpawns', function(source, storeName, spawns)
-    local allowed = IsPlayerAceAllowed(source, 'command') or Bridge.HasPermission(source, 'illegal.admin')
-    if not allowed then
+    if not IsPlayerAceAllowed(source, 'illegal.admin') then
         return false, "Sem permissão."
     end
     
