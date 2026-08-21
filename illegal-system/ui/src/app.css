@@ -99,6 +99,23 @@ body {
     overflow-y: auto;
 }
 
+#admin-menu.expanded {
+    min-width: 900px;
+    width: 80vw;
+    height: 80vh;
+    top: 10%;
+    left: 10%;
+    right: auto;
+    transform: none;
+}
+
+#admin-menu.expanded .admin-content {
+    height: auto;
+    flex: 1;
+    padding: 0;
+    overflow: hidden;
+}
+
 .admin-content::-webkit-scrollbar {
     width: 6px;
 }

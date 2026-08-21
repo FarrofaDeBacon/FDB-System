@@ -164,7 +164,7 @@
 </script>
 
 {#if isEditorOpen}
-<div id="admin-menu">
+<div id="admin-menu" class:expanded={currentTab === 'assaltos'}>
     <div class="admin-header">
         <div class="lock-icon" class:locked={!isCursorEnabled} class:unlocked={isCursorEnabled} on:click={toggleLock}></div>
         <h2>Editor de Assaltos</h2>
@@ -288,7 +288,7 @@
         {/if}
 
         {#if currentTab === 'assaltos'}
-            <div id="tab-assaltos" class="tab-pane active" style="height: calc(100vh - 120px); padding: 0;">
+            <div id="tab-assaltos" class="tab-pane active" style="height: 100%; padding: 0;">
                 <HeistEditor bind:isPlacementMode={isPlacementMode} />
             </div>
         {/if}
