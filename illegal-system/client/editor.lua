@@ -29,12 +29,26 @@ RegisterNUICallback("saveStore", function(data, cb)
 end)
 
 RegisterNUICallback("saveHeistGraph", function(data, cb)
-    local success, msg = lib.callback.await('illegal-system:server:SaveHeistGraph', 5000, data.id, data.name, data.graph)
-    if success then
-        Bridge.Notify("Assalto (Nodes) salvo com sucesso!", "success")
-    else
-        Bridge.Notify("Erro ao salvar assalto: " .. tostring(msg), "error")
+    print("[NodeEngine] DEBUG: saveHeistGraph NUI callback ATINGIDO!")
+    print("[NodeEngine] DEBUG: data.id = " .. tostring(data.id))
+    print("[NodeEngine] DEBUG: data.name = " .. tostring(data.name))
+    print("[NodeEngine] DEBUG: data.graph = " .. tostring(data.graph ~= nil))
+    
+    local ok, result = pcall(function()
+        local success, msg = lib.callback.await('illegal-system:server:SaveHeistGraph', 5000, data.id, data.name, data.graph)
+        print("[NodeEngine] DEBUG: callback retornou success=" .. tostring(success) .. " msg=" .. tostring(msg))
+        if success then
+            Bridge.Notify("Assalto (Nodes) salvo com sucesso!", "success")
+        else
+            Bridge.Notify("Erro ao salvar assalto: " .. tostring(msg), "error")
+        end
+    end)
+    
+    if not ok then
+        print("[NodeEngine] ERRO FATAL no saveHeistGraph: " .. tostring(result))
+        Bridge.Notify("Erro interno ao salvar. Veja F8.", "error")
     end
+    
     cb('ok')
 end)
 

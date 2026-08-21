@@ -285,7 +285,7 @@
         {/if}
 
         {#if currentTab === 'assaltos'}
-            <div id="tab-assaltos" class="tab-pane active" style="height: 100%; padding: 0;">
+            <div id="tab-assaltos" class="tab-pane active" style="height: 100%; padding: 0; display: flex !important;">
                 <HeistEditor bind:isPlacementMode={isPlacementMode} />
             </div>
         {/if}

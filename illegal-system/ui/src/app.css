@@ -113,7 +113,7 @@ body {
     height: auto;
     flex: 1;
     padding: 0;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .admin-content::-webkit-scrollbar {
