@@ -1,6 +1,7 @@
 <script>
     import { onMount } from 'svelte';
     import './app.css';
+    import HeistEditor from './components/HeistEditor.svelte';
 
     let isEditorOpen = false;
     let isPlacementMode = false;
@@ -76,6 +77,11 @@
                     }
                 }
                 updateGhosts();
+            }
+            if (data.action === "stopPlacementNode") {
+                isEditorOpen = true;
+                isPlacementMode = false;
+                // O HeistEditor escuta isso localmente pra atualizar a UI
             }
         });
     });
@@ -168,6 +174,7 @@
     <div class="admin-tabs">
         <div class="tab-label" class:active={currentTab === 'stores'} on:click={() => currentTab = 'stores'}>Lojas</div>
         <div class="tab-label" class:active={currentTab === 'editor'} on:click={() => currentTab = 'editor'}>Configurar</div>
+        <div class="tab-label" class:active={currentTab === 'assaltos'} on:click={() => currentTab = 'assaltos'}>Assaltos (Nodes)</div>
     </div>
 
     <div class="admin-content">
@@ -277,6 +284,12 @@
 
                 <button class="admin-button" style="margin-top: 20px; background: #3498db; color: white;" on:click={saveStore}>Salvar Loja</button>
                 <button class="admin-button" style="margin-top: 5px; background: #555;" on:click={() => currentTab = 'stores'}>Voltar</button>
+            </div>
+        {/if}
+
+        {#if currentTab === 'assaltos'}
+            <div id="tab-assaltos" class="tab-pane active" style="height: calc(100vh - 120px); padding: 0;">
+                <HeistEditor bind:isPlacementMode={isPlacementMode} />
             </div>
         {/if}
     </div>

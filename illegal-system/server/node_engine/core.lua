@@ -159,18 +159,62 @@ RegisterNetEvent('node_engine:server:ForceStartHeist', function(heistId)
     NodeEngine.StartHeist(source, heistId, graph)
 end)
 
+-- Salvar Grafo no Banco
+lib.callback.register('illegal-system:server:SaveHeistGraph', function(source, id, name, graphData)
+    if not Bridge.HasPermission(source) then 
+        return false, "Sem permissão."
+    end
+    
+    local graphJson = json.encode(graphData)
+    local query = "INSERT INTO illegal_heists (id, name, graph) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name), graph=VALUES(graph)"
+    
+    local success, err = pcall(function()
+        MySQL.Sync.execute(query, {id, name, graphJson})
+    end)
+    
+    if success then
+        NodeEngine.RegisteredHeists[id] = graphData
+        print("[NodeEngine] Grafo salvo e atualizado na memória: " .. id)
+        return true, "Salvo com sucesso."
+    else
+        print("[NodeEngine] Erro ao salvar grafo no banco: " .. tostring(err))
+        return false, "Erro ao salvar no banco."
+    end
+end)
+
 -- Tipos de Nó
+local function AutoAdvance(playerId, session)
+    local nextNodeId = nil
+    for _, edge in ipairs(session.graph.edges) do
+        if edge.source == session.currentNodeId then
+            nextNodeId = edge.target
+            break
+        end
+    end
+    AdvanceNode(playerId, session, nextNodeId)
+end
 NodeEngine.RegisterNodeType("start", {
     OnEnter = function(playerId, session, nodeData, nodeToken)
         -- Nó silencioso, avança automaticamente sem precisar de client report
-        local nextNodeId = nil
-        for _, edge in ipairs(session.graph.edges) do
-            if edge.source == session.currentNodeId then
-                nextNodeId = edge.target
-                break
-            end
-        end
-        AdvanceNode(playerId, session, nextNodeId)
+        AutoAdvance(playerId, session)
+    end
+})
+
+NodeEngine.RegisterNodeType("wait", {
+    OnEnter = function(playerId, session, nodeData, nodeToken)
+        local duration = nodeData.durationMs or 1000
+        CreateThread(function()
+            Wait(duration)
+            AutoAdvance(playerId, session)
+        end)
+    end
+})
+
+NodeEngine.RegisterNodeType("end", {
+    OnEnter = function(playerId, session, nodeData, nodeToken)
+        print(("[NodeEngine] Sessão %s de %s encerrada pelo nó 'end'."):format(session.heistName, playerId))
+        activeSessions[playerId] = nil
+        TriggerClientEvent('node_engine:client:EndSession', playerId)
     end
 })
 
@@ -197,11 +241,54 @@ NodeEngine.RegisterNodeType("crack_register", {
         if timeElapsed < (nodeData.minTime or 3) then
             return false, "Tempo mínimo não atingido (Speedhack?)"
         end
-        -- Dá a recompensa hardcoded pra fase 1
-        -- (No RedM seria algo como exports.vorp_inventory:addItem)
         print(("[NodeEngine] Jogador %s roubou a registradora!"):format(playerId))
         return true
     end
 })
 
+NodeEngine.RegisterNodeType("lockpick_door", {
+    OnEnter = function(playerId, session, nodeData, nodeToken)
+        TriggerClientEvent('node_engine:client:StartNodeAction', playerId, "lockpick_door", nodeData, nodeToken)
+    end,
+    OnClientReport = function(playerId, session, nodeData, reportData)
+        local timeElapsed = os.time() - session.nodeStartTime
+        if timeElapsed < (nodeData.minTime or 5) then
+            return false, "Tempo mínimo não atingido (Speedhack?)"
+        end
+        return true
+    end
+})
 
+NodeEngine.RegisterNodeType("minigame", {
+    OnEnter = function(playerId, session, nodeData, nodeToken)
+        TriggerClientEvent('node_engine:client:StartNodeAction', playerId, "minigame", nodeData, nodeToken)
+    end,
+    OnClientReport = function(playerId, session, nodeData, reportData)
+        local timeElapsed = os.time() - session.nodeStartTime
+        if timeElapsed < (nodeData.minTime or 5) then
+            return false, "Tempo mínimo não atingido (Speedhack?)"
+        end
+        return true
+    end
+})
+
+NodeEngine.RegisterNodeType("spawn_ped", {
+    OnEnter = function(playerId, session, nodeData, nodeToken)
+        TriggerClientEvent('node_engine:client:SyncAction', playerId, "spawn_ped", nodeData)
+        AutoAdvance(playerId, session)
+    end
+})
+
+NodeEngine.RegisterNodeType("player_notification", {
+    OnEnter = function(playerId, session, nodeData, nodeToken)
+        TriggerClientEvent('node_engine:client:SyncAction', playerId, "player_notification", nodeData)
+        AutoAdvance(playerId, session)
+    end
+})
+
+NodeEngine.RegisterNodeType("dispatch", {
+    OnEnter = function(playerId, session, nodeData, nodeToken)
+        TriggerClientEvent('node_engine:client:SyncAction', playerId, "dispatch", nodeData)
+        AutoAdvance(playerId, session)
+    end
+})

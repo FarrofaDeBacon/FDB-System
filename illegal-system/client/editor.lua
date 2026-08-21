@@ -4,7 +4,7 @@ local isEditorOpen = false
 
 RegisterNUICallback("startPlacement", function(data, cb)
     SetNuiFocus(false, false)
-    StartPlacementCamera(data.type, data.model)
+    StartPlacementCamera(data.type, data.model, data.callbackAction, data.extraData)
     cb('ok')
 end)
 

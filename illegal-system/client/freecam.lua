@@ -40,6 +40,8 @@ local isPlacing = false
 local placementPosX, placementPosY, placementPosZ = 0.0, 0.0, 0.0
 local placementType = nil
 local placementModel = nil
+local placementCallbackAction = "stopPlacement"
+local placementExtraData = nil
 local ghostEntity = nil
 local ghostHeading = 0.0
 
@@ -552,20 +554,23 @@ local function finish(ok)
     end
 
     SendNUIMessage({
-        action = "stopPlacement",
+        action = placementCallbackAction,
         result = resultData,
         spawnType = placementType,
-        model = placementModel
+        model = placementModel,
+        extra = placementExtraData
     })
     
     SetNuiFocus(true, true)
 end
 
-function StartPlacementCamera(type, model)
+function StartPlacementCamera(type, model, callbackAction, extraData)
     if isPlacing then return false end
 
     placementType = type
     placementModel = model
+    placementCallbackAction = callbackAction or "stopPlacement"
+    placementExtraData = extraData
     ghostHeading = 0.0
 
     unfreezePlacementPlayer()
