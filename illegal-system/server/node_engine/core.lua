@@ -183,6 +183,69 @@ lib.callback.register('illegal-system:server:SaveHeistGraph', function(source, i
     end
 end)
 
+-- Listar Grafos Salvos
+lib.callback.register('illegal-system:server:GetHeistGraphs', function(source)
+    if not IsPlayerAceAllowed(source, 'illegal.admin') then
+        return false, "Sem permissão."
+    end
+    
+    local results = MySQL.query.await('SELECT id, name, graph FROM illegal_heists')
+    local heists = {}
+    if results and #results > 0 then
+        for _, row in ipairs(results) do
+            table.insert(heists, {
+                id = row.id,
+                name = row.name,
+                graph = json.decode(row.graph)
+            })
+        end
+    end
+    return true, heists
+end)
+
+-- Deletar Grafo
+lib.callback.register('illegal-system:server:DeleteHeistGraph', function(source, id)
+    if not IsPlayerAceAllowed(source, 'illegal.admin') then
+        return false, "Sem permissão."
+    end
+    
+    local success = pcall(function()
+        MySQL.query.await('DELETE FROM illegal_heists WHERE id = ?', {id})
+    end)
+    
+    if success then
+        NodeEngine.RegisteredHeists[id] = nil
+        print("[NodeEngine] Grafo deletado: " .. id)
+        return true, "Deletado com sucesso."
+    else
+        return false, "Erro ao deletar no banco."
+    end
+end)
+
+-- Comando de Teste
+RegisterCommand('testheist', function(source, args)
+    if source == 0 then return end
+    if not IsPlayerAceAllowed(source, 'illegal.admin') then
+        Bridge.Notify(source, "Sem permissão.", "error")
+        return
+    end
+
+    local heistId = args[1]
+    if not heistId then
+        Bridge.Notify(source, "Uso: /testheist [id_do_assalto]", "error")
+        return
+    end
+
+    local graph = NodeEngine.RegisteredHeists[heistId]
+    if not graph then
+        Bridge.Notify(source, "Assalto não encontrado na memória.", "error")
+        return
+    end
+
+    Bridge.Notify(source, "Iniciando teste do assalto: " .. heistId, "success")
+    NodeEngine.StartHeist(source, heistId, graph)
+end)
+
 -- Tipos de Nó
 local function AutoAdvance(playerId, session)
     local nextNodeId = nil

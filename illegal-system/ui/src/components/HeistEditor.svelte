@@ -145,12 +145,85 @@
                 name: heistName,
                 graph: graph
             })
+        }).then(() => {
+            loadHeists(); // Refresh list after saving
         }).catch(err => console.error("Error sending NUI message:", err));
+    }
+
+    let savedHeists = $state([]);
+    let selectedSavedHeist = $state("");
+
+    function loadHeists() {
+        fetch(`https://${GetParentResourceName()}/getHeists`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+            body: JSON.stringify({})
+        }).then(res => res.json()).then(data => {
+            savedHeists = data || [];
+        }).catch(err => console.error("Error fetching heists:", err));
+    }
+
+    function applyHeist() {
+        if (!selectedSavedHeist) return;
+        const heist = savedHeists.find(h => h.id === selectedSavedHeist);
+        if (heist) {
+            heistId = heist.id;
+            heistName = heist.name;
+            
+            // Reconstruct nodes
+            const newNodes = [];
+            let maxId = 0;
+            for (const [idStr, nodeData] of Object.entries(heist.graph.nodes)) {
+                const idNum = parseInt(idStr) || parseInt(idStr.replace('node_', ''));
+                if (idNum > maxId) maxId = idNum;
+                
+                const config = nodeTypesList.find(n => n.type === nodeData.type) || { label: nodeData.type };
+                
+                newNodes.push({
+                    id: idStr,
+                    type: 'default',
+                    position: nodeData.data.uiPosition || { x: Math.random() * 200, y: Math.random() * 200 },
+                    data: {
+                        ...nodeData.data,
+                        label: config.label,
+                        realType: nodeData.type
+                    }
+                });
+            }
+            nodes = newNodes;
+            nextId = maxId + 1;
+            
+            // Reconstruct edges
+            edges = heist.graph.edges.map(e => ({
+                id: `e-${e.source}-${e.target}`,
+                source: e.source,
+                target: e.target
+            }));
+        }
+    }
+
+    function deleteHeist() {
+        if (!heistId) return;
+        if (!confirm("Tem certeza que deseja deletar este assalto?")) return;
+        
+        fetch(`https://${GetParentResourceName()}/deleteHeist`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+            body: JSON.stringify({ id: heistId })
+        }).then(() => {
+            loadHeists();
+            heistId = "novo_assalto";
+            heistName = "Novo Assalto";
+            nodes = [];
+            edges = [];
+            selectedSavedHeist = "";
+        }).catch(err => console.error("Error deleting heist:", err));
     }
     
     // Escutador global caso voltemos do placement
     import { onMount } from 'svelte';
     onMount(() => {
+        loadHeists();
         const listener = (event) => {
             if (event.data.action === "stopPlacementNode") {
                 isPlacementMode = false;
@@ -181,6 +254,19 @@
 
 <div class="heist-editor-container">
     <div class="sidebar">
+        <h3>Meus Assaltos</h3>
+        <div class="form-group" style="display: flex; gap: 5px;">
+            <select class="admin-select" bind:value={selectedSavedHeist} style="flex: 1; padding: 10px; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 4px;">
+                <option value="">-- Novo Assalto --</option>
+                {#each savedHeists as heist}
+                    <option value={heist.id}>{heist.name} ({heist.id})</option>
+                {/each}
+            </select>
+            <button class="admin-button" style="width: auto; margin-top: 0;" onclick={applyHeist}>Carregar</button>
+        </div>
+        
+        <hr style="border-color: #333; margin: 20px 0;">
+
         <h3>Propriedades do Assalto</h3>
         <div class="form-group">
             <label>ID Único (ex: store_valentine)</label>
@@ -190,7 +276,12 @@
             <label>Nome Visível</label>
             <input type="text" bind:value={heistName} />
         </div>
-        <button class="admin-button" style="background: #27ae60;" onclick={saveHeist}>Salvar no Banco</button>
+        <div class="form-group" style="display: flex; gap: 5px;">
+            <button class="admin-button" style="background: #27ae60; flex: 1;" onclick={saveHeist}>Salvar no Banco</button>
+            {#if savedHeists.some(h => h.id === heistId)}
+                <button class="admin-button" style="background: #c0392b; flex: 1;" onclick={deleteHeist}>Deletar</button>
+            {/if}
+        </div>
 
         <hr style="border-color: #333; margin: 20px 0;">
 

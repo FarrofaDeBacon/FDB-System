@@ -50,6 +50,27 @@ RegisterNUICallback("saveHeistGraph", function(data, cb)
     cb('ok')
 end)
 
+RegisterNUICallback("getHeists", function(data, cb)
+    local success, heists = lib.callback.await('illegal-system:server:GetHeistGraphs', 5000)
+    if success then
+        cb(heists)
+    else
+        cb({})
+    end
+end)
+
+RegisterNUICallback("deleteHeist", function(data, cb)
+    if not data or not data.id then return cb('error') end
+    local success, msg = lib.callback.await('illegal-system:server:DeleteHeistGraph', 5000, data.id)
+    if success then
+        lib.notify({ title = 'Node Engine', description = 'Assalto deletado com sucesso!', type = 'success' })
+        cb('ok')
+    else
+        lib.notify({ title = 'Node Engine', description = 'Erro: ' .. tostring(msg), type = 'error' })
+        cb('error')
+    end
+end)
+
 RegisterNUICallback("closeEditor", function(data, cb)
     isEditorOpen = false
     SetNuiFocus(false, false)
