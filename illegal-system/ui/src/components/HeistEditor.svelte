@@ -153,7 +153,7 @@
                 isPlacementMode = false;
                 // Atualiza as coords do nó
                 const nodeId = event.data.extra?.nodeId;
-                if (nodeId) {
+                if (nodeId && event.data.result) {
                     nodes = nodes.map(n => {
                         if (n.id === nodeId) {
                             n.data = {
