@@ -101,12 +101,13 @@ body {
 
 #admin-menu.expanded {
     min-width: 900px;
-    width: 80vw;
-    height: 80vh;
-    top: 10%;
-    left: 10%;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
     right: auto;
     transform: none;
+    border-radius: 0;
 }
 
 #admin-menu.expanded .admin-content {
