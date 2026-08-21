@@ -86,6 +86,7 @@
 
     function startPlacement() {
         if (!selectedNodeId) return;
+        isPlacementMode = true;
         // Pede pra NUI iniciar a camera no client
         fetch(`https://${GetParentResourceName()}/startPlacement`, {
             method: 'POST',
@@ -150,6 +151,7 @@
     onMount(() => {
         const listener = (event) => {
             if (event.data.action === "stopPlacementNode") {
+                isPlacementMode = false;
                 // Atualiza as coords do nó
                 const nodeId = event.data.extra?.nodeId;
                 if (nodeId) {
