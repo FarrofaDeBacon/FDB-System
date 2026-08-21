@@ -51,7 +51,6 @@
                 fetch(`https://${GetParentResourceName()}/clearEditorGhosts`, { method: 'POST', body: '{}' });
             }
             if (data.action === "startPlacement") {
-                isEditorOpen = false;
                 isPlacementMode = true;
             }
             if (data.action === "stopPlacement") {
@@ -135,8 +134,6 @@
         if (type === "store") model = "A_M_M_ValTownfolk_01";
         if (type === "door") model = "p_crate01x";
         if (type === "register") model = "p_crate01x";
-        
-        isEditorOpen = false;
         isPlacementMode = true;
         
         post('startPlacement', { type, model });
@@ -164,7 +161,7 @@
 </script>
 
 {#if isEditorOpen}
-<div id="admin-menu" class:expanded={currentTab === 'assaltos'}>
+<div id="admin-menu" class:expanded={currentTab === 'assaltos'} style="display: {isPlacementMode ? 'none' : 'flex'};">
     <div class="admin-header">
         <div class="lock-icon" class:locked={!isCursorEnabled} class:unlocked={isCursorEnabled} on:click={toggleLock}></div>
         <h2>Editor de Assaltos</h2>
