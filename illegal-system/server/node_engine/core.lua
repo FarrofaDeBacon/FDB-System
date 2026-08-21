@@ -161,7 +161,10 @@ end)
 
 -- Salvar Grafo no Banco
 lib.callback.register('illegal-system:server:SaveHeistGraph', function(source, id, name, graphData)
-    if not Bridge.HasPermission(source, 'illegal.admin') then 
+    -- Usa ACE nativo (txAdmin já concede 'command' a admins) com fallback pro framework
+    local allowed = IsPlayerAceAllowed(source, 'command') or Bridge.HasPermission(source, 'illegal.admin')
+    if not allowed then 
+        print("[NodeEngine] Permissão negada para source " .. tostring(source))
         return false, "Sem permissão."
     end
     
