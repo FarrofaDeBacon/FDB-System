@@ -63,6 +63,20 @@ RegisterNetEvent('node_engine:server:TriggerModelInteracted', function(heistId, 
     local graph = NodeEngine.RegisteredHeists[heistId]
     if not graph then return end
     
+    if type(entityCoords) ~= "vector3" then
+        print(("[NodeEngine] entityCoords inválido (tipo %s) do jogador %s. Possível exploit."):format(type(entityCoords), source))
+        return
+    end
+
+    local playerPed = GetPlayerPed(source)
+    local playerCoords = GetEntityCoords(playerPed)
+    local dist = #(playerCoords - entityCoords)
+    
+    if dist > 10.0 then
+        print(("[NodeEngine] Jogador %s tentou interagir com modelo muito distante (%.2f metros). Possível exploit."):format(source, dist))
+        return
+    end
+    
     -- Inicia a sessão injetando o contexto do trigger
     print("[NodeEngine] Iniciando assalto dinâmico via trigger_model: " .. heistId)
     NodeEngine.StartHeist(source, heistId, graph, {
