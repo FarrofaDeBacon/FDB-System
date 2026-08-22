@@ -3,26 +3,72 @@ NodeEngine.Types = {}
 NodeEngine.RegisteredHeists = {}
 local activeSessions = {}
 
+NodeEngine.GlobalTriggers = { models = {} }
+
 -- Carrega os assaltos do banco de dados na inicialização
 CreateThread(function()
     -- Dá um tempinho para o oxmysql estar 100% pronto
     Wait(1000)
-    MySQL.Async.fetchAll('SELECT * FROM illegal_heists WHERE active = 1', {}, function(results)
-        if not results then return end
-        
-        local count = 0
-        for _, row in ipairs(results) do
-            local success, parsedGraph = pcall(json.decode, row.graph)
-            if success and parsedGraph then
-                -- Opcional: Se for vetor no JSON, precisamos garantir que as funções vector3 funcionem, mas o ox_target aceita table com x,y,z
-                NodeEngine.RegisteredHeists[row.id] = parsedGraph
-                count = count + 1
-            else
-                print("[NodeEngine] ERRO: Falha ao decodificar JSON do assalto ID: " .. tostring(row.id))
+    local results = MySQL.query.await('SELECT * FROM illegal_heists WHERE active = 1')
+    if not results then return end
+    
+    local count = 0
+    for _, row in ipairs(results) do
+        local success, parsedGraph = pcall(json.decode, row.graph)
+        if success and parsedGraph then
+            NodeEngine.RegisteredHeists[row.id] = parsedGraph
+            count = count + 1
+            
+            -- Extrai nós do tipo trigger_model para enviar ao client
+            for nodeId, nodeData in pairs(parsedGraph.nodes) do
+                if nodeData.type == 'trigger_model' then
+                    local models = {}
+                    -- Suporta string separada por vírgula no editor
+                    if nodeData.data.models then
+                        for model in string.gmatch(nodeData.data.models, '([^,]+)') do
+                            local cleanModel = string.match(model, "^%s*(.-)%s*$")
+                            if cleanModel ~= "" then
+                                -- Tenta converter para hash numérico se for número
+                                local num = tonumber(cleanModel)
+                                table.insert(models, num or cleanModel)
+                            end
+                        end
+                    end
+                    
+                    if #models > 0 then
+                        table.insert(NodeEngine.GlobalTriggers.models, {
+                            heistId = row.id,
+                            nodeId = nodeId,
+                            models = models,
+                            label = nodeData.data.prompt or "Interagir",
+                            icon = nodeData.data.icon or "fas fa-hand",
+                            distance = tonumber(nodeData.data.distance) or 3.5
+                        })
+                    end
+                end
             end
+        else
+            print("[NodeEngine] ERRO: Falha ao decodificar JSON do assalto ID: " .. tostring(row.id))
         end
-        print("[NodeEngine] " .. count .. " assaltos carregados do banco de dados.")
-    end)
+    end
+    print("[NodeEngine] " .. count .. " assaltos carregados. Gatilhos de modelo: " .. #NodeEngine.GlobalTriggers.models)
+end)
+
+lib.callback.register('node_engine:server:GetGlobalTriggers', function(source)
+    return NodeEngine.GlobalTriggers
+end)
+
+RegisterNetEvent('node_engine:server:TriggerModelInteracted', function(heistId, nodeId, entityModel, entityCoords)
+    local source = source
+    local graph = NodeEngine.RegisteredHeists[heistId]
+    if not graph then return end
+    
+    -- Inicia a sessão injetando o contexto do trigger
+    print("[NodeEngine] Iniciando assalto dinâmico via trigger_model: " .. heistId)
+    NodeEngine.StartHeist(source, heistId, graph, {
+        entityModel = entityModel,
+        entityCoords = entityCoords
+    })
 end)
 
 -- Utility to generate unique tokens
@@ -63,30 +109,31 @@ local function AdvanceNode(playerId, session, nextNodeId)
     end
 end
 
-function NodeEngine.StartHeist(playerId, heistName, graph)
+function NodeEngine.StartHeist(playerId, heistName, graph, context)
     print("[NodeEngine Debug] StartHeist invocado para jogador: " .. tostring(playerId))
-    -- Find start node
+    -- Find start node OR trigger_model node
     local startNodeId = nil
     for id, node in pairs(graph.nodes) do
-        if node.type == "start" then
+        if node.type == "start" or node.type == "trigger_model" then
             startNodeId = id
             break
         end
     end
 
     if not startNodeId then
-        print("[NodeEngine] Grafo não possui nó 'start'.")
+        print("[NodeEngine] Grafo não possui nó 'start' ou 'trigger_model'.")
         return
     end
 
-    print("[NodeEngine Debug] Nó 'start' encontrado: " .. startNodeId)
+    print("[NodeEngine Debug] Nó inicial encontrado: " .. startNodeId)
     activeSessions[playerId] = {
         heistName = heistName,
         graph = graph,
         currentNodeId = nil,
         currentNodeType = nil,
         nodeStartTime = nil,
-        nodeToken = nil
+        nodeToken = nil,
+        context = context or {}
     }
 
     AdvanceNode(playerId, activeSessions[playerId], startNodeId)
@@ -161,7 +208,7 @@ end)
 
 -- Salvar Grafo no Banco
 lib.callback.register('illegal-system:server:SaveHeistGraph', function(source, id, name, graphData)
-    if not IsPlayerAceAllowed(source, 'illegal.admin') then
+    if not Bridge.HasPermission(source, 'illegal.admin') then
         print("[NodeEngine] Permissão negada para source " .. tostring(source))
         return false, "Sem permissão."
     end
@@ -170,7 +217,7 @@ lib.callback.register('illegal-system:server:SaveHeistGraph', function(source, i
     local query = "INSERT INTO illegal_heists (id, name, graph) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name), graph=VALUES(graph)"
     
     local success, err = pcall(function()
-        MySQL.Sync.execute(query, {id, name, graphJson})
+        MySQL.query.await(query, {id, name, graphJson})
     end)
     
     if success then
@@ -185,7 +232,7 @@ end)
 
 -- Listar Grafos Salvos
 lib.callback.register('illegal-system:server:GetHeistGraphs', function(source)
-    if not IsPlayerAceAllowed(source, 'illegal.admin') then
+    if not Bridge.HasPermission(source, 'illegal.admin') then
         return false, "Sem permissão."
     end
     
@@ -205,7 +252,7 @@ end)
 
 -- Deletar Grafo
 lib.callback.register('illegal-system:server:DeleteHeistGraph', function(source, id)
-    if not IsPlayerAceAllowed(source, 'illegal.admin') then
+    if not Bridge.HasPermission(source, 'illegal.admin') then
         return false, "Sem permissão."
     end
     
@@ -225,7 +272,7 @@ end)
 -- Comando de Teste
 RegisterCommand('testheist', function(source, args)
     if source == 0 then return end
-    if not IsPlayerAceAllowed(source, 'illegal.admin') then
+    if not Bridge.HasPermission(source, 'illegal.admin') then
         Bridge.Notify(source, "Sem permissão.", "error")
         return
     end

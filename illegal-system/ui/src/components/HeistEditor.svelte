@@ -22,7 +22,12 @@
         { type: 'minigame', label: 'Minigame (Ação)', color: '#e67e22' },
         { type: 'spawn_ped', label: 'Spawn Ped (Ação)', color: '#e67e22' },
         { type: 'dispatch', label: 'Dispatch (Ação)', color: '#e67e22' },
-        { type: 'player_notification', label: 'Notification (Feedback)', color: '#f1c40f' }
+        { type: 'player_notification', label: 'Notification (Feedback)', color: '#f1c40f' },
+        { type: 'trigger_model', label: 'Trigger Model (Start)', color: '#8e44ad' },
+        { type: 'check_requirements', label: 'Check Req (Validação)', color: '#16a085' },
+        { type: 'minigame_action', label: 'Minigame Action (Ação)', color: '#e67e22' },
+        { type: 'spawn_prop', label: 'Spawn Prop (Ação)', color: '#e67e22' },
+        { type: 'crime_reward_and_cooldown', label: 'Crime Reward & CD', color: '#c0392b' }
     ];
 
     let selectedNodeId = $state(null);
@@ -41,6 +46,36 @@
             initialData.coords = null;
             initialData.minTime = 5;
             initialData.prompt = "Interagir";
+        }
+        if (type === 'trigger_model') {
+            initialData.models = "p_crate01x";
+            initialData.distance = 3.5;
+            initialData.prompt = "Interagir";
+            initialData.icon = "fas fa-hand";
+        }
+        if (type === 'check_requirements') {
+            initialData.item = "shovel";
+            initialData.amount = 1;
+            initialData.failMessage = "Você precisa de uma pá.";
+        }
+        if (type === 'minigame_action') {
+            initialData.minTime = 5;
+            initialData.animDict = "amb@medic@standing@kneel@base";
+            initialData.animName = "base";
+            initialData.propModel = "prop_tool_shovel";
+            initialData.boneName = "SKEL_R_Hand";
+            initialData.minigameType = "tierbar";
+            initialData.minigameDuration = 5000;
+        }
+        if (type === 'spawn_prop') {
+            initialData.model = "prop_ld_rub_money_01";
+            initialData.offsetZ = -1.0;
+            initialData.offsetForward = 0.5;
+        }
+        if (type === 'crime_reward_and_cooldown') {
+            initialData.crimeType = "grave_robbery";
+            initialData.cooldownPrefix = "grave";
+            initialData.successMessage = "Você encontrou algo!";
         }
         
         const newNode = {
@@ -330,6 +365,97 @@
                 <div class="form-group">
                     <label>Duração (ms)</label>
                     <input type="number" bind:value={selectedNodeData.durationMs} oninput={() => nodes = [...nodes]} />
+                </div>
+            {/if}
+            
+            {#if selectedNodeData.realType === 'trigger_model'}
+                <div class="form-group">
+                    <label>Modelos (separados por vírgula)</label>
+                    <input type="text" bind:value={selectedNodeData.models} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Prompt</label>
+                    <input type="text" bind:value={selectedNodeData.prompt} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Distância Máx</label>
+                    <input type="number" step="0.1" bind:value={selectedNodeData.distance} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Ícone (FontAwesome)</label>
+                    <input type="text" bind:value={selectedNodeData.icon} oninput={() => nodes = [...nodes]} />
+                </div>
+            {/if}
+            
+            {#if selectedNodeData.realType === 'check_requirements'}
+                <div class="form-group">
+                    <label>Item</label>
+                    <input type="text" bind:value={selectedNodeData.item} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Quantidade</label>
+                    <input type="number" bind:value={selectedNodeData.amount} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Msg de Erro</label>
+                    <input type="text" bind:value={selectedNodeData.failMessage} oninput={() => nodes = [...nodes]} />
+                </div>
+            {/if}
+            
+            {#if selectedNodeData.realType === 'minigame_action'}
+                <div class="form-group">
+                    <label>Minigame Type (none/tierbar)</label>
+                    <input type="text" bind:value={selectedNodeData.minigameType} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Duração (ms)</label>
+                    <input type="number" bind:value={selectedNodeData.minigameDuration} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Min Time Seguro (s)</label>
+                    <input type="number" bind:value={selectedNodeData.minTime} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Anim Dict</label>
+                    <input type="text" bind:value={selectedNodeData.animDict} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Anim Name</label>
+                    <input type="text" bind:value={selectedNodeData.animName} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Prop Model</label>
+                    <input type="text" bind:value={selectedNodeData.propModel} oninput={() => nodes = [...nodes]} />
+                </div>
+            {/if}
+            
+            {#if selectedNodeData.realType === 'spawn_prop'}
+                <div class="form-group">
+                    <label>Prop Model</label>
+                    <input type="text" bind:value={selectedNodeData.model} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Offset Z</label>
+                    <input type="number" step="0.1" bind:value={selectedNodeData.offsetZ} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Offset Forward</label>
+                    <input type="number" step="0.1" bind:value={selectedNodeData.offsetForward} oninput={() => nodes = [...nodes]} />
+                </div>
+            {/if}
+            
+            {#if selectedNodeData.realType === 'crime_reward_and_cooldown'}
+                <div class="form-group">
+                    <label>Tipo de Crime (Config.Crimes)</label>
+                    <input type="text" bind:value={selectedNodeData.crimeType} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Prefixo Cooldown</label>
+                    <input type="text" bind:value={selectedNodeData.cooldownPrefix} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Msg de Sucesso</label>
+                    <input type="text" bind:value={selectedNodeData.successMessage} oninput={() => nodes = [...nodes]} />
                 </div>
             {/if}
         {/if}
