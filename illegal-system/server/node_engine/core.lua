@@ -403,3 +403,134 @@ NodeEngine.RegisterNodeType("dispatch", {
         AutoAdvance(playerId, session)
     end
 })
+
+NodeEngine.RegisterNodeType("trigger_model", {
+    OnEnter = function(playerId, session, nodeData, nodeToken)
+        AutoAdvance(playerId, session)
+    end
+})
+
+NodeEngine.RegisterNodeType("check_requirements", {
+    OnEnter = function(playerId, session, nodeData, nodeToken)
+        local item = nodeData.item
+        local amount = tonumber(nodeData.amount) or 1
+        
+        if not item or item == "" then
+            AutoAdvance(playerId, session)
+            return
+        end
+        
+        if not Bridge.HasItem(playerId, item, amount) then
+            Bridge.Notify(playerId, nodeData.failMessage or "Você não tem o item necessário.", "error")
+            print(("[NodeEngine] Jogador %s não tem o item %s. Sessão encerrada."):format(playerId, item))
+            activeSessions[playerId] = nil
+            TriggerClientEvent('node_engine:client:EndSession', playerId)
+        else
+            AutoAdvance(playerId, session)
+        end
+    end
+})
+
+NodeEngine.RegisterNodeType("minigame_action", {
+    OnEnter = function(playerId, session, nodeData, nodeToken)
+        TriggerClientEvent('node_engine:client:StartNodeAction', playerId, "minigame_action", nodeData, nodeToken)
+    end,
+    OnClientReport = function(playerId, session, nodeData, reportData)
+        if not reportData.success then
+            return false, "Falhou no minigame."
+        end
+        local timeElapsed = os.time() - session.nodeStartTime
+        local minTime = tonumber(nodeData.minTime) or 0
+        if minTime > 0 and timeElapsed < minTime then
+            return false, "Tempo mínimo não atingido (Speedhack?)"
+        end
+        
+        -- Salva o tier alcançado no contexto caso outro nó precise
+        session.context.minigameTier = reportData.tier or "common"
+        return true
+    end
+})
+
+NodeEngine.RegisterNodeType("spawn_prop", {
+    OnEnter = function(playerId, session, nodeData, nodeToken)
+        local coords = session.context.entityCoords
+        if not coords then
+            print("[NodeEngine] spawn_prop ignorado: Sem coordenada no contexto da sessão.")
+            AutoAdvance(playerId, session)
+            return
+        end
+        
+        TriggerClientEvent('node_engine:client:SpawnProp', playerId, nodeData.model, coords, tonumber(nodeData.offsetZ) or 0.0, tonumber(nodeData.offsetForward) or 0.0)
+        AutoAdvance(playerId, session)
+    end
+})
+
+local robbedMemory = {}
+NodeEngine.RegisterNodeType("crime_reward_and_cooldown", {
+    OnEnter = function(playerId, session, nodeData, nodeToken)
+        local coords = session.context.entityCoords
+        local crimeType = nodeData.crimeType
+        
+        if not crimeType or crimeType == "" then
+            crimeType = "grave_robbery" -- fallback for safety
+        end
+        
+        local crimeConfig = Config.Crimes and Config.Crimes[crimeType]
+        
+        -- Calcula Cooldown ID
+        if coords and nodeData.cooldownPrefix and nodeData.cooldownPrefix ~= "" then
+            local model = session.context.entityModel or "unknown"
+            local graveId = string.format("%s_%s_%d_%d_%d", nodeData.cooldownPrefix, model, math.floor(coords.x*10), math.floor(coords.y*10), math.floor(coords.z*10))
+            
+            if Config.GraveRespawn and Config.GraveRespawn.mode == 'restart' then
+                if robbedMemory[graveId] then
+                    Bridge.Notify(playerId, "Já foi saqueado recentemente.", "error")
+                    activeSessions[playerId] = nil
+                    TriggerClientEvent('node_engine:client:EndSession', playerId)
+                    return
+                end
+                robbedMemory[graveId] = true
+            else
+                local row = MySQL.single.await('SELECT UNIX_TIMESTAMP(next_available_at) as next_time FROM illegal_grave_state WHERE grave_id = ?', { graveId })
+                if row and os.time() < row.next_time then
+                    Bridge.Notify(playerId, "Já foi saqueado recentemente.", "error")
+                    activeSessions[playerId] = nil
+                    TriggerClientEvent('node_engine:client:EndSession', playerId)
+                    return
+                end
+                
+                local days = Config.GraveRespawn and math.random(Config.GraveRespawn.minDays, Config.GraveRespawn.maxDays) or 1
+                local seconds = days * (Config.GraveRespawn and Config.GraveRespawn.minutesPerIngameDay or 48) * 60
+                local nextAvailable = os.time() + seconds
+                MySQL.insert.await([[
+                    INSERT INTO illegal_grave_state (grave_id, last_robbed_at, next_available_at)
+                    VALUES (?, NOW(), FROM_UNIXTIME(?))
+                    ON DUPLICATE KEY UPDATE last_robbed_at = NOW(), next_available_at = FROM_UNIXTIME(?)
+                ]], { graveId, nextAvailable, nextAvailable })
+            end
+        end
+
+        -- Reward
+        if crimeConfig and crimeConfig.loot then
+            local tier = session.context.minigameTier or "common"
+            local lootTable = crimeConfig.loot[tier] or crimeConfig.loot["common"]
+            if lootTable and #lootTable > 0 then
+                local rewardItem = lootTable[math.random(#lootTable)]
+                CrimeCore.FinishCrime(playerId, crimeType, true, rewardItem)
+                if nodeData.successMessage and nodeData.successMessage ~= "" then
+                    Bridge.Notify(playerId, nodeData.successMessage, "success")
+                end
+            else
+                CrimeCore.FinishCrime(playerId, crimeType, false, nil)
+                Bridge.Notify(playerId, "Nada de valor aqui.", "error")
+            end
+        else
+            CrimeCore.FinishCrime(playerId, crimeType, true, nil)
+            if nodeData.successMessage and nodeData.successMessage ~= "" then
+                Bridge.Notify(playerId, nodeData.successMessage, "success")
+            end
+        end
+        
+        AutoAdvance(playerId, session)
+    end
+})
