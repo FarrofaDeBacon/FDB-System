@@ -467,6 +467,7 @@ NodeEngine.RegisterNodeType("minigame_action", {
 
 NodeEngine.RegisterNodeType("spawn_prop", {
     OnEnter = function(playerId, session, nodeData, nodeToken)
+        print("[NodeEngine] Entrando no nó spawn_prop para jogador " .. tostring(playerId))
         local coords = session.context.entityCoords
         if not coords then
             print("[NodeEngine] spawn_prop ignorado: Sem coordenada no contexto da sessão.")

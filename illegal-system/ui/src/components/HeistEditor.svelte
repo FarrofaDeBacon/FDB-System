@@ -136,7 +136,7 @@
     }
     
     const onConnect = (connection) => {
-        edges = addEdge(connection, edges);
+        edges = addEdge(connection, edges.filter(e => e.source !== connection.source));
     };
     
     function onPaneClick() {
