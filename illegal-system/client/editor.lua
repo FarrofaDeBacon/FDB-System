@@ -64,10 +64,10 @@ RegisterNUICallback("deleteHeist", function(data, cb)
     local success, msg = lib.callback.await('illegal-system:server:DeleteHeistGraph', 5000, data.id)
     if success then
         lib.notify({ title = 'Node Engine', description = 'Assalto deletado com sucesso!', type = 'success' })
-        cb('ok')
+        cb({ success = true, message = "Deletado com sucesso" })
     else
         lib.notify({ title = 'Node Engine', description = 'Erro: ' .. tostring(msg), type = 'error' })
-        cb('error')
+        cb({ success = false, message = tostring(msg) })
     end
 end)
 
@@ -129,13 +129,13 @@ CreateThread(function()
         Wait(0)
         if isEditorOpen and not isPlacing then
             if editorMarkers.store then
-                Draw3DText(editorMarkers.store.x, editorMarkers.store.y, editorMarkers.store.z + 1.0, "📍 LOJA")
+                Draw3DText(editorMarkers.store.x, editorMarkers.store.y, editorMarkers.store.z + 1.0, "~y~[LOJA]")
             end
             if editorMarkers.door then
-                Draw3DText(editorMarkers.door.x, editorMarkers.door.y, editorMarkers.door.z + 1.0, "🚪 PORTA")
+                Draw3DText(editorMarkers.door.x, editorMarkers.door.y, editorMarkers.door.z + 1.0, "~g~[PORTA]")
             end
             if editorMarkers.register then
-                Draw3DText(editorMarkers.register.x, editorMarkers.register.y, editorMarkers.register.z + 1.0, "💰 REGISTRADORA")
+                Draw3DText(editorMarkers.register.x, editorMarkers.register.y, editorMarkers.register.z + 1.0, "~b~[REGISTRADORA]")
             end
         else
             Wait(500)

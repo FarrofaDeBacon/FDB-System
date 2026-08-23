@@ -1,6 +1,7 @@
 <script>
-    import { SvelteFlow, Controls, Background } from '@xyflow/svelte';
+    import { SvelteFlow, Controls, Background, BackgroundVariant, addEdge } from '@xyflow/svelte';
     import '@xyflow/svelte/dist/style.css';
+    import Modal from './Modal.svelte';
 
     let { isPlacementMode = $bindable(false) } = $props();
     
@@ -32,6 +33,7 @@
 
     let selectedNodeId = $state(null);
     let selectedNodeData = $state(null);
+    let selectedEdgeId = $state(null);
 
     function onDragStart(event, nodeType) {
         event.dataTransfer.setData('application/svelteflow', nodeType);
@@ -39,6 +41,11 @@
     }
 
     function addNode(type, position = { x: 250, y: 150 }) {
+        if (position.x === 250 && position.y === 150) {
+            position.x = 250 + (nodes.length * 20);
+            position.y = 150 + (nodes.length * 20);
+        }
+        
         const config = nodeTypesList.find(n => n.type === type);
         
         let initialData = { label: config.label };
@@ -52,6 +59,10 @@
             initialData.distance = 3.5;
             initialData.prompt = "Interagir";
             initialData.icon = "fas fa-hand";
+        }
+        if (type === 'minigame_action') {
+            initialData.minigameType = "tierbar";
+            initialData.minigameDuration = 5000;
         }
         if (type === 'check_requirements') {
             initialData.item = "shovel";
@@ -108,14 +119,46 @@
         event.dataTransfer.dropEffect = 'move';
     }
 
-    function selectNode({ node }) {
-        selectedNodeId = node.id;
-        selectedNodeData = node.data;
+    function selectNode(event, node) {
+        if (!node) node = event.node || event.detail?.node;
+        if (node) {
+            selectedNodeId = node.id;
+            selectedNodeData = node.data;
+        }
+        selectedEdgeId = null;
     }
+    
+    function onEdgeClick(event, edge) {
+        if (!edge) edge = event.edge || event.detail?.edge;
+        if (edge) selectedEdgeId = edge.id;
+        selectedNodeId = null;
+        selectedNodeData = null;
+    }
+    
+    const onConnect = (connection) => {
+        edges = addEdge(connection, edges);
+    };
     
     function onPaneClick() {
         selectedNodeId = null;
         selectedNodeData = null;
+        selectedEdgeId = null;
+    }
+
+    function deleteSelectedNode() {
+        if (selectedNodeId) {
+            nodes = nodes.filter(n => n.id !== selectedNodeId);
+            edges = edges.filter(e => e.source !== selectedNodeId && e.target !== selectedNodeId);
+            selectedNodeId = null;
+            selectedNodeData = null;
+        }
+    }
+
+    function deleteSelectedEdge() {
+        if (selectedEdgeId) {
+            edges = edges.filter(e => e.id !== selectedEdgeId);
+            selectedEdgeId = null;
+        }
     }
 
     function startPlacement() {
@@ -154,12 +197,12 @@
                 data: {}
             };
             
-            // Copia as propriedades (removendo label e realType que são exclusivos do UI)
             for (const [k, v] of Object.entries(n.data)) {
                 if (k !== 'label' && k !== 'realType') {
                     nodeExport.data[k] = v;
                 }
             }
+            nodeExport.data.uiPosition = n.position;
             
             graph.nodes[n.id] = nodeExport;
         });
@@ -182,7 +225,70 @@
             })
         }).then(() => {
             loadHeists(); // Refresh list after saving
+            selectedSavedHeist = heistId; // Seleciona o recém-salvo
         }).catch(err => console.error("Error sending NUI message:", err));
+    }
+
+    let showModal = $state(false);
+    let modalConfig = $state({
+        title: "",
+        message: "",
+        type: "alert",
+        onConfirm: () => {},
+        onCancel: () => {}
+    });
+
+    function deleteHeist() {
+        if (!heistId.trim()) return;
+        
+        modalConfig = {
+            title: "Deletar Assalto",
+            message: `Tem certeza que deseja deletar o assalto '${heistName}'? Esta ação não pode ser desfeita.`,
+            type: "confirm",
+            onConfirm: () => {
+                showModal = false;
+                executeDelete();
+            },
+            onCancel: () => {
+                showModal = false;
+            }
+        };
+        showModal = true;
+    }
+    
+    function executeDelete() {
+        fetch(`https://${GetParentResourceName()}/deleteHeist`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+            body: JSON.stringify({ id: heistId })
+        }).then(res => res.json()).then(data => {
+            if (data.success) {
+                nodes = [];
+                edges = [];
+                heistId = "novo_assalto";
+                heistName = "Novo Assalto";
+                selectedSavedHeist = "";
+                loadHeists();
+                
+                modalConfig = {
+                    title: "Sucesso",
+                    message: "Assalto deletado com sucesso!",
+                    type: "alert",
+                    onConfirm: () => { showModal = false; },
+                    onCancel: () => {}
+                };
+                showModal = true;
+            } else {
+                modalConfig = {
+                    title: "Erro",
+                    message: data.message || "Erro ao deletar.",
+                    type: "alert",
+                    onConfirm: () => { showModal = false; },
+                    onCancel: () => {}
+                };
+                showModal = true;
+            }
+        }).catch(err => console.error("Error deleting:", err));
     }
 
     let savedHeists = $state([]);
@@ -212,12 +318,13 @@
                 const idNum = parseInt(idStr) || parseInt(idStr.replace('node_', ''));
                 if (idNum > maxId) maxId = idNum;
                 
-                const config = nodeTypesList.find(n => n.type === nodeData.type) || { label: nodeData.type };
+                const config = nodeTypesList.find(n => n.type === nodeData.type) || { label: nodeData.type, color: '#333' };
                 
                 newNodes.push({
                     id: idStr,
                     type: 'default',
                     position: nodeData.data.uiPosition || { x: Math.random() * 200, y: Math.random() * 200 },
+                    style: `background: ${config.color}; color: white; border: none; border-radius: 4px; padding: 10px; min-width: 120px; text-align: center;`,
                     data: {
                         ...nodeData.data,
                         label: config.label,
@@ -235,24 +342,6 @@
                 target: e.target
             }));
         }
-    }
-
-    function deleteHeist() {
-        if (!heistId) return;
-        if (!confirm("Tem certeza que deseja deletar este assalto?")) return;
-        
-        fetch(`https://${GetParentResourceName()}/deleteHeist`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json; charset=UTF-8' },
-            body: JSON.stringify({ id: heistId })
-        }).then(() => {
-            loadHeists();
-            heistId = "novo_assalto";
-            heistName = "Novo Assalto";
-            nodes = [];
-            edges = [];
-            selectedSavedHeist = "";
-        }).catch(err => console.error("Error deleting heist:", err));
     }
     
     // Escutador global caso voltemos do placement
@@ -290,14 +379,13 @@
 <div class="heist-editor-container">
     <div class="sidebar">
         <h3>Meus Assaltos</h3>
-        <div class="form-group" style="display: flex; gap: 5px;">
-            <select class="admin-select" bind:value={selectedSavedHeist} style="flex: 1; padding: 10px; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 4px;">
+        <div class="form-group">
+            <select class="admin-select" bind:value={selectedSavedHeist} onchange={applyHeist} style="width: 100%; padding: 10px; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 4px;">
                 <option value="">-- Novo Assalto --</option>
                 {#each savedHeists as heist}
                     <option value={heist.id}>{heist.name} ({heist.id})</option>
                 {/each}
             </select>
-            <button class="admin-button" style="width: auto; margin-top: 0;" onclick={applyHeist}>Carregar</button>
         </div>
         
         <hr style="border-color: #333; margin: 20px 0;">
@@ -458,16 +546,35 @@
                     <input type="text" bind:value={selectedNodeData.successMessage} oninput={() => nodes = [...nodes]} />
                 </div>
             {/if}
+            
+            <hr style="border-color: #444; margin: 15px 0;">
+            <button class="admin-button" style="background-color: #e74c3c; width: 100%; color: white;" onclick={deleteSelectedNode}>🗑️ Deletar Nó</button>
+        {/if}
+        
+        {#if selectedEdgeId}
+            <hr style="border-color: #333; margin: 20px 0;">
+            <h3>Ligação Selecionada</h3>
+            <button class="admin-button" style="background-color: #e74c3c; width: 100%; color: white;" onclick={deleteSelectedEdge}>🗑️ Deletar Ligação</button>
         {/if}
     </div>
 
     <div class="canvas-area" ondrop={onDrop} ondragover={onDragOver}>
-        <SvelteFlow bind:nodes={nodes} bind:edges={edges} onnodeclick={selectNode} onpaneclick={onPaneClick}>
+        <SvelteFlow bind:nodes={nodes} bind:edges={edges} onconnect={onConnect} onnodeclick={selectNode} onedgeclick={onEdgeClick} onpaneclick={onPaneClick}>
             <Controls />
-            <Background variant="dots" gap={12} size={1} />
+            <Background variant={BackgroundVariant.Dots} />
         </SvelteFlow>
     </div>
 </div>
+
+{#if showModal}
+    <Modal 
+        title={modalConfig.title} 
+        message={modalConfig.message} 
+        type={modalConfig.type} 
+        onConfirm={modalConfig.onConfirm} 
+        onCancel={modalConfig.onCancel} 
+    />
+{/if}
 
 <style>
     .heist-editor-container {
@@ -476,6 +583,10 @@
         height: 100%;
         background: #111;
         color: #fff;
+    }
+    :global(.svelte-flow__node) {
+        color: #111 !important;
+        font-weight: 500;
     }
     .sidebar {
         width: 300px;

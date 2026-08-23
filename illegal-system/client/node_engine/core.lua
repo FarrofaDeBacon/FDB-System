@@ -71,46 +71,70 @@ RegisterNetEvent('node_engine:client:StartNodeAction', function(type, data, toke
             }
         })
     elseif type == "minigame_action" then
+        print("[NodeEngine DEBUG] *** ENTRANDO no branch minigame_action ***")
         CreateThread(function()
+            print("[NodeEngine DEBUG] *** DENTRO do CreateThread ***")
             local ped = PlayerPedId()
             local minTime = (data.minTime or 1) * 1000
             local propObj = nil
             
-            -- Animação opcional
+            -- Animacao opcional
             if data.animDict and data.animName and data.animDict ~= "" then
                 RequestAnimDict(data.animDict)
-                while not HasAnimDictLoaded(data.animDict) do Wait(10) end
-                
-                if data.propModel and data.propModel ~= "" then
-                    local propHash = GetHashKey(data.propModel)
-                    RequestModel(propHash)
-                    while not HasModelLoaded(propHash) do Wait(10) end
-                    
-                    propObj = CreateObject(propHash, 0, 0, 0, true, true, false)
-                    local boneIndex = GetEntityBoneIndexByName(ped, data.boneName or "SKEL_R_Hand")
-                    -- Valores default ou customizados (ideal seria expor no UI se for flexível demais)
-                    AttachEntityToEntity(propObj, ped, boneIndex, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, true, true, false, true, 1, true)
+                local timeout = 50
+                while not HasAnimDictLoaded(data.animDict) and timeout > 0 do 
+                    Wait(100)
+                    timeout = timeout - 1
                 end
                 
-                TaskPlayAnim(ped, data.animDict, data.animName, 8.0, -8.0, -1, 1, 0, false, false, false)
+                if timeout <= 0 then
+                    print("[NodeEngine] AVISO: Dicionario de animacao nao pode ser carregado: " .. tostring(data.animDict))
+                else
+                    if data.propModel and data.propModel ~= "" then
+                        local propHash = GetHashKey(data.propModel)
+                        RequestModel(propHash)
+                        local pTimeout = 50
+                        while not HasModelLoaded(propHash) and pTimeout > 0 do 
+                            Wait(100)
+                            pTimeout = pTimeout - 1
+                        end
+                        if HasModelLoaded(propHash) then
+                            propObj = CreateObject(propHash, 0, 0, 0, true, true, false)
+                            local boneIndex = GetEntityBoneIndexByName(ped, data.boneName or "SKEL_R_Hand")
+                            AttachEntityToEntity(propObj, ped, boneIndex, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, true, true, false, true, 1, true)
+                        end
+                    end
+                    TaskPlayAnim(ped, data.animDict, data.animName, 8.0, -8.0, -1, 1, 0, false, false, false)
+                end
             end
             
             local result = { success = true, tier = "common" }
-            -- Minigame (tierbar por padrão, se houver)
+            print("[NodeEngine DEBUG] minigameType=" .. tostring(data.minigameType) .. " minigameDuration=" .. tostring(data.minigameDuration))
             if data.minigameType and data.minigameType ~= "" and data.minigameType ~= "none" then
-                -- Duração em ms
                 local duration = data.minigameDuration or 5000
-                result = exports['fdb-libs']:StartMinigame(data.minigameType, {
-                    duration = duration,
-                    -- Passa imagens genéricas se for tierbar
-                    images = {
-                        common = "nui://fdb-libs/ui/public/img/items/unknown.png",
-                        uncommon = "nui://fdb-libs/ui/public/img/items/unknown.png",
-                        rare = "nui://fdb-libs/ui/public/img/items/unknown.png"
-                    },
-                    zones = { 30, 20, 10 } -- Default zones
-                })
+                if data.minigameType == "tierbar" then
+                    duration = duration / 1000.0
+                end
+                
+                print("[NodeEngine DEBUG] Chamando StartMinigame tipo=" .. tostring(data.minigameType) .. " duration=" .. tostring(duration))
+                local mgOk, mgResult = pcall(function()
+                    return exports['fdb-libs']:StartMinigame(data.minigameType, {
+                        duration = duration,
+                        images = {
+                            common = "nui://fdb-libs/ui/public/img/items/unknown.png",
+                            uncommon = "nui://fdb-libs/ui/public/img/items/unknown.png",
+                            rare = "nui://fdb-libs/ui/public/img/items/unknown.png"
+                        }
+                    })
+                end)
+                if mgOk then
+                    print("[NodeEngine DEBUG] StartMinigame retornou: success=" .. tostring(mgResult and mgResult.success) .. " tier=" .. tostring(mgResult and mgResult.tier))
+                    result = mgResult or result
+                else
+                    print("[NodeEngine ERRO] StartMinigame falhou: " .. tostring(mgResult))
+                end
             else
+                print("[NodeEngine DEBUG] Sem minigame, esperando " .. tostring(minTime) .. "ms")
                 Wait(minTime)
             end
             
@@ -119,9 +143,27 @@ RegisterNetEvent('node_engine:client:StartNodeAction', function(type, data, toke
                 DeleteEntity(propObj)
             end
             
+            print("[NodeEngine DEBUG] Enviando ReportNodeCompletion. success=" .. tostring(result.success))
             TriggerServerEvent('node_engine:server:ReportNodeCompletion', currentNodeToken, result)
         end)
     end
+end)
+
+RegisterNetEvent('node_engine:client:SpawnAdminCrate', function()
+    local hash = GetHashKey("p_crate01x")
+    RequestModel(hash)
+    while not HasModelLoaded(hash) do Wait(10) end
+    
+    local ped = PlayerPedId()
+    local coords = GetEntityCoords(ped)
+    local forward = GetEntityForwardVector(ped)
+    local spawnCoords = coords + (forward * 1.5)
+    
+    local obj = CreateObject(hash, spawnCoords.x, spawnCoords.y, spawnCoords.z, true, true, false)
+    PlaceObjectOnGroundProperly(obj)
+    SetModelAsNoLongerNeeded(hash)
+    
+    exports['fdb-libs']:Notify("Caixote spawnado na sua frente!", "success")
 end)
 
 RegisterNetEvent('node_engine:client:SpawnProp', function(modelName, entityCoords, offsetZ, offsetForward)

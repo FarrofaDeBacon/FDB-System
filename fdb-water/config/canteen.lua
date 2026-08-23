@@ -3,6 +3,7 @@ Config = Config or {}
 ------------------------
 -- settings
 ------------------------
+Config.EnableWaterPrompts = true -- Set to false to disable E/G water prompts (useful if you prefer using targets/items exclusively)
 Config.DrinkAmount = 25 -- amount of water increase per drink
 
 ------------------------

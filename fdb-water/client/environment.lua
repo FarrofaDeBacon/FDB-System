@@ -68,8 +68,8 @@ local function SetupDrinkPrompt()
     DrinkPrompt = PromptRegisterBegin()
     PromptSetControlAction(DrinkPrompt, 0xCEFD9220) -- E key
     PromptSetText(DrinkPrompt, CreateVarString(10, 'LITERAL_STRING', str1))
-    PromptSetEnabled(DrinkPrompt, true)
-    PromptSetVisible(DrinkPrompt, true)
+    PromptSetEnabled(DrinkPrompt, false)
+    PromptSetVisible(DrinkPrompt, false)
     PromptSetStandardMode(DrinkPrompt, true)
     PromptSetHoldMode(DrinkPrompt, 1000)
     PromptRegisterEnd(DrinkPrompt)
@@ -78,8 +78,8 @@ local function SetupDrinkPrompt()
     FillPrompt = PromptRegisterBegin()
     PromptSetControlAction(FillPrompt, 0x760A9C6F) -- G key
     PromptSetText(FillPrompt, CreateVarString(10, 'LITERAL_STRING', str2))
-    PromptSetEnabled(FillPrompt, true)
-    PromptSetVisible(FillPrompt, true)
+    PromptSetEnabled(FillPrompt, false)
+    PromptSetVisible(FillPrompt, false)
     PromptSetStandardMode(FillPrompt, true)
     PromptSetHoldMode(FillPrompt, 1000)
     PromptRegisterEnd(FillPrompt)
@@ -91,7 +91,7 @@ CreateThread(function()
     
     while true do
         local wait = 1000
-        if isLoggedIn then
+        if isLoggedIn and Config.EnableWaterPrompts then
             local ped = cache.ped
             if IsEntityInWater(ped) and GetEntitySubmergedLevel(ped) > 0.1 and not isDrinking and not IsPedOnMount(ped) and not IsPedInAnyVehicle(ped) then
                 local coords = GetEntityCoords(ped)

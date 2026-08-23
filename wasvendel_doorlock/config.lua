@@ -38,7 +38,7 @@ Config.Status3D = {
 -- Minigame resource is optional: if resource is not started, lockpick succeeds without UI.
 -- If vorp_doorlocks also registers this item, stop that resource or it will steal the use.
 Config.Lockpick = {
-    resource = "fdb-lockpick",
+    resource = "", -- TEMPORÁRIO PARA TESTES
     export = "startLockpick",
     difficulty = 1,
     item = "lockpick",

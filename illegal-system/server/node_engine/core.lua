@@ -548,3 +548,8 @@ NodeEngine.RegisterNodeType("crime_reward_and_cooldown", {
         AutoAdvance(playerId, session)
     end
 })
+
+RegisterCommand('spawncaixa', function(source)
+    if source == 0 then return end
+    TriggerClientEvent('node_engine:client:SpawnAdminCrate', source)
+end, true)
