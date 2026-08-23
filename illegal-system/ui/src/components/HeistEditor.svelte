@@ -515,6 +515,10 @@
                     <label>Prop Model</label>
                     <input type="text" bind:value={selectedNodeData.propModel} oninput={() => nodes = [...nodes]} />
                 </div>
+                <div class="form-group">
+                    <label>Msg de Falha (Erro)</label>
+                    <input type="text" bind:value={selectedNodeData.failMessage} oninput={() => nodes = [...nodes]} />
+                </div>
             {/if}
             
             {#if selectedNodeData.realType === 'spawn_prop'}

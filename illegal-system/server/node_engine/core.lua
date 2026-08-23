@@ -451,6 +451,13 @@ NodeEngine.RegisterNodeType("minigame_action", {
     end,
     OnClientReport = function(playerId, session, nodeData, reportData)
         if not reportData.success then
+            local msg = nodeData.failMessage
+            if not msg or msg == "" then
+                msg = "Você falhou no minigame."
+            end
+            Bridge.Notify(playerId, msg, "error")
+            activeSessions[playerId] = nil
+            TriggerClientEvent('node_engine:client:EndSession', playerId)
             return false, "Falhou no minigame."
         end
         local timeElapsed = os.time() - session.nodeStartTime
