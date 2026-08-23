@@ -21,3 +21,7 @@ clone_rsg.ps1
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# Transcripts e dumps de ferramentas (Antigravity, etc.)
+historico_*.md
+transcript_*.md
