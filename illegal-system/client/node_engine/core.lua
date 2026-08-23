@@ -168,9 +168,24 @@ end)
 
 RegisterNetEvent('node_engine:client:SpawnProp', function(modelName, entityCoords, offsetZ, offsetForward)
     CreateThread(function()
+        if not modelName or modelName == "" then
+            print("[NodeEngine ERRO] spawn_prop ignorado: nome do modelo nulo ou vazio.")
+            return
+        end
+        
         local hash = GetHashKey(modelName)
         RequestModel(hash)
-        while not HasModelLoaded(hash) do Wait(10) end
+        
+        local timeout = 50
+        while not HasModelLoaded(hash) and timeout > 0 do 
+            Wait(100)
+            timeout = timeout - 1
+        end
+        
+        if not HasModelLoaded(hash) then
+            print("[NodeEngine ERRO] spawn_prop: Nao foi possivel carregar o modelo: " .. tostring(modelName))
+            return
+        end
         
         local ped = PlayerPedId()
         local pedHeading = GetEntityHeading(ped)
@@ -185,6 +200,7 @@ RegisterNetEvent('node_engine:client:SpawnProp', function(modelName, entityCoord
         PlaceObjectOnGroundProperly(obj)
         SetEntityHeading(obj, pedHeading)
         SetModelAsNoLongerNeeded(hash)
+        print("[NodeEngine DEBUG] Prop spawnado com sucesso: " .. tostring(modelName))
     end)
 end)
 
