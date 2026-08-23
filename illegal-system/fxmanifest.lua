@@ -21,7 +21,6 @@ server_scripts {
     'server/core.lua',
     'server/editor.lua',
     'server/crimes/npc_robbery.lua',
-    'server/crimes/grave_robbery.lua',
     'server/crimes/store_robbery.lua',
     'server/node_engine/core.lua'
 }
@@ -35,7 +34,6 @@ client_scripts {
     'client/freecam.lua',
     'client/editor.lua',
     'client/crimes/dev_tool.lua',
-    'client/crimes/grave_robbery.lua',
     'client/crimes/store_robbery.lua',
     'client/node_engine/core.lua'
 }
