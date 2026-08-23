@@ -97,6 +97,12 @@ CreateThread(function()
                 local coords = GetEntityCoords(ped)
                 local water = GetWaterMapZoneAtCoords(coords.x, coords.y, coords.z)
                 
+                print(("[FDB-WATER DEBUG] Tick. IsEntityInWater: %s | SubmergedLevel: %.3f | WaterZone: %s"):format(
+                    tostring(IsEntityInWater(ped)), 
+                    GetEntitySubmergedLevel(ped), 
+                    tostring(water)
+                ))
+                
                 -- Check if it's a valid natural water source (not inside a bathtub)
                 if water ~= 0 then
                     wait = 0
