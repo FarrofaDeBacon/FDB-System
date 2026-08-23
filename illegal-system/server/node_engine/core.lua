@@ -470,9 +470,9 @@ NodeEngine.RegisterNodeType("spawn_prop", {
         print("[NodeEngine] Entrando no nó spawn_prop para jogador " .. tostring(playerId))
         local coords = session.context.entityCoords
         if not coords then
-            print("[NodeEngine] spawn_prop ignorado: Sem coordenada no contexto da sessão.")
-            AutoAdvance(playerId, session)
-            return
+            print("[NodeEngine] spawn_prop: Sem coordenada no contexto, usando coordenadas do jogador (teste via comando?).")
+            local ped = GetPlayerPed(playerId)
+            coords = GetEntityCoords(ped)
         end
         
         TriggerClientEvent('node_engine:client:SpawnProp', playerId, nodeData.model, coords, tonumber(nodeData.offsetZ) or 0.0, tonumber(nodeData.offsetForward) or 0.0)
@@ -484,6 +484,10 @@ local robbedMemory = {}
 NodeEngine.RegisterNodeType("crime_reward_and_cooldown", {
     OnEnter = function(playerId, session, nodeData, nodeToken)
         local coords = session.context.entityCoords
+        if not coords then
+            local ped = GetPlayerPed(playerId)
+            coords = GetEntityCoords(ped)
+        end
         local crimeType = nodeData.crimeType
         
         if not crimeType or crimeType == "" then
