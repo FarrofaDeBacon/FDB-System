@@ -88,14 +88,3 @@ RegisterCommand('robsystem', function()
         Bridge.Notify("Modo Dev DESLIGADO", "error")
     end
 end, false)
-
-RegisterCommand('test_grave_exploit', function()
-    -- Pega o último token salvo e manda um evento finish imediatamente
-    if lastDebugToken then
-        TriggerServerEvent('illegal-system:server:finishGraveRobbery', true, 'rare', lastDebugToken)
-    else
-        print("Precisa rodar /test_minigame primeiro pra gerar um token")
-    end
-end, false)
-
-
