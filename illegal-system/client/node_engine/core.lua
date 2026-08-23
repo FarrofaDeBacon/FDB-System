@@ -101,7 +101,13 @@ RegisterNetEvent('node_engine:client:StartNodeAction', function(type, data, toke
                         if HasModelLoaded(propHash) then
                             propObj = CreateObject(propHash, 0, 0, 0, true, true, false)
                             local boneIndex = GetEntityBoneIndexByName(ped, data.boneName or "SKEL_R_Hand")
-                            AttachEntityToEntity(propObj, ped, boneIndex, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, true, true, false, true, 1, true)
+                            local ox = tonumber(data.attachOffsetX) or 0.0
+                            local oy = tonumber(data.attachOffsetY) or 0.0
+                            local oz = tonumber(data.attachOffsetZ) or 0.0
+                            local rx = tonumber(data.attachRotX) or 0.0
+                            local ry = tonumber(data.attachRotY) or 0.0
+                            local rz = tonumber(data.attachRotZ) or 0.0
+                            AttachEntityToEntity(propObj, ped, boneIndex, ox, oy, oz, rx, ry, rz, true, true, false, true, 1, true)
                         end
                     end
                     TaskPlayAnim(ped, data.animDict, data.animName, 8.0, -8.0, -1, 1, 0, false, false, false)
@@ -191,10 +197,11 @@ RegisterNetEvent('node_engine:client:SpawnProp', function(modelName, entityCoord
         local pedHeading = GetEntityHeading(ped)
         local rad = math.rad(pedHeading)
         
-        -- Spawn na coordenada fornecida + offset
-        local spawnX = entityCoords.x + (math.sin(-rad) * (offsetForward or 0.0))
-        local spawnY = entityCoords.y + (math.cos(-rad) * (offsetForward or 0.0))
-        local spawnZ = entityCoords.z + (offsetZ or 0.0)
+        -- Spawn na coordenada fornecida + offset, baseado na coordenada do jogador
+        local pedCoords = GetEntityCoords(ped)
+        local spawnX = pedCoords.x + (math.sin(-rad) * (offsetForward or 0.0))
+        local spawnY = pedCoords.y + (math.cos(-rad) * (offsetForward or 0.0))
+        local spawnZ = pedCoords.z + (offsetZ or 0.0)
         
         local obj = CreateObject(hash, spawnX, spawnY, spawnZ, true, true, false)
         PlaceObjectOnGroundProperly(obj)

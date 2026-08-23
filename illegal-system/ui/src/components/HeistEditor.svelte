@@ -519,6 +519,22 @@
                     <label>Msg de Falha (Erro)</label>
                     <input type="text" bind:value={selectedNodeData.failMessage} oninput={() => nodes = [...nodes]} />
                 </div>
+                <div class="form-group">
+                    <label>Prop Offset (X, Y, Z)</label>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="number" step="0.001" placeholder="X" bind:value={selectedNodeData.attachOffsetX} oninput={() => nodes = [...nodes]} style="flex:1;" />
+                        <input type="number" step="0.001" placeholder="Y" bind:value={selectedNodeData.attachOffsetY} oninput={() => nodes = [...nodes]} style="flex:1;" />
+                        <input type="number" step="0.001" placeholder="Z" bind:value={selectedNodeData.attachOffsetZ} oninput={() => nodes = [...nodes]} style="flex:1;" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Prop Rotation (X, Y, Z)</label>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="number" step="0.01" placeholder="X" bind:value={selectedNodeData.attachRotX} oninput={() => nodes = [...nodes]} style="flex:1;" />
+                        <input type="number" step="0.01" placeholder="Y" bind:value={selectedNodeData.attachRotY} oninput={() => nodes = [...nodes]} style="flex:1;" />
+                        <input type="number" step="0.01" placeholder="Z" bind:value={selectedNodeData.attachRotZ} oninput={() => nodes = [...nodes]} style="flex:1;" />
+                    </div>
+                </div>
             {/if}
             
             {#if selectedNodeData.realType === 'spawn_prop'}

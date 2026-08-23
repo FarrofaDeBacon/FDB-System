@@ -74,7 +74,13 @@ INSERT IGNORE INTO `illegal_heists` (`id`, `name`, `graph`, `active`) VALUES (
                     "animDict": "amb_work@world_human_gravedig@working@male_b@base", 
                     "animName": "base", 
                     "propModel": "p_shovel02x", 
-                    "failMessage": "Você foi interrompido!" 
+                    "failMessage": "Você foi interrompido!",
+                    "attachOffsetX": 0.0,
+                    "attachOffsetY": -0.19,
+                    "attachOffsetZ": -0.089,
+                    "attachRotX": 274.19,
+                    "attachRotY": 483.89,
+                    "attachRotZ": 378.40
                 } 
             },
             "node_spawn": { 
