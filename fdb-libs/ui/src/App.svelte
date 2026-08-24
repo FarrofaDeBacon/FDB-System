@@ -259,7 +259,6 @@
 
     <ContextMenu />
     <ThemeEditor />
-    <RiskBar />
 </main>
 
 <style>
