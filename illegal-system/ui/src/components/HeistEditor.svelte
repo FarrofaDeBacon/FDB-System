@@ -570,16 +570,109 @@
             
             {#if selectedNodeData.realType === 'spawn_prop'}
                 <div class="form-group">
-                    <label>Prop Model</label>
-                    <input type="text" bind:value={selectedNodeData.model} oninput={() => nodes = [...nodes]} />
+                    <label>Props List</label>
+                    {#if !selectedNodeData.props}
+                        <button class="admin-button" onclick={() => {
+                            selectedNodeData.props = [{ 
+                                model: selectedNodeData.model || "", 
+                                offsetZ: selectedNodeData.offsetZ || 0, 
+                                offsetForward: selectedNodeData.offsetForward || 0 
+                            }];
+                            delete selectedNodeData.model;
+                            delete selectedNodeData.offsetZ;
+                            delete selectedNodeData.offsetForward;
+                            nodes = [...nodes];
+                        }}>Migrar para Formato de Lista</button>
+                        
+                        <div style="border: 1px dashed #666; padding: 10px; margin-top: 10px;">
+                            <label>Prop Model (Legacy)</label>
+                            <input type="text" bind:value={selectedNodeData.model} oninput={() => nodes = [...nodes]} />
+                            <label>Offset Z (Legacy)</label>
+                            <input type="number" step="0.1" bind:value={selectedNodeData.offsetZ} oninput={() => nodes = [...nodes]} />
+                            <label>Offset Forward (Legacy)</label>
+                            <input type="number" step="0.1" bind:value={selectedNodeData.offsetForward} oninput={() => nodes = [...nodes]} />
+                        </div>
+                    {:else}
+                        {#each selectedNodeData.props as prop, index}
+                            <div style="border: 1px solid #444; padding: 10px; margin-bottom: 8px; border-radius: 4px; background: #222;">
+                                <strong>Prop {index + 1}</strong>
+                                <button class="admin-button" style="background: #e74c3c; padding: 2px 8px; font-size: 11px; float: right;" onclick={() => {
+                                    selectedNodeData.props.splice(index, 1);
+                                    nodes = [...nodes];
+                                }}>Remover</button>
+                                <div style="clear: both; margin-bottom: 5px;"></div>
+                                
+                                <label>Model</label>
+                                <input type="text" bind:value={prop.model} oninput={() => nodes = [...nodes]} />
+                                
+                                <div style="display: flex; gap: 5px; margin-top: 5px;">
+                                    <div style="flex: 1;">
+                                        <label>Offset Z</label>
+                                        <input type="number" step="0.1" bind:value={prop.offsetZ} oninput={() => nodes = [...nodes]} />
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <label>Offset Forward</label>
+                                        <input type="number" step="0.1" bind:value={prop.offsetForward} oninput={() => nodes = [...nodes]} />
+                                    </div>
+                                </div>
+                            </div>
+                        {/each}
+                        <button class="admin-button" style="background: #27ae60; width: 100%;" onclick={() => {
+                            selectedNodeData.props.push({ model: "prop_box", offsetZ: 0, offsetForward: 0 });
+                            nodes = [...nodes];
+                        }}>+ Adicionar Prop</button>
+                    {/if}
                 </div>
+            {/if}
+
+            {#if selectedNodeData.realType === 'spawn_ped'}
                 <div class="form-group">
-                    <label>Offset Z</label>
-                    <input type="number" step="0.1" bind:value={selectedNodeData.offsetZ} oninput={() => nodes = [...nodes]} />
-                </div>
-                <div class="form-group">
-                    <label>Offset Forward</label>
-                    <input type="number" step="0.1" bind:value={selectedNodeData.offsetForward} oninput={() => nodes = [...nodes]} />
+                    <label>Peds List</label>
+                    {#if !selectedNodeData.peds}
+                        <button class="admin-button" onclick={() => {
+                            selectedNodeData.peds = [{ 
+                                pedModel: selectedNodeData.pedModel || "", 
+                                taskType: selectedNodeData.taskType || "", 
+                                distance: selectedNodeData.distance || 0,
+                                animDict: selectedNodeData.animDict || "",
+                                animName: selectedNodeData.animName || ""
+                            }];
+                            delete selectedNodeData.pedModel;
+                            delete selectedNodeData.taskType;
+                            nodes = [...nodes];
+                        }}>Migrar para Formato de Lista</button>
+
+                        <div style="border: 1px dashed #666; padding: 10px; margin-top: 10px;">
+                            <label>Ped Model (Legacy)</label>
+                            <input type="text" bind:value={selectedNodeData.pedModel} oninput={() => nodes = [...nodes]} />
+                            <label>Task Type (Legacy)</label>
+                            <input type="text" bind:value={selectedNodeData.taskType} oninput={() => nodes = [...nodes]} />
+                        </div>
+                    {:else}
+                        {#each selectedNodeData.peds as ped, index}
+                            <div style="border: 1px solid #444; padding: 10px; margin-bottom: 8px; border-radius: 4px; background: #222;">
+                                <strong>Ped {index + 1}</strong>
+                                <button class="admin-button" style="background: #e74c3c; padding: 2px 8px; font-size: 11px; float: right;" onclick={() => {
+                                    selectedNodeData.peds.splice(index, 1);
+                                    nodes = [...nodes];
+                                }}>Remover</button>
+                                <div style="clear: both; margin-bottom: 5px;"></div>
+                                
+                                <label>Model</label>
+                                <input type="text" bind:value={ped.pedModel} oninput={() => nodes = [...nodes]} />
+                                <label>Task Type</label>
+                                <input type="text" bind:value={ped.taskType} oninput={() => nodes = [...nodes]} />
+                                <label>Anim Dict (Opcional)</label>
+                                <input type="text" bind:value={ped.animDict} oninput={() => nodes = [...nodes]} />
+                                <label>Anim Name (Opcional)</label>
+                                <input type="text" bind:value={ped.animName} oninput={() => nodes = [...nodes]} />
+                            </div>
+                        {/each}
+                        <button class="admin-button" style="background: #27ae60; width: 100%;" onclick={() => {
+                            selectedNodeData.peds.push({ pedModel: "a_m_m_skater_01", taskType: "guard" });
+                            nodes = [...nodes];
+                        }}>+ Adicionar Ped</button>
+                    {/if}
                 </div>
             {/if}
             

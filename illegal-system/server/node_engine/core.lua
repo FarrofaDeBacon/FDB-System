@@ -411,7 +411,16 @@ NodeEngine.RegisterNodeType("minigame", {
 
 NodeEngine.RegisterNodeType("spawn_ped", {
     OnEnter = function(playerId, session, nodeData, nodeToken)
-        TriggerClientEvent('node_engine:client:SyncAction', playerId, "spawn_ped", nodeData)
+        local peds = {}
+        if nodeData.peds then
+            peds = nodeData.peds
+        elseif nodeData.pedModel then
+            table.insert(peds, nodeData)
+        end
+        
+        for _, pedData in ipairs(peds) do
+            TriggerClientEvent('node_engine:client:SyncAction', playerId, "spawn_ped", pedData)
+        end
         AutoAdvance(playerId, session)
     end
 })
@@ -571,7 +580,17 @@ NodeEngine.RegisterNodeType("spawn_prop", {
             coords = GetEntityCoords(ped)
         end
         
-        TriggerClientEvent('node_engine:client:SpawnProp', playerId, nodeData.model, coords, tonumber(nodeData.offsetZ) or 0.0, tonumber(nodeData.offsetForward) or 0.0)
+        local props = {}
+        if nodeData.props then
+            props = nodeData.props
+        elseif nodeData.model then
+            table.insert(props, nodeData)
+        end
+        
+        for _, propData in ipairs(props) do
+            TriggerClientEvent('node_engine:client:SpawnProp', playerId, propData.model, coords, tonumber(propData.offsetZ) or 0.0, tonumber(propData.offsetForward) or 0.0)
+        end
+        
         AutoAdvance(playerId, session)
     end
 })
