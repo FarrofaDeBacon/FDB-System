@@ -335,6 +335,18 @@ NodeEngine.RegisterNodeType("wait", {
     end
 })
 
+NodeEngine.RegisterNodeType("play_animation", {
+    OnEnter = function(playerId, session, nodeData, nodeToken)
+        local duration = tonumber(nodeData.durationMs) or 1000
+        TriggerClientEvent('node_engine:client:PlayAnimation', playerId, nodeData)
+        
+        CreateThread(function()
+            Wait(duration)
+            AutoAdvance(playerId, session)
+        end)
+    end
+})
+
 NodeEngine.RegisterNodeType("end", {
     OnEnter = function(playerId, session, nodeData, nodeToken)
         print(("[NodeEngine] Sessão %s de %s encerrada pelo nó 'end'."):format(session.heistName, playerId))

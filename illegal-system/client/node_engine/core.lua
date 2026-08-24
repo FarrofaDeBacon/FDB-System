@@ -172,6 +172,59 @@ RegisterNetEvent('node_engine:client:SpawnAdminCrate', function()
     exports['fdb-libs']:Notify("Caixote spawnado na sua frente!", "success")
 end)
 
+RegisterNetEvent('node_engine:client:PlayAnimation', function(data)
+    CreateThread(function()
+        local ped = PlayerPedId()
+        local propObj = nil
+        
+        if data.animDict and data.animName and data.animDict ~= "" then
+            RequestAnimDict(data.animDict)
+            local timeout = 50
+            while not HasAnimDictLoaded(data.animDict) and timeout > 0 do 
+                Wait(100)
+                timeout = timeout - 1
+            end
+            
+            if timeout <= 0 then
+                print("[NodeEngine] AVISO: Dicionario de animacao nao pode ser carregado: " .. tostring(data.animDict))
+                return
+            end
+
+            if data.propModel and data.propModel ~= "" then
+                local propHash = GetHashKey(data.propModel)
+                RequestModel(propHash)
+                local pTimeout = 50
+                while not HasModelLoaded(propHash) and pTimeout > 0 do 
+                    Wait(100)
+                    pTimeout = pTimeout - 1
+                end
+                if HasModelLoaded(propHash) then
+                    propObj = CreateObject(propHash, 0, 0, 0, true, true, false)
+                    local boneIndex = GetEntityBoneIndexByName(ped, data.boneName or "SKEL_R_Hand")
+                    local ox = tonumber(data.attachOffsetX) or 0.0
+                    local oy = tonumber(data.attachOffsetY) or 0.0
+                    local oz = tonumber(data.attachOffsetZ) or 0.0
+                    local rx = tonumber(data.attachRotX) or 0.0
+                    local ry = tonumber(data.attachRotY) or 0.0
+                    local rz = tonumber(data.attachRotZ) or 0.0
+                    AttachEntityToEntity(propObj, ped, boneIndex, ox, oy, oz, rx, ry, rz, true, true, false, true, 1, true)
+                end
+            end
+            
+            -- Toca a animação (flag 1 = loop)
+            TaskPlayAnim(ped, data.animDict, data.animName, 8.0, -8.0, -1, 1, 0, false, false, false)
+            
+            local duration = tonumber(data.durationMs) or 1000
+            Wait(duration)
+            
+            ClearPedTasks(ped)
+            if propObj and DoesEntityExist(propObj) then
+                DeleteEntity(propObj)
+            end
+        end
+    end)
+end)
+
 RegisterNetEvent('node_engine:client:SpawnProp', function(modelName, entityCoords, offsetZ, offsetForward)
     CreateThread(function()
         if not modelName or modelName == "" then

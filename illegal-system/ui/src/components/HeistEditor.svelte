@@ -29,7 +29,8 @@
         { type: 'minigame_action', label: 'Minigame Action (Ação)', color: '#e67e22' },
         { type: 'spawn_prop', label: 'Spawn Prop (Ação)', color: '#e67e22' },
         { type: 'crime_reward_and_cooldown', label: 'Crime Reward & CD', color: '#c0392b' },
-        { type: 'risk_session', label: 'Risk Session (Ação)', color: '#d35400' }
+        { type: 'risk_session', label: 'Risk Session (Ação)', color: '#d35400' },
+        { type: 'play_animation', label: 'Play Anim (Fluxo)', color: '#8e44ad' }
     ];
 
     let selectedNodeId = $state(null);
@@ -101,6 +102,12 @@
             initialData.maxChance = 100.0;
             initialData.duration = 10000;
             initialData.failMessage = "Você fez muito barulho!";
+        }
+        if (type === 'play_animation') {
+            initialData.animDict = "amb@medic@standing@kneel@base";
+            initialData.animName = "base";
+            initialData.propModel = "";
+            initialData.durationMs = 1000;
         }
         
         const newNode = {
@@ -641,6 +648,25 @@
                 <div class="form-group">
                     <label>Fail Message</label>
                     <input type="text" bind:value={selectedNodeData.failMessage} oninput={() => nodes = [...nodes]} />
+                </div>
+            {/if}
+            
+            {#if selectedNodeData.realType === 'play_animation'}
+                <div class="form-group">
+                    <label>Anim Dict</label>
+                    <input type="text" bind:value={selectedNodeData.animDict} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Anim Name</label>
+                    <input type="text" bind:value={selectedNodeData.animName} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Prop Model (Opcional)</label>
+                    <input type="text" bind:value={selectedNodeData.propModel} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Duração (ms)</label>
+                    <input type="number" bind:value={selectedNodeData.durationMs} oninput={() => nodes = [...nodes]} />
                 </div>
             {/if}
             
