@@ -496,9 +496,10 @@ NodeEngine.RegisterNodeType("risk_session", {
         local startTime = GetGameTimer()
         local ped = GetPlayerPed(playerId)
         local lastCoords = GetEntityCoords(ped)
+        local originalNodeId = session.currentNodeId
 
         CreateThread(function()
-            while activeSessions[playerId] == session and session.currentNodeId == session.currentNodeId do
+            while activeSessions[playerId] == session and session.currentNodeId == originalNodeId do
                 Wait(checkInterval)
 
                 -- Se a duração esgotou sem estourar o limite, sucesso

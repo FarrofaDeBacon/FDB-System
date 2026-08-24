@@ -391,7 +391,7 @@
 </script>
 
 <div class="heist-editor-container">
-    <div class="sidebar">
+    <div class="sidebar left-sidebar">
         <h3>Meus Assaltos</h3>
         <div class="form-group">
             <select class="admin-select" bind:value={selectedSavedHeist} onchange={applyHeist} style="width: 100%; padding: 10px; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 4px;">
@@ -436,8 +436,18 @@
                 </div>
             {/each}
         </div>
+    </div>
 
-        {#if selectedNodeId}
+    <div class="canvas-area" ondrop={onDrop} ondragover={onDragOver}>
+        <SvelteFlow bind:nodes={nodes} bind:edges={edges} onconnect={onConnect} onnodeclick={selectNode} onedgeclick={onEdgeClick} onpaneclick={onPaneClick}>
+            <Controls />
+            <Background variant={BackgroundVariant.Dots} />
+        </SvelteFlow>
+    </div>
+
+    {#if selectedNodeId || selectedEdgeId}
+        <div class="sidebar right-sidebar">
+            {#if selectedNodeId}
             <hr style="border-color: #333; margin: 20px 0;">
             <h3>Configurar Nó</h3>
             <p style="font-size: 12px; color: #ccc;">ID: {selectedNodeId} ({selectedNodeData.realType})</p>
@@ -636,21 +646,15 @@
             
             <hr style="border-color: #444; margin: 15px 0;">
             <button class="admin-button" style="background-color: #e74c3c; width: 100%; color: white;" onclick={deleteSelectedNode}>🗑️ Deletar Nó</button>
-        {/if}
-        
-        {#if selectedEdgeId}
+            {/if}
+
+            {#if selectedEdgeId}
             <hr style="border-color: #333; margin: 20px 0;">
             <h3>Ligação Selecionada</h3>
             <button class="admin-button" style="background-color: #e74c3c; width: 100%; color: white;" onclick={deleteSelectedEdge}>🗑️ Deletar Ligação</button>
-        {/if}
-    </div>
-
-    <div class="canvas-area" ondrop={onDrop} ondragover={onDragOver}>
-        <SvelteFlow bind:nodes={nodes} bind:edges={edges} onconnect={onConnect} onnodeclick={selectNode} onedgeclick={onEdgeClick} onpaneclick={onPaneClick}>
-            <Controls />
-            <Background variant={BackgroundVariant.Dots} />
-        </SvelteFlow>
-    </div>
+            {/if}
+        </div>
+    {/if}
 </div>
 
 {#if showModal}
@@ -678,9 +682,14 @@
     .sidebar {
         width: 300px;
         background: #1a1a1a;
-        border-right: 1px solid #333;
         padding: 15px;
         overflow-y: auto;
+    }
+    .left-sidebar {
+        border-right: 1px solid #333;
+    }
+    .right-sidebar {
+        border-left: 1px solid #333;
     }
     .canvas-area {
         flex: 1;
