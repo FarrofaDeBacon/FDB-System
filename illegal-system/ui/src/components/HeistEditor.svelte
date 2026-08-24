@@ -28,7 +28,8 @@
         { type: 'check_requirements', label: 'Check Req (Validação)', color: '#16a085' },
         { type: 'minigame_action', label: 'Minigame Action (Ação)', color: '#e67e22' },
         { type: 'spawn_prop', label: 'Spawn Prop (Ação)', color: '#e67e22' },
-        { type: 'crime_reward_and_cooldown', label: 'Crime Reward & CD', color: '#c0392b' }
+        { type: 'crime_reward_and_cooldown', label: 'Crime Reward & CD', color: '#c0392b' },
+        { type: 'risk_session', label: 'Risk Session (Ação)', color: '#d35400' }
     ];
 
     let selectedNodeId = $state(null);
@@ -87,6 +88,19 @@
             initialData.crimeType = "grave_robbery";
             initialData.cooldownPrefix = "grave";
             initialData.successMessage = "Você encontrou algo!";
+        }
+        if (type === 'risk_session') {
+            initialData.title = "RISCO";
+            initialData.criticalText = "CUIDADO";
+            initialData.checkInterval = 500;
+            initialData.sprintThreshold = 6.0;
+            initialData.runThreshold = 2.0;
+            initialData.sprintIncrease = 15.0;
+            initialData.runIncrease = 5.0;
+            initialData.idleDecay = 2.0;
+            initialData.maxChance = 100.0;
+            initialData.duration = 10000;
+            initialData.failMessage = "Você fez muito barulho!";
         }
         
         const newNode = {
@@ -564,6 +578,59 @@
                 <div class="form-group">
                     <label>Msg de Sucesso</label>
                     <input type="text" bind:value={selectedNodeData.successMessage} oninput={() => nodes = [...nodes]} />
+                </div>
+            {/if}
+
+            {#if selectedNodeData.realType === 'risk_session'}
+                <div class="form-group">
+                    <label>Título UI</label>
+                    <input type="text" bind:value={selectedNodeData.title} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Texto Crítico UI</label>
+                    <input type="text" bind:value={selectedNodeData.criticalText} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group" style="display: flex; gap: 5px;">
+                    <div style="flex: 1;">
+                        <label>Threshold Sprint</label>
+                        <input type="number" step="0.1" bind:value={selectedNodeData.sprintThreshold} oninput={() => nodes = [...nodes]} />
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Increase Sprint</label>
+                        <input type="number" step="0.1" bind:value={selectedNodeData.sprintIncrease} oninput={() => nodes = [...nodes]} />
+                    </div>
+                </div>
+                <div class="form-group" style="display: flex; gap: 5px;">
+                    <div style="flex: 1;">
+                        <label>Threshold Run</label>
+                        <input type="number" step="0.1" bind:value={selectedNodeData.runThreshold} oninput={() => nodes = [...nodes]} />
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Increase Run</label>
+                        <input type="number" step="0.1" bind:value={selectedNodeData.runIncrease} oninput={() => nodes = [...nodes]} />
+                    </div>
+                </div>
+                <div class="form-group" style="display: flex; gap: 5px;">
+                    <div style="flex: 1;">
+                        <label>Idle Decay (Queda)</label>
+                        <input type="number" step="0.1" bind:value={selectedNodeData.idleDecay} oninput={() => nodes = [...nodes]} />
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Max Chance</label>
+                        <input type="number" step="1.0" bind:value={selectedNodeData.maxChance} oninput={() => nodes = [...nodes]} />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Duração Total (ms)</label>
+                    <input type="number" bind:value={selectedNodeData.duration} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Check Interval (ms)</label>
+                    <input type="number" bind:value={selectedNodeData.checkInterval} oninput={() => nodes = [...nodes]} />
+                </div>
+                <div class="form-group">
+                    <label>Fail Message</label>
+                    <input type="text" bind:value={selectedNodeData.failMessage} oninput={() => nodes = [...nodes]} />
                 </div>
             {/if}
             

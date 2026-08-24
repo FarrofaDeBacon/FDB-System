@@ -233,3 +233,21 @@ RegisterCommand('startheist', function(source, args)
     print("[NodeEngine Debug] Enviando pedido de StartHeist para o servidor. ID: " .. tostring(heistId))
     TriggerServerEvent("node_engine:server:ForceStartHeist", heistId)
 end, false)
+
+RegisterNetEvent('node_engine:client:ManageRiskBar', function(action, data)
+    if action == "show" then
+        if exports['fdb-libs'] and exports['fdb-libs'].ShowRiskBar then
+            exports['fdb-libs']:ShowRiskBar(data)
+        else
+            print("[NodeEngine] fdb-libs export 'ShowRiskBar' not found!")
+        end
+    elseif action == "update" then
+        if exports['fdb-libs'] and exports['fdb-libs'].UpdateRiskBar then
+            exports['fdb-libs']:UpdateRiskBar(data.percent)
+        end
+    elseif action == "hide" then
+        if exports['fdb-libs'] and exports['fdb-libs'].HideRiskBar then
+            exports['fdb-libs']:HideRiskBar()
+        end
+    end
+end)

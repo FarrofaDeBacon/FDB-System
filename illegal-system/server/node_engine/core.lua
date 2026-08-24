@@ -472,6 +472,82 @@ NodeEngine.RegisterNodeType("minigame_action", {
     end
 })
 
+NodeEngine.RegisterNodeType("risk_session", {
+    OnEnter = function(playerId, session, nodeData, nodeToken)
+        local title = nodeData.title or "RISCO"
+        local criticalText = nodeData.criticalText or "CUIDADO"
+        local checkInterval = tonumber(nodeData.checkInterval) or 500
+        local sprintThreshold = tonumber(nodeData.sprintThreshold) or 6.0
+        local runThreshold = tonumber(nodeData.runThreshold) or 2.0
+        local sprintIncrease = tonumber(nodeData.sprintIncrease) or 15.0
+        local runIncrease = tonumber(nodeData.runIncrease) or 5.0
+        local idleDecay = tonumber(nodeData.idleDecay) or 2.0
+        local maxChance = tonumber(nodeData.maxChance) or 100.0
+        local duration = tonumber(nodeData.duration) or 10000
+        local failMessage = nodeData.failMessage or "Você fez muito barulho!"
+
+        session.currentRisk = 0.0
+
+        TriggerClientEvent('node_engine:client:ManageRiskBar', playerId, "show", {
+            title = title,
+            criticalText = criticalText
+        })
+
+        local startTime = GetGameTimer()
+        local ped = GetPlayerPed(playerId)
+        local lastCoords = GetEntityCoords(ped)
+
+        CreateThread(function()
+            while activeSessions[playerId] == session and session.currentNodeId == session.currentNodeId do
+                Wait(checkInterval)
+
+                -- Se a duração esgotou sem estourar o limite, sucesso
+                if GetGameTimer() - startTime >= duration then
+                    TriggerClientEvent('node_engine:client:ManageRiskBar', playerId, "hide")
+                    AutoAdvance(playerId, session)
+                    return
+                end
+
+                local currentCoords = GetEntityCoords(ped)
+                local distance = #(currentCoords - lastCoords)
+                local speed = distance / (checkInterval / 1000.0)
+                lastCoords = currentCoords
+
+                -- Multiplicadores futuros (Fases F/G)
+                local speedMultiplier = 1.0 
+                local clothingMultiplier = 1.0 
+                local totalMultiplier = speedMultiplier * clothingMultiplier
+
+                local increase = -idleDecay
+                if speed >= sprintThreshold then
+                    increase = sprintIncrease * totalMultiplier
+                elseif speed >= runThreshold then
+                    increase = runIncrease * totalMultiplier
+                end
+
+                session.currentRisk = session.currentRisk + increase
+                if session.currentRisk < 0.0 then session.currentRisk = 0.0 end
+                if session.currentRisk > maxChance then session.currentRisk = maxChance end
+
+                local percent = math.floor((session.currentRisk / maxChance) * 100)
+                
+                TriggerClientEvent('node_engine:client:ManageRiskBar', playerId, "update", {
+                    percent = percent
+                })
+
+                if session.currentRisk >= maxChance then
+                    TriggerClientEvent('node_engine:client:ManageRiskBar', playerId, "hide")
+                    Bridge.Notify(playerId, failMessage, "error")
+                    print(("[NodeEngine] Jogador %s estourou o risco. Sessão encerrada."):format(playerId))
+                    activeSessions[playerId] = nil
+                    TriggerClientEvent('node_engine:client:EndSession', playerId)
+                    return
+                end
+            end
+        end)
+    end
+})
+
 NodeEngine.RegisterNodeType("spawn_prop", {
     OnEnter = function(playerId, session, nodeData, nodeToken)
         print("[NodeEngine] Entrando no nó spawn_prop para jogador " .. tostring(playerId))
