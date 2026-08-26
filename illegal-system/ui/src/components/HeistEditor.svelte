@@ -81,9 +81,11 @@
             initialData.minigameDuration = 5000;
         }
         if (type === 'spawn_prop') {
-            initialData.model = "prop_ld_rub_money_01";
+            initialData.model = "p_crate01x";
+            initialData.offsetX = 0.0;
+            initialData.offsetY = 1.0;
             initialData.offsetZ = -1.0;
-            initialData.offsetForward = 0.5;
+            initialData.heading = 0.0;
         }
         if (type === 'crime_reward_and_cooldown') {
             initialData.crimeType = "grave_robbery";
@@ -198,6 +200,29 @@
         }).catch(err => console.error(err));
     }
 
+    function startPlacementItem(listType, index, model) {
+        if (!selectedNodeId) return;
+        isPlacementMode = true;
+        
+        let pType = listType === 'peds' ? 'guard' : 'point';
+        if (listType === 'props') {
+            pType = 'prop'; // This will trigger SpawnGhost for objects
+        }
+
+        fetch(`https://${GetParentResourceName()}/startPlacement`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+            body: JSON.stringify({
+                type: pType,
+                model: model || '',
+                callbackAction: 'stopPlacementListItem',
+                extraData: { nodeId: selectedNodeId, index: index, type: listType }
+            })
+        }).catch(err => console.error(err));
+    }
+
+    let isSaving = $state(false);
+
     // Exportador de JSON para salvar no banco
     function saveHeist() {
         if (!heistId.trim() || !heistName.trim()) {
@@ -205,6 +230,8 @@
             alert("Preencha o ID e o Nome do assalto antes de salvar!");
             return;
         }
+
+        isSaving = true;
 
         const graph = {
             nodes: {},
@@ -244,10 +271,14 @@
                 name: heistName,
                 graph: graph
             })
-        }).then(() => {
-            loadHeists(); // Refresh list after saving
-            selectedSavedHeist = heistId; // Seleciona o recém-salvo
-        }).catch(err => console.error("Error sending NUI message:", err));
+        }).then(resp => resp.json()).then(resp => {
+            isSaving = false;
+            loadHeists();
+            selectedSavedHeist = heistId;
+        }).catch(err => {
+            console.error(err);
+            isSaving = false;
+        });
     }
 
     let showModal = $state(false);
@@ -389,6 +420,27 @@
                         return n;
                     });
                 }
+            } else if (event.data.action === "stopPlacementListItem") {
+                isPlacementMode = false;
+                const { nodeId, index, type } = event.data.extra || {};
+                const res = event.data.result;
+                if (nodeId && res && typeof index === 'number') {
+                    nodes = nodes.map(n => {
+                        if (n.id === nodeId) {
+                            if (type === 'props' && n.data.props) {
+                                n.data.props[index].coords = { x: res.x, y: res.y, z: res.z };
+                                n.data.props[index].heading = res.h;
+                            } else if (type === 'peds' && n.data.peds) {
+                                n.data.peds[index].coords = { x: res.x, y: res.y, z: res.z };
+                                n.data.peds[index].heading = res.h;
+                            }
+                            if (selectedNodeId === nodeId) {
+                                selectedNodeData = n.data; 
+                            }
+                        }
+                        return n;
+                    });
+                }
             }
         };
         window.addEventListener('message', listener);
@@ -421,7 +473,7 @@
             <input type="text" bind:value={heistName} />
         </div>
         <div class="form-group" style="display: flex; gap: 5px;">
-            <button class="admin-button" style="background: #27ae60; flex: 1;" onclick={saveHeist}>Salvar no Banco</button>
+            <button class="admin-button" style="background: {isSaving ? '#555' : '#27ae60'}; flex: 1;" onclick={saveHeist} disabled={isSaving}>{isSaving ? 'Salvando...' : 'Salvar no Banco'}</button>
             {#if savedHeists.some(h => h.id === heistId)}
                 <button class="admin-button" style="background: #c0392b; flex: 1;" onclick={deleteHeist}>Deletar</button>
             {/if}
@@ -607,18 +659,23 @@
                                 
                                 <div style="display: flex; gap: 5px; margin-top: 5px;">
                                     <div style="flex: 1;">
-                                        <label>Offset Z</label>
-                                        <input type="number" step="0.1" bind:value={prop.offsetZ} oninput={() => nodes = [...nodes]} />
+                                        <label>Coordenadas (3D)</label>
+                                        {#if prop.coords}
+                                            <span style="font-size: 11px; color: #2ecc71;">X:{prop.coords.x.toFixed(1)} Y:{prop.coords.y.toFixed(1)} Z:{prop.coords.z.toFixed(1)}</span>
+                                        {:else}
+                                            <span style="font-size: 11px; color: #e74c3c;">Não definidas</span>
+                                        {/if}
                                     </div>
                                     <div style="flex: 1;">
-                                        <label>Offset Forward</label>
-                                        <input type="number" step="0.1" bind:value={prop.offsetForward} oninput={() => nodes = [...nodes]} />
+                                        <label>Heading</label>
+                                        <input type="number" step="1.0" bind:value={prop.heading} oninput={() => nodes = [...nodes]} />
                                     </div>
                                 </div>
+                                <button class="admin-button" style="background: #3498db; width: 100%; margin-top: 10px;" onclick={() => startPlacementItem('props', index, prop.model)}>📍 Setar no Mundo (3D)</button>
                             </div>
                         {/each}
                         <button class="admin-button" style="background: #27ae60; width: 100%;" onclick={() => {
-                            selectedNodeData.props.push({ model: "prop_box", offsetZ: 0, offsetForward: 0 });
+                            selectedNodeData.props.push({ model: "p_crate01x", coords: null, heading: 0 });
                             nodes = [...nodes];
                         }}>+ Adicionar Prop</button>
                     {/if}
@@ -659,17 +716,119 @@
                                 <div style="clear: both; margin-bottom: 5px;"></div>
                                 
                                 <label>Model</label>
-                                <input type="text" bind:value={ped.pedModel} oninput={() => nodes = [...nodes]} />
-                                <label>Task Type</label>
-                                <input type="text" bind:value={ped.taskType} oninput={() => nodes = [...nodes]} />
-                                <label>Anim Dict (Opcional)</label>
-                                <input type="text" bind:value={ped.animDict} oninput={() => nodes = [...nodes]} />
-                                <label>Anim Name (Opcional)</label>
-                                <input type="text" bind:value={ped.animName} oninput={() => nodes = [...nodes]} />
+                                <select bind:value={ped.pedModel} onchange={() => nodes = [...nodes]}>
+                                    <optgroup label="Cidadãos">
+                                        <option value="a_m_m_valtownfolk_01">Cidadão Valentine 1</option>
+                                        <option value="a_m_m_valtownfolk_02">Cidadão Valentine 2</option>
+                                        <option value="a_m_y_valtownfolk_01">Jovem Valentine</option>
+                                        <option value="a_f_m_valtownfolk_01">Mulher Valentine</option>
+                                        <option value="a_m_m_sdtownfolk_01">Cidadão St. Denis 1</option>
+                                        <option value="a_m_m_sdtownfolk_02">Cidadão St. Denis 2</option>
+                                        <option value="a_f_m_sdtownfolk_01">Mulher St. Denis</option>
+                                    </optgroup>
+                                    <optgroup label="Trabalhadores">
+                                        <option value="u_m_m_valbarkeep_01">Bartender Valentine</option>
+                                        <option value="u_m_m_valgunsmith_01">Armeiro Valentine</option>
+                                        <option value="u_m_m_valdoctor_01">Médico Valentine</option>
+                                        <option value="u_m_m_valsheriff_01">Xerife Valentine</option>
+                                        <option value="a_m_m_rancher_01">Fazendeiro</option>
+                                        <option value="a_m_m_blwrangler_01">Vaqueiro</option>
+                                    </optgroup>
+                                    <optgroup label="Viajantes / Vagabundos">
+                                        <option value="a_m_m_bivroughtravelers_01">Viajante Bivrough</option>
+                                        <option value="a_m_m_ranchertravelers_01">Fazendeiro Viajante</option>
+                                        <option value="a_m_m_trapper_01">Caçador Trapper</option>
+                                        <option value="u_m_m_yourknownhorse_01">Mendigo</option>
+                                    </optgroup>
+                                    <optgroup label="Lei / Segurança">
+                                        <option value="s_m_m_law_01">Homem da Lei</option>
+                                        <option value="s_m_m_bankguard_01">Guarda do Banco</option>
+                                        <option value="s_m_m_army_01">Soldado</option>
+                                    </optgroup>
+                                    <optgroup label="Bandidos / Inimigos">
+                                        <option value="g_m_m_bountyhunters_01">Caçador de Recompensas</option>
+                                        <option value="g_m_m_uniduster_01">Bandido Duster</option>
+                                        <option value="g_m_m_unigunslinger_01">Pistoleiro</option>
+                                        <option value="g_m_m_unirancher_01">Bandido Rancher</option>
+                                    </optgroup>
+                                </select>
+
+                                <label>Comportamento</label>
+                                <select bind:value={ped.taskType} onchange={() => nodes = [...nodes]}>
+                                    <option value="idle">Parado (Idle Natural)</option>
+                                    <option value="guard">Guardar Posição</option>
+                                    <option value="attack">Atacar Jogador Imediatamente</option>
+                                    <option value="flee">Fugir do Jogador</option>
+                                    <option value="wander">Vagar pela Área</option>
+                                    <option value="scenario">Cenário Ambiental</option>
+                                    <option value="animation">Animação Personalizada</option>
+                                    <option value="frozen">Congelado (Estátua)</option>
+                                </select>
+
+                                {#if ped.taskType === 'scenario'}
+                                    <label>Cenário</label>
+                                    <select bind:value={ped.scenario} onchange={() => nodes = [...nodes]}>
+                                        <option value="WORLD_HUMAN_SMOKING">Fumando</option>
+                                        <option value="WORLD_HUMAN_DRINKING">Bebendo</option>
+                                        <option value="WORLD_HUMAN_GUARD_STAND">Guardando (em pé)</option>
+                                        <option value="WORLD_HUMAN_LEAN_WALL">Encostado na Parede</option>
+                                        <option value="WORLD_HUMAN_SIT_GROUND">Sentado no Chão</option>
+                                        <option value="WORLD_HUMAN_SWEEPING">Varrendo</option>
+                                        <option value="PROP_HUMAN_SEAT_BENCH">Sentado no Banco</option>
+                                        <option value="WORLD_HUMAN_MUSICIAN_GUITAR">Tocando Violão</option>
+                                        <option value="WORLD_HUMAN_FIRE_TEND">Cuidando da Fogueira</option>
+                                    </select>
+                                {/if}
+
+                                {#if ped.taskType === 'animation'}
+                                    <label>Anim Dict</label>
+                                    <input type="text" bind:value={ped.animDict} oninput={() => nodes = [...nodes]} placeholder="ex: amb@medic@standing@kneel@base" />
+                                    <label>Anim Name</label>
+                                    <input type="text" bind:value={ped.animName} oninput={() => nodes = [...nodes]} placeholder="ex: base" />
+                                {/if}
+
+                                {#if ped.taskType === 'guard' || ped.taskType === 'attack'}
+                                    <label>Arma</label>
+                                    <select bind:value={ped.weapon} onchange={() => nodes = [...nodes]}>
+                                        <option value="WEAPON_UNARMED">Desarmado</option>
+                                        <option value="WEAPON_REVOLVER_CATTLEMAN">Revólver Cattleman</option>
+                                        <option value="WEAPON_REVOLVER_DOUBLEACTION">Revólver Double Action</option>
+                                        <option value="WEAPON_REVOLVER_SCHOFIELD">Revólver Schofield</option>
+                                        <option value="WEAPON_PISTOL_VOLCANIC">Pistola Volcanic</option>
+                                        <option value="WEAPON_REPEATER_CARBINE">Carabina Repetidora</option>
+                                        <option value="WEAPON_RIFLE_SPRINGFIELD">Rifle Springfield</option>
+                                        <option value="WEAPON_SHOTGUN_DOUBLEBARREL">Escopeta Dupla</option>
+                                        <option value="WEAPON_KNIFE">Faca</option>
+                                        <option value="WEAPON_MACHETE">Facão</option>
+                                    </select>
+                                    <label>Distância de Detecção</label>
+                                    <input type="number" step="1.0" bind:value={ped.detectDistance} oninput={() => nodes = [...nodes]} placeholder="15" />
+                                {/if}
+
+                                {#if ped.taskType === 'wander'}
+                                    <label>Raio de Vagar (metros)</label>
+                                    <input type="number" step="1.0" bind:value={ped.wanderRadius} oninput={() => nodes = [...nodes]} placeholder="10" />
+                                {/if}
+                                
+                                <div style="display: flex; gap: 5px; margin-top: 5px;">
+                                    <div style="flex: 1;">
+                                        <label>Coordenadas (3D)</label>
+                                        {#if ped.coords}
+                                            <span style="font-size: 11px; color: #2ecc71;">X:{ped.coords.x.toFixed(1)} Y:{ped.coords.y.toFixed(1)} Z:{ped.coords.z.toFixed(1)}</span>
+                                        {:else}
+                                            <span style="font-size: 11px; color: #e74c3c;">Não definidas</span>
+                                        {/if}
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <label>Heading</label>
+                                        <input type="number" step="1.0" bind:value={ped.heading} oninput={() => nodes = [...nodes]} />
+                                    </div>
+                                </div>
+                                <button class="admin-button" style="background: #3498db; width: 100%; margin-top: 10px;" onclick={() => startPlacementItem('peds', index, ped.pedModel)}>📍 Setar no Mundo (3D)</button>
                             </div>
                         {/each}
                         <button class="admin-button" style="background: #27ae60; width: 100%;" onclick={() => {
-                            selectedNodeData.peds.push({ pedModel: "a_m_m_skater_01", taskType: "guard" });
+                            selectedNodeData.peds.push({ pedModel: "g_m_m_bountyhunters_01", taskType: "idle", weapon: "WEAPON_UNARMED", coords: null, heading: 0 });
                             nodes = [...nodes];
                         }}>+ Adicionar Ped</button>
                     {/if}
@@ -829,3 +988,4 @@
         cursor: grabbing;
     }
 </style>
+

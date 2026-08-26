@@ -419,7 +419,7 @@ NodeEngine.RegisterNodeType("spawn_ped", {
         end
         
         for _, pedData in ipairs(peds) do
-            TriggerClientEvent('node_engine:client:SyncAction', playerId, "spawn_ped", pedData)
+            TriggerClientEvent('node_engine:client:SpawnPed', playerId, pedData)
         end
         AutoAdvance(playerId, session)
     end
@@ -573,11 +573,11 @@ NodeEngine.RegisterNodeType("risk_session", {
 NodeEngine.RegisterNodeType("spawn_prop", {
     OnEnter = function(playerId, session, nodeData, nodeToken)
         print("[NodeEngine] Entrando no nó spawn_prop para jogador " .. tostring(playerId))
-        local coords = session.context.entityCoords
-        if not coords then
+        local defaultCoords = session.context.entityCoords
+        if not defaultCoords then
             print("[NodeEngine] spawn_prop: Sem coordenada no contexto, usando coordenadas do jogador (teste via comando?).")
             local ped = GetPlayerPed(playerId)
-            coords = GetEntityCoords(ped)
+            defaultCoords = GetEntityCoords(ped)
         end
         
         local props = {}
@@ -588,7 +588,7 @@ NodeEngine.RegisterNodeType("spawn_prop", {
         end
         
         for _, propData in ipairs(props) do
-            TriggerClientEvent('node_engine:client:SpawnProp', playerId, propData.model, coords, tonumber(propData.offsetZ) or 0.0, tonumber(propData.offsetForward) or 0.0)
+            TriggerClientEvent('node_engine:client:SpawnProp', playerId, propData, defaultCoords)
         end
         
         AutoAdvance(playerId, session)

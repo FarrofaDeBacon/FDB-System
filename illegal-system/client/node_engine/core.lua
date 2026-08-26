@@ -225,12 +225,66 @@ RegisterNetEvent('node_engine:client:PlayAnimation', function(data)
     end)
 end)
 
-RegisterNetEvent('node_engine:client:SpawnProp', function(modelName, entityCoords, offsetZ, offsetForward)
+RegisterNetEvent('node_engine:client:SpawnProp', function(propData, defaultCoords)
     CreateThread(function()
-        if not modelName or modelName == "" then
-            print("[NodeEngine ERRO] spawn_prop ignorado: nome do modelo nulo ou vazio.")
-            return
+        if not propData.props or type(propData.props) ~= "table" then
+            -- Fallback para nó legado
+            propData.props = {
+                {
+                    model = propData.model,
+                    offsetX = propData.offsetX,
+                    offsetY = propData.offsetY,
+                    offsetZ = propData.offsetZ,
+                    heading = propData.heading
+                }
+            }
         end
+
+        for _, prop in ipairs(propData.props) do
+            local modelName = prop.model
+            if modelName and modelName ~= "" then
+                local hash = GetHashKey(modelName)
+                RequestModel(hash)
+                
+                local timeout = 50
+                while not HasModelLoaded(hash) and timeout > 0 do 
+                    Wait(100)
+                    timeout = timeout - 1
+                end
+                
+                if HasModelLoaded(hash) then
+                    local spawnCoords
+                    local propHeading
+                    
+                    if prop.coords and type(prop.coords) == 'table' and prop.coords.x then
+                        -- Coordenadas absolutas da ferramenta 3D
+                        spawnCoords = vector3(prop.coords.x, prop.coords.y, prop.coords.z)
+                        propHeading = tonumber(prop.heading) or 0.0
+                    else
+                        -- Offsets legados relativos ao jogador
+                        local ped = PlayerPedId()
+                        local pedHeading = GetEntityHeading(ped)
+                        spawnCoords = GetOffsetFromEntityInWorldCoords(ped, prop.offsetX or 0.0, prop.offsetY or 0.0, prop.offsetZ or 0.0)
+                        propHeading = pedHeading + (prop.heading or 0.0)
+                    end
+                    
+                    local obj = CreateObject(hash, spawnCoords.x, spawnCoords.y, spawnCoords.z, true, true, false)
+                    PlaceObjectOnGroundProperly(obj)
+                    SetEntityHeading(obj, propHeading)
+                    SetModelAsNoLongerNeeded(hash)
+                    print("[NodeEngine DEBUG] Prop spawnado com sucesso: " .. tostring(modelName))
+                else
+                    print("[NodeEngine ERRO] spawn_prop: Nao foi possivel carregar o modelo: " .. tostring(modelName))
+                end
+            end
+        end
+    end)
+end)
+
+RegisterNetEvent('node_engine:client:SpawnPed', function(pedData)
+    CreateThread(function()
+        local modelName = pedData.pedModel
+        if not modelName or modelName == "" then return end
         
         local hash = GetHashKey(modelName)
         RequestModel(hash)
@@ -241,26 +295,56 @@ RegisterNetEvent('node_engine:client:SpawnProp', function(modelName, entityCoord
             timeout = timeout - 1
         end
         
-        if not HasModelLoaded(hash) then
-            print("[NodeEngine ERRO] spawn_prop: Nao foi possivel carregar o modelo: " .. tostring(modelName))
-            return
+        if not HasModelLoaded(hash) then 
+            print("[NodeEngine ERRO] spawn_ped: Nao foi possivel carregar o modelo: " .. tostring(modelName))
+            return 
         end
         
-        local ped = PlayerPedId()
-        local pedHeading = GetEntityHeading(ped)
-        local rad = math.rad(pedHeading)
+        local spawnCoords
+        local pedHeading
         
-        -- Spawn na coordenada fornecida + offset, baseado na coordenada do jogador
-        local pedCoords = GetEntityCoords(ped)
-        local spawnX = pedCoords.x + (math.sin(-rad) * (offsetForward or 0.0))
-        local spawnY = pedCoords.y + (math.cos(-rad) * (offsetForward or 0.0))
-        local spawnZ = pedCoords.z + (offsetZ or 0.0)
+        if pedData.coords and type(pedData.coords) == 'table' and pedData.coords.x then
+            spawnCoords = vector3(pedData.coords.x, pedData.coords.y, pedData.coords.z)
+            pedHeading = tonumber(pedData.heading) or 0.0
+        else
+            local ped = PlayerPedId()
+            spawnCoords = GetOffsetFromEntityInWorldCoords(ped, 0.0, 1.5, 0.0)
+            pedHeading = GetEntityHeading(ped)
+        end
         
-        local obj = CreateObject(hash, spawnX, spawnY, spawnZ, true, true, false)
-        PlaceObjectOnGroundProperly(obj)
-        SetEntityHeading(obj, pedHeading)
+        -- CreatePed signature para RedM/FiveM comum. 
+        -- Em RedM às vezes é CreatePed(hash, x, y, z, h, isNet, bScriptHostPed)
+        -- Em FiveM é CreatePed(pedType, hash, x, y, z, h, isNet, bScriptHostPed)
+        -- Como GetGameName() == 'redm' não temos pedType.
+        local spawnedPed
+        if GetGameName() == 'redm' then
+            spawnedPed = CreatePed(hash, spawnCoords.x, spawnCoords.y, spawnCoords.z, pedHeading, true, false)
+        else
+            spawnedPed = CreatePed(4, hash, spawnCoords.x, spawnCoords.y, spawnCoords.z, pedHeading, true, false)
+        end
+        
+        PlaceObjectOnGroundProperly(spawnedPed)
+        
+        if pedData.animDict and pedData.animName and pedData.animDict ~= "" then
+            RequestAnimDict(pedData.animDict)
+            local aTimeout = 50
+            while not HasAnimDictLoaded(pedData.animDict) and aTimeout > 0 do
+                Wait(100)
+                aTimeout = aTimeout - 1
+            end
+            if HasAnimDictLoaded(pedData.animDict) then
+                TaskPlayAnim(spawnedPed, pedData.animDict, pedData.animName, 8.0, -8.0, -1, 1, 0, false, false, false)
+            end
+        end
+        
+        -- Lógica base de reação do ped (Attack, etc) baseada na taskType
+        if pedData.taskType == "guard" or pedData.taskType == "Atacar" then
+            GiveWeaponToPed(spawnedPed, GetHashKey("WEAPON_REVOLVER"), 100, false, true)
+            TaskCombatPed(spawnedPed, PlayerPedId(), 0, 16)
+        end
+        
         SetModelAsNoLongerNeeded(hash)
-        print("[NodeEngine DEBUG] Prop spawnado com sucesso: " .. tostring(modelName))
+        print("[NodeEngine DEBUG] Ped spawnado com sucesso: " .. tostring(modelName))
     end)
 end)
 
