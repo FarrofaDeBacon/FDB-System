@@ -125,7 +125,6 @@ end
 
 function NodeEngine.StartHeist(playerId, heistName, graph, context)
     print("[NodeEngine Debug] StartHeist invocado para jogador: " .. tostring(playerId))
-    print("DEBUG: Graph has " .. tostring(json.encode(graph.nodes)))
     -- Find start node OR trigger_model node
     local startNodeId = nil
     for id, node in pairs(graph.nodes) do

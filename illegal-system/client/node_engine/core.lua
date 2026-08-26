@@ -235,6 +235,7 @@ RegisterNetEvent('node_engine:client:SpawnProp', function(propData, defaultCoord
                     offsetX = propData.offsetX,
                     offsetY = propData.offsetY,
                     offsetZ = propData.offsetZ,
+                    offsetForward = propData.offsetForward,
                     heading = propData.heading
                 }
             }
@@ -266,7 +267,8 @@ RegisterNetEvent('node_engine:client:SpawnProp', function(propData, defaultCoord
                         -- Offsets legados relativos ao jogador
                         local ped = PlayerPedId()
                         local pedHeading = GetEntityHeading(ped)
-                        spawnCoords = GetOffsetFromEntityInWorldCoords(ped, prop.offsetX or 0.0, prop.offsetY or 0.0, prop.offsetZ or 0.0)
+                        local forwardOffset = prop.offsetForward or prop.offsetY or 0.0
+                        spawnCoords = GetOffsetFromEntityInWorldCoords(ped, prop.offsetX or 0.0, forwardOffset, prop.offsetZ or 0.0)
                         propHeading = pedHeading + (prop.heading or 0.0)
                     end
                     
@@ -397,7 +399,7 @@ RegisterNetEvent('node_engine:client:SpawnPed', function(pedData)
             SetEntityInvincible(spawnedPed, true)
             SetBlockingOfNonTemporaryEvents(spawnedPed, false)
             local radius = tonumber(pedData.wanderRadius) or 10.0
-            TaskWanderInArea(spawnedPed, groundZ and spawnCoords.x or spawnCoords.x, groundZ and spawnCoords.y or spawnCoords.y, groundZ and groundZ or spawnCoords.z, radius, 0, 0)
+            TaskWanderInArea(spawnedPed, spawnCoords.x, spawnCoords.y, groundZ, radius, 0, 0)
             
         elseif taskType == "scenario" then
             -- Cenário ambiental (fumando, bebendo, etc)
