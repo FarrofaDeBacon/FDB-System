@@ -257,10 +257,12 @@ RegisterNetEvent('node_engine:client:SpawnProp', function(propData, defaultCoord
                     local propHeading
                     
                     if prop.coords and type(prop.coords) == 'table' and prop.coords.x then
+                        print("[NodeEngine DEBUG] Usando coordenadas absolutas: " .. json.encode(prop.coords))
                         -- Coordenadas absolutas da ferramenta 3D
                         spawnCoords = vector3(prop.coords.x, prop.coords.y, prop.coords.z)
                         propHeading = tonumber(prop.heading) or 0.0
                     else
+                        print("[NodeEngine DEBUG] Usando fallback relacional. Prop dump: " .. json.encode(prop))
                         -- Offsets legados relativos ao jogador
                         local ped = PlayerPedId()
                         local pedHeading = GetEntityHeading(ped)
@@ -312,39 +314,121 @@ RegisterNetEvent('node_engine:client:SpawnPed', function(pedData)
             pedHeading = GetEntityHeading(ped)
         end
         
-        -- CreatePed signature para RedM/FiveM comum. 
-        -- Em RedM às vezes é CreatePed(hash, x, y, z, h, isNet, bScriptHostPed)
-        -- Em FiveM é CreatePed(pedType, hash, x, y, z, h, isNet, bScriptHostPed)
-        -- Como GetGameName() == 'redm' não temos pedType.
+        -- Garantir colisão carregada no local do spawn
+        RequestCollisionAtCoord(spawnCoords.x, spawnCoords.y, spawnCoords.z)
+        Wait(100)
+        
+        -- Buscar o Z correto do chão para não spawnar enterrado
+        local groundZ = spawnCoords.z
+        local found, z = GetGroundZFor_3dCoord(spawnCoords.x, spawnCoords.y, spawnCoords.z + 5.0, false)
+        if found then
+            groundZ = z
+        end
+        
+        -- Criar o ped — local (não networked) para não sumir
         local spawnedPed
         if GetGameName() == 'redm' then
-            spawnedPed = CreatePed(hash, spawnCoords.x, spawnCoords.y, spawnCoords.z, pedHeading, true, false)
+            spawnedPed = CreatePed(hash, spawnCoords.x, spawnCoords.y, groundZ, pedHeading, false, false)
         else
-            spawnedPed = CreatePed(4, hash, spawnCoords.x, spawnCoords.y, spawnCoords.z, pedHeading, true, false)
+            spawnedPed = CreatePed(4, hash, spawnCoords.x, spawnCoords.y, groundZ, pedHeading, false, false)
         end
         
-        PlaceObjectOnGroundProperly(spawnedPed)
-        
-        if pedData.animDict and pedData.animName and pedData.animDict ~= "" then
-            RequestAnimDict(pedData.animDict)
-            local aTimeout = 50
-            while not HasAnimDictLoaded(pedData.animDict) and aTimeout > 0 do
-                Wait(100)
-                aTimeout = aTimeout - 1
-            end
-            if HasAnimDictLoaded(pedData.animDict) then
-                TaskPlayAnim(spawnedPed, pedData.animDict, pedData.animName, 8.0, -8.0, -1, 1, 0, false, false, false)
-            end
+        if not spawnedPed or spawnedPed == 0 or not DoesEntityExist(spawnedPed) then
+            print("[NodeEngine ERRO] spawn_ped: CreatePed retornou entidade inválida para modelo: " .. tostring(modelName))
+            return
         end
         
-        -- Lógica base de reação do ped (Attack, etc) baseada na taskType
-        if pedData.taskType == "guard" or pedData.taskType == "Atacar" then
-            GiveWeaponToPed(spawnedPed, GetHashKey("WEAPON_REVOLVER"), 100, false, true)
+        -- RedM: Carregar o outfit do ped (sem isso ele fica invisível, só arma aparece)
+        if GetGameName() == 'redm' then
+            Citizen.InvokeNative(0x77FF8D35EEC6BBC4, spawnedPed, 0, false) -- SetPedOutfitPreset(ped, preset, p2)
+            Wait(500) -- Dar tempo pro outfit carregar
+        end
+        
+        -- Configurações base
+        SetBlockingOfNonTemporaryEvents(spawnedPed, true)
+        
+        local taskType = pedData.taskType or "idle"
+        print("[NodeEngine DEBUG] Ped taskType: " .. tostring(taskType))
+        
+        if taskType == "frozen" then
+            -- Congelado: estátua, não se mexe
+            FreezeEntityPosition(spawnedPed, true)
+            SetEntityInvincible(spawnedPed, true)
+            
+        elseif taskType == "idle" then
+            -- Idle natural: fica parado mas com animação de respirar
+            FreezeEntityPosition(spawnedPed, false)
+            SetEntityInvincible(spawnedPed, true)
+            TaskStandStill(spawnedPed, -1)
+            
+        elseif taskType == "guard" then
+            -- Guarda: fica parado, ataca se jogador chegar perto
+            FreezeEntityPosition(spawnedPed, false)
+            SetEntityInvincible(spawnedPed, false)
+            local weaponName = pedData.weapon or "WEAPON_REVOLVER_CATTLEMAN"
+            if weaponName ~= "WEAPON_UNARMED" then
+                GiveWeaponToPed(spawnedPed, GetHashKey(weaponName), 100, false, true)
+            end
+            local detectDist = tonumber(pedData.detectDistance) or 15.0
+            -- Guardar posição e reagir a ameaças
+            TaskGuardCurrentPosition(spawnedPed, detectDist, detectDist, true)
+            
+        elseif taskType == "attack" then
+            -- Atacar imediatamente o jogador
+            FreezeEntityPosition(spawnedPed, false)
+            SetEntityInvincible(spawnedPed, false)
+            SetBlockingOfNonTemporaryEvents(spawnedPed, false)
+            local weaponName = pedData.weapon or "WEAPON_REVOLVER_CATTLEMAN"
+            if weaponName ~= "WEAPON_UNARMED" then
+                GiveWeaponToPed(spawnedPed, GetHashKey(weaponName), 100, false, true)
+            end
             TaskCombatPed(spawnedPed, PlayerPedId(), 0, 16)
+            
+        elseif taskType == "flee" then
+            -- Fugir do jogador
+            FreezeEntityPosition(spawnedPed, false)
+            SetEntityInvincible(spawnedPed, true)
+            SetBlockingOfNonTemporaryEvents(spawnedPed, false)
+            TaskReactAndFleePed(spawnedPed, PlayerPedId())
+            
+        elseif taskType == "wander" then
+            -- Vagar pela área num raio
+            FreezeEntityPosition(spawnedPed, false)
+            SetEntityInvincible(spawnedPed, true)
+            SetBlockingOfNonTemporaryEvents(spawnedPed, false)
+            local radius = tonumber(pedData.wanderRadius) or 10.0
+            TaskWanderInArea(spawnedPed, groundZ and spawnCoords.x or spawnCoords.x, groundZ and spawnCoords.y or spawnCoords.y, groundZ and groundZ or spawnCoords.z, radius, 0, 0)
+            
+        elseif taskType == "scenario" then
+            -- Cenário ambiental (fumando, bebendo, etc)
+            FreezeEntityPosition(spawnedPed, false)
+            SetEntityInvincible(spawnedPed, true)
+            local scenarioName = pedData.scenario or "WORLD_HUMAN_SMOKING"
+            TaskStartScenarioInPlace(spawnedPed, GetHashKey(scenarioName), -1, true)
+            
+        elseif taskType == "animation" then
+            -- Animação personalizada
+            FreezeEntityPosition(spawnedPed, false)
+            SetEntityInvincible(spawnedPed, true)
+            if pedData.animDict and pedData.animName and pedData.animDict ~= "" then
+                RequestAnimDict(pedData.animDict)
+                local aTimeout = 50
+                while not HasAnimDictLoaded(pedData.animDict) and aTimeout > 0 do
+                    Wait(100)
+                    aTimeout = aTimeout - 1
+                end
+                if HasAnimDictLoaded(pedData.animDict) then
+                    TaskPlayAnim(spawnedPed, pedData.animDict, pedData.animName, 8.0, -8.0, -1, 1, 0, false, false, false)
+                end
+            end
+            
+        else
+            -- Fallback: idle
+            TaskStandStill(spawnedPed, -1)
         end
         
         SetModelAsNoLongerNeeded(hash)
-        print("[NodeEngine DEBUG] Ped spawnado com sucesso: " .. tostring(modelName))
+        print("[NodeEngine DEBUG] Ped spawnado com sucesso: " .. tostring(modelName) .. " | Task: " .. tostring(taskType) .. " | Handle: " .. tostring(spawnedPed) .. " | Pos: " .. tostring(GetEntityCoords(spawnedPed)))
     end)
 end)
 

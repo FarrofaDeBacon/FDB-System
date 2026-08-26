@@ -125,6 +125,7 @@ end
 
 function NodeEngine.StartHeist(playerId, heistName, graph, context)
     print("[NodeEngine Debug] StartHeist invocado para jogador: " .. tostring(playerId))
+    print("DEBUG: Graph has " .. tostring(json.encode(graph.nodes)))
     -- Find start node OR trigger_model node
     local startNodeId = nil
     for id, node in pairs(graph.nodes) do
@@ -580,16 +581,8 @@ NodeEngine.RegisterNodeType("spawn_prop", {
             defaultCoords = GetEntityCoords(ped)
         end
         
-        local props = {}
-        if nodeData.props then
-            props = nodeData.props
-        elseif nodeData.model then
-            table.insert(props, nodeData)
-        end
-        
-        for _, propData in ipairs(props) do
-            TriggerClientEvent('node_engine:client:SpawnProp', playerId, propData, defaultCoords)
-        end
+        -- O cliente espera receber o nodeData completo que contém a array "props".
+        TriggerClientEvent('node_engine:client:SpawnProp', playerId, nodeData, defaultCoords)
         
         AutoAdvance(playerId, session)
     end
@@ -673,3 +666,4 @@ RegisterCommand('spawncaixa', function(source)
     if source == 0 then return end
     TriggerClientEvent('node_engine:client:SpawnAdminCrate', source)
 end, true)
+
