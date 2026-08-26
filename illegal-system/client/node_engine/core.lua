@@ -21,8 +21,9 @@ CreateThread(function()
                         
                         local model = GetEntityModel(entity)
                         local coords = GetEntityCoords(entity)
+                        local heading = GetEntityHeading(entity)
                         
-                        TriggerServerEvent('node_engine:server:TriggerModelInteracted', trigger.heistId, trigger.nodeId, model, coords)
+                        TriggerServerEvent('node_engine:server:TriggerModelInteracted', trigger.heistId, trigger.nodeId, model, coords, heading)
                     end
                 }
             }
@@ -225,7 +226,7 @@ RegisterNetEvent('node_engine:client:PlayAnimation', function(data)
     end)
 end)
 
-RegisterNetEvent('node_engine:client:SpawnProp', function(propData, defaultCoords)
+RegisterNetEvent('node_engine:client:SpawnProp', function(propData, defaultCoords, defaultHeading)
     CreateThread(function()
         if not propData.props or type(propData.props) ~= "table" then
             -- Fallback para nó legado
@@ -264,16 +265,27 @@ RegisterNetEvent('node_engine:client:SpawnProp', function(propData, defaultCoord
                         propHeading = tonumber(prop.heading) or 0.0
                     else
                         print("[NodeEngine DEBUG] Usando fallback relacional. Prop dump: " .. json.encode(prop))
-                        -- Offsets legados relativos ao jogador
-                        local ped = PlayerPedId()
-                        local pedHeading = GetEntityHeading(ped)
-                        local forwardOffset = prop.offsetForward or prop.offsetY or 0.0
-                        spawnCoords = GetOffsetFromEntityInWorldCoords(ped, prop.offsetX or 0.0, forwardOffset, prop.offsetZ or 0.0)
-                        propHeading = pedHeading + (prop.heading or 0.0)
+                        -- Offsets legados relativos à entidade que trigou o assalto (ou jogador como fallback final)
+                        local entityHeading = defaultHeading or 0.0
+                        local rad = math.rad(entityHeading)
+                        local fx, fy = -math.sin(rad), math.cos(rad)
+                        local baseX, baseY = defaultCoords.x, defaultCoords.y
+                        
+                        local found, groundZ = GetGroundZFor_3dCoord(baseX, baseY, defaultCoords.z + 2.0, false)
+                        local finalZ = found and groundZ or defaultCoords.z
+                        
+                        spawnCoords = vector3(
+                            baseX + fx * (prop.offsetForward or prop.offsetY or 0.0) + (prop.offsetX or 0.0), -- offsetX is rarely used but preserved just in case
+                            baseY + fy * (prop.offsetForward or prop.offsetY or 0.0) + (prop.offsetX or 0.0),
+                            finalZ + (prop.offsetZ or 0.0)
+                        )
+                        propHeading = entityHeading + (prop.heading or 0.0)
                     end
                     
                     local obj = CreateObject(hash, spawnCoords.x, spawnCoords.y, spawnCoords.z, true, true, false)
-                    PlaceObjectOnGroundProperly(obj)
+                    if prop.coords and type(prop.coords) == 'table' and prop.coords.x then
+                        PlaceObjectOnGroundProperly(obj)
+                    end
                     SetEntityHeading(obj, propHeading)
                     SetModelAsNoLongerNeeded(hash)
                     print("[NodeEngine DEBUG] Prop spawnado com sucesso: " .. tostring(modelName))

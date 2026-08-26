@@ -58,7 +58,7 @@ lib.callback.register('node_engine:server:GetGlobalTriggers', function(source)
     return NodeEngine.GlobalTriggers
 end)
 
-RegisterNetEvent('node_engine:server:TriggerModelInteracted', function(heistId, nodeId, entityModel, entityCoords)
+RegisterNetEvent('node_engine:server:TriggerModelInteracted', function(heistId, nodeId, entityModel, entityCoords, entityHeading)
     local source = source
     local graph = NodeEngine.RegisteredHeists[heistId]
     if not graph then return end
@@ -81,7 +81,8 @@ RegisterNetEvent('node_engine:server:TriggerModelInteracted', function(heistId, 
     print("[NodeEngine] Iniciando assalto dinâmico via trigger_model: " .. heistId)
     NodeEngine.StartHeist(source, heistId, graph, {
         entityModel = entityModel,
-        entityCoords = entityCoords
+        entityCoords = entityCoords,
+        entityHeading = tonumber(entityHeading) or 0.0
     })
 end)
 
@@ -574,14 +575,17 @@ NodeEngine.RegisterNodeType("spawn_prop", {
     OnEnter = function(playerId, session, nodeData, nodeToken)
         print("[NodeEngine] Entrando no nó spawn_prop para jogador " .. tostring(playerId))
         local defaultCoords = session.context.entityCoords
+        local defaultHeading = session.context.entityHeading
+        
         if not defaultCoords then
             print("[NodeEngine] spawn_prop: Sem coordenada no contexto, usando coordenadas do jogador (teste via comando?).")
             local ped = GetPlayerPed(playerId)
             defaultCoords = GetEntityCoords(ped)
+            defaultHeading = GetEntityHeading(ped)
         end
         
         -- O cliente espera receber o nodeData completo que contém a array "props".
-        TriggerClientEvent('node_engine:client:SpawnProp', playerId, nodeData, defaultCoords)
+        TriggerClientEvent('node_engine:client:SpawnProp', playerId, nodeData, defaultCoords, defaultHeading)
         
         AutoAdvance(playerId, session)
     end
