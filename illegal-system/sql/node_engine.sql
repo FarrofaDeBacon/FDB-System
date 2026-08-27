@@ -83,12 +83,27 @@ INSERT IGNORE INTO `illegal_heists` (`id`, `name`, `graph`, `active`) VALUES (
                     "attachRotZ": 378.40
                 } 
             },
+            "node_anim": {
+                "type": "play_animation",
+                "data": {
+                    "animDict": "amb_misc@world_human_kneel@kneel@female_b@base",
+                    "animName": "base",
+                    "durationMs": 3000
+                }
+            },
             "node_spawn": { 
                 "type": "spawn_prop", 
                 "data": { 
-                    "model": "mp005_p_dirtpile_tall_unburied", 
-                    "offsetForward": 0.6, 
-                    "offsetZ": -1.0 
+                    "props": [
+                        {
+                            "model": "mp005_p_dirtpile_tall_unburied",
+                            "coords": null,
+                            "offsetForward": 0.6,
+                            "offsetX": 0.0,
+                            "offsetZ": -1.0,
+                            "heading": 0
+                        }
+                    ]
                 } 
             },
             "node_reward": { 
@@ -103,7 +118,8 @@ INSERT IGNORE INTO `illegal_heists` (`id`, `name`, `graph`, `active`) VALUES (
         "edges": [
             { "source": "node_trigger", "target": "node_check" },
             { "source": "node_check", "target": "node_minigame" },
-            { "source": "node_minigame", "target": "node_spawn" },
+            { "source": "node_minigame", "target": "node_anim" },
+            { "source": "node_anim", "target": "node_spawn" },
             { "source": "node_spawn", "target": "node_reward" }
         ]
     }',
