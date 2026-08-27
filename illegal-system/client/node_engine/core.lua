@@ -268,15 +268,22 @@ RegisterNetEvent('node_engine:client:SpawnProp', function(propData, defaultCoord
                         -- Offsets legados relativos à entidade que trigou o assalto (ou jogador como fallback final)
                         local entityHeading = defaultHeading or 0.0
                         local rad = math.rad(entityHeading)
+                        
+                        -- Vetor Forward (-sin, cos) e Vetor Right (cos, sin)
                         local fx, fy = -math.sin(rad), math.cos(rad)
+                        local rx, ry = math.cos(rad), math.sin(rad)
+                        
                         local baseX, baseY = defaultCoords.x, defaultCoords.y
                         
                         local found, groundZ = GetGroundZFor_3dCoord(baseX, baseY, defaultCoords.z + 2.0, false)
                         local finalZ = found and groundZ or defaultCoords.z
                         
+                        local forwardOffset = prop.offsetForward or prop.offsetY or 0.0
+                        local rightOffset = prop.offsetX or 0.0
+                        
                         spawnCoords = vector3(
-                            baseX + fx * (prop.offsetForward or prop.offsetY or 0.0) + (prop.offsetX or 0.0), -- offsetX is rarely used but preserved just in case
-                            baseY + fy * (prop.offsetForward or prop.offsetY or 0.0) + (prop.offsetX or 0.0),
+                            baseX + (fx * forwardOffset) + (rx * rightOffset),
+                            baseY + (fy * forwardOffset) + (ry * rightOffset),
                             finalZ + (prop.offsetZ or 0.0)
                         )
                         propHeading = entityHeading + (prop.heading or 0.0)
