@@ -79,13 +79,23 @@ end)
 local function SyncMetadata()
     if not PlayerData or not PlayerData.metadata then return end
     if nuiReady then
-        local hunger = PlayerData.metadata["hunger"] or 100
-        local thirst = PlayerData.metadata["thirst"] or 100
-        local stress = PlayerData.metadata["stress"] or 0
-        
-        SendNUIMessage({ action = 'food', value = hunger })
-        SendNUIMessage({ action = 'water', value = thirst })
-        SendNUIMessage({ action = 'stress', value = stress })
+        local hunger      = PlayerData.metadata["hunger"]      or 100
+        local thirst      = PlayerData.metadata["thirst"]      or 100
+        local stress      = PlayerData.metadata["stress"]      or 0
+        local bladder     = PlayerData.metadata["bladder"]     or 0
+        local cleanliness = PlayerData.metadata["cleanliness"] or 100
+        local illness     = PlayerData.metadata["illness"]     or 0
+        local poison      = PlayerData.metadata["poison"]      or 0
+        local alcohol     = PlayerData.metadata["alcohol"]     or 0
+
+        SendNUIMessage({ action = 'food',        value = hunger      })
+        SendNUIMessage({ action = 'water',       value = thirst      })
+        SendNUIMessage({ action = 'stress',      value = stress      })
+        SendNUIMessage({ action = 'bladder',     value = bladder     })
+        SendNUIMessage({ action = 'cleanliness', value = cleanliness })
+        SendNUIMessage({ action = 'illness',     value = illness     })
+        SendNUIMessage({ action = 'poison',      value = poison      })
+        SendNUIMessage({ action = 'drunkenness', value = alcohol     })
     end
 end
 

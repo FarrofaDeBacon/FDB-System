@@ -121,13 +121,48 @@ end)
 -- -------------------------------------------------------
 -- EXPORTS DE MANIPULAÇÃO DIRETA
 -- -------------------------------------------------------
-RegisterNetEvent('fdb-survival:server:ForceClean', function()
+RegisterNetEvent('fdb-survival:server:ForceClean', function(town)
     local src = source
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     
+    -- SEGURANÇA: Só aceita ForceClean se o jogador está numa sessão de banho PAGA
+    -- Verifica a tabela global BathingSessions do fdb-water
+    local BathingSessions = exports['fdb-water']:GetBathingSessions and exports['fdb-water']:GetBathingSessions() or nil
+    
+    -- Fallback: tenta acessar via global compartilhada (se o export não existir)
+    if not BathingSessions then
+        -- Se fdb-water não expõe a tabela, checamos se town foi enviado e logamos
+        print(("[fdb-survival] AVISO: ForceClean chamado por src %s sem validação de sessão (fdb-water export não encontrado). Rejeitando por segurança."):format(src))
+        return
+    end
+    
+    -- Verifica se este jogador realmente está numa sessão de banho ativa
+    local isInBath = false
+    if town and BathingSessions[town] == src then
+        isInBath = true
+    else
+        -- Busca em qualquer town (caso o client não mande o town correto)
+        for t, player in pairs(BathingSessions) do
+            if player == src then
+                isInBath = true
+                town = t
+                break
+            end
+        end
+    end
+    
+    if not isInBath then
+        print(("[fdb-survival] EXPLOIT BLOQUEADO: ForceClean rejeitado para src %s (citizenid: %s) — nenhuma sessão de banho ativa."):format(src, Player.PlayerData.citizenid))
+        return
+    end
+    
+    -- Sessão válida: aplica limpeza e invalida a sessão de banho no mesmo evento
     Player.Functions.SetMetaData("cleanliness", 100)
     TriggerClientEvent('fdb-survival:client:ForceClean', src)
+    
+    -- Libera a sessão de banho automaticamente (fecha a brecha de dois eventos separados)
+    TriggerEvent('fdb-water:server:setBathAsFree', town)
 end)
 
 RegisterNetEvent('fdb-survival:server:EmptyBladder', function()
@@ -190,7 +225,9 @@ exports('AddBladder', function(src, amount)
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     local current = Player.PlayerData.metadata["bladder"] or 0
-    Player.Functions.SetMetaData("bladder", math.max(0, math.min(100, current + amount)))
+    local newBladder = math.max(0, math.min(100, current + amount))
+    Player.Functions.SetMetaData("bladder", newBladder)
+    TriggerClientEvent('fdb-survival:client:stateChanged', src, { field = 'bladder', value = math.floor(newBladder) })
 end)
 
 exports('AddCleanliness', function(src, amount)

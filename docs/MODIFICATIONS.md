@@ -17,6 +17,7 @@ Este documento registra todas as alterações estruturais, correções de segura
 | **Fase 6** | Performance & StateBags | ✅ APROVADA | Eliminação de polling inativo no PVP, cache de handle em `ShowMe3D`, zero queries MySQL em tick e direcionamento estrito de broadcast. (Commit: `baf45263fbdbd69471a57587970585e4fa036a06`) |
 | **Fase 7** | Documentação Final & Wiki | ✅ APROVADA | Criação de `WIKI.md`, READMEs em `server/` e `client/` e consolidação final do estado do fork. |
 | **Fase 8** | Biblioteca Central de UI (`fdb-libs`) | ✅ APROVADA | Desenvolvimento da UI rústica compilada em Svelte+Vite, integração de cores sólidas e HUD de RDR2. (Commit: `52bfb20`) |
+| **Fase 9** | Auditoria & Correções do Ecossistema de Sobrevivência | ✅ APROVADA | Blindagem de segurança em `fdb-consume`, `fdb-water`, `fdb-survival` e correção de integração do `fdb-hudpremium`. |
 
 ---
 
@@ -134,6 +135,39 @@ Este documento registra todas as alterações estruturais, correções de segura
   - **Módulo `context` (Menu de Contexto)**: Adicionado Menu de Contexto flutuante em Svelte (`ContextMenu.svelte`) e Lua (`context.lua`) com suporte a ícones, descrições e ações clicáveis com ajuste de coordenadas para evitar transbordar os limites da tela.
   - **Módulo `ThemeEditor` (Customização de Temas)**: Adicionada a ferramenta de edição `/libseditor` permitindo alterar cores in-game em tempo real com Live Preview de componentes de teste. As modificações são salvas de forma persistente e segura nos KVPs locais do recurso via interface `fdb.themeStore.Get/Set` e aplicadas dinamicamente na inicialização do NUI.
   - **Correção do Bug do Evento `onChange`**: Corrigido o bug visual no Svelte onde interações do menu clássico (como sliders e checkboxes) eram modificadas na interface mas não retornavam feedback ao Lua. Conectamos o manipulador `itemChange` no `App.svelte` permitindo o envio correto do payload para o NUI callback `/onMenuChange` e o disparo do respectivo evento Lua `fdb-libs:menu:onChange`.
+
+### 9. Auditoria & Correções do Ecossistema de Sobrevivência
+
+**Data:** 2026-08-27 | **Status:** ✅ APROVADA
+
+#### 9.1 Correções de Segurança (fdb-consume, fdb-water, fdb-survival)
+
+| Recurso | Evento | Vulnerabilidade | Correção |
+|---|---|---|---|
+| `fdb-consume` | `takeBite` | Spam de mordida = cura instantânea | Rate limit de **1s** por jogador via `lastBiteTime[src]` |
+| `fdb-water` | `WashInRiver` | Spam = limpeza grátis infinita | Cooldown de **30s** via `CheckCooldown(src, 'WashInRiver', 30)` |
+| `fdb-water` | `DrinkNaturalWater` | Spam = sede resolvida sem animação | Cooldown de **10s** via `CheckCooldown(src, 'DrinkNaturalWater', 10)` |
+| `fdb-survival` | `ForceClean` | Limpeza grátis sem pagar banho | Exige sessão ativa em `BathingSessions` do `fdb-water` via export `GetBathingSessions()` |
+
+- **Confirmado:** Metabolismo (fome/sede) roda **100% no servidor** — imune a fraudes de cliente.
+- **Confirmado:** `SaveMeta` possui rate limit (10s) e cap de delta máximo por sync.
+- **Confirmado:** `reportHazardDamage` cap de dano ambiental de `5.0` por tick.
+
+#### 9.2 Correção de Integração do fdb-hudpremium
+
+**Problema 1 — `AddBladder` sem feedback ao HUD:**
+O export `AddBladder` em `fdb-survival/server/main.lua` atualizava o metadata mas não disparava `fdb-survival:client:stateChanged`, deixando o ícone de bexiga desatualizado no HUD até o próximo sync passivo.
+
+**Correção:** Adicionado `TriggerClientEvent('fdb-survival:client:stateChanged', src, { field = 'bladder', value = ... })` no export `AddBladder`.
+
+**Problema 2 — `SyncMetadata` incompleto no login/restart:**
+A função `SyncMetadata()` em `fdb-hudpremium/client/main.lua` só enviava `food`, `water` e `stress` ao logar. Campos como `bladder`, `cleanliness`, `illness`, `poison` e `drunkenness` ficavam em valor default até uma mudança ocorrer.
+
+**Correção:** `SyncMetadata()` expandido para enviar todos os 8 campos de sobrevivência no carregamento.
+
+**Arquivos modificados:**
+- `fdb-survival/server/main.lua` — export `AddBladder`
+- `fdb-hudpremium/client/main.lua` — função `SyncMetadata()`
 
 ---
 
