@@ -657,21 +657,53 @@
                                 <label>Model</label>
                                 <input type="text" bind:value={prop.model} oninput={() => nodes = [...nodes]} />
                                 
-                                <div style="display: flex; gap: 5px; margin-top: 5px;">
-                                    <div style="flex: 1;">
-                                        <label>Coordenadas (3D)</label>
-                                        {#if prop.coords}
+                                <label style="display: flex; align-items: center; gap: 5px; margin-top: 10px;">
+                                    <input type="checkbox" checked={!prop.coords} onchange={(e) => {
+                                        if (e.target.checked) {
+                                            prop.coords = null;
+                                            prop.offsetForward = prop.offsetForward || 0;
+                                            prop.offsetX = prop.offsetX || 0;
+                                            prop.offsetZ = prop.offsetZ || 0;
+                                        } else {
+                                            prop.coords = { x: 0, y: 0, z: 0 };
+                                        }
+                                        nodes = [...nodes];
+                                    }} />
+                                    Usar Offset Relativo (Dinâmico)
+                                </label>
+
+                                {#if prop.coords}
+                                    <div style="display: flex; gap: 5px; margin-top: 5px;">
+                                        <div style="flex: 1;">
+                                            <label>Coordenadas (3D)</label>
                                             <span style="font-size: 11px; color: #2ecc71;">X:{prop.coords.x.toFixed(1)} Y:{prop.coords.y.toFixed(1)} Z:{prop.coords.z.toFixed(1)}</span>
-                                        {:else}
-                                            <span style="font-size: 11px; color: #e74c3c;">Não definidas</span>
-                                        {/if}
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <label>Heading</label>
+                                            <input type="number" step="1.0" bind:value={prop.heading} oninput={() => nodes = [...nodes]} />
+                                        </div>
                                     </div>
-                                    <div style="flex: 1;">
-                                        <label>Heading</label>
+                                    <button class="admin-button" style="background: #3498db; width: 100%; margin-top: 10px;" onclick={() => startPlacementItem('props', index, prop.model)}>📍 Setar no Mundo (3D)</button>
+                                {:else}
+                                    <div style="display: flex; gap: 5px; margin-top: 5px;">
+                                        <div style="flex: 1;">
+                                            <label>Offset Forward</label>
+                                            <input type="number" step="0.1" bind:value={prop.offsetForward} oninput={() => nodes = [...nodes]} />
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <label>Offset Right (X)</label>
+                                            <input type="number" step="0.1" bind:value={prop.offsetX} oninput={() => nodes = [...nodes]} />
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <label>Offset Z (Up)</label>
+                                            <input type="number" step="0.1" bind:value={prop.offsetZ} oninput={() => nodes = [...nodes]} />
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 5px;">
+                                        <label>Heading Offset</label>
                                         <input type="number" step="1.0" bind:value={prop.heading} oninput={() => nodes = [...nodes]} />
                                     </div>
-                                </div>
-                                <button class="admin-button" style="background: #3498db; width: 100%; margin-top: 10px;" onclick={() => startPlacementItem('props', index, prop.model)}>📍 Setar no Mundo (3D)</button>
+                                {/if}
                             </div>
                         {/each}
                         <button class="admin-button" style="background: #27ae60; width: 100%;" onclick={() => {
