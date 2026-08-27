@@ -45,7 +45,7 @@ INSERT IGNORE INTO `illegal_heists` (`id`, `name`, `graph`) VALUES (
 -- Seed de teste para o Roubo de Túmulo (Migração Fase 5)
 -- ATENÇÃO: O assalto já está ATIVO (active=1), mas propositalmente restrito a 3 modelos para teste.
 -- Após testar em jogo, adicione os 50+ modelos no editor para ir pra produção real.
-INSERT IGNORE INTO `illegal_heists` (`id`, `name`, `graph`, `active`) VALUES (
+REPLACE INTO `illegal_heists` (`id`, `name`, `graph`, `active`) VALUES (
     'grave_robbery_heist',
     'Roubo de Túmulo',
     '{
