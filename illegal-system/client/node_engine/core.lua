@@ -27,7 +27,18 @@ CreateThread(function()
                     end
                 }
             }
-            Bridge.RegisterTargetModel(trigger.models, options)
+            local modelsTable = {}
+            if type(trigger.models) == "string" then
+                for model in string.gmatch(trigger.models, '([^,]+)') do
+                    table.insert(modelsTable, model:match("^%s*(.-)%s*$")) -- Trim whitespace
+                end
+            elseif type(trigger.models) == "table" then
+                modelsTable = trigger.models
+            else
+                modelsTable = { trigger.models }
+            end
+            
+            Bridge.RegisterTargetModel(modelsTable, options)
             table.insert(registeredTriggers, trigger)
         end
         print(("[NodeEngine] Registrados %d gatilhos globais de modelo."):format(#triggers.models))
