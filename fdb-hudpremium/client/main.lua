@@ -105,7 +105,7 @@ RegisterNetEvent('FDBCore:Client:OnPlayerInfoUpdate', function(data)
 end)
 
 RegisterNetEvent('FDBCore:Player:SetPlayerData', function(val)
-    PlayerData = FDBCore.Functions.GetPlayerData()
+    PlayerData = val
     SyncMetadata()
 end)
 
@@ -139,6 +139,7 @@ end)
 -- Loop de Coleta de Ticks Básicos (500ms) - Vida e Fôlego
 -- -------------------------------------------------------
 CreateThread(function()
+    local firstTick = true
     while true do
         Wait(500)
         
@@ -149,6 +150,12 @@ CreateThread(function()
             local currentHealth = GetEntityHealth(ped)
             -- Saúde do jogador (Fisiologia fdb-medical-core + Fallback de ped)
             local medState = Entity(ped).state.medical
+            
+            if firstTick then
+                print("[fdb-hudpremium] FIRST TICK MEDICAL STATE: " .. (medState and json.encode(medState) or "NIL"))
+                firstTick = false
+            end
+
             local health = 0
             if medState and medState.health ~= nil then
                 local maxHp = GetEntityMaxHealth(ped)
@@ -208,6 +215,7 @@ CreateThread(function()
                 horseHealth = math.floor((hHealthTank / 2) + (hHealthCore / 2))
 
                 local rawHorseStamina = Citizen.InvokeNative(0x0FF421E467373FCF, mount, Citizen.ResultAsFloat())
+                print("[fdb-hudpremium] HORSE STAMINA 0x0FF421E467373FCF RETURNED: " .. tostring(rawHorseStamina))
                 local hStaminaTank = math.max(0, math.min(100, math.floor(rawHorseStamina)))
                 local hStaminaCore = Citizen.InvokeNative(0x36731AC041289BB1, mount, 1)
                 if not tonumber(hStaminaCore) then hStaminaCore = 0 end

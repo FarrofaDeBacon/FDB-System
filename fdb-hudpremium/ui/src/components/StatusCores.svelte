@@ -36,20 +36,37 @@
     // Invertido para coisas que sobem (ex: estresse, bexiga, veneno)
     $: getInnerColorReverse = (val, defaultColor = '#ffffff', dangerColor = '#ff0000', threshold = 80) => val >= threshold ? dangerColor : defaultColor;
     
+    $: blendColor = (c1, c2, ratio) => {
+        if (!c1) c1 = '#ffffff';
+        if (!c2) c2 = '#8b4513';
+        ratio = Math.max(0, Math.min(1, ratio));
+        let hex = function(x) {
+            x = x.toString(16);
+            return (x.length == 1) ? '0' + x : x;
+        };
+        let r = Math.ceil(parseInt(c1.substring(1,3), 16) * ratio + parseInt(c2.substring(1,3), 16) * (1-ratio));
+        let g = Math.ceil(parseInt(c1.substring(3,5), 16) * ratio + parseInt(c2.substring(3,5), 16) * (1-ratio));
+        let b = Math.ceil(parseInt(c1.substring(5,7), 16) * ratio + parseInt(c2.substring(5,7), 16) * (1-ratio));
+        return '#' + hex(r) + hex(g) + hex(b);
+    };
+    
     // Clamp para o valor da temperatura
     $: getTempValue = (t) => Math.min(100, t < 15 ? (15 - t)*5 : (t - 35)*5);
 
     $: isEditing = $editorState.isEditing;
+    $: configs = $editorState.configs;
 
     // Condicionais de visibilidade (sempre visíveis se estiver editando)
     $: showArmor = isEditing || armor > 0;
     $: showOxygen = isEditing || oxygen < 100;
-    $: showHorse = isEditing || (horseHealth > 0 && horseHealth <= 100);
+    $: showHorse = isEditing || horseHealth > 0;
 
     // Regras de Exibição Dinâmica para Survival
     $: showBladder = isEditing || bladder > 50;
     $: showCleanliness = isEditing || cleanliness < 100;
-    $: showTemp = isEditing || temp < 15 || temp > 28; // Tremos frio/calor
+    $: showTemp = true; // Termômetro sempre visível
+
+
     $: showPoison = isEditing || poison > 0;
     $: showIllness = isEditing || illness > 0;
     $: showDrunkenness = isEditing || drunkenness > 0;
@@ -222,11 +239,10 @@
             <HUDItem 
                 itemId="cleanliness"
                 value={getOuter(cleanliness)} 
-                innerValue={getInner(cleanliness)} 
+                innerValue={100} 
                 icon="./assets/hygiene.svg" 
-                outerColor="#ffffff" 
-                trackColor="#8b4513"
-                innerColor={getInnerColor(cleanliness, '#ffffff', '#ff0000')}
+                outerColor={configs?.cleanliness?.outerColor || '#8b4513'} 
+                innerColor={blendColor('#ffffff', configs?.cleanliness?.innerColor || '#8b4513', cleanliness / 100)}
             />
         </DraggableModule>
     {/if}

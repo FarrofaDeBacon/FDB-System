@@ -66,6 +66,10 @@ RegisterNetEvent('fdb-consume:client:StartInteractiveConsumable', function(animT
         local isAnimating = false
         while isHoldingConsumable do
             Wait(0)
+            
+            -- FIX: Desativa a tecla TODO frame enquanto segura o item
+            DisableControlAction(0, Config.Prompts.SmokeKey, true)
+
             if IsControlJustReleased(0, Config.Prompts.DropKey) then
                 TriggerServerEvent('fdb-consume:server:cancelConsume')
                 TriggerEvent('fdb-consume:client:StopInteractiveConsumable')
