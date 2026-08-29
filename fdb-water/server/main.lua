@@ -1,5 +1,23 @@
 local FDBCore = exports['fdb-core']:GetCoreObject()
 
+-- Anti-exploit: cooldowns por jogador para eventos sem validação de posição
+local playerCooldowns = {} -- [src] = { [eventName] = timestamp }
+
+local function CheckCooldown(src, eventName, cooldownSeconds)
+    local now = os.time()
+    if not playerCooldowns[src] then playerCooldowns[src] = {} end
+    if playerCooldowns[src][eventName] and (now - playerCooldowns[src][eventName]) < cooldownSeconds then
+        return false -- ainda em cooldown
+    end
+    playerCooldowns[src][eventName] = now
+    return true -- liberado
+end
+
+-- Limpa cooldowns quando o jogador desconecta
+AddEventHandler('playerDropped', function()
+    playerCooldowns[source] = nil
+end)
+
 ----------------------------------------------------------------------
 -- WATER CANTEEN LOGIC
 ----------------------------------------------------------------------
@@ -132,6 +150,11 @@ end)
 
 BathingSessions = {}
 
+-- Export para que outros recursos (fdb-survival) possam validar sessões ativas
+exports('GetBathingSessions', function()
+    return BathingSessions
+end)
+
 RegisterServerEvent('fdb-water:server:canEnterBath')
 AddEventHandler('fdb-water:server:canEnterBath', function(town)
     local src = source
@@ -259,6 +282,12 @@ RegisterNetEvent('fdb-water:server:WashInRiver', function()
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     
+    -- SEGURANÇA: Cooldown de 30s para impedir spam de limpeza grátis
+    if not CheckCooldown(src, 'WashInRiver', 30) then
+        print(('[fdb-water] WashInRiver rejeitado: cooldown ativo para src %s'):format(src))
+        return
+    end
+    
     -- Using the WashInWater value from config (25.0)
     exports['fdb-survival']:AddCleanliness(src, 25.0)
 end)
@@ -267,6 +296,12 @@ RegisterNetEvent('fdb-water:server:DrinkNaturalWater', function()
     local src = source
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
+    
+    -- SEGURANÇA: Cooldown de 10s para impedir spam de sede grátis
+    if not CheckCooldown(src, 'DrinkNaturalWater', 10) then
+        print(('[fdb-water] DrinkNaturalWater rejeitado: cooldown ativo para src %s'):format(src))
+        return
+    end
     
     exports['fdb-survival']:AddThirst(src, 15)
     
