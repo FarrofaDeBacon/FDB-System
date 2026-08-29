@@ -3,6 +3,7 @@ local activeProp2 = nil
 local isHoldingFood = false
 local consumePrompt = nil
 local dropPrompt = nil
+local currentFoodSession = 0
 
 local function CreateFoodPrompts()
     Citizen.CreateThread(function()
@@ -32,8 +33,10 @@ RegisterNetEvent('fdb-consume:client:ConsumeFood', function(propModel, animType,
 
     if isHoldingFood then
         TriggerEvent('fdb-consume:client:StopInteractiveConsumable')
-        Wait(50)
     end
+    
+    currentFoodSession = currentFoodSession + 1
+    local mySession = currentFoodSession
     
     isHoldingFood = true
     maxUses = maxUses or 3
@@ -106,7 +109,7 @@ RegisterNetEvent('fdb-consume:client:ConsumeFood', function(propModel, animType,
 
     Citizen.CreateThread(function()
         local isAnimating = false
-        while isHoldingFood do
+        while isHoldingFood and currentFoodSession == mySession do
             Wait(0)
             DisableControlAction(0, Config.Prompts.SmokeKey, true)
             DisableControlAction(0, Config.Prompts.ChugKey, true)
@@ -157,7 +160,7 @@ RegisterNetEvent('fdb-consume:client:ConsumeFood', function(propModel, animType,
                 local lastBiteTime = GetGameTimer()
                 TriggerServerEvent('fdb-consume:server:takeBite')
 
-                while IsDisabledControlPressed(0, Config.Prompts.ChugKey) and isHoldingFood do
+                while IsDisabledControlPressed(0, Config.Prompts.ChugKey) and isHoldingFood and currentFoodSession == mySession do
                     Wait(0)
                     DisableControlAction(0, Config.Prompts.SmokeKey, true)
                     DisableControlAction(0, Config.Prompts.ChugKey, true)

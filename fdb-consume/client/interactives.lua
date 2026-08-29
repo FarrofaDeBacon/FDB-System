@@ -6,6 +6,7 @@ local activeType = nil
 local consumePrompt = nil
 local dropPrompt = nil
 local isHoldingConsumable = false
+local currentInteractiveSession = 0
 
 function CreateConsumablePrompts(animType)
     Citizen.CreateThread(function()
@@ -51,6 +52,9 @@ RegisterNetEvent('fdb-consume:client:StartInteractiveConsumable', function(animT
         TriggerEvent('fdb-consume:client:StopInteractiveConsumable')
     end
 
+    currentInteractiveSession = currentInteractiveSession + 1
+    local mySession = currentInteractiveSession
+
     isHoldingConsumable = true
     activeType = animType
     
@@ -64,7 +68,7 @@ RegisterNetEvent('fdb-consume:client:StartInteractiveConsumable', function(animT
 
     Citizen.CreateThread(function()
         local isAnimating = false
-        while isHoldingConsumable do
+        while isHoldingConsumable and currentInteractiveSession == mySession do
             Wait(0)
             
             -- FIX: Desativa a tecla TODO frame enquanto segura o item
@@ -95,7 +99,7 @@ RegisterNetEvent('fdb-consume:client:StartInteractiveConsumable', function(animT
                 local lastBiteTime = GetGameTimer()
                 TriggerServerEvent('fdb-consume:server:takeBite')
 
-                while IsDisabledControlPressed(0, Config.Prompts.SmokeKey) and isHoldingConsumable do
+                while IsDisabledControlPressed(0, Config.Prompts.SmokeKey) and isHoldingConsumable and currentInteractiveSession == mySession do
                     Wait(0)
                     DisableControlAction(0, Config.Prompts.SmokeKey, true)
                     local now = GetGameTimer()

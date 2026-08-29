@@ -2,6 +2,7 @@ local activeProp = nil
 local isHoldingDrink = false
 local consumePrompt = nil
 local dropPrompt = nil
+local currentDrinkSession = 0
 
 local function CreateDrinkPrompts()
     Citizen.CreateThread(function()
@@ -41,6 +42,9 @@ RegisterNetEvent('fdb-consume:client:ConsumeDrink', function(propModel, animType
     if isHoldingDrink then
         TriggerEvent('fdb-consume:client:StopInteractiveConsumable')
     end
+
+    currentDrinkSession = currentDrinkSession + 1
+    local mySession = currentDrinkSession
 
     isHoldingDrink = true
     maxUses = maxUses or 3
@@ -87,7 +91,7 @@ RegisterNetEvent('fdb-consume:client:ConsumeDrink', function(propModel, animType
 
     Citizen.CreateThread(function()
         local isAnimating = false
-        while isHoldingDrink do
+        while isHoldingDrink and currentDrinkSession == mySession do
             Wait(0)
             DisableControlAction(0, Config.Prompts.SmokeKey, true)
             DisableControlAction(0, Config.Prompts.ChugKey, true)
@@ -128,7 +132,7 @@ RegisterNetEvent('fdb-consume:client:ConsumeDrink', function(propModel, animType
                 local lastBiteTime = GetGameTimer()
                 TriggerServerEvent('fdb-consume:server:takeBite')
 
-                while IsDisabledControlPressed(0, Config.Prompts.ChugKey) and isHoldingDrink do
+                while IsDisabledControlPressed(0, Config.Prompts.ChugKey) and isHoldingDrink and currentDrinkSession == mySession do
                     Wait(0)
                     DisableControlAction(0, Config.Prompts.SmokeKey, true)
                     DisableControlAction(0, Config.Prompts.ChugKey, true)
