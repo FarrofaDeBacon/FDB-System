@@ -32,8 +32,9 @@ RegisterNetEvent('fdb-consume:client:ConsumeFood', function(propModel, animType,
 
     if isHoldingFood then
         TriggerEvent('fdb-consume:client:StopInteractiveConsumable')
+        Wait(50)
     end
-
+    
     isHoldingFood = true
     maxUses = maxUses or 3
 
