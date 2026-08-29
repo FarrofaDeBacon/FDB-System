@@ -127,8 +127,12 @@ RegisterNetEvent('fdb-survival:server:ForceClean', function(town)
     if not Player then return end
     
     -- SEGURANÇA: Só aceita ForceClean se o jogador está numa sessão de banho PAGA
-    -- Verifica a tabela global BathingSessions do fdb-water
-    local BathingSessions = exports['fdb-water']:GetBathingSessions and exports['fdb-water']:GetBathingSessions() or nil
+    local hasWater = GetResourceState('fdb-water') == 'started' or GetResourceState('fdb-water') == 'starting'
+    local BathingSessions = nil
+    if hasWater then
+        local ok, result = pcall(function() return exports['fdb-water']:GetBathingSessions() end)
+        if ok then BathingSessions = result else BathingSessions = nil end
+    end
     
     -- Fallback: tenta acessar via global compartilhada (se o export não existir)
     if not BathingSessions then
@@ -410,3 +414,5 @@ RegisterNetEvent('fdb-survival:server:reportHazardDamage', function(damageType, 
     -- Invoca a fonte única de dano no fdb-medical-core
     exports['fdb-medical-core']:ApplyDamage(src, damageType or 'Generic', nil, cappedAmount)
 end)
+
+print('^2[fdb-survival] Carregado com sucesso na RAM! Exports ativados.^7')
