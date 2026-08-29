@@ -7,6 +7,7 @@ local items = {
         type = "Drink",
         hunger = 0,
         thirst = 100,
+        uses = 5,
         stress = 5,
         alcohol = -5,
         health = 0,
