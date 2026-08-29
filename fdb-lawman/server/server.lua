@@ -23,6 +23,7 @@ RegisterNetEvent('fdb-lawman:server:SearchPlayer', function()
     local src = source
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
+    if Player.PlayerData.job.type ~= 'leo' then return end
     local PlayerData = Player.PlayerData
     local player, distance = FDBCore.Functions.GetClosestPlayer(src)
     if player ~= -1 and distance < Config.SearchDistance then
