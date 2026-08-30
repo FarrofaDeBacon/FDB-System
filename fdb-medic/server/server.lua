@@ -1,6 +1,8 @@
 local FDBCore = exports['fdb-core']:GetCoreObject()
 lib.locale()
 
+local PendingRevives = {}
+
 ---------------------------------
 -- SaltyChat integration
 ---------------------------------
@@ -112,8 +114,6 @@ end, 'admin')
 ----------------------
 -- EVENTS 
 -----------------------
-
-local PendingRevives = {}
 
 RegisterNetEvent('fdb-medic:server:ConfirmRevived', function()
     local src = source
