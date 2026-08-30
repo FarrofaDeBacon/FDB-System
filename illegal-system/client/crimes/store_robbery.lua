@@ -46,7 +46,6 @@ AddEventHandler('illegal-system:client:StoresLoaded', function(stores)
                 coords = store.registerCoords,
                 size = vec3(1.5, 1.5, 1.5),
                 rotation = 0,
-                debug = true,
                 options = {
                     {
                         name = 'burglary_register_'..store.name,

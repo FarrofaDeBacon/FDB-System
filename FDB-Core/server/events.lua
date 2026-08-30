@@ -176,10 +176,7 @@ RegisterNetEvent('FDBCore:UpdatePlayer', function()
 end)
 
 -- Whitelisted metadata keys allowed to be updated directly by client request
-local AllowedClientMetaData = {
-    hunger = true,
-    thirst = true,
-}
+local AllowedClientMetaData = {}
 
 RegisterNetEvent('FDBCore:Server:SetMetaData', function(meta, data)
     local src = source

@@ -174,7 +174,9 @@ RegisterNetEvent('fdb-backpacks:server:spawnBackpackOnGround', function(itemName
     end
 
     -- Remove item from player pockets
-    Player.Functions.RemoveItem(itemName, 1, slot)
+    if not Player.Functions.RemoveItem(itemName, 1, slot) then
+        return
+    end
     TriggerClientEvent("inventory:client:ItemBox", src, FDBCore.Shared.Items[itemName], "remove")
 
     -- Initialize stash inside inventory global table
@@ -292,20 +294,22 @@ RegisterNetEvent('fdb-backpacks:server:registerGroundBackpack', function(stashId
 
     -- Remove o item dos bolsos ou o attach das costas/lateral
     if slot then
-        Player.Functions.RemoveItem(itemName, 1, slot)
+        if not Player.Functions.RemoveItem(itemName, 1, slot) then
+            return
+        end
         TriggerClientEvent("inventory:client:ItemBox", src, FDBCore.Shared.Items[itemName], "remove")
     else
         local bpConfig = Config.Backpacks[itemName]
         local isSatchel = bpConfig and (bpConfig.isClothing or itemName == "doctor_bag")
         if isSatchel then
             local eq = Player.PlayerData.metadata.equipmentSlots or {backpack=nil,satchel=nil,wallet=nil,holster=nil}
-        eq.satchel = nil
-        Player.Functions.SetMetaData('equipmentSlots', eq)
+            eq.satchel = nil
+            Player.Functions.SetMetaData('equipmentSlots', eq)
             TriggerClientEvent('fdb-backpacks:client:detachSatchel', src)
         else
             local eq = Player.PlayerData.metadata.equipmentSlots or {backpack=nil,satchel=nil,wallet=nil,holster=nil}
-        eq.backpack = nil
-        Player.Functions.SetMetaData('equipmentSlots', eq)
+            eq.backpack = nil
+            Player.Functions.SetMetaData('equipmentSlots', eq)
             TriggerClientEvent('fdb-backpacks:client:detachFromBack', src)
         end
     end

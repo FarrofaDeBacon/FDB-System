@@ -39,3 +39,19 @@ dependencies {
     'fdb-core'
 }
 
+
+server_exports {
+    'AddHunger',
+    'AddThirst',
+    'AddStress',
+    'AddAlcohol',
+    'AddBladder',
+    'AddCleanliness',
+    'SetWet',
+    'CurePoison',
+    'CureIllness',
+    'AddIllness',
+    'AddPoison',
+    'AddColdResistance',
+    'AddHeatResistance'
+}

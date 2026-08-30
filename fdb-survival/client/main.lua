@@ -47,6 +47,17 @@ RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', function()
     end
 end)
 
+AddEventHandler('onResourceStart', function(resourceName)
+    if GetCurrentResourceName() == resourceName then
+        local PlayerData = FDBCore.Functions.GetPlayerData()
+        if PlayerData and PlayerData.citizenid then
+            FDB.IsLoggedIn = true
+            SyncLocalMetadata(true)
+            LocalPlayer.state:set('isWet', PlayerData.metadata["isWet"] or false, true)
+        end
+    end
+end)
+
 RegisterNetEvent('fdb-survival:client:ForceClean', function()
     FDB.Survival.cleanliness = 100
     FDB.BroadcastState('cleanliness', 100)

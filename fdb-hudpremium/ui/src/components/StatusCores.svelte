@@ -239,9 +239,10 @@
             <HUDItem 
                 itemId="cleanliness"
                 value={getOuter(cleanliness)} 
-                innerValue={100} 
+                innerValue={getInner(cleanliness)} 
                 icon="./assets/hygiene.svg" 
-                outerColor={configs?.cleanliness?.outerColor || '#8b4513'} 
+                outerColor={configs?.cleanliness?.outerColor || '#ffffff'} 
+                trackColor="#8b4513"
                 innerColor={blendColor('#ffffff', configs?.cleanliness?.innerColor || '#8b4513', cleanliness / 100)}
             />
         </DraggableModule>

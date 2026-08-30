@@ -241,6 +241,7 @@ lib.callback.register('fdb-inventory:server:SetInventoryData', function(source, 
     -- Prevent moving items to shops
     if toInventory:find('shop-') then return false, 'shop' end
     if not fromInventory or not toInventory or not fromSlot or not toSlot or not fromAmount or not toAmount then return false, 'invalid_args' end
+    if fromInventory == toInventory and fromSlot == toSlot then return false, 'same_slot' end
 
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return false, 'no_player' end
@@ -349,6 +350,18 @@ lib.callback.register('fdb-inventory:server:SetInventoryData', function(source, 
                 local isWalletModel = (model == "p_wallet01x" or model == "p_wallet02x" or model:sub(1, 7) == "wallet_")
                 local isHolsterModel = (model == "p_holster01x" or model == "p_holster02x" or model:sub(1, 8) == "holster_")
                 
+                -- Anti-Inception restriction: Prevent backpacks/satchels/wallets/holsters from being placed inside backpacks
+                local isItemBackpack = (fromItem.name == "backpack" or fromItem.name == "satchel" or fromItem.name:find("backpack") or fromItem.name:find("satchel") or fromItem.name:find("wallet") or fromItem.name:find("holster") or fromItem.name == "doctor_bag")
+                if isItemBackpack then
+                    TriggerClientEvent('ox_lib:notify', src, {
+                        title = 'Ação Inválida',
+                        description = 'Você não pode colocar um container de armazenamento dentro de outro!',
+                        type = 'error',
+                        duration = 5000
+                    })
+                    return false, 'backpack_inception'
+                end
+
                 -- Wallet restriction: Only accepts money items
                 if isWalletModel then
                     local allowed = (fromItem.name == "cash" or fromItem.name == "money" or fromItem.name == "dollar" or fromItem.name == "cent" or fromItem.name == "blood_dollar" or fromItem.name == "blood_cent" or fromItem.name == "gold_bar" or fromItem.name == "gold_chunk" or fromItem.name:find("money") or fromItem.name:find("cash") or fromItem.name:find("dollar") or fromItem.name:find("cent"))

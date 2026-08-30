@@ -97,16 +97,14 @@ RegisterNetEvent('fdb-medical-core:server:ReportDamage', function(bodyPart, dama
     local ped = GetPlayerPed(src)
     if not ped or ped == 0 then return end
 
-    -- Sanity Cap: Previne que hitches de rede encavalem frames e mandem deltas maliciosos/bugados.
-    -- O dano máximo aceito por ciclo de report (~500ms) é 590 (quase hit-kill, mas evita estourar variável).
-    if reportedAmount > 590 then
-        print(("[fdb-medical-core] SANITY CAP: src %s reportou dano de %s (capado em 590)"):format(src, reportedAmount))
-        reportedAmount = 590
-    end
+    local vitals = GetPlayerVitals(src)
+    local actualHp = GetEntityHealth(ped)
+    local actualDelta = vitals.health - actualHp -- quanto a vida realmente caiu desde a última sync
 
-    -- Confia no valor reportado pelo cliente (espião), já que a vida server-side (GetEntityHealth) 
-    -- tem um atraso gigantesco no RedM e não reflete o dano real instantaneamente.
-    local amount = reportedAmount
+    if actualDelta <= 0 then return end -- não perdeu vida de verdade, ignora o report
+
+    -- Sanity Cap original: usa o menor entre o reportado e o real, nunca confia cegamente no reportado
+    local amount = math.min(reportedAmount, actualDelta)
 
     ProcessDamage(src, damageType, bodyPart, amount, 'fdb-medic:selfReport')
 end)

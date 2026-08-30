@@ -15,8 +15,8 @@ export const coreStatus = writable({
 });
 
 export const horseStatus = writable({
-    horseHealth: 100,
-    horseStamina: 100,
+    horseHealth: 0,
+    horseStamina: 0,
     dirtTier: 'clean',
     agitationTier: 'calm',
     isExhausted: false,
@@ -55,7 +55,7 @@ export const extras = writable({
     job: 'Desempregado',
     id: 0,
     time: '12:00',
-    isVisible: true,
+    isVisible: false,
     showTemp: false, // Temporary visibility toggle (showExtrasTemp)
 });
 
@@ -274,9 +274,10 @@ window.addEventListener('message', (event) => {
                 Voice: ['voice'],
             };
 
+            let defaultCfgs = createDefaultConfigs();
             if (!configs) {
                 // Formato legado detectado! Fazer migração das configs
-                configs = createDefaultConfigs();
+                configs = defaultCfgs;
                 
                 // 1. Mapear as escalas legadas
                 const oldScales = scales || {};
@@ -293,6 +294,9 @@ window.addEventListener('message', (event) => {
                 for (const [id, color] of Object.entries(oldColors)) {
                     if (configs[id]) configs[id].outerColor = color;
                 }
+            } else {
+                // Mesclar configs padrão para garantir que itens novos (ex: bladder, cleanliness) apareçam
+                configs = { ...defaultCfgs, ...configs };
             }
 
             // 3. Migrar posições legadas (sejam novas ou antigas)

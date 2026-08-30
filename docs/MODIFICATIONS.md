@@ -148,6 +148,7 @@ Este documento registra todas as alterações estruturais, correções de segura
 | `fdb-water` | `WashInRiver` | Spam = limpeza grátis infinita | Cooldown de **30s** via `CheckCooldown(src, 'WashInRiver', 30)` |
 | `fdb-water` | `DrinkNaturalWater` | Spam = sede resolvida sem animação | Cooldown de **10s** via `CheckCooldown(src, 'DrinkNaturalWater', 10)` |
 | `fdb-survival` | `ForceClean` | Limpeza grátis sem pagar banho | Exige sessão ativa em `BathingSessions` do `fdb-water` via export `GetBathingSessions()` |
+| `FDB-Core` | `SetMetaData` | Hack de fome/sede instantânea pelo client | Remoção de `hunger` e `thirst` da `AllowedClientMetaData` (100% server-side agora) |
 
 - **Confirmado:** Metabolismo (fome/sede) roda **100% no servidor** — imune a fraudes de cliente.
 - **Confirmado:** `SaveMeta` possui rate limit (10s) e cap de delta máximo por sync.

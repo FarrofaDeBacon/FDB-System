@@ -40,6 +40,7 @@ CreateThread(function()
                         alcohol = (data.alcohol or 0) / uses,
                         health = (data.health or 0) / uses,
                         stamina = (data.stamina or 0) / uses,
+                        bladder = (data.bladder or 0) / uses,
                     },
                     cures = {
                         illness = data.cureIllness or false,
@@ -55,10 +56,20 @@ CreateThread(function()
     end
 end)
 
+local lastBiteTime = {} -- Anti-exploit: cooldown por jogador
+
 RegisterNetEvent('fdb-consume:server:takeBite', function()
     local src = source
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
+
+    -- SEGURANÇA: Rate limit de 1s por mordida (impede spam de cura instantânea)
+    local now = GetGameTimer()
+    if lastBiteTime[src] and (now - lastBiteTime[src]) < 1000 then
+        print(('[fdb-consume] takeBite rejeitado: spam detectado de src %s (citizenid: %s)'):format(src, Player.PlayerData.citizenid))
+        return
+    end
+    lastBiteTime[src] = now
 
     local consume = activeConsumptions[src]
     if not consume or consume.currentUses <= 0 then
@@ -72,6 +83,11 @@ RegisterNetEvent('fdb-consume:server:takeBite', function()
     exports['fdb-survival']:AddThirst(src, consume.stats.thirst)
     exports['fdb-survival']:AddStress(src, consume.stats.stress)
     exports['fdb-survival']:AddAlcohol(src, consume.stats.alcohol)
+    
+    if consume.stats.bladder and consume.stats.bladder ~= 0 then
+        exports['fdb-survival']:AddBladder(src, consume.stats.bladder)
+    end
+
 
     if consume.stats.health ~= 0 then
         -- Envia para o fdb-medical-core no servidor (valor negativo = cura/recuperação)
@@ -117,4 +133,5 @@ AddEventHandler('playerDropped', function(reason)
     if activeConsumptions[src] then
         activeConsumptions[src] = nil
     end
+    lastBiteTime[src] = nil
 end)

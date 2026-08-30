@@ -83,9 +83,7 @@ AddEventHandler('fdb-multijob:client:choiceMenu', function(args)
     lib.showContext('choice_menu')
 end)
 
-RegisterNetEvent('FDBCore:Client:OnJobUpdate', function(JobInfo)
-    TriggerServerEvent('fdb-multijob:server:newJob', JobInfo)
-end)
+-- Removed FDBCore:Client:OnJobUpdate because the server handles it natively now.
 
 RegisterNetEvent('fdb-multijob:client:openmenu', function()
 	showMultijob()

@@ -102,7 +102,9 @@ RegisterNetEvent('fdb-inventory:server:EquipItem', function(slot, equipmentType)
         slot = equipmentType
     }
 
-    Player.Functions.RemoveItem(item.name, 1, slotNum)
+    if not Player.Functions.RemoveItem(item.name, 1, slotNum) then
+        return
+    end
 
     if currentlyEquipped then
         Player.Functions.AddItem(currentlyEquipped.name, 1, slotNum, currentlyEquipped.info)

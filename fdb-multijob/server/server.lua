@@ -99,9 +99,9 @@ RegisterNetEvent('fdb-multijob:server:changeJob', function(job)
     TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_job') .. ': ' .. jobInfo.label, type = 'info', duration = 5000 })
 end)
 
-RegisterNetEvent('fdb-multijob:server:newJob', function(newJob)
-    local src = source
+AddEventHandler('FDBCore:Server:OnJobUpdate', function(src, newJob)
     local Player = FDBCore.Functions.GetPlayer(src)
+    if not Player then return end
     local cid = Player.PlayerData.citizenid
     
     if newJob.name == 'unemployed' then 
@@ -143,15 +143,20 @@ end)
 RegisterNetEvent('fdb-bossmenu:server:FireEmployee', function(target) -- Removes job when fired from fdb-bossmenu.
     local src = source
     local Player = FDBCore.Functions.GetPlayer(src)
+    if not Player or not Player.PlayerData.job.isboss then return end
+
     local Employee = FDBCore.Functions.GetPlayerByCitizenId(target)
     if Employee then
         local oldJob = Employee.PlayerData.job.name
+        if oldJob ~= Player.PlayerData.job.name then return end
+        if Employee.PlayerData.job.grade.level > Player.PlayerData.job.grade.level then return end
         MySQL.query.await('DELETE FROM player_jobs WHERE citizenid = ? AND job = ?', {Employee.PlayerData.citizenid, oldJob})
     else
         local player = MySQL.query.await('SELECT * FROM players WHERE citizenid = ? LIMIT 1', { target })
         if player[1] then
             Employee = player[1]
             Employee.job = json.decode(Employee.job)
+            if Employee.job.name ~= Player.PlayerData.job.name then return end
             if Employee.job.grade.level > Player.PlayerData.job.grade.level then return end
             MySQL.query.await('DELETE FROM player_jobs WHERE citizenid = ? AND job = ?', {target, Employee.job.name})
         end
