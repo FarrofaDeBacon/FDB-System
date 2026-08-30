@@ -63,6 +63,7 @@ FDBCore.Commands.Add('revive', locale('sv_revive'), {{name = 'id', help = locale
     local src = source
 
     if not args[1] then
+        exports['fdb-medical-core']:FullHeal(src)
         TriggerClientEvent('fdb-medic:client:adminRevive', src)
         return
     end
@@ -73,6 +74,7 @@ FDBCore.Commands.Add('revive', locale('sv_revive'), {{name = 'id', help = locale
         return
     end
 
+    exports['fdb-medical-core']:FullHeal(Player.PlayerData.source)
     TriggerClientEvent('fdb-medic:client:adminRevive', Player.PlayerData.source)
 end, 'admin')
 
@@ -129,6 +131,8 @@ RegisterNetEvent('fdb-medic:server:deathactions', function()
         Player.Functions.SetMoney('bloodmoney', 0)
         TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_lost_bloodmoney'), type = 'info', duration = 7000 })
     end
+    
+    exports['fdb-medical-core']:FullHeal(src)
 end)
 
 -- Medic Revive Player
@@ -146,6 +150,7 @@ RegisterNetEvent('fdb-medic:server:RevivePlayer', function(playerId)
 
     if Player.Functions.RemoveItem('firstaid', 1) then
         TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items['firstaid'], 'remove')
+        exports['fdb-medical-core']:FullHeal(Patient.PlayerData.source)
         TriggerClientEvent('fdb-medic:client:playerRevive', Patient.PlayerData.source)
     end
 end)
