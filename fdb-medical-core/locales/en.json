@@ -1,0 +1,6 @@
+{
+  "log_damage_applied": "[fdb-medical-core] Damage applied to player %s | Origin: %s | Type: %s | Part: %s | Amount: %s",
+  "log_treatment_applied": "[fdb-medical-core] Treatment applied to player %s | Item: %s | Type: %s",
+  "notify_fainted_pain": "You passed out due to extreme pain!",
+  "notify_bleeding_warning": "You are bleeding! Seek immediate treatment."
+}

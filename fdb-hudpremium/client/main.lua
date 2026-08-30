@@ -171,8 +171,16 @@ CreateThread(function()
             
             -- Fôlego (Stamina) do jogador
             local rawStamina = GetPlayerStamina(PlayerId())
+            
+            -- [DEBUG] Testando native de mount no player ped
+            local testStaminaPoints = Citizen.InvokeNative(0x0FF421E467373FCF, ped, Citizen.ResultAsFloat())
+            
             local staminaTank = math.max(0, math.min(100, math.floor(rawStamina)))
             local staminaCore = Citizen.InvokeNative(0x36731AC041289BB1, ped, 1)
+            
+            print(string.format("[fdb-hudpremium] PLAYER STAMINA DEBUG - GetPlayerStamina: %s | 0x0FF421E4...: %s | Core(0x3673...): %s", 
+                tostring(rawStamina), tostring(testStaminaPoints), tostring(staminaCore)))
+
             if not tonumber(staminaCore) then staminaCore = 0 end
             staminaCore = (staminaCore <= 1.0) and (staminaCore * 100) or staminaCore
             local stamina = math.floor((staminaTank / 2) + (staminaCore / 2))
