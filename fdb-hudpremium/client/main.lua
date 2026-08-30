@@ -222,9 +222,9 @@ CreateThread(function()
                 hHealthCore = (hHealthCore <= 1.0) and (hHealthCore * 100) or hHealthCore
                 horseHealth = math.floor((hHealthTank / 2) + (hHealthCore / 2))
 
-                local rawHorseStamina = Citizen.InvokeNative(0x0FF421E467373FCF, mount, Citizen.ResultAsFloat())
-                print("[fdb-hudpremium] HORSE STAMINA 0x0FF421E467373FCF RETURNED: " .. tostring(rawHorseStamina))
-                local hStaminaTank = math.max(0, math.min(100, math.floor(rawHorseStamina)))
+                local maxHorseStamina = Citizen.InvokeNative(0xCB42AFE2B613EE55, mount, Citizen.ResultAsFloat()) or 100.0
+                local currentHorseStamina = Citizen.InvokeNative(0x775A1CA7893AA8B5, mount, Citizen.ResultAsFloat()) or 100.0
+                local hStaminaTank = math.max(0, math.min(100, math.floor((currentHorseStamina / maxHorseStamina) * 100)))
                 local hStaminaCore = Citizen.InvokeNative(0x36731AC041289BB1, mount, 1)
                 if not tonumber(hStaminaCore) then hStaminaCore = 0 end
                 hStaminaCore = (hStaminaCore <= 1.0) and (hStaminaCore * 100) or hStaminaCore
