@@ -87,6 +87,12 @@
     $: clipHeight = Math.max(0, Math.min(100, innerValue));
     $: iconName = icon ? icon.split('/').pop() : '';
     $: svgMarkup = svgMap[iconName] || '';
+
+    $: {
+        if (itemId === 'horseStamina' || itemId === 'horseHealth' || itemId === 'stamina' || itemId === 'health') {
+            console.log(`[HUDItem Debug] ${itemId} | value: ${value} | actualOuterColor: ${actualOuterColor} | FULL CFG:`, cfg);
+        }
+    }
 </script>
 
 {#if visible}
