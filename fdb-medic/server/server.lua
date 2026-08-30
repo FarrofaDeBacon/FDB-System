@@ -63,9 +63,8 @@ FDBCore.Commands.Add('revive', locale('sv_revive'), {{name = 'id', help = locale
     local src = source
 
     if not args[1] then
+        PendingRevives[src] = true
         TriggerClientEvent('fdb-medic:client:adminRevive', src)
-        Wait(1500)
-        exports['fdb-medical-core']:FullHeal(src)
         return
     end
 
@@ -75,9 +74,8 @@ FDBCore.Commands.Add('revive', locale('sv_revive'), {{name = 'id', help = locale
         return
     end
 
+    PendingRevives[Player.PlayerData.source] = true
     TriggerClientEvent('fdb-medic:client:adminRevive', Player.PlayerData.source)
-    Wait(1500)
-    exports['fdb-medical-core']:FullHeal(Player.PlayerData.source)
 end, 'admin')
 
 -- Admin Kill Player
@@ -114,6 +112,21 @@ end, 'admin')
 ----------------------
 -- EVENTS 
 -----------------------
+
+local PendingRevives = {}
+
+RegisterNetEvent('fdb-medic:server:ConfirmRevived', function()
+    local src = source
+    if PendingRevives[src] then
+        PendingRevives[src] = nil
+        exports['fdb-medical-core']:FullHeal(src)
+    else
+        if Config.Debug then
+            print(("[fdb-medic] Ignorando ConfirmRevived de %s (nenhum revive pendente)"):format(src))
+        end
+    end
+end)
+
 -- Death Actions: Remove Inventory / Cash
 RegisterNetEvent('fdb-medic:server:deathactions', function()
     local src = source
@@ -134,8 +147,7 @@ RegisterNetEvent('fdb-medic:server:deathactions', function()
         TriggerClientEvent('ox_lib:notify', src, {title = locale('sv_lost_bloodmoney'), type = 'info', duration = 7000 })
     end
     
-    Wait(1500)
-    exports['fdb-medical-core']:FullHeal(src)
+    PendingRevives[src] = true
 end)
 
 -- Medic Revive Player
@@ -153,9 +165,8 @@ RegisterNetEvent('fdb-medic:server:RevivePlayer', function(playerId)
 
     if Player.Functions.RemoveItem('firstaid', 1) then
         TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items['firstaid'], 'remove')
+        PendingRevives[Patient.PlayerData.source] = true
         TriggerClientEvent('fdb-medic:client:playerRevive', Patient.PlayerData.source)
-        Wait(1500)
-        exports['fdb-medical-core']:FullHeal(Patient.PlayerData.source)
     end
 end)
 

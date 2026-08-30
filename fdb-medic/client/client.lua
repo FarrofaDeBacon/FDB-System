@@ -488,6 +488,8 @@ AddEventHandler('fdb-medic:client:revive', function()
         SetAttributeCoreValue(cache.ped, 1, 100) -- SetAttributeCoreValue
         TriggerEvent('hud:client:UpdateNeeds', 100, 100, 100)
         TriggerEvent('hud:client:UpdateStress', 0)
+        
+        TriggerServerEvent('fdb-medic:server:ConfirmRevived')
 
         -- Reset Outlaw Status on respawn
         if Config.ResetOutlawStatus then
@@ -529,6 +531,10 @@ RegisterNetEvent('fdb-medic:client:adminRevive', function()
     SetAttributeCoreValue(cache.ped, 1, 100) -- SetAttributeCoreValue
     TriggerEvent('hud:client:UpdateNeeds', 100, 100, 100)
     TriggerEvent('hud:client:UpdateStress', 0)
+    
+    TriggerServerEvent('fdb-medic:server:ConfirmRevived')
+
+    TriggerServerEvent('FDBCore:Server:SetMetaData', 'isdead', false)
 
     -- Reset Outlaw Status on respawn
     if Config.ResetOutlawStatus then
@@ -566,6 +572,8 @@ RegisterNetEvent('fdb-medic:client:playerRevive', function()
     SetAttributeCoreValue(cache.ped, 0, Config.MedicReviveHealth) -- SetAttributeCoreValue
     SetAttributeCoreValue(cache.ped, 1, 0) -- SetAttributeCoreValue
     LocalPlayer.state:set('health', math.round(Config.MaxHealth * (Config.MedicReviveHealth / 100)), true)
+    
+    TriggerServerEvent('fdb-medic:server:ConfirmRevived')
 
     -- Reset Outlaw Status on respawn
     if Config.ResetOutlawStatus then
