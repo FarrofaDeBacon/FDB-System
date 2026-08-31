@@ -67,6 +67,8 @@
         cfg.outerColor
     ) : outerColor;
 
+    $: console.log('[HUDItem]', itemId, 'cfg:', cfg, 'actualOuterColor:', actualOuterColor, 'value:', value);
+
     // SVG Math
     const radius = 22;
     const circumference = 2 * Math.PI * radius;
