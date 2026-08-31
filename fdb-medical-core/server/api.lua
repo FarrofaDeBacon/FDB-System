@@ -150,3 +150,4 @@ RegisterNetEvent('fdb-medical-core:server:ConvertWoundToScar', function(bodyPart
         end
     end
 end)
+exports('FullHeal', function(src) local Player = FDBCore.Functions.GetPlayer(src); if Player then Player.Functions.SetMetaData('isdead', false); Player.Functions.SetPlayerData('metadata', {isdead=false}); end; end)
