@@ -63,10 +63,17 @@ end)
 ----------------------------------
 FDBCore.Commands.Add('revive', locale('sv_revive'), {{name = 'id', help = locale('sv_revive_2')}}, false, function(source, args)
     local src = source
+    print(("[fdb-medic] /revive chamado por source: %s"):format(src))
 
     if not args[1] then
-        PendingRevives[src] = true
-        TriggerClientEvent('fdb-medic:client:adminRevive', src)
+        -- Revive self and clear all wounds
+        local Player = FDBCore.Functions.GetPlayer(src)
+        if Player then
+            print(("[fdb-medic] Player encontrado para source %s. Iniciando revive admin..."):format(src))
+            PendingRevives[src] = true
+            TriggerClientEvent('fdb-medic:client:adminRevive', src)
+            TriggerClientEvent('fdb-medic:client:ClearAllWounds', src)
+        end
         return
     end
 
@@ -76,6 +83,7 @@ FDBCore.Commands.Add('revive', locale('sv_revive'), {{name = 'id', help = locale
         return
     end
 
+    print(("[fdb-medic] Admin revivendo player %s"):format(Player.PlayerData.source))
     PendingRevives[Player.PlayerData.source] = true
     TriggerClientEvent('fdb-medic:client:adminRevive', Player.PlayerData.source)
 end, 'admin')
@@ -120,6 +128,12 @@ RegisterNetEvent('fdb-medic:server:ConfirmRevived', function()
     if PendingRevives[src] then
         PendingRevives[src] = nil
         exports['fdb-medical-core']:FullHeal(src)
+        -- Garante saúde cheia no FDBCore para HUD
+        local RevivedPlayer = FDBCore.Functions.GetPlayer(src)
+        if RevivedPlayer then
+            RevivedPlayer.Functions.SetMetaData('health', 600)
+            RevivedPlayer.Functions.SetPlayerData('metadata', {health = 600})
+        end
     else
         if Config.Debug then
             print(("[fdb-medic] Ignorando ConfirmRevived de %s (nenhum revive pendente)"):format(src))

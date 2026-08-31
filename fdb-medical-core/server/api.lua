@@ -46,8 +46,13 @@ exports('FullHeal', function(source)
     if ResetPlayerVitals then
         ResetPlayerVitals(source)
     else
-        -- Caso a função não esteja no escopo de api.lua, manda um dano negativo genérico massivo
         ProcessDamage(source, 'Generic', 'Torso', -9999, caller)
+    end
+    -- Sincroniza health com FDBCore/HUD (max 600)
+    local PlayerData = RSGCore.Functions.GetPlayer(source)
+    if PlayerData then
+        PlayerData.Functions.SetMetaData('health', 600)
+        PlayerData.Functions.SetPlayerData('metadata', {health = 600})
     end
 end)
 
@@ -150,4 +155,4 @@ RegisterNetEvent('fdb-medical-core:server:ConvertWoundToScar', function(bodyPart
         end
     end
 end)
-exports('FullHeal', function(src) local Player = FDBCore.Functions.GetPlayer(src); if Player then Player.Functions.SetMetaData('isdead', false); Player.Functions.SetPlayerData('metadata', {isdead=false}); end; end)
+-- REMOVED duplicate broken export at line 153
