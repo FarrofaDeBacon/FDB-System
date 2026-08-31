@@ -47,6 +47,22 @@ function SyncVitalsToStatebag(src)
     end
 end
 
+function ResetPlayerVitals(src)
+    local vitals = GetPlayerVitals(src)
+    vitals.health = Config.Vitals.MaxHealth or 600
+    vitals.pulse = Config.Vitals.DefaultPulse or 89
+    vitals.pain = Config.Vitals.DefaultPain or 0
+    vitals.bleeding = Config.Vitals.DefaultBleeding or 0
+    vitals.consciousness = Config.Vitals.DefaultConsciousness or 100
+    vitals.wounds = {}
+    SyncVitalsToStatebag(src)
+    -- Garante health no FDBCore metadata
+    local Player = RSGCore.Functions.GetPlayer(src)
+    if Player then
+        Player.Functions.SetMetaData('health', vitals.health)
+    end
+end
+
 --- Salva vitais do jogador no banco de dados ativamente
 function SavePlayerVitalsToDB(src, Player)
     Player = Player or RSGCore.Functions.GetPlayer(src)
