@@ -22,11 +22,11 @@ function ProcessDamage(src, damageType, bodyPart, amount, originResource)
     originResource = originResource or GetInvokingResource() or 'unknown'
     bodyPart = bodyPart or BodyPart.Torso
 
-    -- Log de auditoria server-side
-    print(string.format(
-        locale('log_damage_applied'),
-        tostring(src), tostring(originResource), tostring(damageType), tostring(bodyPart), tostring(amount)
-    ))
+    -- Log de auditoria server-side (Desativado para não floodar o console)
+    -- print(string.format(
+    --     locale('log_damage_applied'),
+    --     tostring(src), tostring(originResource), tostring(damageType), tostring(bodyPart), tostring(amount)
+    -- ))
 
     -- Ajuste de Saúde
     -- Usa vitals.health como base para não duplicar o dano (já que currentHp já pode estar menor pelo motor do jogo)
