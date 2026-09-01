@@ -10,6 +10,7 @@ ui_page 'ui/build/index.html'
 
 shared_scripts {
     'config.lua',
+    'shared/locales/*.lua',
     'shared/framework-bridge/bridge.lua',
     'shared/component/data.lua',
 }
