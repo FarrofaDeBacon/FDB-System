@@ -32,36 +32,33 @@ Durante a renomeação global (substituindo textos de `rsg` para `fdb` via Power
 
 ## 5. Integração do Ecossistema Customizado e Migração
 
-Nesta nova fase (04/08/2026), iniciamos a integração da base visual e estrutural que vai dar suporte ao sistema médico avançado.
+Nesta fase madura do projeto (Final de Agosto / Setembro 2026), alcançamos a consolidação total do núcleo de sobrevivência, medicina e consumo.
 
-### 5.1 O Que Já Foi Feito (Fases 1, 2A e 2B Concluídas e Validadas)
+### 5.1 O Que Já Foi Feito e Validado em Produção
 - ✅ **Infraestrutura Transversal (`fdb-configui`):** Adicionado com sucesso. Motor de KVP genérico que o ecossistema precisa. 
-- ✅ **Inventário & Mochilas (`fdb-inventory` / `fdb-backpacks`):** Restaurados pela versão imaculada da source original (`STEEL`). Bug crítico de `GetFDBPlayers` resolvido.
-- ✅ **Fundação Visual (`fdb-hudpremium`):** O antigo `fdb-hud` foi deletado do repositório e completamente substituído pelo novo `fdb-hudpremium`. Compilado com sucesso via Vite+Svelte.
-- ✅ **Fundações de Consumo (`fdb-consume` & `fdb-canteen`):** A versão provisória foi deletada. Build completa (2.184 linhas) adicionada. **Validação:** Corrigido bug de interrupção de animações (StopInteractiveConsumable) na última mordida/gole e refeito a ponte de sede do `fdb-canteen` para o novo motor.
-- ✅ **Sobrevivência (`fdb-survival`):** Migrado e injetado antes do sistema médico. **Validação:** Descoberto e corrigido o "Hash" secreto das fossas para urinar, resolvido erro crítico de parsing (UTF-8 BOM), e chaves de tradução adicionadas em todos os notifies.
-- ✅ **Permissões Base (`server.cfg`):** As permissões do Core foram devidamente renomeadas de `rsgcore.*` para `fdbcore.*` no servidor ao vivo.
+- ✅ **Inventário & Mochilas (`fdb-inventory` / `fdb-backpacks`):** Restaurados e imaculados. Bug de `GetFDBPlayers` resolvido.
+- ✅ **Fundação Visual (`fdb-hudpremium`):** Compilado com sucesso via Vite+Svelte, integrado perfeitamente aos vitais.
+- ✅ **Consumo (`fdb-consume`):** Build completa adicionada. Bug de garrafas/itens fantasmas nas mãos resolvido com cleanup global via `StopInteractiveConsumable`.
+- ✅ **Sobrevivência & Água (`fdb-survival` e `fdb-water`):** O `fdb-water` foi integrado nativamente ao `fdb-survival`, substituindo sistemas antigos de banho e consumo. Cooldowns aplicados para evitar abusos na bomba d'água.
+- ✅ **O Sistema Médico Supremo (`fdb-medical-core` e `fdb-medic`):** **CONCLUÍDO!** A pausa foi removida. O sistema agora é a fonte absoluta de verdade para a vida do jogador (ancorada em 600 HP, quebrando o cap nativo de 150 do motor do jogo). Foram eliminados eventos duplicados, erros fantasmas no console e hit-kills nativos, mantendo perfeita sincronia com a HUD.
+- ✅ **Substituição de Criação de Personagem:** O antigo `fdb-appearance` foi removido e substituído em definitivo pelo **`fdb-creator`** na receita oficial do servidor.
+- ✅ **Limpeza de Scripts Obsoletos:** Para garantir estabilidade, deletamos definitivamente os scripts `fdb-canteen`, `fdb-bathing` e `fdb-essentials`, cujos sistemas entravam em conflito com o novo motor de sobrevivência/água.
+- ✅ **Atualização da Receita (txAdmin):** Os arquivos `fdbcore.yaml` foram limpos (remoção de doorlocks obsoletos e scripts antigos) e preenchidos com as novas dependências corretas (incluindo `fdb-libs`).
 
-### 5.2 Próximos Passos (Fase 2C - PAUSADA)
-A próxima grande fase seria a integração da joia da coroa: **`fdb-medic` + `fdb-medical-core`**.
-⚠️ **Status atual:** Esta fase está **intencionalmente pausada** por decisão do usuário. Não iniciaremos a migração do sistema médico até recebermos autorização expressa.
+### 5.2 Próximos Passos
+- Refinar detalhes de UI e economia.
+- Expansão contínua de conteúdo agora que os 4 pilares principais (Core, Inventário, Sobrevivência e Médico) estão estáveis e rodando perfeitamente integrados.
 
 ---
 **ATENÇÃO - Nota Importante para o Claude / IAs Auxiliares:**
-O repositório `FDB-System` evoluiu massivamente. Não presuma mais que "apenas o fdb-core foi modificado". Neste momento, os seguintes módulos já são builds altamente customizadas, higienizadas e integradas nativamente à arquitetura do FDB-Core:
-- `fdb-core` (Fonte de verdade absoluta)
+O repositório `FDB-System` evoluiu massivamente e os sistemas principais foram concluídos. Neste momento, os seguintes módulos já são builds altamente customizadas, higienizadas e integradas nativamente à arquitetura do FDB-Core:
+- `fdb-core` e `fdb-libs` (Fonte de verdade absoluta)
 - `fdb-inventory` e `fdb-backpacks`
-- `fdb-configui`
-- `fdb-hudpremium`
-- `fdb-consume` (Totalmente interativo)
-- `fdb-survival` (Motor base de atributos vitais)
+- `fdb-hudpremium` e `fdb-configui`
+- `fdb-consume` (Totalmente limpo de conflitos)
+- `fdb-survival` e `fdb-water` (Motor de atributos vitais e interações)
+- `fdb-medical-core` e `fdb-medic` (Motor de danos, ferimentos e tratamento finalizado)
+- `fdb-creator` (Responsável exclusivo pela criação visual do personagem)
 - `fdb-horses` e `fdb-ammo`
-- `fdb-canteen` (Integrado à sede)
-- `fdb-appearance` (Refatoração em andamento, transição de UI)
 
-### 5.3 Refatoração do `fdb-appearance` e o Dilema da Interface (Atualizado)
-Iniciamos a reescrita estrutural do criador de personagens (`fdb-appearance`) para abandonar menus defasados.
-- **O Problema:** A interface genérica fornecida pelo `jo_libs` (menus de opções em lista) funciona bem para lojas, mas é demasiadamente rústica ("bruta") para um Character Creator moderno, onde precisamos de sliders visuais finos, paletas de cor intuitivas e um design premium ("delicado"). 
-- **O que sugerimos / Próximo Passo Proposto:** Decidimos explorar um pivô arquitetural. Em vez de depender do `jo_libs` para a interface de criação de personagens, a proposta é construir um NUI dedicado em **Svelte + Vite** exclusivamente para o `fdb-appearance`. Isso nos dará controle total do visual (glassmorphism, sliders reais) mantendo intacta toda a poderosa lógica de cache e persistência (Lua) já construída no back-end.
-
-Sempre consulte os manifestos e códigos-fonte desses recursos antes de inferir o comportamento deles. O ecossistema está ganhando vida de forma estruturada.
+> Consulte sempre o documento `docs/FDB_ECOSYSTEM.md` para entender a visão geral atualizada de cada script, pois o servidor atingiu seu status de integração core principal.
