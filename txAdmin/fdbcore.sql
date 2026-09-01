@@ -486,3 +486,11 @@ INSERT IGNORE INTO `mdt_roles` (`name`, `label`, `permissions`) VALUES
     ('admin', 'Administrator', '{"canCreateRecords": true, "canDeleteRecords": true, "canManageWarrants": true, "isAdmin": true}'),
     ('supervisor', 'Supervisor', '{"canCreateRecords": true, "canDeleteRecords": true, "canManageWarrants": true, "isAdmin": false}'),
     ('officer', 'Officer', '{"canCreateRecords": true, "canDeleteRecords": false, "canManageWarrants": false, "isAdmin": false}');
+
+CREATE TABLE IF NOT EXISTS `fdb_creator` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `charid` varchar(200) NOT NULL,
+  `peddata` json NOT NULL,
+  `informations` json NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

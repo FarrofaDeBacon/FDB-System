@@ -16,17 +16,17 @@ tasks:
 
   # Setup server config
   - action: move_path
-    src: ./tmp/FDBSystem/txAdminRecipe/server.cfg
+    src: ./tmp/FDBSystem/txAdmin/server.cfg
     dest: ./server.cfg
 
   - action: move_path
-    src: ./tmp/FDBSystem/txAdminRecipe/myLogo.png
+    src: ./tmp/FDBSystem/txAdmin/myLogo.png
     dest: ./myLogo.png
 
   # Prepare Database
   - action: connect_database
   - action: query_database
-    file: ./tmp/FDBSystem/txAdminRecipe/fdbcore.sql
+    file: ./tmp/FDBSystem/txAdmin/fdbcore.sql
 
   # ================================================
   #  External Resources (not in our repo)
