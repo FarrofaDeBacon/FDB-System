@@ -130,9 +130,7 @@ tasks:
     src: ./tmp/FDBSystem/fdb-inventory
     dest: ./resources/[framework]/fdb-inventory
 
-  - action: move_path
-    src: ./tmp/FDBSystem/fdb-multicharacter
-    dest: ./resources/[framework]/fdb-multicharacter
+
 
   - action: move_path
     src: ./tmp/FDBSystem/fdb-creator
