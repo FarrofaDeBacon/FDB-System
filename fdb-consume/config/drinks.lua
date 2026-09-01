@@ -25,7 +25,7 @@ local items = {
         thirst = 0,
         stress = -10,
         alcohol = 25,
-        health = 5,
+        health = -5,
         bladder = 20,
         prop = "p_bottle01x",
         offsets = { hand_idle = { x = 0.05, y = -0.07, z = -0.05, rx = -75.0, ry = 60.0, rz = 0.0 } },
