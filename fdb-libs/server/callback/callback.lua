@@ -26,7 +26,9 @@ end)
 exports('RegisterServerCallback', fdb.callback.RegisterServerCallback)
 
 -- REGISTRO DE CALLBACK DE TESTE
-fdb.callback.RegisterServerCallback('fdb-libs:server:test', function(source, cb, data)
-    print(("[fdb-libs] Server Callback recebido de [%s] com dados: %s"):format(source, data))
-    cb("Resposta do servidor para: " .. tostring(data))
-end)
+if Config.Debug then
+    fdb.callback.RegisterServerCallback('fdb-libs:server:test', function(source, cb, data)
+        print(("[fdb-libs] Server Callback recebido de [%s] com dados: %s"):format(source, data))
+        cb("Resposta do servidor para: " .. tostring(data))
+    end)
+end
