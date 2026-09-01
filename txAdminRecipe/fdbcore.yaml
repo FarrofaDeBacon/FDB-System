@@ -107,9 +107,7 @@ tasks:
     src: ./tmp/FDBSystem/ox_target
     dest: ./resources/[standalone]/ox_target
 
-  - action: move_path
-    src: ./tmp/FDBSystem/ox_doorlock
-    dest: ./resources/[standalone]/ox_doorlock
+
 
   # ================================================
   #  Framework Resources (from our repo)
@@ -147,9 +145,7 @@ tasks:
     src: ./tmp/FDBSystem/fdb-prison
     dest: ./resources/[framework]/fdb-prison
 
-  - action: move_path
-    src: ./tmp/FDBSystem/fdb-doorlock
-    dest: ./resources/[framework]/fdb-doorlock
+
 
   - action: move_path
     src: ./tmp/FDBSystem/fdb-banking
@@ -188,8 +184,20 @@ tasks:
     dest: ./resources/[framework]/fdb-horses
 
   - action: move_path
-    src: ./tmp/FDBSystem/fdb-hud
-    dest: ./resources/[framework]/fdb-hud
+    src: ./tmp/FDBSystem/fdb-hudpremium
+    dest: ./resources/[framework]/fdb-hudpremium
+
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-survival
+    dest: ./resources/[framework]/fdb-survival
+
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-medical-core
+    dest: ./resources/[framework]/fdb-medical-core
+
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-water
+    dest: ./resources/[framework]/fdb-water
 
   - action: move_path
     src: ./tmp/FDBSystem/fdb-menubase

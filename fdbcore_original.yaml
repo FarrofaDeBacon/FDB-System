@@ -1,321 +1,292 @@
-+$engine: 3
+$engine: 3
 $onesync: on
-name: Rexshack RedM Build
+name: FDB-System RedM Build
 version: 1.0.0
-author: Rexshack Gaming
-description: RSG RedM Server Build
+author: Farrofa De Bacon
+description: FDB-System RedM Server Build
 
 tasks:
-  #  Download Base Files
+  # ================================================
+  #  Download FDB-System repo (contains EVERYTHING)
+  # ================================================
   - action: download_github
-    src: https://github.com/Rexshack-RedM/txAdminRecipe
-    ref: main
-    dest: ./tmp/RSGCore
+    src: https://github.com/FarrofaDeBacon/FDB-System
+    ref: fix/companion-inventory-audit
+    dest: ./tmp/FDBSystem
 
+  # Setup server config
   - action: move_path
-    src: ./tmp/RSGCore/server.cfg
+    src: ./tmp/FDBSystem/txAdminRecipe/server.cfg
     dest: ./server.cfg
 
   - action: move_path
-    src: ./tmp/RSGCore/myLogo.png
+    src: ./tmp/FDBSystem/txAdminRecipe/myLogo.png
     dest: ./myLogo.png
 
   # Prepare Database
   - action: connect_database
   - action: query_database
-    file: ./tmp/RSGCore/rsgcore.sql
+    file: ./tmp/FDBSystem/txAdminRecipe/fdbcore.sql
 
-  # Downloading Standalone Resources  
+  # ================================================
+  #  External Resources (not in our repo)
+  # ================================================
+
+  # Base FXServer resources
   - action: download_github
     src: https://github.com/citizenfx/cfx-server-data
     subpath: resources
     dest: ./resources/[cfx-default]
 
+  # oxmysql
   - action: download_file
     path: ./tmp/files/oxmysql.zip
     url: https://github.com/CommunityOx/oxmysql/releases/latest/download/oxmysql.zip
   - action: unzip
     dest: ./resources/[standalone]
     src: ./tmp/files/oxmysql.zip
-    
-  - action: download_github
-    dest: ./resources/[standalone]/ox_lib
-    ref: main
-    src: https://github.com/Rexshack-RedM/ox_lib
 
-  - action: download_github
-    dest: ./resources/[standalone]/progressbar
-    ref: main
-    src: https://github.com/Rexshack-RedM/progressbar
-
-  - action: download_github
-    dest: ./resources/[standalone]/PolyZone
-    ref: main
-    src: https://github.com/Rexshack-RedM/PolyZone
-
+  # pma-voice
   - action: download_github
     dest: ./resources/[standalone]/pma-voice
     ref: main
     src: https://github.com/AvarianKnight/pma-voice
 
-  - action: download_github
-    dest: ./resources/[standalone]/weathersync
-    ref: main
-    src: https://github.com/Rexshack-RedM/weathersync
-
+  # xsound
   - action: download_github
     dest: ./resources/[standalone]/xsound
     ref: master
     src: https://github.com/Xogy/xsound
 
-  - action: download_github
-    dest: ./resources/[standalone]/interact-sound 
-    ref: main
-    src: https://github.com/Rexshack-RedM/interact-sound 
-
-  - action: download_github
-    dest: ./resources/[standalone]/menu_base
-    ref: main
-    src: https://github.com/Rexshack-RedM/menu_base
-
-  - action: download_github
-    dest: ./resources/[standalone]/chat-redm
-    ref: main
-    src: https://github.com/Rexshack-RedM/chat-redm
-
-  - action: download_github
-    dest: ./resources/[standalone]/rNotify
-    ref: main
-    src: https://github.com/Rexshack-RedM/rNotify
-
-  - action: download_github
-    dest: ./resources/[standalone]/ox_target
-    ref: main
-    src: https://github.com/Rexshack-RedM/ox_target
-
-  - action: download_github
-    dest: ./resources/[standalone]/ox_doorlock
-    ref: main
-    src: https://github.com/Rexshack-RedM/ox_doorlock
-    
+  # redm-female-fix
   - action: download_github
     dest: ./resources/[standalone]/redm-female-fix
     ref: main
     src: https://github.com/Popisek/redm-female-fix
 
-  - action: waste_time # prevent github throttling
+  - action: waste_time
     seconds: 10
 
-  # Download RSGCore resources
+  # ================================================
+  #  Standalone Resources (from our repo)
+  # ================================================
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/rsg-core
-    ref: main
-    dest: ./resources/[framework]/rsg-core
+  - action: move_path
+    src: ./tmp/FDBSystem/ox_lib
+    dest: ./resources/[standalone]/ox_lib
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/rsg-inventory
-    ref: main
-    dest: ./resources/[framework]/rsg-inventory
+  - action: move_path
+    src: ./tmp/FDBSystem/progressbar
+    dest: ./resources/[standalone]/progressbar
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/rsg-multicharacter
-    ref: main
-    dest: ./resources/[framework]/rsg-multicharacter
+  - action: move_path
+    src: ./tmp/FDBSystem/PolyZone
+    dest: ./resources/[standalone]/PolyZone
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/rsg-appearance
-    ref: main
-    dest: ./resources/[framework]/rsg-appearance
+  - action: move_path
+    src: ./tmp/FDBSystem/weathersync
+    dest: ./resources/[standalone]/weathersync
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/rsg-wardrobe
-    ref: main
-    dest: ./resources/[framework]/rsg-wardrobe
+  - action: move_path
+    src: ./tmp/FDBSystem/interact-sound
+    dest: ./resources/[standalone]/interact-sound
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/rsg-medic
-    ref: main
-    dest: ./resources/[framework]/rsg-medic
+  - action: move_path
+    src: ./tmp/FDBSystem/menu_base
+    dest: ./resources/[standalone]/menu_base
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/rsg-lawman
-    ref: main
-    dest: ./resources/[framework]/rsg-lawman
+  - action: move_path
+    src: ./tmp/FDBSystem/chat-redm
+    dest: ./resources/[standalone]/chat-redm
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/rsg-prison
-    ref: main
-    dest: ./resources/[framework]/rsg-prison
+  - action: move_path
+    src: ./tmp/FDBSystem/rNotify
+    dest: ./resources/[standalone]/rNotify
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/rsg-doorlock
-    ref: main
-    dest: ./resources/[framework]/rsg-doorlock
+  - action: move_path
+    src: ./tmp/FDBSystem/ox_target
+    dest: ./resources/[standalone]/ox_target
 
-  - action: waste_time # prevent github throttling
-    seconds: 10
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/rsg-banking
-    ref: main
-    dest: ./resources/[framework]/rsg-banking
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/rsg-spawn
-    ref: main
-    dest: ./resources/[framework]/rsg-spawn
+  # ================================================
+  #  Framework Resources (from our repo)
+  # ================================================
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/rsg-weapons
-    ref: main
-    dest: ./resources/[framework]/rsg-weapons
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-core
+    dest: ./resources/[framework]/fdb-core
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/rsg-ammo
-    ref: main
-    dest: ./resources/[framework]/rsg-ammo
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-inventory
+    dest: ./resources/[framework]/fdb-inventory
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/rsg-shops
-    ref: main
-    dest: ./resources/[framework]/rsg-shops
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-multicharacter
+    dest: ./resources/[framework]/fdb-multicharacter
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/rsg-radialmenu
-    ref: main
-    dest: ./resources/[framework]/rsg-radialmenu
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-appearance
+    dest: ./resources/[framework]/fdb-appearance
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/rsg-essentials
-    ref: main
-    dest: ./resources/[framework]/rsg-essentials
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-wardrobe
+    dest: ./resources/[framework]/fdb-wardrobe
 
-  - action: waste_time # prevent github throttling
-    seconds: 10
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-medic
+    dest: ./resources/[framework]/fdb-medic
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/rsg-telegram
-    ref: main
-    dest: ./resources/[framework]/rsg-telegram
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-lawman
+    dest: ./resources/[framework]/fdb-lawman
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/rsg-horses
-    ref: main
-    dest: ./resources/[framework]/rsg-horses
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-prison
+    dest: ./resources/[framework]/fdb-prison
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/rsg-hud
-    ref: main
-    dest: ./resources/[framework]/rsg-hud
 
-  - action: download_github
-    dest: ./resources/[framework]/rsg-menubase
-    ref: main
-    src: https://github.com/Rexshack-RedM/rsg-menubase
 
-  - action: download_github
-    dest: ./resources/[framework]/rsg-playerinfo
-    ref: main
-    src: https://github.com/Rexshack-RedM/rsg-playerinfo
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-banking
+    dest: ./resources/[framework]/fdb-banking
 
-  - action: download_github
-    dest: ./resources/[framework]/rsg-bossmenu
-    ref: main
-    src: https://github.com/Rexshack-RedM/rsg-bossmenu
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-spawn
+    dest: ./resources/[framework]/fdb-spawn
 
-  - action: download_github
-    dest: ./resources/[framework]/rsg-gangmenu
-    ref: main
-    src: https://github.com/Rexshack-RedM/rsg-gangmenu
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-weapons
+    dest: ./resources/[framework]/fdb-weapons
 
-  - action: waste_time # prevent github throttling
-    seconds: 10
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-ammo
+    dest: ./resources/[framework]/fdb-ammo
 
-  - action: download_github
-    dest: ./resources/[framework]/rsg-npcs
-    ref: main
-    src: https://github.com/Rexshack-RedM/rsg-npcs
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-shops
+    dest: ./resources/[framework]/fdb-shops
 
-  - action: download_github
-    dest: ./resources/[framework]/rsg-canteen
-    ref: main
-    src: https://github.com/Rexshack-RedM/rsg-canteen
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-radialmenu
+    dest: ./resources/[framework]/fdb-radialmenu
 
-  - action: download_github
-    dest: ./resources/[framework]/rsg-barbers
-    ref: main
-    src: https://github.com/Rexshack-RedM/rsg-barbers
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-essentials
+    dest: ./resources/[framework]/fdb-essentials
 
-  - action: download_github
-    dest: ./resources/[framework]/rsg-bathing
-    ref: main
-    src: https://github.com/Rexshack-RedM/rsg-bathing
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-telegram
+    dest: ./resources/[framework]/fdb-telegram
 
-  - action: download_github
-    dest: ./resources/[framework]/rsg-lockpick
-    ref: main
-    src: https://github.com/Rexshack-RedM/rsg-lockpick
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-horses
+    dest: ./resources/[framework]/fdb-horses
 
-  - action: download_github
-    dest: ./resources/[framework]/rsg-adminmenu
-    ref: main
-    src: https://github.com/Rexshack-RedM/rsg-adminmenu
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-hudpremium
+    dest: ./resources/[framework]/fdb-hudpremium
 
-  - action: download_github
-    dest: ./resources/[framework]/rsg-animations
-    ref: main
-    src: https://github.com/Rexshack-RedM/rsg-animations
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-survival
+    dest: ./resources/[framework]/fdb-survival
 
-  - action: download_github
-    dest: ./resources/[framework]/rsg-multijob
-    ref: main
-    src: https://github.com/Rexshack-RedM/rsg-multijob
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-medical-core
+    dest: ./resources/[framework]/fdb-medical-core
 
-  - action: download_github
-    dest: ./resources/[framework]/rsg-consume
-    ref: main
-    src: https://github.com/Rexshack-RedM/rsg-consume
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-water
+    dest: ./resources/[framework]/fdb-water
 
-  - action: download_github
-    dest: ./resources/[framework]/rsg-fishing
-    ref: main
-    src: https://github.com/Rexshack-RedM/rsg-fishing
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-menubase
+    dest: ./resources/[framework]/fdb-menubase
 
-  - action: waste_time # prevent github throttling
-    seconds: 10
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-playerinfo
+    dest: ./resources/[framework]/fdb-playerinfo
 
-  - action: download_github
-    dest: ./resources/[framework]/rsg-weaponcomp
-    ref: main
-    src: https://github.com/Rexshack-RedM/rsg-weaponcomp
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-bossmenu
+    dest: ./resources/[framework]/fdb-bossmenu
 
-  - action: download_github
-    dest: ./resources/[framework]/rsg-loading
-    ref: main
-    src: https://github.com/Rexshack-RedM/rsg-loading
-    
-  - action: download_github
-    dest: ./resources/[framework]/rsg-mdt
-    ref: main
-    src: https://github.com/Rexshack-RedM/rsg-mdt
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-gangmenu
+    dest: ./resources/[framework]/fdb-gangmenu
 
-  # Download Rexshack MapMod resources
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-npcs
+    dest: ./resources/[framework]/fdb-npcs
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/redm-ipls
-    ref: main
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-canteen
+    dest: ./resources/[framework]/fdb-canteen
+
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-barbers
+    dest: ./resources/[framework]/fdb-barbers
+
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-bathing
+    dest: ./resources/[framework]/fdb-bathing
+
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-lockpick
+    dest: ./resources/[framework]/fdb-lockpick
+
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-adminmenu
+    dest: ./resources/[framework]/fdb-adminmenu
+
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-animations
+    dest: ./resources/[framework]/fdb-animations
+
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-multijob
+    dest: ./resources/[framework]/fdb-multijob
+
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-consume
+    dest: ./resources/[framework]/fdb-consume
+
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-fishing
+    dest: ./resources/[framework]/fdb-fishing
+
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-weaponcomp
+    dest: ./resources/[framework]/fdb-weaponcomp
+
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-loading
+    dest: ./resources/[framework]/fdb-loading
+
+  - action: move_path
+    src: ./tmp/FDBSystem/fdb-mdt
+    dest: ./resources/[framework]/fdb-mdt
+
+  # ================================================
+  #  Map Mods (from our repo)
+  # ================================================
+
+  - action: move_path
+    src: ./tmp/FDBSystem/redm-ipls
     dest: ./resources/[mapmods]/redm-ipls
 
-  - action: download_github
-    src: https://github.com/Rexshack-RedM/redm-ymaps
-    ref: main
+  - action: move_path
+    src: ./tmp/FDBSystem/redm-ymaps
     dest: ./resources/[mapmods]/redm-ymaps
 
-  # Remove Old Chat
+  # ================================================
+  #  Cleanup
+  # ================================================
+
+  # Remove old chat (conflicts with RedM)
   - action: remove_path
     path: ./resources/[cfx-default]/[gameplay]/chat
 
-  # Clean up
+  # Clean up temp files
   - action: remove_path
     path: ./tmp
