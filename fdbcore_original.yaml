@@ -89,6 +89,10 @@ tasks:
     dest: ./resources/[standalone]/PolyZone
 
   - action: move_path
+    src: ./tmp/FDBSystem/sessionmanager-rdr3
+    dest: ./resources/[standalone]/sessionmanager-rdr3
+
+  - action: move_path
     src: ./tmp/FDBSystem/weathersync
     dest: ./resources/[standalone]/weathersync
 
