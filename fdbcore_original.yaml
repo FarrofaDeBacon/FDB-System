@@ -11,7 +11,7 @@ tasks:
   # ================================================
   - action: download_github
     src: https://github.com/FarrofaDeBacon/FDB-System
-    ref: fix/companion-inventory-audit
+    ref: main
     dest: ./tmp/FDBSystem
 
   # Setup server config
