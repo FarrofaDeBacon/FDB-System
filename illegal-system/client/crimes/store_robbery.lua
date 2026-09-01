@@ -409,14 +409,14 @@ CreateThread(function()
     end
 end)
 
-RegisterNetEvent('illegal-system:client:showRiskBar', function(config)
-    exports['fdb-libs']:ShowRiskBar(config)
+RegisterNetEvent('illegal-system:client:showNoiseBar', function(config)
+    exports['fdb-libs']:ShowNoiseBar(config)
 end)
 
-RegisterNetEvent('illegal-system:client:updateRiskBar', function(value)
-    exports['fdb-libs']:UpdateRiskBar(value)
+RegisterNetEvent('illegal-system:client:updateNoiseBar', function(value)
+    exports['fdb-libs']:UpdateNoiseBar(value)
 end)
 
-RegisterNetEvent('illegal-system:client:hideRiskBar', function()
-    exports['fdb-libs']:HideRiskBar()
+RegisterNetEvent('illegal-system:client:hideNoiseBar', function()
+    exports['fdb-libs']:HideNoiseBar()
 end)

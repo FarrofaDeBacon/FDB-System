@@ -8,7 +8,7 @@
     import TierBar from './components/TierBar.svelte';
     import ContextMenu from './components/ContextMenu.svelte';
     import ThemeEditor from './components/ThemeEditor.svelte';
-    import RiskBar from './components/RiskBar.svelte';
+    import NoiseBar from './components/NoiseBar.svelte';
 
     let menuData = null;
     let isOpen = false;
@@ -209,7 +209,7 @@
 </script>
 
 <main>
-    <RiskBar />
+    <NoiseBar />
     {#if isOpen && menuData}
         <Menu {menuData} on:itemChange={handleMenuItemChange} />
     {/if}

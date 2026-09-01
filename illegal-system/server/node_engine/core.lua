@@ -510,7 +510,7 @@ NodeEngine.RegisterNodeType("risk_session", {
 
         session.currentRisk = 0.0
 
-        TriggerClientEvent('node_engine:client:ManageRiskBar', playerId, "show", {
+        TriggerClientEvent('node_engine:client:ManageNoiseBar', playerId, "show", {
             title = title,
             criticalText = criticalText
         })
@@ -526,7 +526,7 @@ NodeEngine.RegisterNodeType("risk_session", {
 
                 -- Se a duração esgotou sem estourar o limite, sucesso
                 if GetGameTimer() - startTime >= duration then
-                    TriggerClientEvent('node_engine:client:ManageRiskBar', playerId, "hide")
+                    TriggerClientEvent('node_engine:client:ManageNoiseBar', playerId, "hide")
                     AutoAdvance(playerId, session)
                     return
                 end
@@ -554,12 +554,12 @@ NodeEngine.RegisterNodeType("risk_session", {
 
                 local percent = math.floor((session.currentRisk / maxChance) * 100)
                 
-                TriggerClientEvent('node_engine:client:ManageRiskBar', playerId, "update", {
+                TriggerClientEvent('node_engine:client:ManageNoiseBar', playerId, "update", {
                     percent = percent
                 })
 
                 if session.currentRisk >= maxChance then
-                    TriggerClientEvent('node_engine:client:ManageRiskBar', playerId, "hide")
+                    TriggerClientEvent('node_engine:client:ManageNoiseBar', playerId, "hide")
                     Bridge.Notify(playerId, failMessage, "error")
                     print(("[NodeEngine] Jogador %s estourou o risco. Sessão encerrada."):format(playerId))
                     activeSessions[playerId] = nil

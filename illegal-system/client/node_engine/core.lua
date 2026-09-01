@@ -487,20 +487,20 @@ RegisterCommand('startheist', function(source, args)
     TriggerServerEvent("node_engine:server:ForceStartHeist", heistId)
 end, false)
 
-RegisterNetEvent('node_engine:client:ManageRiskBar', function(action, data)
+RegisterNetEvent('node_engine:client:ManageNoiseBar', function(action, data)
     if action == "show" then
-        if exports['fdb-libs'] and exports['fdb-libs'].ShowRiskBar then
-            exports['fdb-libs']:ShowRiskBar(data)
+        if exports['fdb-libs'] and exports['fdb-libs'].ShowNoiseBar then
+            exports['fdb-libs']:ShowNoiseBar(data)
         else
-            print("[NodeEngine] fdb-libs export 'ShowRiskBar' not found!")
+            print("[NodeEngine] fdb-libs export 'ShowNoiseBar' not found!")
         end
     elseif action == "update" then
-        if exports['fdb-libs'] and exports['fdb-libs'].UpdateRiskBar then
-            exports['fdb-libs']:UpdateRiskBar(data.percent)
+        if exports['fdb-libs'] and exports['fdb-libs'].UpdateNoiseBar then
+            exports['fdb-libs']:UpdateNoiseBar(data.percent)
         end
     elseif action == "hide" then
-        if exports['fdb-libs'] and exports['fdb-libs'].HideRiskBar then
-            exports['fdb-libs']:HideRiskBar()
+        if exports['fdb-libs'] and exports['fdb-libs'].HideNoiseBar then
+            exports['fdb-libs']:HideNoiseBar()
         end
     end
 end)

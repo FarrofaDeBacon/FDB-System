@@ -30,7 +30,7 @@ client_scripts {
     'client/blip/blip.lua',
     'client/zones/zones.lua',
     'client/component/component.lua',
-    'client/riskbar/riskbar.lua',
+    'client/noisebar/noisebar.lua',
 }
 
 server_scripts {

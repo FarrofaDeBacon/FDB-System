@@ -110,7 +110,7 @@ local function EndRiskSession(src, reason)
     
     session.active = false
     activeRiskSessions[src] = nil
-    TriggerClientEvent('illegal-system:client:hideRiskBar', src)
+    TriggerClientEvent('illegal-system:client:hideNoiseBar', src)
     print("[illegal-system] RISCO: Sessão encerrada para jogador " .. tostring(src) .. " | Loja: " .. session.storeName .. " | Motivo: " .. reason)
 end
 
@@ -160,14 +160,14 @@ local function StartRiskSession(src, storeName)
         active = true,
     }
     
-    TriggerClientEvent('illegal-system:client:showRiskBar', src, {
+    TriggerClientEvent('illegal-system:client:showNoiseBar', src, {
         title = "Risco de Ser Ouvido",
         criticalText = "P E R I G O",
         stages = { 33, 66 }
     })
     
     if burglaryConfig.dog and burglaryConfig.dog.enabled then
-        TriggerClientEvent('illegal-system:client:updateRiskBar', src, burglaryConfig.dog.baseChance)
+        TriggerClientEvent('illegal-system:client:updateNoiseBar', src, burglaryConfig.dog.baseChance)
     end
     
     print("[illegal-system] RISCO: Sessão iniciada para jogador " .. tostring(src) .. " | Loja: " .. storeName .. " | Session: " .. sessionId)
@@ -221,7 +221,7 @@ local function StartRiskSession(src, storeName)
                     burglaryConfig.dog.maxChance
                 )
                 
-                TriggerClientEvent('illegal-system:client:updateRiskBar', src, chance)
+                TriggerClientEvent('illegal-system:client:updateNoiseBar', src, chance)
                 
                 local roll = math.random(1, 100)
                 print("[illegal-system] RISCO: Tick #" .. session.tickCount .. " | Chance: " .. chance .. "% | Roll: " .. roll .. " | Session: " .. mySessionId)
