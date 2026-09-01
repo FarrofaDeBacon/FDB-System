@@ -132,7 +132,7 @@ RegisterNetEvent('fdb-medic:server:ConfirmRevived', function()
         local RevivedPlayer = FDBCore.Functions.GetPlayer(src)
         if RevivedPlayer then
             RevivedPlayer.Functions.SetMetaData('health', 600)
-            RevivedPlayer.Functions.SetPlayerData('metadata', {health = 600})
+            -- REMOVED SetPlayerData('metadata', ...) — evita perda de fome/sede/estresse/isdead
         end
     else
         if Config.Debug then

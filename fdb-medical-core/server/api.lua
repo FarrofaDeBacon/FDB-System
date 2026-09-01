@@ -2,7 +2,7 @@
 -- fdb-medical | server/api.lua
 -- Exports públicas para consumo por outros recursos
 -- ============================================================
-local RSGCore = exports['fdb-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 --- Único ponto de entrada para QUALQUER dano no servidor.
 --- @param source number ID do jogador que recebeu o dano
@@ -37,10 +37,10 @@ exports('FullHeal', function(source)
     local caller = GetInvokingResource() or 'unknown'
     print(("[fdb-medical-core] Auditoria: FullHeal acionado por '%s' para source %s"):format(caller, source))
     
-    local Player = RSGCore.Functions.GetPlayer(source)
+    local Player = FDBCore.Functions.GetPlayer(source)
     if not Player then return end
     
-    -- Chama ApplyDamage negativo usando o MaxHealth do RSGCore
+    -- Chama ApplyDamage negativo usando o MaxHealth do FDBCore
     local maxHealth = 600 -- Valor default ou dependente do core/ped
     -- Faremos um workaround seguro, como cura altíssima para zerar dano, mas vamos também reescrever os vitals:
     if ResetPlayerVitals then
@@ -49,17 +49,17 @@ exports('FullHeal', function(source)
         ProcessDamage(source, 'Generic', 'Torso', -9999, caller)
     end
     -- Sincroniza health com FDBCore/HUD (max 600)
-    local PlayerData = RSGCore.Functions.GetPlayer(source)
+    local PlayerData = FDBCore.Functions.GetPlayer(source)
     if PlayerData then
         PlayerData.Functions.SetMetaData('health', 600)
-        PlayerData.Functions.SetPlayerData('metadata', {health = 600})
+        -- REMOVED SetPlayerData('metadata', ...) — sobrescreve metadata inteiro (perda de fome/sede/etc)
     end
 end)
 
 
 RegisterNetEvent('fdb-medical-core:server:SetDead', function(isDead)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     
     local currentlyDead = Player.PlayerData.metadata["isdead"] or false
@@ -79,7 +79,7 @@ end)
 
 RegisterNetEvent('fdb-medical-core:server:FullRestore', function()
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     -- Só restaura se o jogador realmente estava marcado como morto
@@ -116,7 +116,7 @@ end)
 
 RegisterNetEvent('fdb-medical-core:server:ProcessTreatment', function(woundId, treatmentType, itemUsed)
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     
     -- Validação: confere se o jogador realmente tem o item (se itemUsed foi passado)
@@ -128,7 +128,7 @@ RegisterNetEvent('fdb-medical-core:server:ProcessTreatment', function(woundId, t
         end
         -- Remove o item de forma segura e server-side
         Player.Functions.RemoveItem(itemUsed, 1)
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[itemUsed], 'remove', 1)
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[itemUsed], 'remove', 1)
     end
     
     ProcessTreatment(src, woundId, treatmentType, itemUsed)
