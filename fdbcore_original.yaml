@@ -33,9 +33,14 @@ tasks:
   # ================================================
 
   # Base FXServer resources
-  - action: download_github
-    src: https://github.com/citizenfx/cfx-server-data
-    subpath: resources
+  - action: download_file
+    url: https://github.com/citizenfx/cfx-server-data/archive/refs/heads/master.zip
+    path: ./tmp/files/cfx-server-data.zip
+  - action: unzip
+    src: ./tmp/files/cfx-server-data.zip
+    dest: ./tmp/cfx-server-data
+  - action: move_path
+    src: ./tmp/cfx-server-data/cfx-server-data-master/resources
     dest: ./resources/[cfx-default]
 
   # oxmysql
