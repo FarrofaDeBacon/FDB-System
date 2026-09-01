@@ -3,7 +3,7 @@
 -- Integração de Banco de Dados Oficial e Persistência
 -- ============================================================
 
-local RSGCore = exports['fdb-core']:GetCoreObject()
+local FDBCore = exports["fdb-core"]:GetCoreObject()
 
 -- ============================================================
 -- INICIALIZAÇÃO E MIGRAÇÃO DO SCHEMA

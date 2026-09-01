@@ -3,7 +3,7 @@
 -- Loop de evolução de infecção baseado em higiene (cleanliness do fdb-survival)
 -- ============================================================
 
-local RSGCore = exports['fdb-core']:GetCoreObject()
+local FDBCore = exports["fdb-core"]:GetCoreObject()
 
 local function GetCleanlinessMultiplier(cleanliness)
     for _, range in ipairs(Config.Wounds.Infection.CleanlinessModifier) do
@@ -19,7 +19,7 @@ CreateThread(function()
         Wait(Config.Wounds.Infection.TickInterval)
         for src, vitals in pairs(PlayerVitals) do
             if vitals.wounds then
-                local Player = RSGCore.Functions.GetPlayer(src)
+                local Player = FDBCore.Functions.GetPlayer(src)
                 local cleanliness = Player and Player.PlayerData.metadata['cleanliness'] or 100
                 local modifier = GetCleanlinessMultiplier(cleanliness)
 

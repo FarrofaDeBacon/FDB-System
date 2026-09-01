@@ -3,7 +3,7 @@
 -- ÚNICO ponto de escrita para dano e saúde no servidor
 -- ============================================================
 
-local RSGCore = exports['fdb-core']:GetCoreObject()
+local FDBCore = exports["fdb-core"]:GetCoreObject()
 
 --- Aplica dano ou alteração de vida server-side no ped de um jogador
 --- @param src number ID do jogador
@@ -12,7 +12,7 @@ local RSGCore = exports['fdb-core']:GetCoreObject()
 --- @param amount number Quantidade de dano (positivo para dano, negativo para cura)
 --- @param originResource string|nil Nome do recurso que originou o dano
 function ProcessDamage(src, damageType, bodyPart, amount, originResource)
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     local ped = GetPlayerPed(src)

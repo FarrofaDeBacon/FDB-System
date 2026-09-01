@@ -3,7 +3,7 @@
 -- Tabela de estado de vitais server-authoritative por jogador
 -- ============================================================
 
-local RSGCore = exports['fdb-core']:GetCoreObject()
+local FDBCore = exports["fdb-core"]:GetCoreObject()
 
 PlayerVitals = {}
 
@@ -41,7 +41,7 @@ function SyncVitalsToStatebag(src)
     }, true)
     
     -- Sincroniza metadata oficial do framework para compatibilidade com rsg-spawn, HUDs, etc.
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if Player then
         Player.Functions.SetMetaData('health', vitals.health)
     end
@@ -57,7 +57,7 @@ function ResetPlayerVitals(src)
     vitals.wounds = {}
     SyncVitalsToStatebag(src)
     -- Garante health no FDBCore metadata
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if Player then
         Player.Functions.SetMetaData('health', vitals.health)
     end
@@ -65,7 +65,7 @@ end
 
 --- Salva vitais do jogador no banco de dados ativamente
 function SavePlayerVitalsToDB(src, Player)
-    Player = Player or RSGCore.Functions.GetPlayer(src)
+    Player = Player or FDBCore.Functions.GetPlayer(src)
     local vitals = PlayerVitals[src]
     if vitals and Player and Player.PlayerData and Player.PlayerData.citizenid then
         local citizenid = Player.PlayerData.citizenid
@@ -74,7 +74,7 @@ function SavePlayerVitalsToDB(src, Player)
 end
 
 --- Evento de carregamento do jogador no framework
-RegisterNetEvent('RSGCore:Server:PlayerLoaded', function(Player)
+RegisterNetEvent('FDBCore:Server:PlayerLoaded', function(Player)
     if not Player then return end
     local src = Player.PlayerData.source
     local citizenid = Player.PlayerData.citizenid
@@ -93,7 +93,7 @@ RegisterNetEvent('RSGCore:Server:PlayerLoaded', function(Player)
 end)
 
 --- Salvamento Redundante no Drop (Framework)
-RegisterNetEvent('RSGCore:Server:PlayerDropped', function(Player)
+RegisterNetEvent('FDBCore:Server:PlayerDropped', function(Player)
     if not Player then return end
     local src = Player.PlayerData.source
     SavePlayerVitalsToDB(src, Player)
@@ -102,7 +102,7 @@ end)
 --- Limpeza ao desconectar (Nativo - Gatilho Infalível)
 AddEventHandler('playerDropped', function()
     local src = source
-    local Player = RSGCore.Functions.GetPlayer(src)
+    local Player = FDBCore.Functions.GetPlayer(src)
     if Player then
         SavePlayerVitalsToDB(src, Player)
     end

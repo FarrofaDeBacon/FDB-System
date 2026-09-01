@@ -199,6 +199,8 @@ RegisterNetEvent('fdb-medic:server:TreatWounds', function(playerId)
 
     if Player.Functions.RemoveItem('bandage', 1) then
         TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items['bandage'], 'remove')
+        -- CORREÇÃO: trata no fdb-medical-core (fonte única da verdade) em vez de só client
+        exports['fdb-medical-core']:TreatWound(Patient.PlayerData.source, nil, 'bandage', 'bandage')
         TriggerClientEvent('fdb-medic:client:HealInjuries', Patient.PlayerData.source)
     end
 end)
