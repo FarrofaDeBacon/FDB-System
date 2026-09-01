@@ -89,9 +89,9 @@ RegisterNetEvent('fdb-consume:server:takeBite', function()
     end
 
 
-    if consume.stats.health ~= 0 and consume.stats.health < 0 then
+    if consume.stats.health ~= 0 then
         -- Envia para o fdb-medical-core no servidor (valor negativo = cura/recuperação)
-        exports['fdb-medical-core']:ApplyDamage(src, 'Generic', nil, -consume.stats.health)
+        exports["fdb-medical-core"]:ApplyDamage(src, "Generic", nil, -consume.stats.health)
     end
 
     if consume.stats.stamina ~= 0 then
