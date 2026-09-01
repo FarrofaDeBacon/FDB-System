@@ -114,6 +114,10 @@ tasks:
   # ================================================
 
   - action: move_path
+    src: ./tmp/FDBSystem/fdb-libs
+    dest: ./resources/[framework]/fdb-libs
+
+  - action: move_path
     src: ./tmp/FDBSystem/fdb-core
     dest: ./resources/[framework]/fdb-core
 
