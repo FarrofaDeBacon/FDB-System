@@ -230,6 +230,10 @@ RegisterNetEvent('fdb-water:server:washAtPump', function()
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
+    if not CheckCooldown(src, 'washAtPump', 30) then
+        return
+    end
+
     local soapItem = Player.Functions.GetItemByName('soap')
     if soapItem and soapItem.amount > 0 then
         Player.Functions.RemoveItem('soap', 1)

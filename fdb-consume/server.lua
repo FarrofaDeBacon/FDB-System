@@ -63,6 +63,12 @@ RegisterNetEvent('fdb-consume:server:takeBite', function()
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
+    -- NÃO pode beber se está morto (protege contra beber morto / duplicar efeito)
+    if Player.PlayerData.metadata and Player.PlayerData.metadata.isdead then
+        TriggerClientEvent('fdb-consume:client:StopInteractiveConsumable', src)
+        return
+    end
+
     -- SEGURANÇA: Rate limit de 1s por mordida (impede spam de cura instantânea)
     local now = GetGameTimer()
     if lastBiteTime[src] and (now - lastBiteTime[src]) < 1000 then

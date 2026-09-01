@@ -41,6 +41,9 @@ RegisterNetEvent('fdb-consume:client:playAnim', function(itemName)
     -- Remoção dos Triggers Fantasmas (Fase 2)
     -- O fdb-consume/server.lua já removeu o item e atualizou o banco ANTES de chamar essa animação.
 
+    -- Limpa qualquer item que o player estivesse segurando antes (evita misturar garrafa de água com pão)
+    TriggerEvent('fdb-consume:client:StopInteractiveConsumable')
+
     -- Roteador de Animações
     if animType == "Drink" or animType == "Coffee" then
         TriggerEvent('fdb-consume:client:ConsumeDrink', propModel, animType, maxUses, animDict, animName, itemName)

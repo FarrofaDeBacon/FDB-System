@@ -67,8 +67,6 @@
         cfg.outerColor
     ) : outerColor;
 
-    $: console.log('[HUDItem]', itemId, 'cfg:', cfg, 'actualOuterColor:', actualOuterColor, 'value:', value);
-
     // SVG Math
     const radius = 22;
     const circumference = 2 * Math.PI * radius;
@@ -90,11 +88,7 @@
     $: iconName = icon ? icon.split('/').pop() : '';
     $: svgMarkup = svgMap[iconName] || '';
 
-    $: {
-        if (itemId === 'horseStamina' || itemId === 'horseHealth' || itemId === 'stamina' || itemId === 'health') {
-            console.log(`[HUDItem Debug] ${itemId} | value: ${value} | actualOuterColor: ${actualOuterColor} | FULL CFG:`, cfg);
-        }
-    }
+    // Core icon and values handled by parent
 </script>
 
 {#if visible}

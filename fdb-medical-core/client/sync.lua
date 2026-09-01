@@ -3,7 +3,7 @@
 -- Listener de Statebags para sincronizar vitais no client
 -- ============================================================
 
-local RSGCore = exports['fdb-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 -- Handler para ouvir atualizações de vitais na Statebag do ped do jogador
 AddStateBagChangeHandler('medical', nil, function(bagName, key, value, _unused, replicated)
