@@ -126,8 +126,8 @@ tasks:
     dest: ./resources/[framework]/fdb-multicharacter
 
   - action: move_path
-    src: ./tmp/FDBSystem/fdb-appearance
-    dest: ./resources/[framework]/fdb-appearance
+    src: ./tmp/FDBSystem/fdb-creator
+    dest: ./resources/[framework]/fdb-creator
 
   - action: move_path
     src: ./tmp/FDBSystem/fdb-wardrobe
@@ -171,9 +171,7 @@ tasks:
     src: ./tmp/FDBSystem/fdb-radialmenu
     dest: ./resources/[framework]/fdb-radialmenu
 
-  - action: move_path
-    src: ./tmp/FDBSystem/fdb-essentials
-    dest: ./resources/[framework]/fdb-essentials
+
 
   - action: move_path
     src: ./tmp/FDBSystem/fdb-telegram
@@ -219,17 +217,13 @@ tasks:
     src: ./tmp/FDBSystem/fdb-npcs
     dest: ./resources/[framework]/fdb-npcs
 
-  - action: move_path
-    src: ./tmp/FDBSystem/fdb-canteen
-    dest: ./resources/[framework]/fdb-canteen
+
 
   - action: move_path
     src: ./tmp/FDBSystem/fdb-barbers
     dest: ./resources/[framework]/fdb-barbers
 
-  - action: move_path
-    src: ./tmp/FDBSystem/fdb-bathing
-    dest: ./resources/[framework]/fdb-bathing
+
 
   - action: move_path
     src: ./tmp/FDBSystem/fdb-lockpick
