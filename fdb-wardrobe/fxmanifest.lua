@@ -26,7 +26,7 @@ files {
 
 dependencies {
     'fdb-core',
-    'fdb-appearance',
+    'fdb-creator',
 }
 
 lua54 'yes'

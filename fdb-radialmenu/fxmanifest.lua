@@ -31,7 +31,6 @@ files {
 
 dependencies {
     'fdb-core',
-    'fdb-essentials',
     'ox_lib'
 }
 
