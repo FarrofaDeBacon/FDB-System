@@ -30,7 +30,7 @@ function ProcessDamage(src, damageType, bodyPart, amount, originResource)
 
     -- Ajuste de Saúde
     -- Usa vitals.health como base para não duplicar o dano (já que currentHp já pode estar menor pelo motor do jogo)
-    local maxHp = GetEntityMaxHealth(ped)
+    local maxHp = Config.Vitals.MaxHealth or 600
     local newHp = math.max(0, math.min(maxHp, math.floor(vitals.health - amount)))
 
     -- Aplica nativamente via Server (Único local do projeto!)
