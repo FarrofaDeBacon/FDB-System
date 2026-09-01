@@ -7,12 +7,12 @@
 -- ============================================================
 
 fdb = fdb or {}
-fdb.noisebar = {}
+fdb.riskbar = {}
 
 local active = false
 
 --- Mostra a barra na tela, vazia.
-function fdb.noisebar.Show(config)
+function fdb.riskbar.Show(config)
     SendNUIMessage({
         action = "showRiskBar",
         config = config or {}
@@ -21,7 +21,7 @@ end
 
 --- Atualiza o valor da barra.
 --- @param value number 0-100
-function fdb.noisebar.Update(value)
+function fdb.riskbar.Update(value)
     SendNUIMessage({
         action = "updateRiskBar",
         value = value
@@ -29,12 +29,12 @@ function fdb.noisebar.Update(value)
 end
 
 --- Esconde a barra.
-function fdb.noisebar.Hide()
+function fdb.riskbar.Hide()
     SendNUIMessage({
         action = "hideRiskBar"
     })
 end
 
-exports('ShowRiskBar', fdb.noisebar.Show)
-exports('UpdateRiskBar', fdb.noisebar.Update)
-exports('HideRiskBar', fdb.noisebar.Hide)
+exports('ShowRiskBar', fdb.riskbar.Show)
+exports('UpdateRiskBar', fdb.riskbar.Update)
+exports('HideRiskBar', fdb.riskbar.Hide)
