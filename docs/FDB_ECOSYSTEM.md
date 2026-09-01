@@ -8,8 +8,7 @@ Este documento descreve o propósito de cada um dos scripts que compõem o ecoss
 - **fdb-configui**: Motor responsável por lidar com o KVP (armazenamento local) do cliente, salvando preferências e interfaces de configurações do jogador (ex: configurações da HUD).
 
 ## 👤 Personagem e Identidade
-- **fdb-multicharacter**: A tela de seleção de personagem (lobby). Carrega os dados dos slots do jogador e exibe antes de entrar na cidade.
-- **fdb-creator**: Interface de criação do personagem. Define rosto, corpo, voz, maquiagem na primeira vez que um personagem nasce. Substitui o obsoleto `fdb-appearance`.
+- **fdb-creator**: Interface de criação do personagem E tela de seleção de personagem (Lobby). Este script substituiu simultaneamente o antigo `fdb-appearance` (plástica/rosto) e o `fdb-multicharacter` (tela inicial com os cards). Tudo está integrado nele.
 - **fdb-spawn**: O mapa que aparece logo após escolher/criar o personagem, permitindo escolher em qual cidade (ou última localização) você vai "acordar".
 - **fdb-clothing / fdb-wardrobe**: Lida com todas as roupas. Compra em lojas, sistema de guarda-roupa para salvar trajes (outfits) e troca rápida.
 - **fdb-barbers**: Sistema das barbearias para modificar cabelo, barba e dentes de um personagem já criado.
