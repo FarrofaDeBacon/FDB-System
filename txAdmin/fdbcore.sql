@@ -494,3 +494,49 @@ CREATE TABLE IF NOT EXISTS `fdb_creator` (
   `informations` json NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- FDB Barber Tables
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `fdb_barber` (
+  `charid` varchar(255) NOT NULL,
+  `hairstyle` LONGTEXT NOT NULL DEFAULT '',
+  `overlays` LONGTEXT NOT NULL DEFAULT '',
+  `permanentoverlay` LONGTEXT NOT NULL DEFAULT '',
+  `outfit_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `fdb_barber_preset` (
+  `charid` varchar(255) NOT NULL,
+  `outfit_id` int(11) NOT NULL,
+  `price` float(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `hairstyle` LONGTEXT NOT NULL DEFAULT '',
+  `overlays` LONGTEXT NOT NULL DEFAULT '',
+  `gender` LONGTEXT NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- FDB Clothing Tables
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `fdb_clothes` (
+  `charid` varchar(200) NOT NULL,
+  `clothes` LONGTEXT NOT NULL,
+  `outfit_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `FDB_outfits` (
+  `charid` varchar(200) NOT NULL,
+  `outfit_id` int(11) NOT NULL,
+  `price` float(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `clothes` LONGTEXT NOT NULL DEFAULT '',
+  `singleitems` LONGTEXT NOT NULL DEFAULT '',
+  `gender` varchar(200) NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `FDB_wearable` (
+  `charid` varchar(200) NOT NULL,
+  `outfit_id` int(11) NOT NULL,
+  `skin` LONGTEXT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
