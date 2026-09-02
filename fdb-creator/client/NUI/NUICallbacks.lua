@@ -371,6 +371,8 @@ RegisterNUICallback("spawnCharacter", function(data, cb)
                         SetEntityHeading(PlayerPedId(), SpawnLocation[spawnLocationId].pedspawnheading)
                         Wait(2000)
                         DoScreenFadeIn(500)
+                        DisplayRadar(true)
+                        DisplayHud(true)
                         FreezeEntityPosition(PlayerPedId(), false)
                         canspawn = true -- Reset after successful creation
                         -- TriggerEvent("fdb-creator:loadskin")
