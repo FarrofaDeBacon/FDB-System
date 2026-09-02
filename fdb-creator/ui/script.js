@@ -3315,9 +3315,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     ////////////////////////// CANCEL CHARACTER EDITION //////////////////////////
     document.getElementById('CancelCharEdition').addEventListener('click', () => {
-
         $.post(`https://${GetParentResourceName()}/cancelCharEdition`, JSON.stringify({}));
+    });
 
+    document.getElementById('CancelBodyPart').addEventListener('click', () => {
+        hideBodyPartsMenu();
+        const pinContainer = document.getElementById('pinContainer');
+        if (pinContainer) pinContainer.innerHTML = '';
+        $.post(`https://${GetParentResourceName()}/cancelCharEdition`, JSON.stringify({}));
     });
 
     ////////////////////////// CANCEL CHARACTER EDITION //////////////////////////
