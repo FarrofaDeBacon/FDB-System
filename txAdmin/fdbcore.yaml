@@ -141,6 +141,10 @@ tasks:
     dest: ./resources/[framework]/fdb-creator
 
   - action: move_path
+    src: ./tmp/FDBSystem/fdb-clothing
+    dest: ./resources/[framework]/fdb-clothing
+
+  - action: move_path
     src: ./tmp/FDBSystem/fdb-wardrobe
     dest: ./resources/[framework]/fdb-wardrobe
 
