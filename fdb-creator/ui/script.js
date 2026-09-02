@@ -708,7 +708,10 @@ function hideOutfitMenu() {
     itemsContainer.innerHTML = '';
 
     hideContextualMenu();
-    document.getElementById('CreateOutfit').innerHTML = 'Save - $0.00';
+    const createOutfitBtn = document.getElementById('CreateOutfit');
+    if (createOutfitBtn) {
+        createOutfitBtn.innerHTML = 'Save - $0.00';
+    }
 }
 
 
