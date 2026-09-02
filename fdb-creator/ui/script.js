@@ -3684,7 +3684,6 @@ window.addEventListener('message', (event) => {
     if (event.data.type === "closeOutfitMenu") {
         console.log("Fermer le menu outfit")
         hideOutfitMenu();
-        hideOutfitListMenu();
     }
 
     // Open Edit apparence Menu
