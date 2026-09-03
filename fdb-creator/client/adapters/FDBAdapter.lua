@@ -282,8 +282,8 @@ if Config.framework == 'fdb-core' then
         FreezeEntityPosition(ped, false)
         SetEntityCoords(ped, PlayerData.position.x, PlayerData.position.y, PlayerData.position.z)
         SetEntityHeading(ped, PlayerData.position.w)
-        TriggerServerEvent('RSGCore:Server:OnPlayerLoaded')
-        TriggerEvent('RSGCore:Client:OnPlayerLoaded')
+        TriggerServerEvent('FDBCore:Server:OnPlayerLoaded')
+        TriggerEvent('FDBCore:Client:OnPlayerLoaded')
 
         if PlayerData.metadata["injail"] > 0 then
             Wait(2000)
@@ -293,7 +293,7 @@ if Config.framework == 'fdb-core' then
         DoScreenFadeIn(1000)
     end)
 
-    AddEventHandler("RSGCore:Client:OnPlayerLoaded", function()
+    AddEventHandler("FDBCore:Client:OnPlayerLoaded", function()
         Wait(1000)
         -- Ne retire pas lâ€™invincibilitÃ© avant le chargement du skin
         if LocalPlayer and LocalPlayer.state then
@@ -502,8 +502,8 @@ if Config.framework == 'fdb-core' then
         TriggerServerEvent('fdb-multicharacter:server:createCharacter', data)
         Wait(2000)
         exports.weathersync:setSyncEnabled(true)
-        TriggerServerEvent('RSGCore:Server:OnPlayerLoaded')
-        TriggerEvent('RSGCore:Client:OnPlayerLoaded')
+        TriggerServerEvent('FDBCore:Server:OnPlayerLoaded')
+        TriggerEvent('FDBCore:Client:OnPlayerLoaded')
         TriggerServerEvent("fdb-creator:RemovePlayerFromInstance")
         Wait(2000)
         healthinit = true
