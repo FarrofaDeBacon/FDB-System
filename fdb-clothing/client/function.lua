@@ -164,8 +164,8 @@ function Change(id, category, change_type, value)
                         local palette, tint0, tint1, tint2 = GetMetaPedAssetTint(ped, componentIndex)
                         ClothesCache[category].texture.tint0 = value
                         tint0 = value
-                        tint1 = ClothesCache[category].texture.tint1
-                        tint2 = ClothesCache[category].texture.tint2
+                        tint1 = ClothesCache[category].texture.tint1 or tint1
+                        tint2 = ClothesCache[category].texture.tint2 or tint2
                         UpdateCustomClothes(ped, drawable, albedo, normal, material, palette, tint0, tint1, tint2)
                     else
                         local model = ClothesCache[category].texture
@@ -188,9 +188,9 @@ function Change(id, category, change_type, value)
                         local drawable, albedo, normal, material = GetMetaPedAssetGuids(ped, componentIndex)
                         local palette, tint0, tint1, tint2 = GetMetaPedAssetTint(ped, componentIndex)
                         ClothesCache[category].texture.tint1 = value
-                        tint0 = ClothesCache[category].texture.tint0
+                        tint0 = ClothesCache[category].texture.tint0 or tint0
                         tint1 = value
-                        tint2 = ClothesCache[category].texture.tint2
+                        tint2 = ClothesCache[category].texture.tint2 or tint2
                         UpdateCustomClothes(ped, drawable, albedo, normal, material, palette, tint0, tint1, tint2)
                     else
                         local model = ClothesCache[category].texture
@@ -213,8 +213,8 @@ function Change(id, category, change_type, value)
                         local drawable, albedo, normal, material = GetMetaPedAssetGuids(ped, componentIndex)
                         local palette, tint0, tint1, tint2 = GetMetaPedAssetTint(ped, componentIndex)
                         ClothesCache[category].texture.tint2 = value
-                        tint0 = ClothesCache[category].texture.tint0
-                        tint1 = ClothesCache[category].texture.tint1
+                        tint0 = ClothesCache[category].texture.tint0 or tint0
+                        tint1 = ClothesCache[category].texture.tint1 or tint1
                         tint2 = value
                         UpdateCustomClothes(ped, drawable, albedo, normal, material, palette, tint0, tint1, tint2)
                     else

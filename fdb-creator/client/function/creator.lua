@@ -192,8 +192,8 @@ function Change(id, category, change_type, value)
                         local palette, tint0, tint1, tint2 = GetMetaPedAssetTint(ped, componentIndex)
                         hairstyleCache[category].texture.tint0 = value
                         tint0 = value
-                        tint1 = hairstyleCache[category].texture.tint1
-                        tint2 = hairstyleCache[category].texture.tint2
+                        tint1 = hairstyleCache[category].texture.tint1 or tint1
+                        tint2 = hairstyleCache[category].texture.tint2 or tint2
                         palette = `metaped_tint_hair`
                         UpdateCustomhairstyle(ped, drawable, albedo, normal, material, palette, tint0, tint1, tint2)
                     else
@@ -218,9 +218,9 @@ function Change(id, category, change_type, value)
                         local drawable, albedo, normal, material = GetMetaPedAssetGuids(ped, componentIndex)
                         local palette, tint0, tint1, tint2 = GetMetaPedAssetTint(ped, componentIndex)
                         hairstyleCache[category].texture.tint1 = value
-                        tint0 = hairstyleCache[category].texture.tint0
+                        tint0 = hairstyleCache[category].texture.tint0 or tint0
                         tint1 = value
-                        tint2 = hairstyleCache[category].texture.tint2
+                        tint2 = hairstyleCache[category].texture.tint2 or tint2
                         palette = `metaped_tint_hair`
                         UpdateCustomhairstyle(ped, drawable, albedo, normal, material, palette, tint0, tint1, tint2)
                     else
@@ -245,8 +245,8 @@ function Change(id, category, change_type, value)
                         local drawable, albedo, normal, material = GetMetaPedAssetGuids(ped, componentIndex)
                         local palette, tint0, tint1, tint2 = GetMetaPedAssetTint(ped, componentIndex)
                         hairstyleCache[category].texture.tint2 = value
-                        tint0 = hairstyleCache[category].texture.tint0
-                        tint1 = hairstyleCache[category].texture.tint1
+                        tint0 = hairstyleCache[category].texture.tint0 or tint0
+                        tint1 = hairstyleCache[category].texture.tint1 or tint1
                         tint2 = value
                         palette = `metaped_tint_hair`
                         UpdateCustomhairstyle(ped, drawable, albedo, normal, material, palette, tint0, tint1, tint2)

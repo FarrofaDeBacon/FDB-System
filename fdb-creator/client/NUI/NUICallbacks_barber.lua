@@ -196,7 +196,7 @@ RegisterNUICallback("tintValue", function(body, resultCallback)
                     v.palette_color_secondary = value
                 end
                 local palette_color_secondary = v.palette_color_secondary
-                if tintId == 2 then
+                if tintId == 3 then
                     v.palette_color_tertiary = value
                 end
                 local palette_color_tertiary = v.palette_color_tertiary
