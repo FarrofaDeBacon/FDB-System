@@ -158,22 +158,6 @@ RegisterNUICallback("cameraChange", function(data, cb)
     local value = data.value
 
 
-    if cameraName == "H" then
-        local ped = CachePed
-        if ped and DoesEntityExist(ped) then
-            local pedCoords = GetEntityCoords(ped)
-            local cam = ActualCamera or (ActiveCam == 1 and Cam1 or Cam2)
-            if cam and DoesCamExist(cam) then
-                local camCoord = GetCamCoord(cam)
-                -- Scale slider (1-360) to height offset (-1.0 to 2.0)
-                local heightOffset = scale(tonumber(value) or 180, 1, 360, -1.0, 2.0)
-                SetCamCoord(cam, camCoord.x, camCoord.y, pedCoords.z + heightOffset)
-                PointCamAtCoord(cam, pedCoords.x, pedCoords.y, pedCoords.z + heightOffset * 0.3)
-            end
-            PlaySound("Amount_Increase", "HUD_Donate_Sounds")
-        end
-    end
-
     if cameraName == "Z" then
         local outputvalue = scale(value, 1, 360, 15.0, 50.0)
         if ActiveCam == 1 then
@@ -186,27 +170,12 @@ RegisterNUICallback("cameraChange", function(data, cb)
 
     if cameraName == "R" then
         local ped = CachePed
-        if ped and DoesEntityExist(ped) then
-            local angle = tonumber(value) or 180.0
-            local rad = math.rad(angle)
-            local pedCoords = GetEntityCoords(ped)
-            local cam = ActualCamera or (ActiveCam == 1 and Cam1 or Cam2)
-            if cam and DoesCamExist(cam) then
-                local camCoord = GetCamCoord(cam)
-                -- Calculate current distance and height offset from ped
-                local dx = camCoord.x - pedCoords.x
-                local dy = camCoord.y - pedCoords.y
-                local dist = math.sqrt(dx * dx + dy * dy)
-                local heightOffset = camCoord.z - pedCoords.z
-                -- Calculate new camera position orbiting around the ped
-                local newX = pedCoords.x + math.sin(rad) * dist
-                local newY = pedCoords.y + math.cos(rad) * dist
-                local newZ = pedCoords.z + heightOffset
-                SetCamCoord(cam, newX, newY, newZ)
-                PointCamAtCoord(cam, pedCoords.x, pedCoords.y, pedCoords.z + heightOffset * 0.3)
-            end
-            PlaySound("Amount_Decrease", "HUD_Donate_Sounds")
-        end
+
+        -- Calcular o heading diretamente a partir do slider (0-360)
+        local targetHeading = tonumber(value) or 180.0
+        SetEntityHeading(ped, targetHeading)
+        PlaySound("Amount_Decrease",
+            "HUD_Donate_Sounds")
     end
 end)
 
@@ -402,8 +371,6 @@ RegisterNUICallback("spawnCharacter", function(data, cb)
                         SetEntityHeading(PlayerPedId(), SpawnLocation[spawnLocationId].pedspawnheading)
                         Wait(2000)
                         DoScreenFadeIn(500)
-                        DisplayRadar(true)
-                        DisplayHud(true)
                         FreezeEntityPosition(PlayerPedId(), false)
                         canspawn = true -- Reset after successful creation
                         -- TriggerEvent("fdb-creator:loadskin")
