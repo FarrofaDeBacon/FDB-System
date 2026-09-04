@@ -635,12 +635,21 @@ function showBodyPartsMenu() {
 
     const bodyPartsMenu = document.getElementById('BodyPartsMenu');
     bodyPartsMenu.classList.remove('hidden');
+
+    //CAM
+    loadCameraMenu();
+    const cameraMenu = document.getElementById('CameraSettings');
+    cameraMenu.classList.remove('hidden');
 }
 
 function hideBodyPartsMenu() {
 
     const bodyPartsMenu = document.getElementById('BodyPartsMenu');
     bodyPartsMenu.classList.add('hidden');
+
+    //CAM
+    const cameraMenu = document.getElementById('CameraSettings');
+    cameraMenu.classList.add('hidden');
 }
 
 // Show menu for body parts
@@ -660,11 +669,20 @@ function hideCharSelectMenu() {
 function showCharGlobalMenu() {
     const charGlobalMenu = document.getElementById('CharactersMenu');
     charGlobalMenu.classList.remove('hidden');
+
+    //CAM
+    loadCameraMenu();
+    const cameraMenu = document.getElementById('CameraSettings');
+    cameraMenu.classList.remove('hidden');
 }
 
 function hideCharGlobalMenu() {
     const charGlobalMenu = document.getElementById('CharactersMenu');
     charGlobalMenu.classList.add('hidden');
+
+    //CAM
+    const cameraMenu = document.getElementById('CameraSettings');
+    cameraMenu.classList.add('hidden');
 }
 
 
@@ -779,6 +797,11 @@ function showApparenceMenu() {
     apparenceMenu.classList.remove('hidden');
     createEditApparenceMenu();
     
+    //CAM
+    loadCameraMenu();
+    const cameraMenu = document.getElementById('CameraSettings');
+    cameraMenu.classList.remove('hidden');
+    
     // Show/hide Save button based on Second Chance mode
     const saveSecondChanceBtn = document.getElementById('SaveSecondChance');
     const backBtn = document.getElementById('CancelApparenceEdition');
@@ -806,6 +829,10 @@ function showApparenceMenu() {
 function hideApparenceMenu() {
     const apparenceMenu = document.getElementById('GlobalCharacterMenu');
     apparenceMenu.classList.add('hidden');
+
+    //CAM
+    const cameraMenu = document.getElementById('CameraSettings');
+    cameraMenu.classList.add('hidden');
 }
 
 ////////////////////////// SPAWN MENU //////////////////////////
@@ -3055,6 +3082,10 @@ function loadCameraMenu() {
 
     //NE PAS SUPPRIMER OU REMPLACER JSON LOCAL
     const cameraDatas = [
+        {
+            "cameraName": 'H',
+            "value": 180
+        },
         {
             "cameraName": 'Z',
             "value": 154

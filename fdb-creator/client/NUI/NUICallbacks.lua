@@ -158,6 +158,22 @@ RegisterNUICallback("cameraChange", function(data, cb)
     local value = data.value
 
 
+    if cameraName == "H" then
+        local ped = CachePed
+        if ped and DoesEntityExist(ped) then
+            local pedCoords = GetEntityCoords(ped)
+            local cam = ActualCamera or (ActiveCam == 1 and Cam1 or Cam2)
+            if cam and DoesCamExist(cam) then
+                local camCoord = GetCamCoord(cam)
+                -- Scale slider (1-360) to height offset (-1.0 to 2.0)
+                local heightOffset = scale(tonumber(value) or 180, 1, 360, -1.0, 2.0)
+                SetCamCoord(cam, camCoord.x, camCoord.y, pedCoords.z + heightOffset)
+                PointCamAtCoord(cam, pedCoords.x, pedCoords.y, pedCoords.z + heightOffset * 0.3)
+            end
+            PlaySound("Amount_Increase", "HUD_Donate_Sounds")
+        end
+    end
+
     if cameraName == "Z" then
         local outputvalue = scale(value, 1, 360, 15.0, 50.0)
         if ActiveCam == 1 then
