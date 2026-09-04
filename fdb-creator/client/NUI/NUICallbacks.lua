@@ -173,7 +173,9 @@ RegisterNUICallback("cameraChange", function(data, cb)
 
         -- Calcular o heading diretamente a partir do slider (0-360)
         local targetHeading = tonumber(value) or 180.0
+        FreezeEntityPosition(ped, false)
         SetEntityHeading(ped, targetHeading)
+        FreezeEntityPosition(ped, true)
         PlaySound("Amount_Decrease",
             "HUD_Donate_Sounds")
     end
