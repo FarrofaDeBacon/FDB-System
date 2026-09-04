@@ -170,14 +170,27 @@ RegisterNUICallback("cameraChange", function(data, cb)
 
     if cameraName == "R" then
         local ped = CachePed
-
-        -- Calcular o heading diretamente a partir do slider (0-360)
-        local targetHeading = tonumber(value) or 180.0
-        FreezeEntityPosition(ped, false)
-        SetEntityHeading(ped, targetHeading)
-        FreezeEntityPosition(ped, true)
-        PlaySound("Amount_Decrease",
-            "HUD_Donate_Sounds")
+        if ped and DoesEntityExist(ped) then
+            local angle = tonumber(value) or 180.0
+            local rad = math.rad(angle)
+            local pedCoords = GetEntityCoords(ped)
+            local cam = ActualCamera or (ActiveCam == 1 and Cam1 or Cam2)
+            if cam and DoesCamExist(cam) then
+                local camCoord = GetCamCoord(cam)
+                -- Calculate current distance and height offset from ped
+                local dx = camCoord.x - pedCoords.x
+                local dy = camCoord.y - pedCoords.y
+                local dist = math.sqrt(dx * dx + dy * dy)
+                local heightOffset = camCoord.z - pedCoords.z
+                -- Calculate new camera position orbiting around the ped
+                local newX = pedCoords.x + math.sin(rad) * dist
+                local newY = pedCoords.y + math.cos(rad) * dist
+                local newZ = pedCoords.z + heightOffset
+                SetCamCoord(cam, newX, newY, newZ)
+                PointCamAtCoord(cam, pedCoords.x, pedCoords.y, pedCoords.z + heightOffset * 0.3)
+            end
+            PlaySound("Amount_Decrease", "HUD_Donate_Sounds")
+        end
     end
 end)
 
