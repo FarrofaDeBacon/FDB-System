@@ -7,6 +7,7 @@ local FDBCore = exports['fdb-core']:GetCoreObject()
 local PlayerData = {}
 local isLoggedIn = false
 local nuiReady = false
+local hudForceHidden = false
 local KVP_KEY = "fdb-hudpremium:settings"
 
 -- Cache de status para otimização e redução de spam de tráfego NUI
@@ -67,7 +68,9 @@ AddEventHandler('FDBCore:Client:OnPlayerLoaded', function()
     PlayerData = FDBCore.Functions.GetPlayerData()
     isLoggedIn = true
     LoadSettings()
-    SendNUIMessage({ action = 'setVisibility', value = true })
+    if not hudForceHidden then
+        SendNUIMessage({ action = 'setVisibility', value = true })
+    end
 end)
 
 AddEventHandler('FDBCore:Client:OnPlayerLogout', function()
@@ -115,7 +118,7 @@ end)
 RegisterNUICallback("uiReady", function(data, cb)
     nuiReady = true
     LoadSettings()
-    if isLoggedIn then
+    if isLoggedIn and not hudForceHidden then
         SendNUIMessage({ action = 'setVisibility', value = true })
     end
     cb("ok")
@@ -328,7 +331,9 @@ CreateThread(function()
             PlayerData = data
             isLoggedIn = true
             LoadSettings()
-            SendNUIMessage({ action = 'setVisibility', value = true })
+            if not hudForceHidden then
+                SendNUIMessage({ action = 'setVisibility', value = true })
+            end
         end
     end
 end)
@@ -340,7 +345,9 @@ AddEventHandler("onResourceStart", function(resourceName)
             PlayerData = data
             isLoggedIn = true
             LoadSettings()
-            SendNUIMessage({ action = 'setVisibility', value = true })
+            if not hudForceHidden then
+                SendNUIMessage({ action = 'setVisibility', value = true })
+            end
             SyncMetadata()
         end
     end
@@ -353,3 +360,16 @@ RegisterCommand("hud", function()
         value = true
     })
 end, false)
+
+-- -------------------------------------------------------
+-- Toggle HUD visibility from external scripts (e.g. fdb-creator)
+-- When visible=false, sets hudForceHidden to block all auto-show
+-- When visible=true, clears the block and re-shows
+-- -------------------------------------------------------
+RegisterNetEvent('fdb-hudpremium:client:toggleHud', function(visible)
+    hudForceHidden = not visible
+    SendNUIMessage({ action = 'setVisibility', value = visible })
+    if visible then
+        isLoggedIn = true
+    end
+end)

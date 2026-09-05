@@ -161,6 +161,8 @@ RegisterNUICallback("cameraChange", function(data, cb)
     local cameraName = data.cameraName
     local value = data.value
     
+    print("[fdb-creator] cameraChange called: " .. tostring(cameraName) .. " = " .. tostring(value))
+    
     if cameraName == "Z" then
         local outputvalue = scale(value, 1, 360, 15.0, 50.0)
         if ActiveCam == 1 then
@@ -173,6 +175,8 @@ RegisterNUICallback("cameraChange", function(data, cb)
     end
 
     local dest = currentCamDestionation
+    print("[fdb-creator] currentCamDestionation=" .. tostring(dest) .. " ActiveCam=" .. tostring(ActiveCam) .. " CachePed=" .. tostring(CachePed))
+    
     if lastDest ~= dest then
         currentCamH = 25
         currentCamR = 180
@@ -189,41 +193,50 @@ RegisterNUICallback("cameraChange", function(data, cb)
 
     local currentCam = (ActiveCam == 1) and Cam1 or Cam2
     local ped = CachePed
-    if DoesCamExist(currentCam) and camCoords[ped] then
+    
+    local camExists = DoesCamExist(currentCam)
+    local hasCamCoords = camCoords[ped] ~= nil
+    print("[fdb-creator] camExists=" .. tostring(camExists) .. " hasCamCoords=" .. tostring(hasCamCoords))
+    
+    if camExists and hasCamCoords then
         local currentCamData = camCoords[ped][dest] or camCoords[ped].default
+        print("[fdb-creator] currentCamData found=" .. tostring(currentCamData ~= nil) .. " dest='" .. tostring(dest) .. "'")
         if currentCamData then
             local baseCoords = currentCamData.coords
             local baseTarget = currentCamData.target
             local pedCoords = GetEntityCoords(ped)
 
             local hOffset = 0.0
-        if currentCamH >= 25 then
-            hOffset = scale(currentCamH, 25, 360, 0.0, 0.60)
-        else
-            hOffset = scale(currentCamH, 1, 25, -0.8, 0.0)
+            if currentCamH >= 25 then
+                hOffset = scale(currentCamH, 25, 360, 0.0, 0.60)
+            else
+                hOffset = scale(currentCamH, 1, 25, -0.8, 0.0)
+            end
+            
+            local rAngle = currentCamR - 180.0
+            local rad = math.rad(rAngle)
+            local s = math.sin(rad)
+            local c = math.cos(rad)
+            
+            local dx = baseCoords.x - pedCoords.x
+            local dy = baseCoords.y - pedCoords.y
+            local rotatedCamX = pedCoords.x + (dx * c - dy * s)
+            local rotatedCamY = pedCoords.y + (dx * s + dy * c)
+            
+            local tx = baseTarget.x - pedCoords.x
+            local ty = baseTarget.y - pedCoords.y
+            local rotatedTargetX = pedCoords.x + (tx * c - ty * s)
+            local rotatedTargetY = pedCoords.y + (tx * s + ty * c)
+            
+            local finalCamCoords = vector3(rotatedCamX, rotatedCamY, baseCoords.z + hOffset)
+            local finalTarget = vector3(rotatedTargetX, rotatedTargetY, baseTarget.z + hOffset)
+            
+            print("[fdb-creator] Setting cam coords: " .. tostring(finalCamCoords) .. " target: " .. tostring(finalTarget))
+            SetCamCoord(currentCam, finalCamCoords)
+            PointCamAtCoord(currentCam, finalTarget)
         end
-        
-        local rAngle = currentCamR - 180.0
-        local rad = math.rad(rAngle)
-        local s = math.sin(rad)
-        local c = math.cos(rad)
-        
-        local dx = baseCoords.x - pedCoords.x
-        local dy = baseCoords.y - pedCoords.y
-        local rotatedCamX = pedCoords.x + (dx * c - dy * s)
-        local rotatedCamY = pedCoords.y + (dx * s + dy * c)
-        
-        local tx = baseTarget.x - pedCoords.x
-        local ty = baseTarget.y - pedCoords.y
-        local rotatedTargetX = pedCoords.x + (tx * c - ty * s)
-        local rotatedTargetY = pedCoords.y + (tx * s + ty * c)
-        
-        local finalCamCoords = vector3(rotatedCamX, rotatedCamY, baseCoords.z + hOffset)
-        local finalTarget = vector3(rotatedTargetX, rotatedTargetY, baseTarget.z + hOffset)
-        
-        SetCamCoord(currentCam, finalCamCoords)
-        PointCamAtCoord(currentCam, finalTarget)
-        end
+    else
+        print("[fdb-creator] SKIPPED camera update - camExists=" .. tostring(camExists) .. " hasCamCoords=" .. tostring(hasCamCoords))
     end
 end)
 
