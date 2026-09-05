@@ -189,12 +189,14 @@ RegisterNUICallback("cameraChange", function(data, cb)
 
     local currentCam = (ActiveCam == 1) and Cam1 or Cam2
     local ped = CachePed
-    if DoesCamExist(currentCam) and camCoords[ped] and camCoords[ped][dest] then
-        local baseCoords = camCoords[ped][dest].coords
-        local baseTarget = camCoords[ped][dest].target
-        local pedCoords = GetEntityCoords(ped)
+    if DoesCamExist(currentCam) and camCoords[ped] then
+        local currentCamData = camCoords[ped][dest] or camCoords[ped].default
+        if currentCamData then
+            local baseCoords = currentCamData.coords
+            local baseTarget = currentCamData.target
+            local pedCoords = GetEntityCoords(ped)
 
-        local hOffset = 0.0
+            local hOffset = 0.0
         if currentCamH >= 25 then
             hOffset = scale(currentCamH, 25, 360, 0.0, 0.60)
         else
@@ -221,6 +223,7 @@ RegisterNUICallback("cameraChange", function(data, cb)
         
         SetCamCoord(currentCam, finalCamCoords)
         PointCamAtCoord(currentCam, finalTarget)
+        end
     end
 end)
 
