@@ -38,6 +38,7 @@ if Config.framework == 'fdb-core' then
         Wait(500)
         DisplayRadar(false)
         DisplayHud(false)
+        TriggerEvent('fdb-hudpremium:client:toggleHud', false)
         SetEntityCoords(PlayerPedId(), Config.CharSelect.playerSpawn.coords)
         FreezeEntityPosition(PlayerPedId(), true)
         SetEntityInvincible(PlayerPedId(), true)
@@ -271,6 +272,7 @@ if Config.framework == 'fdb-core' then
         SwitchOffCam(false)
         DisplayRadar(true)
         DisplayHud(true)
+        TriggerEvent('fdb-hudpremium:client:toggleHud', true)
         TriggerServerEvent('fdb-multicharacter:server:loadUserData', myChars[id])
         currentCharacter = myChars[id].citizenid
         Wait(5000)
