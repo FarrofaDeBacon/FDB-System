@@ -153,11 +153,14 @@ RegisterNetEvent("fdb_creator:BackFromClothing", function()
 end)
 
 -- Callback for handling camera changes
+local currentCamH = 25
+local currentCamR = 180
+local lastDest = ""
+
 RegisterNUICallback("cameraChange", function(data, cb)
     local cameraName = data.cameraName
     local value = data.value
-
-
+    
     if cameraName == "Z" then
         local outputvalue = scale(value, 1, 360, 15.0, 50.0)
         if ActiveCam == 1 then
@@ -166,16 +169,58 @@ RegisterNUICallback("cameraChange", function(data, cb)
             SetCamFov(Cam2, outputvalue)
         end
         PlaySound("Amount_Increase", "HUD_Donate_Sounds")
+        return
     end
 
-    if cameraName == "R" then
-        local ped = CachePed
+    local dest = currentCamDestionation
+    if lastDest ~= dest then
+        currentCamH = 25
+        currentCamR = 180
+        lastDest = dest
+    end
 
-        -- Calcular o heading diretamente a partir do slider (0-360)
-        local targetHeading = tonumber(value) or 180.0
-        SetEntityHeading(ped, targetHeading)
-        PlaySound("Amount_Decrease",
-            "HUD_Donate_Sounds")
+    if cameraName == "H" then
+        currentCamH = tonumber(value) or 25
+        PlaySound("Amount_Increase", "HUD_Donate_Sounds")
+    elseif cameraName == "R" then
+        currentCamR = tonumber(value) or 180
+        PlaySound("Amount_Decrease", "HUD_Donate_Sounds")
+    end
+
+    local currentCam = (ActiveCam == 1) and Cam1 or Cam2
+    local ped = CachePed
+    if DoesCamExist(currentCam) and camCoords[ped] and camCoords[ped][dest] then
+        local baseCoords = camCoords[ped][dest].coords
+        local baseTarget = camCoords[ped][dest].target
+        local pedCoords = GetEntityCoords(ped)
+
+        local hOffset = 0.0
+        if currentCamH >= 25 then
+            hOffset = scale(currentCamH, 25, 360, 0.0, 0.60)
+        else
+            hOffset = scale(currentCamH, 1, 25, -0.8, 0.0)
+        end
+        
+        local rAngle = currentCamR - 180.0
+        local rad = math.rad(rAngle)
+        local s = math.sin(rad)
+        local c = math.cos(rad)
+        
+        local dx = baseCoords.x - pedCoords.x
+        local dy = baseCoords.y - pedCoords.y
+        local rotatedCamX = pedCoords.x + (dx * c - dy * s)
+        local rotatedCamY = pedCoords.y + (dx * s + dy * c)
+        
+        local tx = baseTarget.x - pedCoords.x
+        local ty = baseTarget.y - pedCoords.y
+        local rotatedTargetX = pedCoords.x + (tx * c - ty * s)
+        local rotatedTargetY = pedCoords.y + (tx * s + ty * c)
+        
+        local finalCamCoords = vector3(rotatedCamX, rotatedCamY, baseCoords.z + hOffset)
+        local finalTarget = vector3(rotatedTargetX, rotatedTargetY, baseTarget.z + hOffset)
+        
+        SetCamCoord(currentCam, finalCamCoords)
+        PointCamAtCoord(currentCam, finalTarget)
     end
 end)
 

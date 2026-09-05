@@ -660,6 +660,11 @@ function hideCharSelectMenu() {
 function showCharGlobalMenu() {
     const charGlobalMenu = document.getElementById('CharactersMenu');
     charGlobalMenu.classList.remove('hidden');
+    // Ensure Camera Settings are hidden
+    const cameraMenu = document.getElementById('CameraSettings');
+    if (cameraMenu) {
+        cameraMenu.classList.add('hidden');
+    }
 }
 
 function hideCharGlobalMenu() {
@@ -3055,6 +3060,10 @@ function loadCameraMenu() {
 
     //NE PAS SUPPRIMER OU REMPLACER JSON LOCAL
     const cameraDatas = [
+        {
+            "cameraName": 'H',
+            "value": 25
+        },
         {
             "cameraName": 'Z',
             "value": 154
