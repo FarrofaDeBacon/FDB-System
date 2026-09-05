@@ -83,6 +83,11 @@ RegisterNetEvent('fdb-creator:client:OpenCreator', function(data, empty)
 end)
 
 RegisterNetEvent("fdb_creator:LaunchCreator", function()
+    -- Hide HUD when launching the creator
+    DisplayRadar(false)
+    DisplayHud(false)
+    TriggerEvent('fdb-hudpremium:client:toggleHud', false)
+    
     local coords = Config.CharSelect.playerSpawn.coords
     local heading = Config.CharSelect.playerSpawn.heading
 
@@ -157,6 +162,7 @@ RegisterNetEvent("fdb_creator:LaunchCreator", function()
     Light()
     MoveCam("default")
     SetNuiFocus(true, true)
+    DoScreenFadeIn(1000)
     SendNUIMessage(
         {
             type = "showCharGlobalMenu",
