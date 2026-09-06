@@ -459,6 +459,7 @@ if Config.framework == 'fdb-core' then
             
             local currentHealth
             print("Is Dead: " .. tostring(isDead), isDead)
+            print("DEBUG FASE 2: healthinit status before check = " .. tostring(healthinit))
             if isDead == true then
                 currentHealth = 0
             else
@@ -495,6 +496,7 @@ if Config.framework == 'fdb-core' then
     end)
 
     RegisterNetEvent("fdb-creator:createnewchar", function(data)
+        print("DEBUG FASE 2: Event fdb-creator:createnewchar FIRED!")
         if creatingCharacter then
             print("Character creation already in progress, ignoring duplicate call")
             return
