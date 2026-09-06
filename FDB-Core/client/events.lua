@@ -150,7 +150,13 @@ end)
 -- Server Callback
 RegisterNetEvent('FDBCore:Client:TriggerCallback', function(name, ...)
     if FDBCore.ServerCallbacks[name] then
-        FDBCore.ServerCallbacks[name](...)
+        local success, err = pcall(function(...)
+            FDBCore.ServerCallbacks[name](...)
+        end, ...)
+        
+        if not success then
+            print("^1[FDB-CORE SCRIPT ERROR]^7 In callback '" .. tostring(name) .. "': " .. tostring(err))
+        end
         FDBCore.ServerCallbacks[name] = nil
     end
 end)
