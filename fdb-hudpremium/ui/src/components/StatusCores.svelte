@@ -98,7 +98,7 @@
     };
 </script>
 
-{#if $extras.isVisible || isEditing}
+{#if $extras.isVisible}
 <div class="status-cores-container">
     <!-- Saúde -->
     <DraggableModule id="health" defaultX={-240} defaultY={0}>
