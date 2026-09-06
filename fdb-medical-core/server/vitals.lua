@@ -82,6 +82,17 @@ RegisterNetEvent('FDBCore:Server:PlayerLoaded', function(Player)
     -- Garante a inicialização da tabela segura
     local vitals = GetPlayerVitals(src)
     
+    -- Puxar a vida (health) e vitais persistidos do banco de dados (salvos na metadata)
+    if Player.PlayerData.metadata then
+        if Player.PlayerData.metadata["health"] then
+            vitals.health = Player.PlayerData.metadata["health"]
+        end
+        if Player.PlayerData.metadata["pulse"] then vitals.pulse = Player.PlayerData.metadata["pulse"] end
+        if Player.PlayerData.metadata["pain"] then vitals.pain = Player.PlayerData.metadata["pain"] end
+        if Player.PlayerData.metadata["bleeding"] then vitals.bleeding = Player.PlayerData.metadata["bleeding"] end
+        if Player.PlayerData.metadata["consciousness"] then vitals.consciousness = Player.PlayerData.metadata["consciousness"] end
+    end
+    
     -- Carrega feridas do banco (se existirem)
     local dbWounds = LoadWoundData(citizenid)
     if dbWounds and next(dbWounds) ~= nil then
