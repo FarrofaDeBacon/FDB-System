@@ -81,7 +81,7 @@ end)
 
 local function SyncMetadata()
     if not PlayerData or not PlayerData.metadata then return end
-    if nuiReady then
+    if nuiReady and not hudForceHidden then
         local hunger      = PlayerData.metadata["hunger"]      or 100
         local thirst      = PlayerData.metadata["thirst"]      or 100
         local stress      = PlayerData.metadata["stress"]      or 0
@@ -146,7 +146,7 @@ CreateThread(function()
     while true do
         Wait(500)
         
-        if isLoggedIn and nuiReady then
+        if isLoggedIn and nuiReady and not hudForceHidden then
             local ped = PlayerPedId()
             
             -- Saúde do jogador (Tank + Core combinados em 0-100 para a UI)
