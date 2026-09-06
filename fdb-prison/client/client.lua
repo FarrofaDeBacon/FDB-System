@@ -282,7 +282,7 @@ RegisterNetEvent('fdb-prison:client:freedom', function()
     local maxStamina = GetPedMaxStamina(playerPed, Citizen.ResultAsFloat())
     local currentStamina = GetPedStamina(playerPed, Citizen.ResultAsFloat()) / maxStamina * 100
     
-    exports['fdb-appearance']:ApplySkin()
+    TriggerEvent('fdb-creator:loadskin')
 
     local playerPed = PlayerPedId()
     SetEntityHealth(playerPed, currentHealth )

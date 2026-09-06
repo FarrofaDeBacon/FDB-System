@@ -3,8 +3,8 @@ local bandana = false
 RegisterNetEvent('fdb-bandana:client:ToggleBandana')
 AddEventHandler('fdb-bandana:client:ToggleBandana', function()
     local male = IsPedMale(cache.ped)
-    local neckwear = exports['fdb-appearance']:GetClothesCurrentComponentHash('neckwear')
-    local applybeard = exports['fdb-appearance']:GetComponentId('beard').hash
+    local neckwear = exports['fdb-clothing']:GetClothesCurrentComponentHash('neckwear')
+    local applybeard = exports['fdb-clothing']:GetComponentId('beard').hash
 
     if not bandana then
         if not male then

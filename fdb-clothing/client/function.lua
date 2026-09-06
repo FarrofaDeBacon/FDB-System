@@ -15,6 +15,20 @@ exports('GetBodyComponents', function()
     return { ComponentsMale, ComponentsFemale }
 end)
 
+exports('GetClothesCurrentComponentHash', function(name)
+    return GetClothesCurrentComponentHash(name)
+end)
+
+exports('GetComponentId', function(name)
+    if name == 'beard' then
+        name = 'beards_chin'
+    end
+    if ClothesCache[name] then
+        return { hash = ClothesCache[name].hash or 0, model = ClothesCache[name].model or 0 }
+    end
+    return { hash = 0, model = 0 }
+end)
+
 
 ComponentsMale = {}
 ComponentsFemale = {}

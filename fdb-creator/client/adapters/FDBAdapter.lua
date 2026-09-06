@@ -165,7 +165,7 @@ if Config.framework == 'fdb-core' then
                                 while Citizen.InvokeNative(0xA0BC8FAED8CFEB3C, data.PedHandler) ~= 1 do
                                     Wait(1)
                                 end
-                                exports['fdb-appearance']:ApplySkinMultiChar(skinTable, data.PedHandler, clothesTable)
+                                -- exports['fdb-appearance']:ApplySkinMultiChar(skinTable, data.PedHandler, clothesTable)
                                 print("Character skin applied: " .. tostring(value.citizenid))
                                 TriggerEvent("fdb_clothes:ApplyClothesToCharid", value.citizenid, data.PedHandler)
                                 TriggerEvent("fdb-barber:loadbarberoverlayOnCharacter", value.citizenid,
@@ -268,6 +268,12 @@ if Config.framework == 'fdb-core' then
         TriggerServerEvent("fdb-creator:RemovePlayerFromInstance")
         DoScreenFadeOut(0)
         repeat Wait(0) until IsScreenFadedOut()
+        for key, pedHandler in pairs(charselectpeds) do
+            if DoesEntityExist(pedHandler) then
+                DeleteEntity(pedHandler)
+            end
+        end
+        charselectpeds = {}
         Wait(1000)
         SwitchOffCam(false)
         DisplayRadar(true)
@@ -276,9 +282,8 @@ if Config.framework == 'fdb-core' then
         TriggerServerEvent('fdb-multicharacter:server:loadUserData', myChars[id])
         currentCharacter = myChars[id].citizenid
         Wait(5000)
-        TriggerServerEvent('fdb-appearance:server:LoadSkin')
+        TriggerEvent('fdb-creator:loadskin')
         Wait(500)
-        TriggerServerEvent('fdb-appearance:server:LoadClothes', 1)
         local PlayerData = RSGCore.Functions.GetPlayerData()
         local ped = PlayerPedId()
         FreezeEntityPosition(ped, false)
@@ -354,7 +359,7 @@ if Config.framework == 'fdb-core' then
             if next(CachePedData) == nil then
                 --- If no data in fdb_creator, load default skin for framework
                 print("No skin data in fdb_creator")
-                TriggerServerEvent('fdb-appearance:server:LoadSkin')
+                -- TriggerServerEvent('fdb-appearance:server:LoadSkin')
             else
                 local model = CachePedData.pedmodel.model
                 local outfit = CachePedData.pedmodel.outfit

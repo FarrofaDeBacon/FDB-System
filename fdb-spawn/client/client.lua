@@ -23,7 +23,7 @@ RegisterNetEvent('fdb-spawn:client:existingplayer', function()
     Wait(10000)
 
     DoScreenFadeOut(1000)
-    exports['fdb-appearance']:ApplySkin()
+    TriggerEvent('fdb-creator:loadskin')
 
     -- set player health
     local currentHealth = PlayerData.metadata["health"]
@@ -65,7 +65,7 @@ local function SpawnChar(coords)
     Wait(10000)
     DoScreenFadeOut(1000)
 
-    exports['fdb-appearance']:ApplySkin()
+    TriggerEvent('fdb-creator:loadskin')
     local ped = PlayerPedId()
 
     SetEntityCoordsNoOffset(ped, coords, true, true, true)
