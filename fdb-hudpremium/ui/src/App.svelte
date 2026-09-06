@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { extras } from './store/hudStore';
   import StatusCores from './components/StatusCores.svelte';
   import ScreenEffects from './components/ScreenEffects.svelte';
   import EditorPanel from './components/EditorPanel.svelte';
@@ -18,7 +19,9 @@
 
 <main>
   <ScreenEffects />
+  {#if $extras.isVisible}
   <StatusCores />
+  {/if}
   <EditorPanel />
 </main>
 

@@ -1,7 +1,7 @@
 <script>
     import HUDItem from './HUDItem.svelte';
     import DraggableModule from './DraggableModule.svelte';
-    import { coreStatus, horseStatus, survivalEngines, activeBuffs, comms, editorState, extras } from '../store/hudStore';
+    import { coreStatus, horseStatus, survivalEngines, activeBuffs, comms, editorState } from '../store/hudStore';
 
     // Para facilitar, extraímos as reatividades do store
     $: health = $coreStatus.health;
@@ -98,7 +98,6 @@
     };
 </script>
 
-{#if $extras.isVisible}
 <div class="status-cores-container">
     <!-- Saúde -->
     <DraggableModule id="health" defaultX={-240} defaultY={0}>
@@ -345,7 +344,6 @@
         />
     </DraggableModule>
 </div>
-{/if}
 
 <style>
     .status-cores-container {
