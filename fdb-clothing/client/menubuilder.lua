@@ -799,7 +799,8 @@ end)
 FirstinitCreator = false
 RegisterNetEvent('fdb_clothing:OpenClothesMenuCreator', function()
     CreatorMode = true
-
+    baseHeading = nil
+    
     Light()
     if IsPedMale(PlayerPedId()) then SelectedGender = "male" else SelectedGender = "female" end
     if FirstinitCreator == false then

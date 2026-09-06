@@ -189,14 +189,8 @@ RegisterNUICallback("cameraChange", function(body, resultCallback)
 
         -- Calculer le heading cible directement
         local targetHeading = (value - angleOffset) % 360
-        local rad = math.rad(targetHeading)
 
-        -- Calculer un point Ã  1 unitÃ© devant le ped selon le heading voulu
-        local distance = 1.0
-        local targetX = x + (math.sin(-rad) * distance)
-        local targetY = y + (math.cos(-rad) * distance)
-
-        TaskTurnPedToFaceCoord(ped, targetX, targetY, z, 0)
+        SetEntityHeading(ped, targetHeading)
         local focus = #(GetCamCoord(ClothingCamera) - GetEntityCoords(PlayerPedId()))
         SetCamFocusDistance(ClothingCamera, focus)
         if currentR >= value then
