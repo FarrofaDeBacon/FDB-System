@@ -16,6 +16,7 @@ RegisterNUICallback("showEditionMenu", function(data, cb)
     local elemId = data.elemId
     local subElemName = data.subElemName
     DisplayPins = false
+    baseHeading = false
 
     if elemId == "barber" then
         OpenBarberMenu()
@@ -186,6 +187,14 @@ RegisterNUICallback("cameraChange", function(data, cb)
     elseif cameraName == "R" then
         currentCamR = tonumber(value) or 180
         PlaySound("Amount_Decrease", "HUD_Donate_Sounds")
+        
+        local ped = CachePed
+        if not baseHeading then
+            baseHeading = GetEntityHeading(ped)
+            angleOffset = 180 - baseHeading
+        end
+        local targetHeading = (currentCamR - angleOffset) % 360
+        SetEntityHeading(ped, targetHeading)
     end
 
     local currentCam = (ActiveCam == 1) and Cam1 or Cam2
@@ -208,23 +217,8 @@ RegisterNUICallback("cameraChange", function(data, cb)
                 hOffset = scale(currentCamH, 1, 25, -0.8, 0.0)
             end
             
-            local rAngle = currentCamR - 180.0
-            local rad = math.rad(rAngle)
-            local s = math.sin(rad)
-            local c = math.cos(rad)
-            
-            local dx = baseCoords.x - pedCoords.x
-            local dy = baseCoords.y - pedCoords.y
-            local rotatedCamX = pedCoords.x + (dx * c - dy * s)
-            local rotatedCamY = pedCoords.y + (dx * s + dy * c)
-            
-            local tx = baseTarget.x - pedCoords.x
-            local ty = baseTarget.y - pedCoords.y
-            local rotatedTargetX = pedCoords.x + (tx * c - ty * s)
-            local rotatedTargetY = pedCoords.y + (tx * s + ty * c)
-            
-            local finalCamCoords = vector3(rotatedCamX, rotatedCamY, baseCoords.z + hOffset)
-            local finalTarget = vector3(rotatedTargetX, rotatedTargetY, baseTarget.z + hOffset)
+            local finalCamCoords = vector3(baseCoords.x, baseCoords.y, baseCoords.z + hOffset)
+            local finalTarget = vector3(baseTarget.x, baseTarget.y, baseTarget.z + hOffset)
             
             SetCamCoord(currentCam, finalCamCoords)
             PointCamAtCoord(currentCam, finalTarget)
