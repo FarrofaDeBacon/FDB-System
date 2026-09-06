@@ -88,7 +88,7 @@ FDBCore.Commands.Add('dress', locale('sv_text_34'), {}, false, function(source)
         _clothes = {}
     end
     if _clothes and next(_clothes) then
-        TriggerClientEvent('fdb-appearance:client:ApplyClothes', src, _clothes)
+        TriggerClientEvent('fdb_clothes:applyWearable', src, _clothes)
     end
 end)
 
@@ -111,6 +111,6 @@ exports('DressPlayer', function(source)
         _clothes = {}
     end
     if _clothes and next(_clothes) then
-        TriggerClientEvent('fdb-appearance:client:ApplyClothes', source, _clothes)
+        TriggerClientEvent('fdb_clothes:applyWearable', source, _clothes)
     end
 end)

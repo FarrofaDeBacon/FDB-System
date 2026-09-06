@@ -11,6 +11,10 @@ exports('GetClothesCache', function()
     return ClothesCache
 end)
 
+exports('GetBodyComponents', function()
+    return { ComponentsMale, ComponentsFemale }
+end)
+
 
 ComponentsMale = {}
 ComponentsFemale = {}

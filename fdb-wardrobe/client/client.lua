@@ -183,12 +183,12 @@ AddEventHandler('FDBCore:Client:OnPlayerLoaded', function()
         local ped = PlayerPedId()
         local male = IsPedMale(ped)
 
-        local bodyComponents = exports['fdb-appearance']:GetBodyComponents()
+        local bodyComponents = exports['fdb-clothing']:GetBodyComponents()
 
         if male then
             ComponentsMale = bodyComponents[1]
         else
-            ComponentsFemale = bodyComponents[1]
+            ComponentsFemale = bodyComponents[2]
         end
 
         playerSkin = json.decode(result.skin)
@@ -217,7 +217,7 @@ local function toggleClothing(clothingName)
 
                 -- Need to remove boot as well to avoid blank lower body
                 if clothingData['currentBoots'] == 0 then
-                    ClothesCache = exports['fdb-appearance']:GetClothesCache()
+                    ClothesCache = exports['fdb-clothing']:GetClothesCache()
                     clothingData['currentBoots'] = ClothesCache['boots'].hash
                     local isWearingComps = IsPedUsingComponent(playerPed, 2004797167)
 
@@ -230,7 +230,7 @@ local function toggleClothing(clothingName)
                 end
 
                 if clothingData[data] == 0 then
-                    ClothesCache = exports['fdb-appearance']:GetClothesCache()
+                    ClothesCache = exports['fdb-clothing']:GetClothesCache()
                     clothingData[data] = ClothesCache[comps].hash
                     local isWearingComps = IsPedUsingComponent(playerPed, hash)
 
