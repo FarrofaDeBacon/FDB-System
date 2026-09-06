@@ -178,7 +178,6 @@ RegisterNUICallback("cameraChange", function(body, resultCallback)
     if cam == "R" then
         local ped = PlayerPedId()
         if MannequinPed then ped = MannequinPed end
-        local x, y, z = table.unpack(GetEntityCoords(ped))
 
         -- Initialiser le heading de base si pas encore fait
         if not baseHeading then

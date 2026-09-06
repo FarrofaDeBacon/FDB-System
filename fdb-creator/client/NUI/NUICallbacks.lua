@@ -161,8 +161,6 @@ RegisterNUICallback("cameraChange", function(data, cb)
     local cameraName = data.cameraName
     local value = data.value
     
-    print("[fdb-creator] cameraChange called: " .. tostring(cameraName) .. " = " .. tostring(value))
-    
     if cameraName == "Z" then
         local outputvalue = scale(value, 1, 360, 15.0, 50.0)
         if ActiveCam == 1 then
@@ -175,7 +173,6 @@ RegisterNUICallback("cameraChange", function(data, cb)
     end
 
     local dest = currentCamDestionation
-    print("[fdb-creator] currentCamDestionation=" .. tostring(dest) .. " ActiveCam=" .. tostring(ActiveCam) .. " CachePed=" .. tostring(CachePed))
     
     if lastDest ~= dest then
         currentCamH = 25
@@ -196,11 +193,9 @@ RegisterNUICallback("cameraChange", function(data, cb)
     
     local camExists = DoesCamExist(currentCam)
     local hasCamCoords = camCoords[ped] ~= nil
-    print("[fdb-creator] camExists=" .. tostring(camExists) .. " hasCamCoords=" .. tostring(hasCamCoords))
     
     if camExists and hasCamCoords then
         local currentCamData = camCoords[ped][dest] or camCoords[ped].default
-        print("[fdb-creator] currentCamData found=" .. tostring(currentCamData ~= nil) .. " dest='" .. tostring(dest) .. "'")
         if currentCamData then
             local baseCoords = currentCamData.coords
             local baseTarget = currentCamData.target
@@ -231,12 +226,9 @@ RegisterNUICallback("cameraChange", function(data, cb)
             local finalCamCoords = vector3(rotatedCamX, rotatedCamY, baseCoords.z + hOffset)
             local finalTarget = vector3(rotatedTargetX, rotatedTargetY, baseTarget.z + hOffset)
             
-            print("[fdb-creator] Setting cam coords: " .. tostring(finalCamCoords) .. " target: " .. tostring(finalTarget))
             SetCamCoord(currentCam, finalCamCoords)
             PointCamAtCoord(currentCam, finalTarget)
         end
-    else
-        print("[fdb-creator] SKIPPED camera update - camExists=" .. tostring(camExists) .. " hasCamCoords=" .. tostring(hasCamCoords))
     end
 end)
 
