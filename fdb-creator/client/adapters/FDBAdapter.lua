@@ -340,16 +340,16 @@ if Config.framework == 'fdb-core' then
             local ped
             local healthCore, stamCore, health, stam
             
-            -- Sauvegarder les valeurs de vie/stamina AVANT le changement de modÃ¨le si nÃ©cessaire
-            if needsModelChange then
-                healthCore = GetAttributeCoreValue(PlayerPedId(), 0) -- Get health core value
-                stamCore = GetAttributeCoreValue(PlayerPedId(), 1)   -- Get stamina core value
-                health = GetEntityHealth(PlayerPedId())              -- Get health value
-                stam = Citizen.ResultAsFloat(Citizen.InvokeNative(0x22F2A386D43048A9, PlayerPedId()))
-                print("[FDB-CREATOR] Model needs change, saving health/stamina - HealthCore: " .. tostring(healthCore) .. ", StamCore: " .. tostring(stamCore) .. ", Health: " .. tostring(health) .. ", Stam: " .. tostring(stam))
-            else
-                print("[FDB-CREATOR] Model already correct, skipping health/stamina save/restore")
-            end
+            -- Sauvegarder les valeurs de vie/stamina AVANT le changement de modèle si nécessaire
+            -- if needsModelChange then
+            --     healthCore = GetAttributeCoreValue(PlayerPedId(), 0) -- Get health core value
+            --     stamCore = GetAttributeCoreValue(PlayerPedId(), 1)   -- Get stamina core value
+            --     health = GetEntityHealth(PlayerPedId())              -- Get health value
+            --     stam = Citizen.ResultAsFloat(Citizen.InvokeNative(0x22F2A386D43048A9, PlayerPedId()))
+            --     print("[FDB-CREATOR] Model needs change, saving health/stamina - HealthCore: " .. tostring(healthCore) .. ", StamCore: " .. tostring(stamCore) .. ", Health: " .. tostring(health) .. ", Stam: " .. tostring(stam))
+            -- else
+            --     print("[FDB-CREATOR] Model already correct, skipping health/stamina save/restore")
+            -- end
 
             if next(CachePedData) == nil then
                 --- If no data in fdb_creator, load default skin for framework
@@ -478,13 +478,13 @@ if Config.framework == 'fdb-core' then
             print("Current Health: " .. tostring(currentHealth))
             SetEntityHealth(PlayerPedId(), currentHealth)
 
-            -- Restaurer vie/stamina SEULEMENT si le modÃ¨le a Ã©tÃ© changÃ©
-            if needsModelChange then
-                Citizen.InvokeNative(0xC6258F41D86676E0, PlayerPedId(), 0, healthCore) -- Set Health Core back to what it was
-                Citizen.InvokeNative(0xC6258F41D86676E0, PlayerPedId(), 1, stamCore)   -- Set Stamina Core back to what it was
-                Citizen.InvokeNative(0x675680D089BFA21F, PlayerPedId(), stam or 100.0) -- RestorePedStamina
-                print("[FDB-CREATOR] Restored health/stamina after model change")
-            end
+            -- Restaurer vie/stamina SEULEMENT si le modèle a été changé
+            -- if needsModelChange then
+            --     Citizen.InvokeNative(0xC6258F41D86676E0, PlayerPedId(), 0, healthCore) -- Set Health Core back to what it was
+            --     Citizen.InvokeNative(0xC6258F41D86676E0, PlayerPedId(), 1, stamCore)   -- Set Stamina Core back to what it was
+            --     Citizen.InvokeNative(0x675680D089BFA21F, PlayerPedId(), stam or 100.0) -- RestorePedStamina
+            --     print("[FDB-CREATOR] Restored health/stamina after model change")
+            -- end
 
             SetEntityInvincible(PlayerPedId(), false)
             SetEntityCanBeDamaged(PlayerPedId(), true)
