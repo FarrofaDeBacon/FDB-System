@@ -112,6 +112,20 @@ export const createDefaultConfigs = () => {
             }
         };
     });
+
+    // Overrides do usuário definidos como padrão
+    if (cfgs.health) cfgs.health = { ...cfgs.health, maxOuterColor:"#23cd6d", trackColor:"#000000", innerColor:"#2ec723", showSegments:true, scale:1.2, goldColor:"#928120", outerColor:"#da2f2f", outerDamageColor:"#e01f1f" };
+    if (cfgs.stamina) cfgs.stamina = { ...cfgs.stamina, scale: 1.2, showSegments: true, maxOuterColor: "#264ad9" };
+    if (cfgs.food) cfgs.food = { ...cfgs.food, scale: 1.2, showSegments: true };
+    if (cfgs.water) cfgs.water = { ...cfgs.water, scale: 1.2, showSegments: true };
+    if (cfgs.money) cfgs.money = { ...cfgs.money, scale: 1.6 };
+    if (cfgs.illness) cfgs.illness = { ...cfgs.illness, maxOuterColor: "#cc1e1e", trackColor: "#b22a2a", showSegments: true };
+    if (cfgs.drunkenness) cfgs.drunkenness = { ...cfgs.drunkenness, innerColor: "#dd3636", showSegments: true };
+
+    ['armor', 'oxygen', 'stress', 'horseHealth', 'horseStamina', 'temperature', 'poison', 'coldResistance', 'heatResistance', 'voice', 'bladder'].forEach(id => {
+        if(cfgs[id]) cfgs[id].showSegments = true;
+    });
+
     return cfgs;
 };
 

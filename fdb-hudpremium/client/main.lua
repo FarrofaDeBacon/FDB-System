@@ -128,7 +128,8 @@ RegisterNUICallback("saveSettings", function(data, cb)
     if data then
         local encoded = json.encode(data)
         SetResourceKvp(KVP_KEY, encoded)
-        print("[fdb-hudpremium] Configurações de layout salvas com sucesso.")
+        print("[fdb-hudpremium] Configurações de layout salvas com sucesso. Copie o JSON abaixo:")
+        print(encoded)
     end
     cb("ok")
 end)
@@ -368,6 +369,7 @@ end, false)
 -- -------------------------------------------------------
 RegisterNetEvent('fdb-hudpremium:client:toggleHud', function(visible)
     hudForceHidden = not visible
+    print('[fdb-hudpremium] hudForceHidden set to:', hudForceHidden, 'visible:', visible)
     SendNUIMessage({ action = 'setVisibility', value = visible })
     if visible then
         isLoggedIn = true

@@ -100,7 +100,7 @@
 
 <div class="status-cores-container">
     <!-- Saúde -->
-    <DraggableModule id="health" defaultX={-240} defaultY={0}>
+    <DraggableModule id="health" defaultX={-1653} defaultY={-329}>
         <HUDItem 
             itemId="health"
             value={getOuter(health)} 
@@ -113,7 +113,7 @@
     </DraggableModule>
 
     <!-- Estamina -->
-    <DraggableModule id="stamina" defaultX={-180} defaultY={0}>
+    <DraggableModule id="stamina" defaultX={-1579} defaultY={-366}>
         <HUDItem 
             itemId="stamina"
             value={getOuter(stamina)} 
@@ -126,7 +126,7 @@
     </DraggableModule>
 
     <!-- Fome -->
-    <DraggableModule id="food" defaultX={-120} defaultY={0}>
+    <DraggableModule id="food" defaultX={-1500} defaultY={-377}>
         <HUDItem 
             itemId="food"
             value={getOuter(food)} 
@@ -139,7 +139,7 @@
     </DraggableModule>
 
     <!-- Sede -->
-    <DraggableModule id="water" defaultX={-60} defaultY={0}>
+    <DraggableModule id="water" defaultX={-1426} defaultY={-354}>
         <HUDItem 
             itemId="water"
             value={getOuter(water)} 
@@ -152,7 +152,7 @@
     </DraggableModule>
 
     <!-- Estresse -->
-    <DraggableModule id="stress" defaultX={0} defaultY={0}>
+    <DraggableModule id="stress" defaultX={-987} defaultY={-76}>
         <HUDItem 
             itemId="stress"
             value={getOuter(stress)} 
@@ -166,7 +166,7 @@
 
     <!-- Armadura (Condicional) -->
     {#if showArmor}
-        <DraggableModule id="armor" defaultX={60} defaultY={0}>
+        <DraggableModule id="armor" defaultX={-901} defaultY={-75}>
             <HUDItem 
                 itemId="armor"
                 value={armor} 
@@ -180,7 +180,7 @@
 
     <!-- Oxigênio (Condicional) -->
     {#if showOxygen}
-        <DraggableModule id="oxygen" defaultX={120} defaultY={0}>
+        <DraggableModule id="oxygen" defaultX={-1520} defaultY={-474}>
             <HUDItem 
                 itemId="oxygen"
                 value={oxygen} 
@@ -195,7 +195,7 @@
 
     <!-- Núcleos do Cavalo -->
     {#if showHorse}
-        <DraggableModule id="horseHealth" defaultX={-180} defaultY={-60}>
+        <DraggableModule id="horseHealth" defaultX={-1593} defaultY={-470}>
             <HUDItem 
                 itemId="horseHealth"
                 value={getOuter(horseHealth)} 
@@ -205,7 +205,7 @@
                 innerColor={getHorseHealthColor(horseHealth, horseDirtTier)}
             />
         </DraggableModule>
-        <DraggableModule id="horseStamina" defaultX={-120} defaultY={-60}>
+        <DraggableModule id="horseStamina" defaultX={-1670} defaultY={-435}>
             <HUDItem 
                 itemId="horseStamina"
                 value={getOuter(horseStamina)} 
@@ -220,7 +220,7 @@
     <!-- Sobrevivência Hardcore -->
     <!-- Bladder (Bexiga) -->
     {#if showBladder}
-        <DraggableModule id="bladder" defaultX={-60} defaultY={-60}>
+        <DraggableModule id="bladder" defaultX={-1297} defaultY={-77}>
             <HUDItem 
                 itemId="bladder"
                 value={getOuter(bladder)} 
@@ -235,7 +235,7 @@
 
     <!-- Cleanliness (Higiene) -->
     {#if showCleanliness}
-        <DraggableModule id="cleanliness" defaultX={0} defaultY={-60}>
+        <DraggableModule id="cleanliness" defaultX={-1300} defaultY={-157}>
             <HUDItem 
                 itemId="cleanliness"
                 value={getOuter(cleanliness)} 
@@ -249,7 +249,7 @@
     {/if}
 
     {#if showTemp}
-        <DraggableModule id="temperature" defaultX={60} defaultY={-60}>
+        <DraggableModule id="temperature" defaultX={-1220} defaultY={-77}>
             <HUDItem 
                 itemId="temperature"
                 value={getOuter(getTempValue(temp))} 
@@ -263,7 +263,7 @@
     {/if}
 
     {#if showPoison}
-        <DraggableModule id="poison" defaultX={120} defaultY={-60}>
+        <DraggableModule id="poison" defaultX={-1142} defaultY={-76}>
             <HUDItem 
                 itemId="poison"
                 value={getOuter(poison)} 
@@ -277,7 +277,7 @@
     {/if}
 
     {#if showIllness}
-        <DraggableModule id="illness" defaultX={180} defaultY={-60}>
+        <DraggableModule id="illness" defaultX={-1064} defaultY={-76}>
             <HUDItem 
                 itemId="illness"
                 value={getOuter(illness)} 
@@ -291,7 +291,7 @@
     {/if}
 
     {#if showDrunkenness}
-        <DraggableModule id="drunkenness" defaultX={240} defaultY={-60}>
+        <DraggableModule id="drunkenness" defaultX={-1221} defaultY={-155}>
             <HUDItem 
                 itemId="drunkenness"
                 value={getOuter(drunkenness)} 
@@ -305,7 +305,7 @@
 
     <!-- Buffs Ativos -->
     {#if showColdResistance}
-        <DraggableModule id="coldResistance" defaultX={0} defaultY={-120}>
+        <DraggableModule id="coldResistance" defaultX={-1063} defaultY={-160}>
             <HUDItem 
                 itemId="coldResistance"
                 value={coldResistance > 100 ? 100 : coldResistance} 
@@ -319,7 +319,7 @@
     {/if}
 
     {#if showHeatResistance}
-        <DraggableModule id="heatResistance" defaultX={60} defaultY={-120}>
+        <DraggableModule id="heatResistance" defaultX={-1143} defaultY={-157}>
             <HUDItem 
                 itemId="heatResistance"
                 value={heatResistance > 100 ? 100 : heatResistance} 
@@ -333,7 +333,7 @@
     {/if}
 
     <!-- Voz (pma-voice) -->
-    <DraggableModule id="voice" defaultX={120} defaultY={-120}>
+    <DraggableModule id="voice" defaultX={-821} defaultY={-77}>
         <HUDItem 
             itemId="voice"
             value={voice === 0 ? 33 : (voice === 1 ? 66 : 100)} 
