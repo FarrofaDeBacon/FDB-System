@@ -16,6 +16,7 @@ end)
 
 -- Evento de Consumir
 RegisterNetEvent('fdb-consume:client:playAnim', function(itemName)
+    print(("[fdb-consume] EVENTO RECEBIDO: playAnim para o item %s"):format(tostring(itemName)))
     if isBusy then 
         lib.notify({ title = locale('notify_busy'), type = 'error' })
         return 

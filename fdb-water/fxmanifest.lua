@@ -15,7 +15,8 @@ client_scripts {
     'client/canteen.lua',
     'client/bathing.lua',
     'client/items.lua',
-    'client/environment.lua'
+    'client/environment.lua',
+    'client/waterpump.lua'
 }
 
 server_scripts {

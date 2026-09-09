@@ -63,6 +63,7 @@ end)
 
 local DrinkPrompt
 local FillPrompt
+local WashPrompt
 local function SetupDrinkPrompt()
     local str1 = 'Beber Água'
     DrinkPrompt = PromptRegisterBegin()
@@ -83,6 +84,16 @@ local function SetupDrinkPrompt()
     PromptSetStandardMode(FillPrompt, true)
     PromptSetHoldMode(FillPrompt, 1000)
     PromptRegisterEnd(FillPrompt)
+
+    local str3 = 'Lavar o Rosto'
+    WashPrompt = PromptRegisterBegin()
+    PromptSetControlAction(WashPrompt, 0xC7B5340A) -- ENTER key
+    PromptSetText(WashPrompt, CreateVarString(10, 'LITERAL_STRING', str3))
+    PromptSetEnabled(WashPrompt, false)
+    PromptSetVisible(WashPrompt, false)
+    PromptSetStandardMode(WashPrompt, true)
+    PromptSetHoldMode(WashPrompt, 1000)
+    PromptRegisterEnd(WashPrompt)
 end
 
 CreateThread(function()
@@ -110,6 +121,8 @@ CreateThread(function()
                     PromptSetEnabled(DrinkPrompt, true)
                     PromptSetVisible(FillPrompt, true)
                     PromptSetEnabled(FillPrompt, true)
+                    PromptSetVisible(WashPrompt, true)
+                    PromptSetEnabled(WashPrompt, true)
                     
                     if PromptHasHoldModeCompleted(DrinkPrompt) then
                         isDrinking = true
@@ -117,6 +130,8 @@ CreateThread(function()
                         PromptSetEnabled(DrinkPrompt, false)
                         PromptSetVisible(FillPrompt, false)
                         PromptSetEnabled(FillPrompt, false)
+                        PromptSetVisible(WashPrompt, false)
+                        PromptSetEnabled(WashPrompt, false)
                         
                         TaskStartScenarioInPlace(ped, joaat('WORLD_HUMAN_CROUCH_INSPECT'), -1, true, false, false, false)
                         Wait(4000)
@@ -134,9 +149,38 @@ CreateThread(function()
                         PromptSetEnabled(DrinkPrompt, false)
                         PromptSetVisible(FillPrompt, false)
                         PromptSetEnabled(FillPrompt, false)
+                        PromptSetVisible(WashPrompt, false)
+                        PromptSetEnabled(WashPrompt, false)
                         
                         TriggerServerEvent('fdb-water:server:FillContainerFromPrompt')
                         Wait(5000)
+                        isDrinking = false
+                    end
+
+                    if PromptHasHoldModeCompleted(WashPrompt) then
+                        isDrinking = true
+                        PromptSetVisible(DrinkPrompt, false)
+                        PromptSetEnabled(DrinkPrompt, false)
+                        PromptSetVisible(FillPrompt, false)
+                        PromptSetEnabled(FillPrompt, false)
+                        PromptSetVisible(WashPrompt, false)
+                        PromptSetEnabled(WashPrompt, false)
+                        
+                        local dic = "amb_misc@world_human_wash_face_bucket@ground@male_a@idle_d"
+                        RequestAnimDict(dic)
+                        while not HasAnimDictLoaded(dic) do Wait(0) end
+                        
+                        TaskPlayAnim(ped, dic, "idle_l", 1.0, 8.0, 5000, 0, 0.0, false, false, false)
+                        Wait(5000)
+                        ClearPedTasks(ped)
+                        ClearPedEnvDirt(ped)
+                        ClearPedBloodDamage(ped)
+                        SetPedDirtCleaned(ped, 0.0, -1, 1, 1)
+                        ClearPedDamageDecalByZone(ped, 10, "ALL")
+                        ClearPedBloodDamageFacial(ped, 1)
+                        TriggerEvent('hud:client:UpdateCleanliness', 100)
+                        
+                        Wait(3000)
                         isDrinking = false
                     end
                 else
@@ -144,6 +188,8 @@ CreateThread(function()
                     PromptSetEnabled(DrinkPrompt, false)
                     PromptSetVisible(FillPrompt, false)
                     PromptSetEnabled(FillPrompt, false)
+                    PromptSetVisible(WashPrompt, false)
+                    PromptSetEnabled(WashPrompt, false)
                 end
             else
                 if DrinkPrompt then
@@ -151,6 +197,8 @@ CreateThread(function()
                     PromptSetEnabled(DrinkPrompt, false)
                     PromptSetVisible(FillPrompt, false)
                     PromptSetEnabled(FillPrompt, false)
+                    PromptSetVisible(WashPrompt, false)
+                    PromptSetEnabled(WashPrompt, false)
                 end
             end
         end

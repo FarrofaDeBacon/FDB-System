@@ -19,8 +19,11 @@ CreateThread(function()
             local Player = FDBCore.Functions.GetPlayer(src)
             if not Player then return end
             
+            print(("[fdb-consume] Callback de Uso do item '%s' disparado para src %s!"):format(item.name, src))
+
             -- Servidor é quem retira o item (impossível fraudar no cliente)
             if Player.Functions.RemoveItem(item.name, 1, item.slot) then
+                print(("[fdb-consume] Item '%s' removido com sucesso de src %s"):format(item.name, src))
                 -- Atualizar o inventário visualmente
                 TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[item.name], "remove")
 
@@ -54,6 +57,7 @@ CreateThread(function()
             end
         end)
     end
+    print(("^2[fdb-consume] %d itens foram registrados com sucesso no FDBCore.^7"):format(count))
 end)
 
 local lastBiteTime = {} -- Anti-exploit: cooldown por jogador
@@ -62,6 +66,7 @@ RegisterNetEvent('fdb-consume:server:takeBite', function()
     local src = source
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
+    print(("[fdb-consume] MORDIDA REGISTRADA pelo servidor para o src %s"):format(src))
 
     -- NÃO pode beber se está morto (protege contra beber morto / duplicar efeito)
     if Player.PlayerData.metadata and Player.PlayerData.metadata.isdead then

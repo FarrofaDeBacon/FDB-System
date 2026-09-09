@@ -1,0 +1,140 @@
+:root {
+  /* Font Families - Standard web safe for now until we load fonts */
+  --font-primary: 'Georgia', serif;
+  --font-secondary: 'Courier New', monospace;
+  --font-handwriting: 'Brush Script MT', cursive;
+
+  /* Theme: Light (Medical Field Book) */
+  --bg-color: #f4ecd8;
+  --bg-panel: #e8dbbf;
+  --text-main: #2c1e16;
+  --text-muted: #5c4738;
+  --border-color: #d1bfae;
+  --accent-color: #8b0000;
+  --accent-hover: #a52a2a;
+  
+  --leather-bg: #4a3320;
+  --leather-stitch: #d4a373;
+  
+  --status-good: #27ae60;
+  --status-medium: #f39c12;
+  --status-critical: #c0392b;
+}
+
+[data-theme="dark"] {
+  /* Theme: Dark (Night mode journal) */
+  --bg-color: #2a2421;
+  --bg-panel: #1f1a18;
+  --text-main: #d3c4b1;
+  --text-muted: #9c8a77;
+  --border-color: #4a3e35;
+  --accent-color: #a32727;
+  --accent-hover: #c43c3c;
+  
+  --leather-bg: #1c130d;
+  --leather-stitch: #7a5c43;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: transparent !important;
+  font-family: var(--font-primary);
+  color: var(--text-main);
+  user-select: none;
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ========================================= */
+/* MEDICAL FIELD BOOK THEME                  */
+/* ========================================= */
+
+.medical-field-book {
+  background-color: var(--bg-color);
+  background-size: cover;
+  border: 10px solid var(--leather-bg);
+  border-radius: 12px;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 15px 30px rgba(0,0,0,0.7);
+  position: relative;
+  overflow: hidden;
+}
+
+.medical-field-book, .medical-field-book[data-theme="light"] {
+  background-image: url('./assets/medical-journal/backgrounds/light/bg-leather-panel.png');
+}
+
+[data-theme="dark"].medical-field-book, .medical-field-book[data-theme="dark"] {
+  background-image: url('./assets/medical-journal/backgrounds/dark/bg-leather-panel.png');
+}
+
+.medical-field-book .rightsidepanel-container {
+  background-color: transparent;
+  background-image: url('./assets/medical-journal/backgrounds/light/bg-bag-texture.png');
+  background-size: cover;
+}
+
+[data-theme="dark"].medical-field-book .rightsidepanel-container, .medical-field-book[data-theme="dark"] .rightsidepanel-container {
+  background-image: url('./assets/medical-journal/backgrounds/dark/bg-bag-texture.png');
+}
+
+.medical-field-book::before {
+  content: '';
+  position: absolute;
+  top: 5px; left: 5px; right: 5px; bottom: 5px;
+  border: 2px dashed var(--leather-stitch);
+  background-image: url('./assets/medical-journal/backgrounds/bg-leather-stitched.png');
+  background-size: cover;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.medical-field-book > * {
+  position: relative;
+  z-index: 2;
+}
+
+.medical-field-book .medic-label {
+  font-family: var(--font-primary) !important;
+  color: var(--accent-color) !important;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 10px;
+}
+
+.medical-field-book .medic-label span {
+  font-family: var(--font-handwriting) !important;
+  color: var(--text-main) !important;
+  text-transform: none;
+  font-size: 1.5em;
+}
+
+.medical-field-book .medic-details {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.medical-field-book .medic-action-btn {
+  background: var(--bg-panel) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-main) !important;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2) !important;
+}
+
+.medical-field-book .medic-action-btn.active {
+  background: var(--accent-color) !important;
+  color: #fff !important;
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5) !important;
+}
+

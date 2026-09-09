@@ -29,6 +29,7 @@ local function CreateFoodPrompts()
 end
 
 RegisterNetEvent('fdb-consume:client:ConsumeFood', function(propModel, animType, maxUses, animDict, animName, itemName)
+    print(("[fdb-consume] INICIANDO ConsumeFood para o item %s!"):format(tostring(itemName)))
     local ped = PlayerPedId()
 
     if isHoldingFood then
@@ -106,6 +107,7 @@ RegisterNetEvent('fdb-consume:client:ConsumeFood', function(propModel, animType,
     end
 
     CreateFoodPrompts()
+    Wait(300) -- Ignora resíduo de clique usado para confirmar "usar item" no inventário (evita mordida fantasma)
 
     Citizen.CreateThread(function()
         local isAnimating = false
@@ -121,6 +123,7 @@ RegisterNetEvent('fdb-consume:client:ConsumeFood', function(propModel, animType,
 
             -- MODO 1: Clique Rápido (Mordida Unica)
             if IsDisabledControlJustPressed(0, Config.Prompts.SmokeKey) and not isAnimating then
+                print("[fdb-consume] MORDIDA REGISTRADA pelo cliente")
                 isAnimating = true
                 local dict = animDict or "mech_inventory@eating@multi_bite@sphere_d8-2_sandwich"
                 local clip = animName or "quick_right_hand"

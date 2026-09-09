@@ -37,3 +37,5 @@ Config.WaterTypes = {
     [25] =  {['name'] = 'Bahia De La Paz',      ['waterhash'] = -1168459546,    ['watertype'] = 'sea'},
     [26] =  {['name'] = 'Arroyo De La Vibora',  ['waterhash'] = -49694339,      ['watertype'] = 'river'},
 }
+
+Config.canteenPump = true -- Set to true to allow filling canteen from manual water pumps
