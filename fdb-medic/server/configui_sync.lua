@@ -1,5 +1,5 @@
 -- fdb-medic/server/configui_sync.lua
-local RSGCore = exports['rsg-core']:GetCoreObject()
+local FDBCore = exports['fdb-core']:GetCoreObject()
 
 -- Export para o fdb-configui pegar a configuração atual
 exports('GetRuntimeConfig', function()
