@@ -155,4 +155,32 @@ RegisterNetEvent('fdb-medical-core:server:ConvertWoundToScar', function(bodyPart
         end
     end
 end)
--- REMOVED duplicate broken export at line 153
+
+--- Exportação para fornecer o perfil médico completo para o MDT/Svelte (fdb-medic)
+--- @param citizenid string
+--- @return table
+exports('GetCompleteMedicalProfile', function(citizenid)
+    local Player = FDBCore.Functions.GetPlayerByCitizenId(citizenid)
+    
+    if Player then
+        -- Jogador online: Retorna dados em tempo real
+        local src = Player.PlayerData.source
+        local vitals = GetPlayerVitals(src)
+        return {
+            wounds = vitals.wounds or {},
+            treatments = vitals.treatments or {},
+            infections = vitals.infections or {},
+            bandages = vitals.bandages or {},
+            scars = GetPlayerScars(citizenid) or {}
+        }
+    else
+        -- Jogador offline: Carrega do banco de dados (Apenas Wounds e Scars no momento)
+        return {
+            wounds = LoadWoundData(citizenid) or {},
+            treatments = {},
+            infections = {},
+            bandages = {},
+            scars = GetPlayerScars(citizenid) or {}
+        }
+    end
+end)

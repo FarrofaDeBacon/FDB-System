@@ -1169,6 +1169,34 @@ AddEventHandler('fdb-medic:client:CheckForSelfTreatment', function(treatmentType
 end)
 
 
+local inspectionLedger = nil
+local inspectionPen = nil
+
+local inspectionLedger = nil
+local inspectionPen = nil
+
+---------------------------------------------------------------------
+-- X-Ray Light Emission (Salvaged from dodi_bonessystem)
+---------------------------------------------------------------------
+RegisterNetEvent("fdb-medic:client:emitXRayLight")
+AddEventHandler("fdb-medic:client:emitXRayLight", function()
+    local playerPed = PlayerPedId()
+    local pos = GetEntityCoords(playerPed)
+    local object = GetClosestObjectOfType(pos, 10.0, GetHashKey('xray_starter'), false, false, false)
+
+    if object ~= 0 then
+        local objectPos = GetEntityCoords(object)
+        local lightPos = vector3(objectPos.x - 0.8, objectPos.y - 0.2, objectPos.z)
+        Citizen.CreateThread(function()
+            local endTime = GetGameTimer() + 10000
+            while GetGameTimer() < endTime do
+                DrawLightWithRange(lightPos.x, lightPos.y, lightPos.z, 0, 255, 0, 10.0, 100.0)
+                Citizen.Wait(0)
+            end
+        end)
+    end
+end)
+
 ---------------------------------------------------------------------
 -- show inspection panel for medic examination
 ---------------------------------------------------------------------
@@ -1189,6 +1217,37 @@ AddEventHandler('fdb-medic:client:ShowInspectionPanel', function(inspectionData)
     
     -- Show cursor
     SetCursorLocation(0.5, 0.5)
+    
+    -- [SALVAGED FROM dodi_bonessystem] Play clipboard animation
+    local ped = PlayerPedId()
+    local male = IsPedMale(ped)
+    local x, y, z = table.unpack(GetEntityCoords(ped))
+    
+    -- Cleanup previous objects if they somehow exist
+    if inspectionLedger and DoesEntityExist(inspectionLedger) then DeleteObject(inspectionLedger) end
+    if inspectionPen and DoesEntityExist(inspectionPen) then DeleteObject(inspectionPen) end
+
+    inspectionLedger = CreateObject(GetHashKey('P_AMB_CLIPBOARD_01'), x, y, z, true, true, true)
+    inspectionPen = CreateObject(GetHashKey('P_PEN01X'), x, y, z, true, true, true)
+    
+    local lefthand = GetEntityBoneIndexByName(ped, "SKEL_L_Hand")
+    local righthand = GetEntityBoneIndexByName(ped, "SKEL_R_Hand")
+
+    if male then
+        AttachEntityToEntity(inspectionPen, ped, righthand, 0.105, 0.055, -0.13, -5.0, 0.0, 0.0, true, true, false, true, 1, true)
+        AttachEntityToEntity(inspectionLedger, ped, lefthand, 0.17, 0.07, 0.08, 80.0, 160.0, 180.0, true, true, false, true, 1, true)
+    else
+        AttachEntityToEntity(inspectionPen, ped, righthand, 0.095, 0.045, -0.095, -5.0, 0.0, 0.0, true, true, false, true, 1, true)
+        AttachEntityToEntity(inspectionLedger, ped, lefthand, 0.17, 0.07, 0.08, 70.0, 155.0, 185.0, true, true, false, true, 1, true)
+    end
+
+    local animDict = male and "amb_work@world_human_write_notebook@male_a@idle_c" or "amb_work@world_human_write_notebook@female_a@idle_c"
+    RequestAnimDict(animDict)
+    while not HasAnimDictLoaded(animDict) do Wait(10) end
+    TaskPlayAnim(ped, animDict, "idle_h", 8.0, -8, -1, 49, 0, false, false, false)
+    
+    -- [SALVAGED FROM dodi_bonessystem] Trigger XRay light if near machine
+    TriggerEvent("fdb-medic:client:emitXRayLight")
     
     
     -- Merge inspection data with cached config data for performance
@@ -1222,6 +1281,14 @@ RegisterNetEvent('fdb-medic:client:HideInspectionPanel')
 AddEventHandler('fdb-medic:client:HideInspectionPanel', function()
     -- Disable NUI focus
     SetNuiFocus(false, false)
+    
+    -- [SALVAGED FROM dodi_bonessystem] Stop animation and delete props
+    local ped = PlayerPedId()
+    ClearPedTasks(ped)
+    if inspectionLedger and DoesEntityExist(inspectionLedger) then DeleteObject(inspectionLedger) end
+    if inspectionPen and DoesEntityExist(inspectionPen) then DeleteObject(inspectionPen) end
+    inspectionLedger = nil
+    inspectionPen = nil
     
     -- Hide all panels
     SendNUIMessage({
