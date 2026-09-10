@@ -55,3 +55,5 @@ dependencies {
     'oxmysql',
     'ox_lib',
 }
+
+provide 'rsg-core'
