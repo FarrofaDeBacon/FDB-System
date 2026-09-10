@@ -6,7 +6,7 @@
 -- Reads entirely from statebag.
 -- =========================================================
 
-local FDBCore = exports['fdb-core']:GetCoreObject()
+local RSGCore = exports['rsg-core']:GetCoreObject()
 local HealingTimers = {}
 
 local function StartHealing(bodyPart)

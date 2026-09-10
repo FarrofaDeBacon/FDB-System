@@ -1,4 +1,4 @@
-local FDBCore = exports['fdb-core']:GetCoreObject()
+local RSGCore = exports['rsg-core']:GetCoreObject()
 local medicbag = 0
 local deployedtable = nil
 local MedicMenus = {}
@@ -27,7 +27,7 @@ exports['rsg-target']:AddTargetModel(1259819729, {
 })
 
 AddEventHandler('fdb-medic:client:bagstorage', function()
-    local job = FDBCore.Functions.GetPlayerData().job.name
+    local job = RSGCore.Functions.GetPlayerData().job.name
     if not IsMedicJob(job) then return end
     TriggerServerEvent('fdb-medic:server:openbaginv')
 end)
@@ -85,12 +85,12 @@ end)
 CreateThread(function()
     for _, v in ipairs(Config.MedicBagCrafting) do
         local IngredientsMetadata = {}
-        local itemInfo = FDBCore.Shared.Items[tostring(v.receive)]
+        local itemInfo = RSGCore.Shared.Items[tostring(v.receive)]
         if itemInfo then
             local setheader = itemInfo.label
             local itemimg = "nui://"..Config.Image..itemInfo.image
             for i, ingredient in ipairs(v.ingredients) do
-                local ingInfo = FDBCore.Shared.Items[ingredient.item]
+                local ingInfo = RSGCore.Shared.Items[ingredient.item]
                 local ingLabel = ingInfo and ingInfo.label or ingredient.item
                 table.insert(IngredientsMetadata, { label = ingLabel, value = ingredient.amount })
             end
@@ -121,7 +121,7 @@ CreateThread(function()
                 table.insert(MedicMenus[v.category].options, option)
             end
         else
-            print("^1[fdb-medic] Error: Item " .. tostring(v.receive) .. " does not exist in FDBCore.Shared.Items^7")
+            print("^1[fdb-medic] Error: Item " .. tostring(v.receive) .. " does not exist in RSGCore.Shared.Items^7")
         end
     end
 end)
@@ -179,7 +179,7 @@ RegisterNetEvent('fdb-medic:client:medicbagMenu', function()
 end)
 
 RegisterNetEvent('fdb-medic:client:checkingredients', function(data)
-    FDBCore.Functions.TriggerCallback('fdb-medic:server:checkingredients', function(hasRequired)
+    RSGCore.Functions.TriggerCallback('fdb-medic:server:checkingredients', function(hasRequired)
     if (hasRequired) then
         if Config.Debug == true then
             print("passed")
@@ -195,7 +195,7 @@ RegisterNetEvent('fdb-medic:client:checkingredients', function(data)
 end)
 
 RegisterNetEvent('fdb-medic:client:mediccraft', function(data)
-    FDBCore.Functions.TriggerCallback('fdb-medic:server:checkingredients', function(hasRequired)
+    RSGCore.Functions.TriggerCallback('fdb-medic:server:checkingredients', function(hasRequired)
         if hasRequired == true then
             local ped = PlayerPedId()
             TaskStartScenarioInPlace(ped, GetHashKey('WORLD_HUMAN_CROUCH_INSPECT'), data.crafttime, true, false, false, false)
@@ -209,7 +209,7 @@ RegisterNetEvent('fdb-medic:client:mediccraft', function(data)
                     move = true,
                     mouse = true,
                 },
-                label = locale('cl_bag_medicbag_craft_label').. FDBCore.Shared.Items[data.receive].label,
+                label = locale('cl_bag_medicbag_craft_label').. RSGCore.Shared.Items[data.receive].label,
             })
             TriggerServerEvent('fdb-medic:server:finishcrafting', data)
             ClearPedTasks(ped)

@@ -6,7 +6,7 @@
 -- to the server (fdb-medical-core).
 -- =========================================================
 
-local FDBCore = exports['fdb-core']:GetCoreObject()
+local RSGCore = exports['rsg-core']:GetCoreObject()
 local LastDamageTime = 0
 local DAMAGE_COOLDOWN = 1000
 local PlayerHealth = nil
@@ -177,5 +177,5 @@ end
 RegisterNetEvent('fdb-medic:client:adminRevive', ResetBaselineHealth)
 RegisterNetEvent('fdb-medic:client:playerRevive', ResetBaselineHealth)
 RegisterNetEvent('fdb-medic:client:revive', ResetBaselineHealth)
-RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', ResetBaselineHealth)
+RegisterNetEvent('RSGCore:Client:OnPlayerLoaded', ResetBaselineHealth)
 

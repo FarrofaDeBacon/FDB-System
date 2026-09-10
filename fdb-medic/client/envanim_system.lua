@@ -6,7 +6,7 @@
 -- Features: Fall damage, horse accidents, animal attacks, fractures, bone breaks
 --=========================================================
 
-local FDBCore = exports['fdb-core']:GetCoreObject()
+local RSGCore = exports['rsg-core']:GetCoreObject()
 
 -- Environmental tracking variables
 local LastVehicleSpeed = 0

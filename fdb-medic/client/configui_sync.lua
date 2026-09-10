@@ -18,8 +18,8 @@ AddEventHandler('fdb-configui:client:configChanged', function(path, value)
 end)
 
 -- Buscar tema inicial no login/spawn
-RegisterNetEvent('FDBCore:Client:OnPlayerLoaded')
-AddEventHandler('FDBCore:Client:OnPlayerLoaded', function()
+RegisterNetEvent('RSGCore:Client:OnPlayerLoaded')
+AddEventHandler('RSGCore:Client:OnPlayerLoaded', function()
     if GetResourceState('fdb-configui') == 'started' then
         pcall(function()
             lib.callback('fdb-configui:server:getGlobalConfig', false, function(globalConfig)

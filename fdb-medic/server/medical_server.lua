@@ -5,7 +5,7 @@
 -- Connects the new wound/treatment/infection systems with database persistence
 --=========================================================
 
-local FDBCore = exports['fdb-core']:GetCoreObject()
+local RSGCore = exports['rsg-core']:GetCoreObject()
 
 -- Helper function to check if player has any medic job
 local function IsMedicJob(jobName)
@@ -24,8 +24,8 @@ end
 -- Server-side player data cache
 local PlayerMedicalData = {}
 
-FDBCore.Commands.Add('testcache', 'Test cache sync', {}, false, function(source)
-      local Player = FDBCore.Functions.GetPlayer(source)
+RSGCore.Commands.Add('testcache', 'Test cache sync', {}, false, function(source)
+      local Player = RSGCore.Functions.GetPlayer(source)
       print("=== CACHE DATA ===")
       print(json.encode(PlayerMedicalData[source] or {}, {indent = true}))
 end, 'admin')
@@ -33,7 +33,7 @@ end, 'admin')
 -- LOCAL FUNCTIONS
 --=========================================================
 local function InitializePlayerMedicalData(source)
-    local Player = FDBCore.Functions.GetPlayer(source)
+    local Player = RSGCore.Functions.GetPlayer(source)
     if not Player then return end
     
     local citizenid = Player.PlayerData.citizenid
@@ -61,8 +61,8 @@ end
 --=========================================================
 -- PLAYER CONNECTION EVENTS
 --=========================================================
-RegisterNetEvent('FDBCore:Server:PlayerLoaded')
-AddEventHandler('FDBCore:Server:PlayerLoaded', function(Player)
+RegisterNetEvent('RSGCore:Server:PlayerLoaded')
+AddEventHandler('RSGCore:Server:PlayerLoaded', function(Player)
     local source = Player.PlayerData.source
     Wait(2000) -- Wait for player to fully load
     InitializePlayerMedicalData(source)
@@ -102,7 +102,7 @@ AddEventHandler('onResourceStart', function(resourceName)
         injectionTypes = Config.InjectionTypes or {}
     }
     
-    local players = FDBCore.Functions.GetPlayers()
+    local players = RSGCore.Functions.GetPlayers()
     for _, src in ipairs(players) do
         InitializePlayerMedicalData(src)
         TriggerClientEvent('fdb-medic:client:ReceiveConfigs', src, configData)
@@ -110,7 +110,7 @@ AddEventHandler('onResourceStart', function(resourceName)
     print('^2[fdb-medic] Pushed config data and initialized medical data for all online players (Script Restart)^7')
 end)
 
-AddEventHandler('FDBCore:Server:OnPlayerUnload', function(source)
+AddEventHandler('RSGCore:Server:OnPlayerUnload', function(source)
     if PlayerMedicalData[source] then
         -- Save all data before player leaves
         local data = PlayerMedicalData[source]
@@ -201,7 +201,7 @@ end)
 RegisterNetEvent('fdb-medic:server:UpdateBandageData')
 AddEventHandler('fdb-medic:server:UpdateBandageData', function(bandageData)
     local src = source
-    local Player = FDBCore.Functions.GetPlayer(src)
+    local Player = RSGCore.Functions.GetPlayer(src)
     if not Player then return end
     
     if not PlayerMedicalData[src] then
@@ -224,8 +224,8 @@ end)
 RegisterNetEvent('fdb-medic:server:MedicApplyBandage')
 AddEventHandler('fdb-medic:server:MedicApplyBandage', function(targetId, bodyPart, bandageType)
     local src = source
-    local Medic = FDBCore.Functions.GetPlayer(src)
-    local Patient = FDBCore.Functions.GetPlayer(targetId)
+    local Medic = RSGCore.Functions.GetPlayer(src)
+    local Patient = RSGCore.Functions.GetPlayer(targetId)
     
     if not Medic or not Patient then return end
     
@@ -253,7 +253,7 @@ AddEventHandler('fdb-medic:server:MedicApplyBandage', function(targetId, bodyPar
     
     -- Remove item from medic
     if Medic.Functions.RemoveItem(bandageType, 1) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[bandageType], 'remove', 1)
+        TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[bandageType], 'remove', 1)
         
         -- Apply treatment to patient
         TriggerClientEvent('fdb-medic:client:ApplyBandage', Patient.PlayerData.source, bodyPart, bandageType, src)
@@ -287,8 +287,8 @@ end)
 RegisterNetEvent('fdb-medic:server:MedicApplyTourniquet')
 AddEventHandler('fdb-medic:server:MedicApplyTourniquet', function(targetId, bodyPart, tourniquetType)
     local src = source
-    local Medic = FDBCore.Functions.GetPlayer(src)
-    local Patient = FDBCore.Functions.GetPlayer(targetId)
+    local Medic = RSGCore.Functions.GetPlayer(src)
+    local Patient = RSGCore.Functions.GetPlayer(targetId)
     
     if not Medic or not Patient then return end
     
@@ -316,7 +316,7 @@ AddEventHandler('fdb-medic:server:MedicApplyTourniquet', function(targetId, body
     
     -- Remove item from medic
     if Medic.Functions.RemoveItem(tourniquetType, 1) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[tourniquetType], 'remove', 1)
+        TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[tourniquetType], 'remove', 1)
         
         -- Apply emergency treatment to patient
         TriggerClientEvent('fdb-medic:client:ApplyTourniquet', Patient.PlayerData.source, bodyPart, tourniquetType, src)
@@ -350,8 +350,8 @@ end)
 RegisterNetEvent('fdb-medic:server:MedicApplyMedicine')
 AddEventHandler('fdb-medic:server:MedicApplyMedicine', function(targetId, medicineType)
     local src = source
-    local Medic = FDBCore.Functions.GetPlayer(src)
-    local Patient = FDBCore.Functions.GetPlayer(targetId)
+    local Medic = RSGCore.Functions.GetPlayer(src)
+    local Patient = RSGCore.Functions.GetPlayer(targetId)
     
     if not Medic or not Patient then return end
     
@@ -401,7 +401,7 @@ AddEventHandler('fdb-medic:server:MedicApplyMedicine', function(targetId, medici
     
     -- Remove item from medic
     if Medic.Functions.RemoveItem(itemName, 1) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[itemName], 'remove', 1)
+        TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[itemName], 'remove', 1)
         
         -- Apply medicine treatment to patient (mark as treated, don't clear wounds)
         TriggerClientEvent('fdb-medic:client:ApplyMedicine', Patient.PlayerData.source, medicineType, src)
@@ -459,8 +459,8 @@ end)
 RegisterNetEvent('fdb-medic:server:RequestMedicalInspection')
 AddEventHandler('fdb-medic:server:RequestMedicalInspection', function(targetId)
     local src = source
-    local Medic = FDBCore.Functions.GetPlayer(src)
-    local Patient = FDBCore.Functions.GetPlayer(targetId)
+    local Medic = RSGCore.Functions.GetPlayer(src)
+    local Patient = RSGCore.Functions.GetPlayer(targetId)
     
     if not Medic or not Patient then return end
     
@@ -527,16 +527,16 @@ end)
 --=========================================================
 -- MEDICAL HISTORY CALLBACK
 --=========================================================
-FDBCore.Functions.CreateCallback('fdb-medic:server:GetMedicalHistory', function(source, cb, targetId, limit)
+RSGCore.Functions.CreateCallback('fdb-medic:server:GetMedicalHistory', function(source, cb, targetId, limit)
     local src = source
-    local Medic = FDBCore.Functions.GetPlayer(src)
+    local Medic = RSGCore.Functions.GetPlayer(src)
     
     if not Medic or not IsMedicJob(Medic.PlayerData.job.name) then
         cb({})
         return
     end
     
-    local Patient = FDBCore.Functions.GetPlayer(targetId)
+    local Patient = RSGCore.Functions.GetPlayer(targetId)
     if not Patient then
         cb({})
         return
@@ -550,7 +550,7 @@ end)
 --=========================================================
 -- PLAYER WOUND DATA CALLBACK
 --=========================================================
-FDBCore.Functions.CreateCallback('fdb-medic:server:GetPlayerWounds', function(source, cb, targetId)
+RSGCore.Functions.CreateCallback('fdb-medic:server:GetPlayerWounds', function(source, cb, targetId)
     local targetSource = targetId or source
     
     if PlayerMedicalData[targetSource] then
@@ -598,10 +598,10 @@ end)
 --=========================================================
 -- MEDIC INSPECT COMMAND
 --=========================================================
-FDBCore.Commands.Add('inspect', 'Inspect another player\'s medical condition (Medic Only)', {{name = 'id', help = 'Player ID to inspect'}}, true, function(source, args)
+RSGCore.Commands.Add('inspect', 'Inspect another player\'s medical condition (Medic Only)', {{name = 'id', help = 'Player ID to inspect'}}, true, function(source, args)
     local src = source
     print('^3[fdb-medic] DEBUG: /inspect command triggered by player ' .. src .. '^7')
-    local Medic = FDBCore.Functions.GetPlayer(src)
+    local Medic = RSGCore.Functions.GetPlayer(src)
     
     if not Medic then return end
     
@@ -627,7 +627,7 @@ FDBCore.Commands.Add('inspect', 'Inspect another player\'s medical condition (Me
         return
     end
     
-    local Patient = FDBCore.Functions.GetPlayer(targetId)
+    local Patient = RSGCore.Functions.GetPlayer(targetId)
     if not Patient then
         TriggerClientEvent('ox_lib:notify', src, {
             title = locale('sv_player_not_found'),
@@ -753,8 +753,8 @@ end)
 RegisterServerEvent('fdb-medic:server:CheckVitals')
 AddEventHandler('fdb-medic:server:CheckVitals', function(targetPlayerId)
     local src = source
-    local Medic = FDBCore.Functions.GetPlayer(src)
-    local Patient = FDBCore.Functions.GetPlayer(targetPlayerId)
+    local Medic = RSGCore.Functions.GetPlayer(src)
+    local Patient = RSGCore.Functions.GetPlayer(targetPlayerId)
     
     if not Medic or not Patient then
         print('Error: Invalid medic or patient for vitals check')
@@ -771,7 +771,7 @@ end)
 RegisterServerEvent('fdb-medic:server:ReceiveVitalsData')
 AddEventHandler('fdb-medic:server:ReceiveVitalsData', function(medicSource, vitalsData)
     local src = source -- This is the patient who is sending their vitals
-    local Patient = FDBCore.Functions.GetPlayer(src)
+    local Patient = RSGCore.Functions.GetPlayer(src)
     
     if not Patient then
         print('Error: Invalid patient sending vitals data')
@@ -797,7 +797,7 @@ end)
 RegisterServerEvent('fdb-medic:server:UseDoctorBagTool')
 AddEventHandler('fdb-medic:server:UseDoctorBagTool', function(toolAction, targetPlayerId)
     local src = source
-    local Medic = FDBCore.Functions.GetPlayer(src)
+    local Medic = RSGCore.Functions.GetPlayer(src)
 
     if Config.Debug then
         print(string.format("^3[SERVER UseDoctorBagTool] Triggered by src=%s, toolAction=%s, targetPlayerId=%s^7", tostring(src), tostring(toolAction), tostring(targetPlayerId)))
@@ -851,7 +851,7 @@ AddEventHandler('fdb-medic:server:UseDoctorBagTool', function(toolAction, target
         end
 
         -- Successfully removed medicine - continue to medicine administration below
-        local Patient = FDBCore.Functions.GetPlayer(targetPlayerId)
+        local Patient = RSGCore.Functions.GetPlayer(targetPlayerId)
         if not Patient then
             -- Refund medicine if patient not found
             Medic.Functions.AddItem(itemName, 1)
@@ -933,7 +933,7 @@ AddEventHandler('fdb-medic:server:UseDoctorBagTool', function(toolAction, target
     end
 
     -- Successfully removed/has item - perform action
-    local Patient = FDBCore.Functions.GetPlayer(targetPlayerId)
+    local Patient = RSGCore.Functions.GetPlayer(targetPlayerId)
     if not Patient then
         -- Refund consumable if patient not found
         if toolConfig.consumable then
@@ -1040,7 +1040,7 @@ end)
 RegisterServerEvent('fdb-medic:server:RefreshMedicInventory')
 AddEventHandler('fdb-medic:server:RefreshMedicInventory', function()
     local src = source
-    local Medic = FDBCore.Functions.GetPlayer(src)
+    local Medic = RSGCore.Functions.GetPlayer(src)
 
     if not Medic then return end
 
@@ -1091,7 +1091,7 @@ CreateThread(function()
         -- Process wound progression for all online players
         for src, data in pairs(PlayerMedicalData) do
             if data.wounds and next(data.wounds) then
-                local Player = FDBCore.Functions.GetPlayer(src)
+                local Player = RSGCore.Functions.GetPlayer(src)
                 if Player then
                     local woundsChanged = false
                     local currentTime = os.time()
@@ -1212,7 +1212,7 @@ CreateThread(function()
         -- Process natural healing for all online players
         for src, data in pairs(PlayerMedicalData) do
             if data.wounds and next(data.wounds) then
-                local Player = FDBCore.Functions.GetPlayer(src)
+                local Player = RSGCore.Functions.GetPlayer(src)
                 if Player then
                     local woundsChanged = false
                     
@@ -1270,7 +1270,7 @@ end)
 
 RegisterNetEvent('fdb-medic:server:TreatWound', function(treatmentType, bodyPart)
     local src = source
-    local Player = FDBCore.Functions.GetPlayer(src)
+    local Player = RSGCore.Functions.GetPlayer(src)
     if not Player then return end
 
     -- 1. O item PRECISA existir no config de tratamentos. Se não existir, não cura nada.
@@ -1309,7 +1309,7 @@ RegisterNetEvent('fdb-medic:server:FullHeal', function()
     local src = source
     
     -- Check permissions (evita cura grátis sem item)
-    if not FDBCore.Functions.HasPermission(src, 'admin') then
+    if not RSGCore.Functions.HasPermission(src, 'admin') then
         -- Se não for admin, podemos permitir apenas se for chamado pelo script
         -- mas por segurança, logamos e ignoramos para evitar abuse de modders.
         print(("[fdb-medic] Aviso: Jogador %s tentou usar FullHeal sem permissão de admin."):format(src))

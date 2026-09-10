@@ -1,20 +1,20 @@
-local FDBCore = exports['fdb-core']:GetCoreObject()
+local RSGCore = exports['rsg-core']:GetCoreObject()
 
 -- use medicalbag
-FDBCore.Functions.CreateUseableItem("medicalbag", function(source, item)
+RSGCore.Functions.CreateUseableItem("medicalbag", function(source, item)
 	local src = source
-	local Player = FDBCore.Functions.GetPlayer(src)
+	local Player = RSGCore.Functions.GetPlayer(src)
 	TriggerClientEvent('fdb-medic:client:medicbag', src)
 	Player.Functions.RemoveItem('medicalbag', 1)
-	TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items['medicalbag'], "remove", 1)
+	TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items['medicalbag'], "remove", 1)
 end)
 
 RegisterServerEvent('fdb-medic:server:pickuptab')
 AddEventHandler('fdb-medic:server:pickuptab', function()
 	local src = source
-    local Player = FDBCore.Functions.GetPlayer(src)
+    local Player = RSGCore.Functions.GetPlayer(src)
 	Player.Functions.AddItem('medicalbag', 1)
-	TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items['medicalbag'], "add", 1)
+	TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items['medicalbag'], "add", 1)
 end)
 
 RegisterNetEvent('fdb-medic:server:pickup')
@@ -23,11 +23,11 @@ AddEventHandler('fdb-medic:server:pickup', function(entity)
     --might add soon :)
 end)
 
-FDBCore.Functions.CreateCallback('fdb-medic:server:checkingredients', function(source, cb, ingredients)
+RSGCore.Functions.CreateCallback('fdb-medic:server:checkingredients', function(source, cb, ingredients)
     local src = source
     local hasItems = false
     local icheck = 0
-    local Player = FDBCore.Functions.GetPlayer(src)
+    local Player = RSGCore.Functions.GetPlayer(src)
     if not Player then return end
     for k, v in pairs(ingredients) do
         if Player.Functions.GetItemByName(v.item) and Player.Functions.GetItemByName(v.item).amount >= v.amount then
@@ -43,7 +43,7 @@ end)
 
 RegisterServerEvent('fdb-medic:server:finishcrafting', function(data)
     local src = source
-    local Player = FDBCore.Functions.GetPlayer(src)
+    local Player = RSGCore.Functions.GetPlayer(src)
     if not Player then 
         print("[DEBUG] Player not found on finish crafting.") -- Debug
         return 
@@ -54,7 +54,7 @@ RegisterServerEvent('fdb-medic:server:finishcrafting', function(data)
         local removed = Player.Functions.RemoveItem(ingredient.item, ingredient.amount)
         if removed then
             print("[DEBUG] Removed " .. ingredient.amount .. " of " .. ingredient.item)
-            TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[ingredient.item], 'remove', ingredient.amount)
+            TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[ingredient.item], 'remove', ingredient.amount)
         else
             print("[DEBUG] Failed to remove item: " .. ingredient.item .. " - Player may not have enough.")
             return
@@ -63,10 +63,10 @@ RegisterServerEvent('fdb-medic:server:finishcrafting', function(data)
     local added = Player.Functions.AddItem(data.receive, data.giveamount)
     if added then
         print("[DEBUG] Successfully added crafted item: " .. data.receive .. " x" .. data.giveamount)
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[data.receive], 'add', data.giveamount)
+        TriggerClientEvent('rsg-inventory:client:ItemBox', src, RSGCore.Shared.Items[data.receive], 'add', data.giveamount)
     else
         print("[DEBUG] Failed to add crafted item: " .. data.receive)
-        print("[DEBUG] Check if the item exists in FDBCore.Shared.Items or inventory configuration.")
+        print("[DEBUG] Check if the item exists in RSGCore.Shared.Items or inventory configuration.")
     end
 end)
 
@@ -74,7 +74,7 @@ end)
 
 RegisterNetEvent('fdb-medic:server:openbaginv', function(location)
     local src = source
-    local Player = FDBCore.Functions.GetPlayer(src)
+    local Player = RSGCore.Functions.GetPlayer(src)
     if not Player then return end
     local data = { label = 'Medical Bag', maxweight = Config.BagMaxWeight, slots = Config.BagMaxSlots }
     local stashName = 'medic_bag' .. Player.PlayerData.citizenid

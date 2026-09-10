@@ -6,7 +6,7 @@
 -- Reads entirely from statebag.
 -- =========================================================
 
-local FDBCore = exports['fdb-core']:GetCoreObject()
+local RSGCore = exports['rsg-core']:GetCoreObject()
 
 -- Track last known stages to show notifications when it worsens
 local LastKnownStages = {}
