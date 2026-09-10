@@ -27,7 +27,6 @@ files {
 
 dependencies {
     'fdb-core',
-    'fdb-appearance',
     'fdb-wardrobe'
 }
 
