@@ -53,6 +53,15 @@ ConfigMissions.Locations = {
             vector4(-1520.1478, -1050.9637, 92.1485, 275.8520), -- Strawberry peaks
             vector4(-1075.9514, -1200.7531, 73.6985, 145.2074)  -- Strawberry creek
         }
+    },
+    -- Generic Medic Area (fallback for standard 'medic' job)
+    generic = {
+        job = "medic", 
+        locations = {
+            vector4(-168.4427, 640.6234, 114.0321, 318.2941),  -- Valentine outskirts
+            vector4(2851.4729, -1220.5145, 47.5868, 130.9617),  -- Saint Denis docks
+            vector4(-1328.2313, -1292.1934, 77.0241, 322.4265), -- Strawberry hills
+        }
     }
 }
 

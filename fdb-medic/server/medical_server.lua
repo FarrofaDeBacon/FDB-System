@@ -598,9 +598,9 @@ end)
 --=========================================================
 -- MEDIC INSPECT COMMAND
 --=========================================================
-FDBCore.Commands.Add('inspect', 'Inspect another player\'s medical condition (Medic Only)', {{name = 'id', help = 'Player ID to inspect'}}, true, function(source, args)
+FDBCore.Commands.Add('ficha', 'Inspect another player\'s medical condition (Medic Only)', {{name = 'id', help = 'Player ID to inspect'}}, true, function(source, args)
     local src = source
-    print('^3[fdb-medic] DEBUG: /inspect command triggered by player ' .. src .. '^7')
+    print('^3[fdb-medic] DEBUG: /ficha command triggered by player ' .. src .. '^7')
     local Medic = FDBCore.Functions.GetPlayer(src)
     
     if not Medic then return end
