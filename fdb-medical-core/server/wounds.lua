@@ -139,3 +139,14 @@ exports('RegisterWound', RegisterWound)
 exports('GetTotalBleeding', GetTotalBleeding)
 exports('GetWoundTier', GetWoundTier)
 exports('RecalculateVitals', RecalculateVitals)
+
+
+-- TEMP DEBUG COMMAND FOR TESTING HEAL TIME
+RegisterCommand('setgametime', function(source, args)
+    -- Allows execution via rcon or ingame
+    local d = tonumber(args[1]) or 0
+    local h = tonumber(args[2]) or 12
+    exports.weathersync:setTime(d, h, 0, 0, 0, false)
+    print('Game time set to Day ' .. d .. ' Hour ' .. h)
+end, true) -- restricted to admins
+
