@@ -23,7 +23,6 @@ server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'server/server.lua',          -- Core server functionality
     'server/sv_bag.lua',          -- Medical bag server logic
-    'server/versionchecker.lua',  -- Version checking
     'server/medical_server.lua',  -- NEW: Medical inspection system with /inspect command
     'server/configui_sync.lua'    -- fdb-configui sync layer
 }

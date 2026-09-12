@@ -76,6 +76,10 @@ CreateThread(function()
                     [22798] = 'Right Arm', -- Hand
                     [64298] = 'Right Leg', [27814] = 'Right Leg', [65384] = 'Right Leg', [19638] = 'Right Leg',
                     [33646] = 'Right Leg', -- Foot
+                    
+                    -- TODO: FDB-System - Pending test for unknown bones falling back to Torso
+                    [23553] = 'Torso', -- NEEDS TEST: Find out which body part this is in F8
+                    [64729] = 'Torso', -- NEEDS TEST: Find out which body part this is in F8
                 }
                 bodyPart = boneMapping[boneIndex] or 'Torso'
                 
