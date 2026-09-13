@@ -71,12 +71,16 @@ function RegisterWound(src, bodyPart, damageType, amount)
 
     -- Fracture Generation Logic
     if tier and tier.name == 'Severe' and Config.Fractures.CausingTypes[damageType] and Config.Fractures.EligibleParts[bodyPart] then
+        print(string.format('[DEBUG fdb-medical-core] Avaliando fratura: Dano Severo em %s (Tipo: %s)', bodyPart, damageType))
         if math.random(1, 100) <= Config.Fractures.ChancePercent then
             wound.boneDamage = true
             wound.healUntil = nil
+            print(string.format('^1[DEBUG fdb-medical-core] BINGO! Osso quebrado na zona: %s^7', bodyPart))
             if ApplyFracturePenalty then
                 ApplyFracturePenalty(src, bodyPart)
             end
+        else
+            print(string.format('[DEBUG fdb-medical-core] Sorte grande: %s resistiu e nao quebrou (fora dos %s%%).', bodyPart, Config.Fractures.ChancePercent))
         end
     end
 
