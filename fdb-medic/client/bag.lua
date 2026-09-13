@@ -2,7 +2,7 @@ local FDBCore = exports['fdb-core']:GetCoreObject()
 local medicbag = 0
 local deployedtable = nil
 local MedicMenus = {}
-exports['rsg-target']:AddTargetModel(1259819729, {
+exports['fdb-target']:AddTargetModel(1259819729, {
     options = {
         {
             type = "client",
@@ -14,16 +14,17 @@ exports['rsg-target']:AddTargetModel(1259819729, {
     }
 })
 
-exports['rsg-target']:AddTargetModel(1259819729, {
+exports['fdb-target']:AddTargetModel(1259819729, {
     options = {
         {
             icon = 'far fa-gear',
-            label = locale('cl_bag_open'),
-            type = "client",
-            event = 'fdb-medic:client:medicbagMenu',
-        },
-    },
-    distance = 2.0,
+            label = locale('cl_bag_interact'),
+            distance = 3.0,
+            action = function()
+                exports['fdb-medic']:OpenMedicBag()
+            end
+        }
+    }
 })
 
 AddEventHandler('fdb-medic:client:bagstorage', function()
