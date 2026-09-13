@@ -185,7 +185,7 @@ CreateThread(function()
                 
                 weaponHash = weaponHash or GetHashKey("WEAPON_UNARMED")
                 
-                local bodyPart = hit and GetBodyPartFromBone(boneId) or 'Torso'
+                local bodyPart = hit and GetBodyPartFromBone(boneId) or 'TORSO'
                 local damageType = GetWeaponDamageTypeEnum(weaponHash)
                 
                 print(string.format("[fdb-medic] Detected damage: %d on %s (Type: %s)", amount, bodyPart, damageType))
