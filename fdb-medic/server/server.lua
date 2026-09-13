@@ -112,7 +112,7 @@ FDBCore.Commands.Add('revive', locale('sv_revive'), {{name = 'id', help = locale
         local Player = FDBCore.Functions.GetPlayer(src)
         if Player then
             TriggerClientEvent('fdb-medic:client:adminRevive', src)
-            TriggerClientEvent('fdb-medic:client:ClearAllWounds', src)
+            exports['fdb-medical-core']:ClearAllWounds(src)
 
             -- Clear from database
             local citizenid = Player.PlayerData.citizenid
@@ -134,7 +134,7 @@ FDBCore.Commands.Add('revive', locale('sv_revive'), {{name = 'id', help = locale
 
     -- Revive target player and clear all wounds
     TriggerClientEvent('fdb-medic:client:adminRevive', Player.PlayerData.source)
-    TriggerClientEvent('fdb-medic:client:ClearAllWounds', Player.PlayerData.source)
+    exports['fdb-medical-core']:ClearAllWounds(Player.PlayerData.source)
 
     -- Clear from database
     local citizenid = Player.PlayerData.citizenid
@@ -154,7 +154,7 @@ FDBCore.Commands.Add('clearwounds', 'Clear all wounds and fractures from a playe
         -- Clear wounds from self
         local Player = FDBCore.Functions.GetPlayer(src)
         if Player then
-            TriggerClientEvent('fdb-medic:client:ClearAllWounds', src)
+            exports['fdb-medical-core']:ClearAllWounds(src)
             
             -- Clear from database for self (optimized 3-table schema)
             local citizenid = Player.PlayerData.citizenid
@@ -189,7 +189,7 @@ FDBCore.Commands.Add('clearwounds', 'Clear all wounds and fractures from a playe
     end
     
     -- Clear wounds from target player
-    TriggerClientEvent('fdb-medic:client:ClearAllWounds', Player.PlayerData.source)
+    exports['fdb-medical-core']:ClearAllWounds(Player.PlayerData.source)
     
     -- Also clear from database (optimized 3-table schema)
     local citizenid = Player.PlayerData.citizenid
@@ -319,11 +319,12 @@ RegisterNetEvent('fdb-medic:server:medicAlert', function(text)
     local src = source
     local ped = GetPlayerPed(src)
     local coords = GetEntityCoords(ped)
-    local players = FDBCore.Functions.GetRSGPlayers()
+    local players = FDBCore.Functions.GetPlayers()
 
-    for _, v in pairs(players) do
-        if IsMedicJob(v.PlayerData.job.name) and v.PlayerData.job.onduty then
-            TriggerClientEvent('fdb-medic:client:medicAlert', v.PlayerData.source, coords, text)
+    for _, src in ipairs(players) do
+        local v = FDBCore.Functions.GetPlayer(src)
+        if v and IsMedicJob(v.PlayerData.job.name) and v.PlayerData.job.onduty then
+            TriggerClientEvent('fdb-medic:client:medicAlert', src, coords, text)
         end
     end
 end)
@@ -335,14 +336,16 @@ RegisterNetEvent('fdb-medic:server:EmergencyCall', function(coords)
     if not Player then return end
 
     local playerName = Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname
-    local players = FDBCore.Functions.GetRSGPlayers()
+    local players = FDBCore.Functions.GetPlayers()
 
-    for _, v in pairs(players) do
-        if IsMedicJob(v.PlayerData.job.name) and v.PlayerData.job.onduty then
+    for _, src in ipairs(players) do
+        local v = FDBCore.Functions.GetPlayer(src)
+        if v and IsMedicJob(v.PlayerData.job.name) and v.PlayerData.job.onduty then
             -- Fixed: Changed to EmergencyAlert to match client handler
-            TriggerClientEvent('fdb-medic:client:EmergencyAlert', v.PlayerData.source, {
+            TriggerClientEvent('fdb-medic:client:EmergencyAlert', src, {
                 caller = playerName,
-                location = coords
+                street = street,
+                coords = coords
             })
         end
     end
@@ -353,9 +356,10 @@ end)
 -------------------------
 FDBCore.Functions.CreateCallback('fdb-medic:server:getmedics', function(source, cb)
     local amount = 0
-    local players = FDBCore.Functions.GetRSGPlayers()
-    for k, v in pairs(players) do
-        if IsMedicJob(v.PlayerData.job.name) and v.PlayerData.job.onduty then
+    local players = FDBCore.Functions.GetPlayers()
+    for _, src in ipairs(players) do
+        local v = FDBCore.Functions.GetPlayer(src)
+        if v and IsMedicJob(v.PlayerData.job.name) and v.PlayerData.job.onduty then
             amount = amount + 1
         end
     end

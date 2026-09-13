@@ -184,3 +184,17 @@ exports('GetCompleteMedicalProfile', function(citizenid)
         }
     end
 end)
+
+
+--- Limpa todas as feridas em memoria de um jogador
+--- @param source number ID do jogador
+exports('ClearAllWounds', function(source)
+    if GetPlayerVitals and SyncVitalsToStatebag then
+        local vitals = GetPlayerVitals(source)
+        if vitals then
+            vitals.wounds = {}
+            SyncVitalsToStatebag(source)
+        end
+    end
+end)
+

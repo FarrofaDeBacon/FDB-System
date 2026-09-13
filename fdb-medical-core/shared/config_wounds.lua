@@ -57,7 +57,7 @@ Config.Wounds = {
 Config.Fractures = {
     CausingTypes = { ['melee'] = true, ['fall'] = true },
     ChancePercent = 30,
-    EligibleParts = { LARM=true, RARM=true, LLEG=true, RLEG=true, TORSO=true },
+    EligibleParts = { LARM=true, RARM=true, LLEG=true, RLEG=true, TORSO=true, SPINE=true },
     HealDaysGame = {
         LARM={min=20,max=28}, RARM={min=20,max=28},
         LLEG={min=30,max=40}, RLEG={min=30,max=40},

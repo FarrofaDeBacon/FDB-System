@@ -998,7 +998,7 @@ AddEventHandler('fdb-medic:server:UseDoctorBagTool', function(toolAction, target
 
     elseif toolAction == 'emergency_surgery' then
         -- Field surgery kit - heal all wounds
-        TriggerClientEvent('fdb-medic:client:ClearAllWounds', Patient.PlayerData.source)
+        exports['fdb-medical-core']:ClearAllWounds(Patient.PlayerData.source)
 
         TriggerClientEvent('ox_lib:notify', src, {
             title = locale('sv_emergency_surgery'),
