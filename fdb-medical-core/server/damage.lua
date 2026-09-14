@@ -20,7 +20,7 @@ function ProcessDamage(src, damageType, bodyPart, amount, originResource)
 
     local vitals = GetPlayerVitals(src)
     originResource = originResource or GetInvokingResource() or 'unknown'
-    bodyPart = bodyPart or BodyPart.Torso
+    bodyPart = bodyPart or BodyPart.TORSO
 
     -- Log de auditoria server-side (Desativado para não floodar o console)
     -- print(string.format(
