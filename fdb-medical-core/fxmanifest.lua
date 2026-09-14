@@ -43,5 +43,7 @@ exports {
     'TreatWound',
     'GetVitals',
     'HasArmFracture',
-    'HasTorsoFracture'
+    'HasTorsoFracture',
+    'FullHeal',
+    'GetCompleteMedicalProfile'
 }
