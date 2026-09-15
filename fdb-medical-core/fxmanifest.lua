@@ -1,4 +1,4 @@
-﻿-- ============================================================
+-- ============================================================
 -- FDB System | fdb-medical-core | fxmanifest.lua
 -- ============================================================
 
@@ -7,7 +7,7 @@ game 'rdr3'
 rdr3_warning 'I acknowledge that this is a prerelease build of RedM, and I am aware my resources *will* become incompatible once RedM ships.'
 lua54 'yes'
 
-description 'fdb-medical-core â€” Fonte Ãšnica de Verdade FisiolÃ³gica e Dano'
+description 'fdb-medical-core - Single Source of Truth for Physiology and Damage'
 version '1.0.0'
 
 files {
@@ -54,4 +54,3 @@ exports {
     'GetCompleteMedicalProfile',
     'GetBodyPartFromBone'
 }
-

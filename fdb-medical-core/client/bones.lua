@@ -1,6 +1,6 @@
 -- ============================================================
 -- FDB System | fdb-medical-core | client/bones.lua
--- Fonte unica de GetBodyPartFromBone para ecossistema FDB.
+-- Single source of GetBodyPartFromBone for the FDB ecosystem.
 -- ============================================================
 
 local function GetBodyPartFromBone(boneId)

@@ -1,31 +1,31 @@
 -- ============================================================
 -- FDB System | fdb-medical-core | shared/config_bones.lua
--- Tabela de Ossos e Regioes do Corpo
+-- Bones and Body Regions Table
 -- ============================================================
 
 Config = Config or {}
 Config.Bones = {
     [0] = 'NONE',
 
-    -- HEAD (união das duas fontes)
+    -- HEAD (union of both sources)
     [21030] = 'HEAD', [21031] = 'HEAD', [27981] = 'HEAD', [57278] = 'HEAD', [54890] = 'HEAD',
 
-    -- NECK (união das duas fontes)
+    -- NECK (union of both sources)
     [14283] = 'NECK', [24015] = 'NECK', [52596] = 'NECK', [32630] = 'NECK',
     [32631] = 'NECK', [32632] = 'NECK', [14284] = 'NECK', [14285] = 'NECK',
 
-    -- SPINE (inclui pélvis, ver conflito 56200 acima)
+    -- SPINE (includes pelvis, see conflict 56200 above)
     [14410] = 'SPINE', [14411] = 'SPINE', [14412] = 'SPINE', [14413] = 'SPINE',
     [14414] = 'SPINE', [11569] = 'SPINE', [56200] = 'TORSO',
 
-    -- TORSO genérico (não confirmado por nenhuma fonte, fallback)
+    -- Generic TORSO (unconfirmed by any source, fallback)
     [23553] = 'TORSO', [64729] = 'TORSO',
 
-    -- LARM (inclui clavícula esquerda, ver conflito 30226 acima)
+    -- LARM (includes left clavicle, see conflict 30226 above)
     [37873] = 'LARM', [53675] = 'LARM', [30226] = 'LARM',
     [43700] = 'LARM', [24238] = 'LARM', [55540] = 'LARM', [53562] = 'LARM',
 
-    -- LHAND (mão + dedos, união das duas fontes)
+    -- LHAND (hand + fingers, union of both sources)
     [34606] = 'LHAND',
 
     -- LFINGER
@@ -38,7 +38,7 @@ Config.Bones = {
     [35908] = 'LFINGER', [35892] = 'LFINGER', [35876] = 'LFINGER', [55214] = 'LFINGER',
     [55198] = 'LFINGER', [55246] = 'LFINGER', [55230] = 'LFINGER',
 
-    -- LLEG (união das duas fontes — a segunda tinha bem mais IDs)
+    -- LLEG (union of both sources - the second had many more IDs)
     [65478] = 'LLEG', [55120] = 'LLEG', [40091] = 'LLEG', [52390] = 'LLEG',
     [65480] = 'LLEG', [21174] = 'LLEG', [49844] = 'LLEG', [38229] = 'LLEG',
     [51618] = 'LLEG', [17816] = 'LLEG', [21124] = 'LLEG', [12785] = 'LLEG',
@@ -53,7 +53,7 @@ Config.Bones = {
     [46065] = 'RARM', [54187] = 'RARM', [54802] = 'RARM',
     [46260] = 'RARM', [65198] = 'RARM', [31186] = 'RARM',
 
-    -- RHAND (mão + dedos)
+    -- RHAND (hand + fingers)
     [22798] = 'RHAND',
 
     -- RFINGER
