@@ -14,10 +14,12 @@ shared_scripts {
     '@ox_lib/init.lua',
     'shared/enums.lua',
     'shared/config.lua',
+    'shared/config_bones.lua',
     'shared/config_wounds.lua'
 }
 
 client_scripts {
+    'client/bones.lua',
     'client/sync.lua',
     'client/fracture_effects.lua'
 }
@@ -45,5 +47,6 @@ exports {
     'HasArmFracture',
     'HasTorsoFracture',
     'FullHeal',
-    'GetCompleteMedicalProfile'
+    'GetCompleteMedicalProfile',
+    'GetBodyPartFromBone'
 }
