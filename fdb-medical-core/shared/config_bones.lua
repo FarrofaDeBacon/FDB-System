@@ -1,4 +1,9 @@
-﻿Config = Config or {}
+-- ============================================================
+-- FDB System | fdb-medical-core | shared/config_bones.lua
+-- Tabela de Ossos e Regioes do Corpo
+-- ============================================================
+
+Config = Config or {}
 Config.Bones = {
     [0] = 'NONE',
 
