@@ -79,6 +79,15 @@ CreateThread(function()
                     else
                         Citizen.InvokeNative(0x89F5E7ADECCCB49C, ped, 'injured_general')
                     end
+
+                    -- Reverte para o andar normal depois de 25s (sem isso o ped fica mancando pra sempre)
+                    Citizen.SetTimeout(25000, function()
+                        local currentPed = PlayerPedId()
+                        if DoesEntityExist(currentPed) and not IsEntityDead(currentPed) then
+                            Citizen.InvokeNative(0x923583741DC87BCE, currentPed, 'arthur_healthy')
+                            Citizen.InvokeNative(0xAA74EC0CB0AAEA2C, currentPed, 'default')
+                        end
+                    end)
                 end
             end
             

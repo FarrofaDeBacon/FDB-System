@@ -56,5 +56,6 @@ exports {
     'HasTorsoFracture',
     'FullHeal',
     'GetCompleteMedicalProfile',
-    'GetBodyPartFromBone'
+    'GetBodyPartFromBone',
+    'ClearAllWounds'
 }
