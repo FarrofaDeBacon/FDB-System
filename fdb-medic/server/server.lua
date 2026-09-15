@@ -113,6 +113,7 @@ FDBCore.Commands.Add('revive', locale('sv_revive'), {{name = 'id', help = locale
         if Player then
             TriggerClientEvent('fdb-medic:client:adminRevive', src)
             exports['fdb-medical-core']:ClearAllWounds(src)
+            exports['fdb-medical-core']:FullHeal(src)
 
             -- Clear from database
             local citizenid = Player.PlayerData.citizenid
@@ -135,6 +136,7 @@ FDBCore.Commands.Add('revive', locale('sv_revive'), {{name = 'id', help = locale
     -- Revive target player and clear all wounds
     TriggerClientEvent('fdb-medic:client:adminRevive', Player.PlayerData.source)
     exports['fdb-medical-core']:ClearAllWounds(Player.PlayerData.source)
+    exports['fdb-medical-core']:FullHeal(Player.PlayerData.source)
 
     -- Clear from database
     local citizenid = Player.PlayerData.citizenid
@@ -155,6 +157,7 @@ FDBCore.Commands.Add('clearwounds', 'Clear all wounds and fractures from a playe
         local Player = FDBCore.Functions.GetPlayer(src)
         if Player then
             exports['fdb-medical-core']:ClearAllWounds(src)
+            exports['fdb-medical-core']:FullHeal(src)
             
             -- Clear from database for self (optimized 3-table schema)
             local citizenid = Player.PlayerData.citizenid
@@ -190,6 +193,7 @@ FDBCore.Commands.Add('clearwounds', 'Clear all wounds and fractures from a playe
     
     -- Clear wounds from target player
     exports['fdb-medical-core']:ClearAllWounds(Player.PlayerData.source)
+    exports['fdb-medical-core']:FullHeal(Player.PlayerData.source)
     
     -- Also clear from database (optimized 3-table schema)
     local citizenid = Player.PlayerData.citizenid
