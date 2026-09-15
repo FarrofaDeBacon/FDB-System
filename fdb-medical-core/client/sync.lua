@@ -60,39 +60,21 @@ CreateThread(function()
                 damageType = 'Fall'
             end
             
-            local bodyPart = 'Torso'
+            local bodyPart = BodyPart.TORSO
             local boneHit, boneIndex = GetPedLastDamageBone(ped)
             if boneHit then
-                -- Salvaged mappings
-                local boneMapping = {
-                    [27981] = 'Head', [57278] = 'Head', [54890] = 'Head', [21030] = 'Head',
-                    [24015] = 'Torso', [52596] = 'Torso', [32630] = 'Torso', [14283] = 'Torso',
-                    [14410] = 'Torso', [14411] = 'Torso', [30226] = 'Torso', [56200] = 'Torso',
-                    [43700] = 'Left Arm', [24238] = 'Left Arm', [55540] = 'Left Arm', [53675] = 'Left Arm',
-                    [34606] = 'Left Arm', -- Hand mapped to arm for simplicity
-                    [40091] = 'Left Leg', [52390] = 'Left Leg', [65480] = 'Left Leg', [21174] = 'Left Leg',
-                    [45454] = 'Left Leg', -- Foot
-                    [54187] = 'Right Arm', [46065] = 'Right Arm', [46260] = 'Right Arm', [65198] = 'Right Arm',
-                    [22798] = 'Right Arm', -- Hand
-                    [64298] = 'Right Leg', [27814] = 'Right Leg', [65384] = 'Right Leg', [19638] = 'Right Leg',
-                    [33646] = 'Right Leg', -- Foot
-                    
-                    -- TODO: FDB-System - Pending test for unknown bones falling back to Torso
-                    [23553] = 'Torso', -- NEEDS TEST: Find out which body part this is in F8
-                    [64729] = 'Torso', -- NEEDS TEST: Find out which body part this is in F8
-                }
-                bodyPart = boneMapping[boneIndex] or 'Torso'
-                
+                bodyPart = exports['fdb-medical-core']:GetBodyPartFromBone(boneIndex)
+
                 -- If damage is severe, apply walkstyle
                 if damageDelta >= 20 then
                     Citizen.InvokeNative(0x923583741DC87BCE, ped, 'default') -- Clipset
-                    if bodyPart == 'Right Leg' then
+                    if bodyPart == BodyPart.RLEG then
                         Citizen.InvokeNative(0x89F5E7ADECCCB49C, ped, 'injured_right_leg')
-                    elseif bodyPart == 'Left Leg' then
+                    elseif bodyPart == BodyPart.LLEG then
                         Citizen.InvokeNative(0x89F5E7ADECCCB49C, ped, 'injured_left_leg')
-                    elseif bodyPart == 'Right Arm' then
+                    elseif bodyPart == BodyPart.RARM then
                         Citizen.InvokeNative(0x89F5E7ADECCCB49C, ped, 'injured_right_arm')
-                    elseif bodyPart == 'Left Arm' then
+                    elseif bodyPart == BodyPart.LARM then
                         Citizen.InvokeNative(0x89F5E7ADECCCB49C, ped, 'injured_left_arm')
                     else
                         Citizen.InvokeNative(0x89F5E7ADECCCB49C, ped, 'injured_general')

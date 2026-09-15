@@ -99,11 +99,7 @@ Config.Bones = {
 }
 
 local function GetBodyPartFromBone(boneId)
-    -- DEBUG TEMPORARIO PRA IDENTIFICAR 23553 E 64729
-    if boneId == 23553 or boneId == 64729 then
-        print("HIT BONE NO DEBUG: ", boneId)
-    end
-    return Config.Bones[boneId] or 'TORSO'
+    return exports['fdb-medical-core']:GetBodyPartFromBone(boneId)
 end
 
 local function GetWeaponDamageTypeEnum(weaponHash)
