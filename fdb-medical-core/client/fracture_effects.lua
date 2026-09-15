@@ -1,7 +1,11 @@
+﻿-- ============================================================
+-- FDB System | fdb-medical-core | client/fracture_effects.lua
+-- ============================================================
+
 -- fracture_effects.lua (fdb-medical-core, client-side)
--- Gerencia os efeitos visuais/mecânicos de fraturas no jogador.
--- Expõe exports para que outros resources (fdb-survival, fdb-weapons) possam
--- consultar o estado de fratura sem depender de variáveis globais compartilhadas.
+-- Gerencia os efeitos visuais/mecÃ¢nicos de fraturas no jogador.
+-- ExpÃµe exports para que outros resources (fdb-survival, fdb-weapons) possam
+-- consultar o estado de fratura sem depender de variÃ¡veis globais compartilhadas.
 
 local HasArmFracture = false
 local HasTorsoFracture = false
@@ -22,9 +26,9 @@ end)
 -- EVENTOS (escutam tanto TriggerEvent local quanto TriggerClientEvent)
 -- ============================================================
 
--- Padrão antigo: RegisterNetEvent (declara) + AddEventHandler (registra)
+-- PadrÃ£o antigo: RegisterNetEvent (declara) + AddEventHandler (registra)
 -- Garante que funciona com TriggerEvent local (entre resources no mesmo client)
--- E também com TriggerClientEvent vindo do servidor.
+-- E tambÃ©m com TriggerClientEvent vindo do servidor.
 
 RegisterNetEvent('fdb-medical-core:client:SetStaminaPenalty')
 AddEventHandler('fdb-medical-core:client:SetStaminaPenalty', function(active)
@@ -47,9 +51,9 @@ AddEventHandler('fdb-medical-core:client:SetSwayIntensity', function(val)
 end)
 
 -- ============================================================
--- SWAY DE MIRA (braço fraturado)
--- Aplica offset sinusoidal suave no heading/pitch da câmera
--- enquanto o jogador está mirando. Não é shake — é "escorregamento".
+-- SWAY DE MIRA (braÃ§o fraturado)
+-- Aplica offset sinusoidal suave no heading/pitch da cÃ¢mera
+-- enquanto o jogador estÃ¡ mirando. NÃ£o Ã© shake â€” Ã© "escorregamento".
 -- ============================================================
 CreateThread(function()
     local timer = 0.0
@@ -83,7 +87,7 @@ CreateThread(function()
 end)
 
 -- ============================================================
--- RESET DE SEGURANÇA
+-- RESET DE SEGURANÃ‡A
 -- ============================================================
 AddEventHandler('onResourceStop', function(resourceName)
     if resourceName == GetCurrentResourceName() then
@@ -91,3 +95,4 @@ AddEventHandler('onResourceStop', function(resourceName)
         HasTorsoFracture = false
     end
 end)
+

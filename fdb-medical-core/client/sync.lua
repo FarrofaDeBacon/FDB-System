@@ -1,3 +1,7 @@
+﻿-- ============================================================
+-- FDB System | fdb-medical-core | client/sync.lua
+-- ============================================================
+
 -- ============================================================
 -- fdb-medical | client/sync.lua
 -- Listener de Statebags para sincronizar vitais no client
@@ -5,7 +9,7 @@
 
 local FDBCore = exports['fdb-core']:GetCoreObject()
 
--- Handler para ouvir atualizações de vitais na Statebag do ped do jogador
+-- Handler para ouvir atualizaÃ§Ãµes de vitais na Statebag do ped do jogador
 AddStateBagChangeHandler('medical', nil, function(bagName, key, value, _unused, replicated)
     if not value then return end
 
@@ -30,7 +34,7 @@ RegisterNetEvent('fdb-medical-core:client:setHealth', function(newHp)
 end)
 
 -- ============================================================
--- Monitoramento Híbrido de Vida (RedM Nível Cliente)
+-- Monitoramento HÃ­brido de Vida (RedM NÃ­vel Cliente)
 -- ============================================================
 CreateThread(function()
     local ped = PlayerPedId()
@@ -39,7 +43,7 @@ CreateThread(function()
     while true do
         Wait(500)
         
-        -- Garante ped atualizado (após morte/respawn)
+        -- Garante ped atualizado (apÃ³s morte/respawn)
         local currentPed = PlayerPedId()
         if currentPed ~= ped then
             ped = currentPed
@@ -48,11 +52,11 @@ CreateThread(function()
         
         local currentHealth = GetEntityHealth(ped)
         
-        -- Queda de vida detectada nativamente! (Dano ambiental/físico não reportado pelo server)
+        -- Queda de vida detectada nativamente! (Dano ambiental/fÃ­sico nÃ£o reportado pelo server)
         if currentHealth < lastHealth then
             local damageDelta = lastHealth - currentHealth
             
-            -- Detecta a causa mais provável
+            -- Detecta a causa mais provÃ¡vel
             local damageType = 'Generic'
             if IsEntityOnFire(ped) then
                 damageType = 'Burn'
@@ -103,11 +107,12 @@ CreateThread(function()
             -- Reporta pro servidor processar e oficializar na Statebag
             TriggerServerEvent('fdb-medical-core:server:ReportDamage', bodyPart, damageType, damageDelta)
             
-            -- Atualiza referência local imediatamente para evitar reports duplicados
+            -- Atualiza referÃªncia local imediatamente para evitar reports duplicados
             lastHealth = currentHealth
         elseif currentHealth > lastHealth then
-            -- O servidor/jogo curou o player nativamente, atualizamos a âncora
+            -- O servidor/jogo curou o player nativamente, atualizamos a Ã¢ncora
             lastHealth = currentHealth
         end
     end
 end)
+

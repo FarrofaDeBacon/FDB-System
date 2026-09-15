@@ -1,13 +1,17 @@
+﻿-- ============================================================
+-- FDB System | fdb-medical-core | shared/config.lua
+-- ============================================================
+
 -- ============================================================
 -- fdb-medical | shared/config.lua
--- Thresholds e taxas de decaimento fisiológico
+-- Thresholds e taxas de decaimento fisiolÃ³gico
 -- ============================================================
 
 Config = {}
 lib.locale()
 
 Config.Vitals = {
-    MaxHealth = 600,            -- Saúde máxima base no RedM
+    MaxHealth = 600,            -- SaÃºde mÃ¡xima base no RedM
     MinHealth = 0,
     DefaultPulse = 70,         -- BPM normal
     MaxPulse = 180,
@@ -18,8 +22,8 @@ Config.Vitals = {
 }
 
 Config.Thresholds = {
-    PainFaint = 85,            -- Nível de dor que causa desmaio
-    BleedingFatal = 75,        -- Sangramento crítico
+    PainFaint = 85,            -- NÃ­vel de dor que causa desmaio
+    BleedingFatal = 75,        -- Sangramento crÃ­tico
     PulseCritical = 40         -- Pulso perigosamente baixo
 }
 
@@ -28,3 +32,4 @@ Config.Decay = {
     PainDecayInterval = 10000,   -- ms para decaimento natural de dor
     PainDecayAmount = 2
 }
+

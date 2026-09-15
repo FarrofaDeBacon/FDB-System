@@ -1,15 +1,19 @@
+﻿-- ============================================================
+-- FDB System | fdb-medical-core | server/database.lua
+-- ============================================================
+
 -- ============================================================
 -- fdb-medical-core | server/database.lua
--- Integração de Banco de Dados Oficial e Persistência
+-- IntegraÃ§Ã£o de Banco de Dados Oficial e PersistÃªncia
 -- ============================================================
 
 local FDBCore = exports["fdb-core"]:GetCoreObject()
 
 -- ============================================================
--- INICIALIZAÇÃO E MIGRAÇÃO DO SCHEMA
+-- INICIALIZAÃ‡ÃƒO E MIGRAÃ‡ÃƒO DO SCHEMA
 -- ============================================================
 CreateThread(function()
-    Wait(1000) -- Aguarda conexão ao banco
+    Wait(1000) -- Aguarda conexÃ£o ao banco
 
     -- Inicializa tabela de feridas purificada com a escala 0-100 do motor
     MySQL.Async.execute([[
@@ -32,7 +36,7 @@ CreateThread(function()
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ]])
     
-    -- Tabela de histórico de eventos médicos
+    -- Tabela de histÃ³rico de eventos mÃ©dicos
     MySQL.Async.execute([[
         CREATE TABLE IF NOT EXISTS medical_history_core (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -50,10 +54,10 @@ CreateThread(function()
 end)
 
 -- ============================================================
--- FUNÇÕES DE PERSISTÊNCIA
+-- FUNÃ‡Ã•ES DE PERSISTÃŠNCIA
 -- ============================================================
 
---- Loga um evento no histórico médico do jogador
+--- Loga um evento no histÃ³rico mÃ©dico do jogador
 function LogMedicalEvent(citizenid, eventType, bodyPart, details, performedBy)
     if not citizenid or not eventType then return false end
     
@@ -173,3 +177,4 @@ function GetPlayerScars(citizenid)
     
     return scars
 end
+

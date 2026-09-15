@@ -1,11 +1,15 @@
+﻿-- ============================================================
+-- FDB System | fdb-medical-core | server/damage.lua
+-- ============================================================
+
 -- ============================================================
 -- fdb-medical | server/damage.lua
--- ÚNICO ponto de escrita para dano e saúde no servidor
+-- ÃšNICO ponto de escrita para dano e saÃºde no servidor
 -- ============================================================
 
 local FDBCore = exports["fdb-core"]:GetCoreObject()
 
---- Aplica dano ou alteração de vida server-side no ped de um jogador
+--- Aplica dano ou alteraÃ§Ã£o de vida server-side no ped de um jogador
 --- @param src number ID do jogador
 --- @param damageType string Tipo de dano (DamageType enum)
 --- @param bodyPart string|nil Parte do corpo atingida (BodyPart enum)
@@ -22,34 +26,34 @@ function ProcessDamage(src, damageType, bodyPart, amount, originResource)
     originResource = originResource or GetInvokingResource() or 'unknown'
     bodyPart = bodyPart or BodyPart.TORSO
 
-    -- Log de auditoria server-side (Desativado para não floodar o console)
+    -- Log de auditoria server-side (Desativado para nÃ£o floodar o console)
     -- print(string.format(
     --     locale('log_damage_applied'),
     --     tostring(src), tostring(originResource), tostring(damageType), tostring(bodyPart), tostring(amount)
     -- ))
 
-    -- Ajuste de Saúde
-    -- Usa vitals.health como base para não duplicar o dano (já que currentHp já pode estar menor pelo motor do jogo)
+    -- Ajuste de SaÃºde
+    -- Usa vitals.health como base para nÃ£o duplicar o dano (jÃ¡ que currentHp jÃ¡ pode estar menor pelo motor do jogo)
     local maxHp = Config.Vitals.MaxHealth or 600
     local newHp = math.max(0, math.min(maxHp, math.floor(vitals.health - amount)))
 
-    -- Aplica nativamente via Server (Único local do projeto!)
+    -- Aplica nativamente via Server (Ãšnico local do projeto!)
     TriggerClientEvent('fdb-medical-core:client:setHealth', src, newHp)
 
-    -- Atualiza os vitais fisiológicos
+    -- Atualiza os vitais fisiolÃ³gicos
     vitals.health = newHp
     if amount > 0 then
-        -- Dano aumenta pulso diretamente (pulso não é puramente dependente de wound)
+        -- Dano aumenta pulso diretamente (pulso nÃ£o Ã© puramente dependente de wound)
         vitals.pulse = math.min(Config.Vitals.MaxPulse, vitals.pulse + math.floor(amount * 0.3))
         
         if damageType == DamageType.Gunshot or damageType == DamageType.Melee or damageType == DamageType.Animal then
             RegisterWound(src, bodyPart, damageType, amount)
-            -- RegisterWound já chama RecalculateVitals() internamente
+            -- RegisterWound jÃ¡ chama RecalculateVitals() internamente
         else
-            -- Para danos genéricos (queimadura, queda leve), apenas atualizamos agregados
-            -- Se precisarmos de dor base não-relacionada a wounds no futuro, 
+            -- Para danos genÃ©ricos (queimadura, queda leve), apenas atualizamos agregados
+            -- Se precisarmos de dor base nÃ£o-relacionada a wounds no futuro, 
             -- implementaremos vitals.basePain. Por enquanto, a fonte de verdade
-            -- de pain/bleeding é sempre RecalculateVitals via wounds.
+            -- de pain/bleeding Ã© sempre RecalculateVitals via wounds.
             RecalculateVitals(src)
         end
     else
@@ -61,8 +65,8 @@ end
 
 --- Aplica um tratamento a um ferimento do jogador
 --- @param src number ID do jogador
---- @param woundId string|nil ID ou tipo do ferimento (na prática, o bodyPart)
---- @param treatmentType string Tipo do tratamento (bandagem, antídoto, cirurgia)
+--- @param woundId string|nil ID ou tipo do ferimento (na prÃ¡tica, o bodyPart)
+--- @param treatmentType string Tipo do tratamento (bandagem, antÃ­doto, cirurgia)
 --- @param itemUsed string Nome do item usado
 function ProcessTreatment(src, woundId, treatmentType, itemUsed)
     local vitals = GetPlayerVitals(src)
@@ -98,3 +102,4 @@ function ProcessTreatment(src, woundId, treatmentType, itemUsed)
     RecalculateVitals(src)
     SyncVitalsToStatebag(src)
 end
+

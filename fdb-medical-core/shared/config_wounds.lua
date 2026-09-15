@@ -1,6 +1,10 @@
+﻿-- ============================================================
+-- FDB System | fdb-medical-core | shared/config_wounds.lua
+-- ============================================================
+
 -- ============================================================
 -- fdb-medical-core | shared/config_wounds.lua
--- Configurações padrão de severidade, sangramento, infecção e tratamentos
+-- ConfiguraÃ§Ãµes padrÃ£o de severidade, sangramento, infecÃ§Ã£o e tratamentos
 -- ============================================================
 
 Config = Config or {}
@@ -14,7 +18,7 @@ Config.Wounds = {
     },
     RequiresMedicSeverity = 3,
 
-    -- Quais DamageType geram/agravam ferimento físico rastreado
+    -- Quais DamageType geram/agravam ferimento fÃ­sico rastreado
     WoundCausingTypes = {
         [DamageType.Gunshot] = true,
         [DamageType.Melee]   = true,
@@ -66,3 +70,4 @@ Config.Fractures = {
     Treatment = { items = {'splint'}, requiresMedic = true },
     MoveRatePenalty = { LLEG=0.5, RLEG=0.5 },
 }
+

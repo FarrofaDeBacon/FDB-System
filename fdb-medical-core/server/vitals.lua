@@ -1,3 +1,7 @@
+﻿-- ============================================================
+-- FDB System | fdb-medical-core | server/vitals.lua
+-- ============================================================
+
 -- ============================================================
 -- fdb-medical | server/vitals.lua
 -- Tabela de estado de vitais server-authoritative por jogador
@@ -7,7 +11,7 @@ local FDBCore = exports["fdb-core"]:GetCoreObject()
 
 PlayerVitals = {}
 
---- Retorna a tabela de vitais de um jogador (ou inicializa se não existir)
+--- Retorna a tabela de vitais de um jogador (ou inicializa se nÃ£o existir)
 --- @param src number Player ID
 --- @return table
 function GetPlayerVitals(src)
@@ -79,7 +83,7 @@ RegisterNetEvent('FDBCore:Server:PlayerLoaded', function(Player)
     local src = Player.PlayerData.source
     local citizenid = Player.PlayerData.citizenid
     
-    -- Garante a inicialização da tabela segura
+    -- Garante a inicializaÃ§Ã£o da tabela segura
     local vitals = GetPlayerVitals(src)
     
     -- Puxar a vida (health) e vitais persistidos do banco de dados (salvos na metadata)
@@ -110,7 +114,7 @@ RegisterNetEvent('FDBCore:Server:PlayerDropped', function(Player)
     SavePlayerVitalsToDB(src, Player)
 end)
 
---- Limpeza ao desconectar (Nativo - Gatilho Infalível)
+--- Limpeza ao desconectar (Nativo - Gatilho InfalÃ­vel)
 AddEventHandler('playerDropped', function()
     local src = source
     local Player = FDBCore.Functions.GetPlayer(src)
@@ -119,3 +123,4 @@ AddEventHandler('playerDropped', function()
     end
     PlayerVitals[src] = nil
 end)
+

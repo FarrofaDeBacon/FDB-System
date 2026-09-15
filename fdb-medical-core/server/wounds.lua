@@ -1,3 +1,7 @@
+﻿-- ============================================================
+-- FDB System | fdb-medical-core | server/wounds.lua
+-- ============================================================
+
 -- ============================================================
 -- fdb-medical-core | server/wounds.lua
 -- Rastreamento de ferimentos por parte do corpo
@@ -20,16 +24,16 @@ local function RollBallisticsFlavor(damageType)
     
     local roll = math.random(1, 100)
     if roll <= 40 then
-        return { result = 'through', bleedModifier = 1.0, text = 'Ferimento perfurante — a bala atravessou' }
+        return { result = 'through', bleedModifier = 1.0, text = 'Ferimento perfurante â€” a bala atravessou' }
     elseif roll <= 75 then
-        return { result = 'stuck', bleedModifier = 0.6, text = 'Bala alojada — o projétil ficou preso' }
+        return { result = 'stuck', bleedModifier = 0.6, text = 'Bala alojada â€” o projÃ©til ficou preso' }
     else
-        return { result = 'fragmented', bleedModifier = 1.3, text = 'Ferimento fragmentado — estilhaços' }
+        return { result = 'fragmented', bleedModifier = 1.3, text = 'Ferimento fragmentado â€” estilhaÃ§os' }
     end
 end
 
---- Aplica dano físico a uma parte do corpo específica, atualizando severity/bleeding
---- Chamado pelo damage.lua DEPOIS de já ter processado a saúde — nunca escreve vida.
+--- Aplica dano fÃ­sico a uma parte do corpo especÃ­fica, atualizando severity/bleeding
+--- Chamado pelo damage.lua DEPOIS de jÃ¡ ter processado a saÃºde â€” nunca escreve vida.
 --- @param src number
 --- @param bodyPart string Enum BodyPart
 --- @param damageType string Enum DamageType
@@ -46,7 +50,7 @@ function RegisterWound(src, bodyPart, damageType, amount)
 
     -- Acumula severidade (0-100), golpes repetidos na mesma parte agravam o ferimento
     wound.severity = math.max(0, math.min(100, wound.severity + amount))
-    wound.treated = false -- novo golpe reabre um ferimento que já tinha sido tratado
+    wound.treated = false -- novo golpe reabre um ferimento que jÃ¡ tinha sido tratado
 
     local tier = GetSeverityTier(wound.severity)
     local baseBleeding = tier and tier.bleeding or 0
@@ -61,7 +65,7 @@ function RegisterWound(src, bodyPart, damageType, amount)
         wound.bleeding = baseBleeding
         wound.bulletResult = nil
         if damageType == 'animal' then
-            wound.text = 'Mordida/Arranhão'
+            wound.text = 'Mordida/ArranhÃ£o'
         elseif damageType == 'melee' then
             wound.text = 'Corte/Trauma Contuso'
         else
@@ -99,7 +103,7 @@ function RegisterWound(src, bodyPart, damageType, amount)
 end
 
 --- Retorna a soma do bleeding de todos os ferimentos ativos do jogador
---- Usado pelo bleedout.lua e pela fórmula de pulso
+--- Usado pelo bleedout.lua e pela fÃ³rmula de pulso
 function GetTotalBleeding(src)
     local vitals = GetPlayerVitals(src)
     local total = 0
@@ -131,7 +135,7 @@ function RecalculateVitals(src)
     vitals.pain = math.min(100, math.floor(totalPain))
 end
 
---- Retorna a tabela de tier (name, requiresMedic, etc) de um wound específico
+--- Retorna a tabela de tier (name, requiresMedic, etc) de um wound especÃ­fico
 function GetWoundTier(src, bodyPart)
     local vitals = GetPlayerVitals(src)
     local wound = vitals.wounds and vitals.wounds[bodyPart]
@@ -153,4 +157,5 @@ RegisterCommand('setgametime', function(source, args)
     exports.weathersync:setTime(d, h, 0, 0, 0, false)
     print('Game time set to Day ' .. d .. ' Hour ' .. h)
 end, true) -- restricted to admins
+
 

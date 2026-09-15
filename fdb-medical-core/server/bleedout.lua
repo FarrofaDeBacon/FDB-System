@@ -1,3 +1,7 @@
+﻿-- ============================================================
+-- FDB System | fdb-medical-core | server/bleedout.lua
+-- ============================================================
+
 -- ============================================================
 -- fdb-medical-core | server/bleedout.lua
 -- Loop de dreno por sangramento server-owned
@@ -16,3 +20,4 @@ CreateThread(function()
         end
     end
 end)
+

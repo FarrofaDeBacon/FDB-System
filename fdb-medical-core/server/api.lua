@@ -1,13 +1,17 @@
+﻿-- ============================================================
+-- FDB System | fdb-medical-core | server/api.lua
+-- ============================================================
+
 -- ============================================================
 -- fdb-medical | server/api.lua
--- Exports públicas para consumo por outros recursos
+-- Exports pÃºblicas para consumo por outros recursos
 -- ============================================================
 local FDBCore = exports['fdb-core']:GetCoreObject()
 
---- Único ponto de entrada para QUALQUER dano no servidor.
+--- Ãšnico ponto de entrada para QUALQUER dano no servidor.
 --- @param source number ID do jogador que recebeu o dano
 --- @param damageType string Enum DamageType (Gunshot, Melee, Fall, Poison, Illness, Cold, Heat...)
---- @param bodyPart string|nil Enum BodyPart (Head, Torso, Arms, Legs) ou nil para sistêmico
+--- @param bodyPart string|nil Enum BodyPart (Head, Torso, Arms, Legs) ou nil para sistÃªmico
 --- @param amount number Intensidade do dano (positivo = dano, negativo = cura)
 exports('ApplyDamage', function(source, damageType, bodyPart, amount)
     local caller = GetInvokingResource() or 'unknown'
@@ -18,20 +22,20 @@ end)
 --- @param source number ID do jogador
 --- @param woundId string|nil ID do ferimento
 --- @param treatmentType string Tipo de tratamento ('bandage', 'antidote', 'medicine')
---- @param itemUsed string|nil Nome do item consumível
+--- @param itemUsed string|nil Nome do item consumÃ­vel
 exports('TreatWound', function(source, woundId, treatmentType, itemUsed)
     ProcessTreatment(source, woundId, treatmentType, itemUsed)
 end)
 
---- Consulta somente-leitura dos vitais fisiológicos atuais do jogador
+--- Consulta somente-leitura dos vitais fisiolÃ³gicos atuais do jogador
 --- @param source number ID do jogador
 --- @return table Tabela contendo health, pulse, pain, bleeding, consciousness
 exports('GetVitals', function(source)
     return GetPlayerVitals(source)
 end)
 
---- Restaura a saúde do jogador ao máximo e limpa efeitos adversos
---- (Deve ser protegida por autenticação no caller)
+--- Restaura a saÃºde do jogador ao mÃ¡ximo e limpa efeitos adversos
+--- (Deve ser protegida por autenticaÃ§Ã£o no caller)
 --- @param source number ID do jogador
 exports('FullHeal', function(source)
     local caller = GetInvokingResource() or 'unknown'
@@ -42,7 +46,7 @@ exports('FullHeal', function(source)
     
     -- Chama ApplyDamage negativo usando o MaxHealth do FDBCore
     local maxHealth = 600 -- Valor default ou dependente do core/ped
-    -- Faremos um workaround seguro, como cura altíssima para zerar dano, mas vamos também reescrever os vitals:
+    -- Faremos um workaround seguro, como cura altÃ­ssima para zerar dano, mas vamos tambÃ©m reescrever os vitals:
     if ResetPlayerVitals then
         ResetPlayerVitals(source)
     else
@@ -52,7 +56,7 @@ exports('FullHeal', function(source)
     local PlayerData = FDBCore.Functions.GetPlayer(source)
     if PlayerData then
         PlayerData.Functions.SetMetaData('health', 600)
-        -- REMOVED SetPlayerData('metadata', ...) — sobrescreve metadata inteiro (perda de fome/sede/etc)
+        -- REMOVED SetPlayerData('metadata', ...) â€” sobrescreve metadata inteiro (perda de fome/sede/etc)
     end
 end)
 
@@ -66,14 +70,14 @@ RegisterNetEvent('fdb-medical-core:server:SetDead', function(isDead)
 
     if isDead == currentlyDead then return end -- ignora chamadas redundantes/repetidas
 
-    -- Reforço extra: só permite "reviver" (isDead=false) se já estava morto de verdade
+    -- ReforÃ§o extra: sÃ³ permite "reviver" (isDead=false) se jÃ¡ estava morto de verdade
     if isDead == false and not currentlyDead then
         print(("[fdb-medical-core] ALERTA: src %s tentou SetDead(false) sem estar morto!"):format(src))
         return
     end
     
-    -- Utiliza a interface do core para evitar ser pego pela trava de segurança
-    -- que proibiria clientes de forçarem isso
+    -- Utiliza a interface do core para evitar ser pego pela trava de seguranÃ§a
+    -- que proibiria clientes de forÃ§arem isso
     Player.Functions.SetMetaData("isdead", isDead)
 end)
 
@@ -82,9 +86,9 @@ RegisterNetEvent('fdb-medical-core:server:FullRestore', function()
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
-    -- Só restaura se o jogador realmente estava marcado como morto
+    -- SÃ³ restaura se o jogador realmente estava marcado como morto
     if not Player.PlayerData.metadata["isdead"] then
-        print(("[fdb-medical-core] ALERTA: src %s tentou forçar FullRestore sem estar morto!"):format(src))
+        print(("[fdb-medical-core] ALERTA: src %s tentou forÃ§ar FullRestore sem estar morto!"):format(src))
         return
     end
 
@@ -104,9 +108,9 @@ RegisterNetEvent('fdb-medical-core:server:ReportDamage', function(bodyPart, dama
 
     local vitals = GetPlayerVitals(src)
     local actualHp = GetEntityHealth(ped)
-    local actualDelta = vitals.health - actualHp -- quanto a vida realmente caiu desde a última sync
+    local actualDelta = vitals.health - actualHp -- quanto a vida realmente caiu desde a Ãºltima sync
 
-    if actualDelta <= 0 then return end -- não perdeu vida de verdade, ignora o report
+    if actualDelta <= 0 then return end -- nÃ£o perdeu vida de verdade, ignora o report
 
     -- Sanity Cap original: usa o menor entre o reportado e o real, nunca confia cegamente no reportado
     local amount = math.min(reportedAmount, actualDelta)
@@ -119,7 +123,7 @@ RegisterNetEvent('fdb-medical-core:server:ProcessTreatment', function(woundId, t
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     
-    -- Validação: confere se o jogador realmente tem o item (se itemUsed foi passado)
+    -- ValidaÃ§Ã£o: confere se o jogador realmente tem o item (se itemUsed foi passado)
     if itemUsed and type(itemUsed) == 'string' then
         local hasItem = Player.Functions.GetItemByName(itemUsed)
         if not hasItem or hasItem.amount < 1 then
@@ -156,7 +160,7 @@ RegisterNetEvent('fdb-medical-core:server:ConvertWoundToScar', function(bodyPart
     end
 end)
 
---- Exportação para fornecer o perfil médico completo para o MDT/Svelte (fdb-medic)
+--- ExportaÃ§Ã£o para fornecer o perfil mÃ©dico completo para o MDT/Svelte (fdb-medic)
 --- @param citizenid string
 --- @return table
 exports('GetCompleteMedicalProfile', function(citizenid)
@@ -197,4 +201,5 @@ exports('ClearAllWounds', function(source)
         end
     end
 end)
+
 
