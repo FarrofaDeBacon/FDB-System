@@ -15,7 +15,6 @@ files {
 }
 
 client_scripts {
-    'config.lua',
     'cl_mdt.lua',
 }
 

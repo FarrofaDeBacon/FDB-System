@@ -13,19 +13,19 @@ Config.Open = {
 	} 
 Config.Office = {
     [1] = {
-        coords={2733.8161, -1230.578, 50.37041}, 
+        coords={-289.46, 806.82, 119.31}, 
     },
 }
 
 --[[ Notifys ]]--
 Config.Notify = {  
-	['1'] = "Los cambios han sido guardados.",
-	['2'] = "Los cambios en el informe han sido guardados.",
-	['3'] = "El informe ha sido eliminado correctamente.",
-	['4'] = "Se ha presentado un nuevo informe.",
-	['5'] = "",
-	['6'] = "",
-	['7'] = "No se pudo encontrar este informe.",
-	['8'] = "Nota guardada.",
-	['9'] = "Nota eliminada.",	
+	['1'] = "As alterações foram salvas.",
+	['2'] = "As alterações no relatório foram salvas.",
+	['3'] = "O relatório foi excluído com sucesso.",
+	['4'] = "Um novo relatório foi registrado.",
+	['5'] = "Novo registro adicionado.",
+	['6'] = "Registro removido.",
+	['7'] = "Não foi possível encontrar este relatório.",
+	['8'] = "Nota salva.",
+	['9'] = "Nota excluída.",	
 	} 
