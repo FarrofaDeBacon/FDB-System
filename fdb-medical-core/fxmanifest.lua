@@ -17,6 +17,7 @@ files {
 shared_scripts {
     '@ox_lib/init.lua',
     'shared/enums.lua',
+    'shared/body_parts.lua',
     'shared/config.lua',
     'shared/config_bones.lua',
     'shared/config_wounds.lua'
@@ -30,9 +31,12 @@ client_scripts {
 
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
+    'server/utils.lua',
     'server/database.lua',
     'server/vitals.lua',
+    'server/fracture_effects.lua',
     'server/wounds.lua',
+    'server/fracture_healing.lua',
     'server/bleedout.lua',
     'server/infection.lua',
     'server/damage.lua',

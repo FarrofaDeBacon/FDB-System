@@ -16,14 +16,7 @@ DamageType = {
     Generic = 'Generic'
 }
 
-BodyPart = {
-    Head = 'Head',
-    Torso = 'Torso',
-    LeftArm = 'LeftArm',
-    RightArm = 'RightArm',
-    LeftLeg = 'LeftLeg',
-    RightLeg = 'RightLeg'
-}
+
 
 InfectionStage = {
     None = 'None',
