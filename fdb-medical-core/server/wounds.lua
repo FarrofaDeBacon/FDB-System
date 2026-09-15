@@ -20,11 +20,11 @@ local function RollBallisticsFlavor(damageType)
     
     local roll = math.random(1, 100)
     if roll <= 40 then
-        return { result = 'through', bleedModifier = 1.0, text = 'Piercing wound - bullet went through' }
+        return { result = 'through', bleedModifier = 1.0, text = locale('wound_through') }
     elseif roll <= 75 then
-        return { result = 'stuck', bleedModifier = 0.6, text = 'Lodged bullet - projectile stuck' }
+        return { result = 'stuck', bleedModifier = 0.6, text = locale('wound_stuck') }
     else
-        return { result = 'fragmented', bleedModifier = 1.3, text = 'Fragmented wound - shrapnel' }
+        return { result = 'fragmented', bleedModifier = 1.3, text = locale('wound_fragmented') }
     end
 end
 
@@ -61,9 +61,9 @@ function RegisterWound(src, bodyPart, damageType, amount)
         wound.bleeding = baseBleeding
         wound.bulletResult = nil
         if damageType == 'animal' then
-            wound.text = 'Bite/Scratch'
+            wound.text = locale('wound_bite')
         elseif damageType == 'melee' then
-            wound.text = 'Cut/Blunt Trauma'
+            wound.text = locale('wound_melee')
         else
             wound.text = nil
         end
