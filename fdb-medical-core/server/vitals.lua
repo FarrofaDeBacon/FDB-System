@@ -1,17 +1,13 @@
-﻿-- ============================================================
+-- ============================================================
 -- FDB System | fdb-medical-core | server/vitals.lua
--- ============================================================
-
--- ============================================================
--- fdb-medical | server/vitals.lua
--- Tabela de estado de vitais server-authoritative por jogador
+-- Server-authoritative vitals state table per player
 -- ============================================================
 
 local FDBCore = exports["fdb-core"]:GetCoreObject()
 
 PlayerVitals = {}
 
---- Retorna a tabela de vitais de um jogador (ou inicializa se nÃ£o existir)
+--- Returns a player's vitals table (or initializes it if it doesn't exist)
 --- @param src number Player ID
 --- @return table
 function GetPlayerVitals(src)
@@ -28,7 +24,7 @@ function GetPlayerVitals(src)
     return PlayerVitals[src]
 end
 
---- Atualiza a Statebag `medical` do ped do jogador e a metadata oficial
+--- Updates the player ped's `medical` Statebag and official metadata
 --- @param src number
 function SyncVitalsToStatebag(src)
     local ped = GetPlayerPed(src)
@@ -44,7 +40,7 @@ function SyncVitalsToStatebag(src)
         wounds = vitals.wounds or {}
     }, true)
     
-    -- Sincroniza metadata oficial do framework para compatibilidade com rsg-spawn, HUDs, etc.
+    -- Synchronizes official framework metadata for compatibility with rsg-spawn, HUDs, etc.
     local Player = FDBCore.Functions.GetPlayer(src)
     if Player then
         Player.Functions.SetMetaData('health', vitals.health)
@@ -60,14 +56,14 @@ function ResetPlayerVitals(src)
     vitals.consciousness = Config.Vitals.DefaultConsciousness or 100
     vitals.wounds = {}
     SyncVitalsToStatebag(src)
-    -- Garante health no FDBCore metadata
+    -- Ensures health in FDBCore metadata
     local Player = FDBCore.Functions.GetPlayer(src)
     if Player then
         Player.Functions.SetMetaData('health', vitals.health)
     end
 end
 
---- Salva vitais do jogador no banco de dados ativamente
+--- Actively saves player vitals to the database
 function SavePlayerVitalsToDB(src, Player)
     Player = Player or FDBCore.Functions.GetPlayer(src)
     local vitals = PlayerVitals[src]
@@ -77,16 +73,16 @@ function SavePlayerVitalsToDB(src, Player)
     end
 end
 
---- Evento de carregamento do jogador no framework
+--- Player load event in the framework
 RegisterNetEvent('FDBCore:Server:PlayerLoaded', function(Player)
     if not Player then return end
     local src = Player.PlayerData.source
     local citizenid = Player.PlayerData.citizenid
     
-    -- Garante a inicializaÃ§Ã£o da tabela segura
+    -- Ensures safe table initialization
     local vitals = GetPlayerVitals(src)
     
-    -- Puxar a vida (health) e vitais persistidos do banco de dados (salvos na metadata)
+    -- Pull health and persisted vitals from the database (saved in metadata)
     if Player.PlayerData.metadata then
         if Player.PlayerData.metadata["health"] then
             vitals.health = Player.PlayerData.metadata["health"]
@@ -97,7 +93,7 @@ RegisterNetEvent('FDBCore:Server:PlayerLoaded', function(Player)
         if Player.PlayerData.metadata["consciousness"] then vitals.consciousness = Player.PlayerData.metadata["consciousness"] end
     end
     
-    -- Carrega feridas do banco (se existirem)
+    -- Load wounds from database (if they exist)
     local dbWounds = LoadWoundData(citizenid)
     if dbWounds and next(dbWounds) ~= nil then
         vitals.wounds = dbWounds
@@ -107,14 +103,14 @@ RegisterNetEvent('FDBCore:Server:PlayerLoaded', function(Player)
     SyncVitalsToStatebag(src)
 end)
 
---- Salvamento Redundante no Drop (Framework)
+--- Redundant Save on Drop (Framework)
 RegisterNetEvent('FDBCore:Server:PlayerDropped', function(Player)
     if not Player then return end
     local src = Player.PlayerData.source
     SavePlayerVitalsToDB(src, Player)
 end)
 
---- Limpeza ao desconectar (Nativo - Gatilho InfalÃ­vel)
+--- Cleanup on disconnect (Native - Infallible Trigger)
 AddEventHandler('playerDropped', function()
     local src = source
     local Player = FDBCore.Functions.GetPlayer(src)
@@ -123,4 +119,3 @@ AddEventHandler('playerDropped', function()
     end
     PlayerVitals[src] = nil
 end)
-

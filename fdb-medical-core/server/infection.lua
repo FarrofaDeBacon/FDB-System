@@ -1,10 +1,6 @@
-﻿-- ============================================================
+-- ============================================================
 -- FDB System | fdb-medical-core | server/infection.lua
--- ============================================================
-
--- ============================================================
--- fdb-medical-core | server/infection.lua
--- Loop de evoluÃ§Ã£o de infecÃ§Ã£o baseado em higiene (cleanliness do fdb-survival)
+-- Infection evolution loop based on hygiene (fdb-survival cleanliness)
 -- ============================================================
 
 local FDBCore = exports["fdb-core"]:GetCoreObject()
@@ -34,7 +30,7 @@ CreateThread(function()
                         local growth = Config.Wounds.Infection.BaseRatePerMinute * modifier
                         wound.infectionStage = math.min(100, (wound.infectionStage or 0) + growth)
 
-                        -- InfecÃ§Ã£o sistÃªmica/grave gera dano por febre
+                        -- Systemic/severe infection generates fever damage
                         if wound.infectionStage >= 50 then
                             ProcessDamage(src, DamageType.Illness, bodyPart, 2.0, 'fdb-medical-core:infection')
                         end
@@ -45,4 +41,3 @@ CreateThread(function()
         end
     end
 end)
-

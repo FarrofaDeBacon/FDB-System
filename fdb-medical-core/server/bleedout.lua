@@ -1,10 +1,6 @@
-﻿-- ============================================================
+-- ============================================================
 -- FDB System | fdb-medical-core | server/bleedout.lua
--- ============================================================
-
--- ============================================================
--- fdb-medical-core | server/bleedout.lua
--- Loop de dreno por sangramento server-owned
+-- Server-owned bleeding drain loop
 -- ============================================================
 
 CreateThread(function()
@@ -14,10 +10,9 @@ CreateThread(function()
             local totalBleed = GetTotalBleeding(src)
             if totalBleed > 0 then
                 local drainAmount = totalBleed * Config.Wounds.Bleeding.DrainRate
-                -- Invoca o ProcessDamage internamente sem passar pelo client
+                -- Invokes ProcessDamage internally without passing through the client
                 ProcessDamage(src, DamageType.Generic, nil, drainAmount, 'fdb-medical-core:bleedout')
             end
         end
     end
 end)
-

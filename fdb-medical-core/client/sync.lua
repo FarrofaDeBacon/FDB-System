@@ -1,15 +1,11 @@
-﻿-- ============================================================
+-- ============================================================
 -- FDB System | fdb-medical-core | client/sync.lua
--- ============================================================
-
--- ============================================================
--- fdb-medical | client/sync.lua
--- Listener de Statebags para sincronizar vitais no client
+-- Statebag listeners for client vitals synchronization
 -- ============================================================
 
 local FDBCore = exports['fdb-core']:GetCoreObject()
 
--- Handler para ouvir atualizaÃ§Ãµes de vitais na Statebag do ped do jogador
+-- Handler to listen for vital updates in the player ped's Statebag
 AddStateBagChangeHandler('medical', nil, function(bagName, key, value, _unused, replicated)
     if not value then return end
 
@@ -17,14 +13,14 @@ AddStateBagChangeHandler('medical', nil, function(bagName, key, value, _unused, 
     local entity = GetEntityFromStateBagName(bagName)
 
     if entity == playerPed then
-        -- Repassa o evento localmente para listeners como o HUD (fdb-hudpremium)
+        -- Forwards the event locally for listeners such as the HUD (fdb-hudpremium)
         TriggerEvent('fdb-medical-core:client:vitalsUpdated', value)
     end
 end)
--- Limpeza e encerramento de threads ao parar o recurso
+-- Cleanup and thread termination upon resource stop
 AddEventHandler('onResourceStop', function(resourceName)
     if GetCurrentResourceName() == resourceName then
-        print("[fdb-medical-core] Recurso finalizado de forma limpa.")
+        print("[fdb-medical-core] Resource terminated cleanly.")
     end
 end)
 
@@ -34,7 +30,7 @@ RegisterNetEvent('fdb-medical-core:client:setHealth', function(newHp)
 end)
 
 -- ============================================================
--- Monitoramento HÃ­brido de Vida (RedM NÃ­vel Cliente)
+-- Hybrid Health Monitoring (RedM Client Level)
 -- ============================================================
 CreateThread(function()
     local ped = PlayerPedId()
@@ -43,7 +39,7 @@ CreateThread(function()
     while true do
         Wait(500)
         
-        -- Garante ped atualizado (apÃ³s morte/respawn)
+        -- Ensure updated ped (after death/respawn)
         local currentPed = PlayerPedId()
         if currentPed ~= ped then
             ped = currentPed
@@ -52,11 +48,11 @@ CreateThread(function()
         
         local currentHealth = GetEntityHealth(ped)
         
-        -- Queda de vida detectada nativamente! (Dano ambiental/fÃ­sico nÃ£o reportado pelo server)
+        -- Native health drop detected! (Environmental/physical damage not reported by the server)
         if currentHealth < lastHealth then
             local damageDelta = lastHealth - currentHealth
             
-            -- Detecta a causa mais provÃ¡vel
+            -- Detect the most likely cause
             local damageType = 'Generic'
             if IsEntityOnFire(ped) then
                 damageType = 'Burn'
@@ -67,7 +63,7 @@ CreateThread(function()
             local bodyPart = 'Torso'
             local boneHit, boneIndex = GetPedLastDamageBone(ped)
             if boneHit then
-                -- Salvaged from dodi_bonessystem
+                -- Salvaged mappings
                 local boneMapping = {
                     [27981] = 'Head', [57278] = 'Head', [54890] = 'Head', [21030] = 'Head',
                     [24015] = 'Torso', [52596] = 'Torso', [32630] = 'Torso', [14283] = 'Torso',
@@ -87,7 +83,7 @@ CreateThread(function()
                 }
                 bodyPart = boneMapping[boneIndex] or 'Torso'
                 
-                -- Se o dano for severo, aplica walkstyle (aproveitado de dodi_bonessystem)
+                -- If damage is severe, apply walkstyle
                 if damageDelta >= 20 then
                     Citizen.InvokeNative(0x923583741DC87BCE, ped, 'default') -- Clipset
                     if bodyPart == 'Right Leg' then
@@ -104,13 +100,13 @@ CreateThread(function()
                 end
             end
             
-            -- Reporta pro servidor processar e oficializar na Statebag
+            -- Report to the server to process and officialize in the Statebag
             TriggerServerEvent('fdb-medical-core:server:ReportDamage', bodyPart, damageType, damageDelta)
             
-            -- Atualiza referÃªncia local imediatamente para evitar reports duplicados
+            -- Update local reference immediately to avoid duplicate reports
             lastHealth = currentHealth
         elseif currentHealth > lastHealth then
-            -- O servidor/jogo curou o player nativamente, atualizamos a Ã¢ncora
+            -- The server/game healed the player natively, update the anchor
             lastHealth = currentHealth
         end
     end

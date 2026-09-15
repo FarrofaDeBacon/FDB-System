@@ -1,10 +1,6 @@
-﻿-- ============================================================
+-- ============================================================
 -- FDB System | fdb-medical-core | server/wounds.lua
--- ============================================================
-
--- ============================================================
--- fdb-medical-core | server/wounds.lua
--- Rastreamento de ferimentos por parte do corpo
+-- Wound tracking by body part
 -- ============================================================
 
 local function GetSeverityTier(value)
@@ -24,20 +20,20 @@ local function RollBallisticsFlavor(damageType)
     
     local roll = math.random(1, 100)
     if roll <= 40 then
-        return { result = 'through', bleedModifier = 1.0, text = 'Ferimento perfurante â€” a bala atravessou' }
+        return { result = 'through', bleedModifier = 1.0, text = 'Piercing wound - bullet went through' }
     elseif roll <= 75 then
-        return { result = 'stuck', bleedModifier = 0.6, text = 'Bala alojada â€” o projÃ©til ficou preso' }
+        return { result = 'stuck', bleedModifier = 0.6, text = 'Lodged bullet - projectile stuck' }
     else
-        return { result = 'fragmented', bleedModifier = 1.3, text = 'Ferimento fragmentado â€” estilhaÃ§os' }
+        return { result = 'fragmented', bleedModifier = 1.3, text = 'Fragmented wound - shrapnel' }
     end
 end
 
---- Aplica dano fÃ­sico a uma parte do corpo especÃ­fica, atualizando severity/bleeding
---- Chamado pelo damage.lua DEPOIS de jÃ¡ ter processado a saÃºde â€” nunca escreve vida.
+--- Applies physical damage to a specific body part, updating severity/bleeding
+--- Called by damage.lua AFTER health has already been processed - never writes health.
 --- @param src number
 --- @param bodyPart string Enum BodyPart
 --- @param damageType string Enum DamageType
---- @param amount number Intensidade do golpe
+--- @param amount number Hit intensity
 function RegisterWound(src, bodyPart, damageType, amount)
     local causesWound = Config.Wounds.WoundCausingTypes[damageType]
     if not causesWound or amount <= 0 then return end
@@ -48,9 +44,9 @@ function RegisterWound(src, bodyPart, damageType, amount)
 
     local wound = vitals.wounds[bodyPart]
 
-    -- Acumula severidade (0-100), golpes repetidos na mesma parte agravam o ferimento
+    -- Accumulates severity (0-100), repeated hits on the same part worsen the wound
     wound.severity = math.max(0, math.min(100, wound.severity + amount))
-    wound.treated = false -- novo golpe reabre um ferimento que jÃ¡ tinha sido tratado
+    wound.treated = false -- new hit reopens a previously treated wound
 
     local tier = GetSeverityTier(wound.severity)
     local baseBleeding = tier and tier.bleeding or 0
@@ -65,9 +61,9 @@ function RegisterWound(src, bodyPart, damageType, amount)
         wound.bleeding = baseBleeding
         wound.bulletResult = nil
         if damageType == 'animal' then
-            wound.text = 'Mordida/ArranhÃ£o'
+            wound.text = 'Bite/Scratch'
         elseif damageType == 'melee' then
-            wound.text = 'Corte/Trauma Contuso'
+            wound.text = 'Cut/Blunt Trauma'
         else
             wound.text = nil
         end
@@ -75,16 +71,16 @@ function RegisterWound(src, bodyPart, damageType, amount)
 
     -- Fracture Generation Logic
     if tier and tier.name == 'Severe' and Config.Fractures.CausingTypes[damageType] and Config.Fractures.EligibleParts[bodyPart] then
-        print(string.format('[DEBUG fdb-medical-core] Avaliando fratura: Dano Severo em %s (Tipo: %s)', bodyPart, damageType))
+        print(string.format('[DEBUG fdb-medical-core] Evaluating fracture: Severe Damage on %s (Type: %s)', bodyPart, damageType))
         if math.random(1, 100) <= Config.Fractures.ChancePercent then
             wound.boneDamage = true
             wound.healUntil = nil
-            print(string.format('^1[DEBUG fdb-medical-core] BINGO! Osso quebrado na zona: %s^7', bodyPart))
+            print(string.format('^1[DEBUG fdb-medical-core] BINGO! Broken bone in zone: %s^7', bodyPart))
             if ApplyFracturePenalty then
                 ApplyFracturePenalty(src, bodyPart)
             end
         else
-            print(string.format('[DEBUG fdb-medical-core] Sorte grande: %s resistiu e nao quebrou (fora dos %s%%).', bodyPart, Config.Fractures.ChancePercent))
+            print(string.format('[DEBUG fdb-medical-core] Lucky: %s resisted and did not break (outside of %s%%).', bodyPart, Config.Fractures.ChancePercent))
         end
     end
 
@@ -102,8 +98,8 @@ function RegisterWound(src, bodyPart, damageType, amount)
     end
 end
 
---- Retorna a soma do bleeding de todos os ferimentos ativos do jogador
---- Usado pelo bleedout.lua e pela fÃ³rmula de pulso
+--- Returns the sum of bleeding from all active wounds on the player
+--- Used by bleedout.lua and the pulse formula
 function GetTotalBleeding(src)
     local vitals = GetPlayerVitals(src)
     local total = 0
@@ -114,7 +110,7 @@ function GetTotalBleeding(src)
     return total
 end
 
---- Recalcula os agregados de pain e bleeding baseando-se nas wounds individuais
+--- Recalculates pain and bleeding aggregates based on individual wounds
 function RecalculateVitals(src)
     local vitals = GetPlayerVitals(src)
     local totalBleeding = 0
@@ -135,7 +131,7 @@ function RecalculateVitals(src)
     vitals.pain = math.min(100, math.floor(totalPain))
 end
 
---- Retorna a tabela de tier (name, requiresMedic, etc) de um wound especÃ­fico
+--- Returns the tier table (name, requiresMedic, etc) for a specific wound
 function GetWoundTier(src, bodyPart)
     local vitals = GetPlayerVitals(src)
     local wound = vitals.wounds and vitals.wounds[bodyPart]
@@ -157,5 +153,3 @@ RegisterCommand('setgametime', function(source, args)
     exports.weathersync:setTime(d, h, 0, 0, 0, false)
     print('Game time set to Day ' .. d .. ' Hour ' .. h)
 end, true) -- restricted to admins
-
-

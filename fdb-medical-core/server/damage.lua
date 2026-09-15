@@ -1,20 +1,16 @@
-﻿-- ============================================================
+-- ============================================================
 -- FDB System | fdb-medical-core | server/damage.lua
--- ============================================================
-
--- ============================================================
--- fdb-medical | server/damage.lua
--- ÃšNICO ponto de escrita para dano e saÃºde no servidor
+-- SOLE entry point for damage and health on the server
 -- ============================================================
 
 local FDBCore = exports["fdb-core"]:GetCoreObject()
 
---- Aplica dano ou alteraÃ§Ã£o de vida server-side no ped de um jogador
---- @param src number ID do jogador
---- @param damageType string Tipo de dano (DamageType enum)
---- @param bodyPart string|nil Parte do corpo atingida (BodyPart enum)
---- @param amount number Quantidade de dano (positivo para dano, negativo para cura)
---- @param originResource string|nil Nome do recurso que originou o dano
+--- Applies server-side damage or health change to a player's ped
+--- @param src number Player ID
+--- @param damageType string Damage type (DamageType enum)
+--- @param bodyPart string|nil Body part hit (BodyPart enum)
+--- @param amount number Damage amount (positive for damage, negative for healing)
+--- @param originResource string|nil Name of the resource that originated the damage
 function ProcessDamage(src, damageType, bodyPart, amount, originResource)
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
@@ -26,34 +22,34 @@ function ProcessDamage(src, damageType, bodyPart, amount, originResource)
     originResource = originResource or GetInvokingResource() or 'unknown'
     bodyPart = bodyPart or BodyPart.TORSO
 
-    -- Log de auditoria server-side (Desativado para nÃ£o floodar o console)
+    -- Server-side audit log (Disabled to prevent console flooding)
     -- print(string.format(
     --     locale('log_damage_applied'),
     --     tostring(src), tostring(originResource), tostring(damageType), tostring(bodyPart), tostring(amount)
     -- ))
 
-    -- Ajuste de SaÃºde
-    -- Usa vitals.health como base para nÃ£o duplicar o dano (jÃ¡ que currentHp jÃ¡ pode estar menor pelo motor do jogo)
+    -- Health Adjustment
+    -- Uses vitals.health as base to avoid duplicating damage (since currentHp might already be lower from the game engine)
     local maxHp = Config.Vitals.MaxHealth or 600
     local newHp = math.max(0, math.min(maxHp, math.floor(vitals.health - amount)))
 
-    -- Aplica nativamente via Server (Ãšnico local do projeto!)
+    -- Applies natively via Server (Only place in the project!)
     TriggerClientEvent('fdb-medical-core:client:setHealth', src, newHp)
 
-    -- Atualiza os vitais fisiolÃ³gicos
+    -- Updates physiological vitals
     vitals.health = newHp
     if amount > 0 then
-        -- Dano aumenta pulso diretamente (pulso nÃ£o Ã© puramente dependente de wound)
+        -- Damage directly increases pulse (pulse is not purely wound-dependent)
         vitals.pulse = math.min(Config.Vitals.MaxPulse, vitals.pulse + math.floor(amount * 0.3))
         
         if damageType == DamageType.Gunshot or damageType == DamageType.Melee or damageType == DamageType.Animal then
             RegisterWound(src, bodyPart, damageType, amount)
-            -- RegisterWound jÃ¡ chama RecalculateVitals() internamente
+            -- RegisterWound already calls RecalculateVitals() internally
         else
-            -- Para danos genÃ©ricos (queimadura, queda leve), apenas atualizamos agregados
-            -- Se precisarmos de dor base nÃ£o-relacionada a wounds no futuro, 
-            -- implementaremos vitals.basePain. Por enquanto, a fonte de verdade
-            -- de pain/bleeding Ã© sempre RecalculateVitals via wounds.
+            -- For generic damage (burn, light fall), we only update aggregates
+            -- If we need non-wound related base pain in the future,
+            -- we will implement vitals.basePain. For now, the source of truth
+            -- for pain/bleeding is always RecalculateVitals via wounds.
             RecalculateVitals(src)
         end
     else
@@ -63,11 +59,11 @@ function ProcessDamage(src, damageType, bodyPart, amount, originResource)
     SyncVitalsToStatebag(src)
 end
 
---- Aplica um tratamento a um ferimento do jogador
---- @param src number ID do jogador
---- @param woundId string|nil ID ou tipo do ferimento (na prÃ¡tica, o bodyPart)
---- @param treatmentType string Tipo do tratamento (bandagem, antÃ­doto, cirurgia)
---- @param itemUsed string Nome do item usado
+--- Applies a treatment to a player's wound
+--- @param src number Player ID
+--- @param woundId string|nil Wound ID or type (in practice, the bodyPart)
+--- @param treatmentType string Treatment type (bandage, antidote, surgery)
+--- @param itemUsed string Name of the item used
 function ProcessTreatment(src, woundId, treatmentType, itemUsed)
     local vitals = GetPlayerVitals(src)
     print(string.format(
@@ -102,4 +98,3 @@ function ProcessTreatment(src, woundId, treatmentType, itemUsed)
     RecalculateVitals(src)
     SyncVitalsToStatebag(src)
 end
-

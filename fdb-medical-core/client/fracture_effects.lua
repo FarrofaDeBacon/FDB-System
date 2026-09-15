@@ -1,18 +1,17 @@
-﻿-- ============================================================
+-- ============================================================
 -- FDB System | fdb-medical-core | client/fracture_effects.lua
 -- ============================================================
 
--- fracture_effects.lua (fdb-medical-core, client-side)
--- Gerencia os efeitos visuais/mecÃ¢nicos de fraturas no jogador.
--- ExpÃµe exports para que outros resources (fdb-survival, fdb-weapons) possam
--- consultar o estado de fratura sem depender de variÃ¡veis globais compartilhadas.
+-- Manages visual/mechanical fracture effects on the player.
+-- Exposes exports so other resources (fdb-survival, fdb-weapons) can
+-- query the fracture state without relying on shared global variables.
 
 local HasArmFracture = false
 local HasTorsoFracture = false
 local swayIntensity = 0.8
 
 -- ============================================================
--- EXPORTS (leitura cross-resource)
+-- EXPORTS (cross-resource reading)
 -- ============================================================
 exports('HasArmFracture', function()
     return HasArmFracture
@@ -23,18 +22,18 @@ exports('HasTorsoFracture', function()
 end)
 
 -- ============================================================
--- EVENTOS (escutam tanto TriggerEvent local quanto TriggerClientEvent)
+-- EVENTS (listen to both local TriggerEvent and TriggerClientEvent)
 -- ============================================================
 
--- PadrÃ£o antigo: RegisterNetEvent (declara) + AddEventHandler (registra)
--- Garante que funciona com TriggerEvent local (entre resources no mesmo client)
--- E tambÃ©m com TriggerClientEvent vindo do servidor.
+-- Old pattern: RegisterNetEvent (declare) + AddEventHandler (register)
+-- Ensures it works with local TriggerEvent (between resources on same client)
+-- And also with TriggerClientEvent from the server.
 
 RegisterNetEvent('fdb-medical-core:client:SetStaminaPenalty')
 AddEventHandler('fdb-medical-core:client:SetStaminaPenalty', function(active)
     HasTorsoFracture = active
     print('[fdb-medical-core] HasTorsoFracture = ' .. tostring(active))
-    -- Votar no Maestro do fdb-survival para bloquear sprint
+    -- Vote in fdb-survival Maestro to block sprint
     TriggerEvent('fdb-survival:client:SetSprintDisable', 'fracture_torso', active)
 end)
 
@@ -51,16 +50,16 @@ AddEventHandler('fdb-medical-core:client:SetSwayIntensity', function(val)
 end)
 
 -- ============================================================
--- SWAY DE MIRA (braÃ§o fraturado)
--- Aplica offset sinusoidal suave no heading/pitch da cÃ¢mera
--- enquanto o jogador estÃ¡ mirando. NÃ£o Ã© shake â€” Ã© "escorregamento".
+-- AIM SWAY (fractured arm)
+-- Applies smooth sinusoidal offset to camera heading/pitch
+-- while the player is aiming. It's not a shake - it's a "sway".
 -- ============================================================
 CreateThread(function()
     local timer = 0.0
     while true do
         Wait(0)
         if HasArmFracture then
-            -- IsPlayerFreeAiming (RDR3 native confirmada)
+            -- IsPlayerFreeAiming (confirmed RDR3 native)
             local isAiming = Citizen.InvokeNative(0x2E623EBE, PlayerId())
             if isAiming then
                 timer = timer + 0.016
@@ -87,7 +86,7 @@ CreateThread(function()
 end)
 
 -- ============================================================
--- RESET DE SEGURANÃ‡A
+-- SAFETY RESET
 -- ============================================================
 AddEventHandler('onResourceStop', function(resourceName)
     if resourceName == GetCurrentResourceName() then
@@ -95,4 +94,3 @@ AddEventHandler('onResourceStop', function(resourceName)
         HasTorsoFracture = false
     end
 end)
-

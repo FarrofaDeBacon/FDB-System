@@ -1,21 +1,17 @@
-﻿-- ============================================================
+-- ============================================================
 -- FDB System | fdb-medical-core | server/database.lua
--- ============================================================
-
--- ============================================================
--- fdb-medical-core | server/database.lua
--- IntegraÃ§Ã£o de Banco de Dados Oficial e PersistÃªncia
+-- Official Database Integration and Persistence
 -- ============================================================
 
 local FDBCore = exports["fdb-core"]:GetCoreObject()
 
 -- ============================================================
--- INICIALIZAÃ‡ÃƒO E MIGRAÃ‡ÃƒO DO SCHEMA
+-- SCHEMA INITIALIZATION AND MIGRATION
 -- ============================================================
 CreateThread(function()
-    Wait(1000) -- Aguarda conexÃ£o ao banco
+    Wait(1000) -- Waits for database connection
 
-    -- Inicializa tabela de feridas purificada com a escala 0-100 do motor
+    -- Initializes purified wounds table with the engine's 0-100 scale
     MySQL.Async.execute([[
         CREATE TABLE IF NOT EXISTS player_wounds_core (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -36,7 +32,7 @@ CreateThread(function()
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ]])
     
-    -- Tabela de histÃ³rico de eventos mÃ©dicos
+    -- Medical events history table
     MySQL.Async.execute([[
         CREATE TABLE IF NOT EXISTS medical_history_core (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -54,10 +50,10 @@ CreateThread(function()
 end)
 
 -- ============================================================
--- FUNÃ‡Ã•ES DE PERSISTÃŠNCIA
+-- PERSISTENCE FUNCTIONS
 -- ============================================================
 
---- Loga um evento no histÃ³rico mÃ©dico do jogador
+--- Logs an event in the player's medical history
 function LogMedicalEvent(citizenid, eventType, bodyPart, details, performedBy)
     if not citizenid or not eventType then return false end
     
@@ -78,7 +74,7 @@ function LogMedicalEvent(citizenid, eventType, bodyPart, details, performedBy)
     return true
 end
 
---- Salva as feridas ativas do jogador (Statebag) pro MySQL
+--- Saves the player's active wounds (Statebag) to MySQL
 function SaveWoundData(citizenid, woundsData)
     if not citizenid or type(woundsData) ~= 'table' then return false end
     
@@ -105,7 +101,7 @@ function SaveWoundData(citizenid, woundsData)
     return true
 end
 
---- Carrega as feridas ativas do MySQL
+--- Loads active wounds from MySQL
 function LoadWoundData(citizenid)
     if not citizenid then return {} end
     
@@ -128,7 +124,7 @@ function LoadWoundData(citizenid)
     return wounds
 end
 
---- Cria uma cicatriz
+--- Creates a scar
 function CreateScar(citizenid, bodyPart, woundData)
     if not citizenid or not bodyPart or not woundData then return false end
     
@@ -157,7 +153,7 @@ function CreateScar(citizenid, bodyPart, woundData)
     return true
 end
 
---- Retorna as cicatrizes
+--- Returns scars
 function GetPlayerScars(citizenid)
     if not citizenid then return {} end
     
@@ -177,4 +173,3 @@ function GetPlayerScars(citizenid)
     
     return scars
 end
-

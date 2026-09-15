@@ -1,10 +1,6 @@
-﻿-- ============================================================
+-- ============================================================
 -- FDB System | fdb-medical-core | shared/enums.lua
--- ============================================================
-
--- ============================================================
--- fdb-medical | shared/enums.lua
--- Enums para Tipos de Dano, Partes do Corpo e InfecÃ§Ã£o
+-- Enums for Damage Types, Body Parts, and Infection
 -- ============================================================
 
 DamageType = {
@@ -35,4 +31,3 @@ InfectionStage = {
     Systemic = 'Systemic',
     Severe = 'Severe'
 }
-

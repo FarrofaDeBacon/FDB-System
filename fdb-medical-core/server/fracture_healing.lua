@@ -1,8 +1,8 @@
-﻿-- ============================================================
+-- ============================================================
 -- FDB System | fdb-medical-core | server/fracture_healing.lua
 -- ============================================================
 
-local TICK_INTERVAL = 30000 -- 30s real
+local TICK_INTERVAL = 30000 -- 30s real-time
 
 CreateThread(function()
     while true do
@@ -29,4 +29,3 @@ CreateThread(function()
         end
     end
 end)
-
