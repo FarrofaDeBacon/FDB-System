@@ -212,6 +212,8 @@ local function ResetBaselineHealth()
     local ped = PlayerPedId()
     PlayerHealth = GetEntityHealth(ped)
     ClearPedLastDamageBone(ped)
+    Citizen.InvokeNative(0x923583741DC87BCE, ped, 'arthur_healthy')
+    Citizen.InvokeNative(0xAA74EC0CB0AAEA2C, ped, 'default')
     print("[DEBUG fdb-medic] PlayerHealth baseline reset after revive/load to: " .. tostring(PlayerHealth))
 end
 
