@@ -1,0 +1,11 @@
+{
+  "log_damage_applied": "[fdb-medical-core] Daño aplicado al jugador %s | Origen: %s | Tipo: %s | Parte: %s | Cantidad: %s",
+  "log_treatment_applied": "[fdb-medical-core] Tratamiento aplicado al jugador %s | Ítem: %s | Tipo: %s",
+  "notify_fainted_pain": "¡Te desmayaste debido al dolor extremo!",
+  "notify_bleeding_warning": "¡Estás sangrando! Busca atención médica inmediata.",
+  "wound_through": "Herida perforante: la bala atravesó",
+  "wound_stuck": "Bala alojada: el proyectil quedó atascado",
+  "wound_fragmented": "Herida fragmentada: metralla",
+  "wound_bite": "Mordedura/Arañazo",
+  "wound_melee": "Corte/Trauma contuso"
+}

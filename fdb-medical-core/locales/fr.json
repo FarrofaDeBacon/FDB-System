@@ -1,0 +1,11 @@
+{
+  "log_damage_applied": "[fdb-medical-core] Dégâts appliqués au joueur %s | Origine : %s | Type : %s | Partie : %s | Montant : %s",
+  "log_treatment_applied": "[fdb-medical-core] Traitement appliqué au joueur %s | Objet : %s | Type : %s",
+  "notify_fainted_pain": "Vous vous êtes évanoui à cause d'une douleur extrême !",
+  "notify_bleeding_warning": "Vous saignez ! Cherchez immédiatement des soins médicaux.",
+  "wound_through": "Blessure perforante - la balle a traversé",
+  "wound_stuck": "Balle logée - le projectile est resté coincé",
+  "wound_fragmented": "Blessure par fragmentation - éclats",
+  "wound_bite": "Morsure/Égratignure",
+  "wound_melee": "Coupure/Traumatisme contondant"
+}
