@@ -1,8 +1,9 @@
-﻿-- ============================================================
+-- ============================================================
 -- FDB System | fdb-medical-core | server/fracture_effects.lua
 -- ============================================================
 
 function ApplyFracturePenalty(src, bodyPart)
+    TriggerClientEvent('fdb-medical-core:client:SetWalkstylePenalty', src, true, bodyPart)
     if Config.Fractures.MoveRatePenalty[bodyPart] then
         TriggerClientEvent('fdb-survival:client:SetMoveRateModifier', src, 'fracture_'..bodyPart, Config.Fractures.MoveRatePenalty[bodyPart])
     end
@@ -15,6 +16,7 @@ function ApplyFracturePenalty(src, bodyPart)
 end
 
 function RemoveFracturePenalty(src, bodyPart)
+    TriggerClientEvent('fdb-medical-core:client:SetWalkstylePenalty', src, false, bodyPart)
     if Config.Fractures.MoveRatePenalty[bodyPart] then
         TriggerClientEvent('fdb-survival:client:SetMoveRateModifier', src, 'fracture_'..bodyPart, nil)
     end
@@ -25,4 +27,3 @@ function RemoveFracturePenalty(src, bodyPart)
         TriggerClientEvent('fdb-medical-core:client:SetAimPenalty', src, false)
     end
 end
-

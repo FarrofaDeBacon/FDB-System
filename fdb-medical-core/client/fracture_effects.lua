@@ -50,6 +50,55 @@ AddEventHandler('fdb-medical-core:client:SetSwayIntensity', function(val)
 end)
 
 -- ============================================================
+-- WALKSTYLE PENALTY (mancada persistente até a fratura sarar)
+-- ============================================================
+local activeFractureParts = {}
+
+local walkstyleAnims = {
+    RLEG = 'injured_right_leg',
+    LLEG = 'injured_left_leg',
+    RARM = 'injured_right_arm',
+    LARM = 'injured_left_arm',
+}
+
+RegisterNetEvent('fdb-medical-core:client:SetWalkstylePenalty')
+AddEventHandler('fdb-medical-core:client:SetWalkstylePenalty', function(active, bodyPart)
+    if active then
+        activeFractureParts[bodyPart] = true
+    else
+        activeFractureParts[bodyPart] = nil
+    end
+end)
+
+CreateThread(function()
+    local wasActive = false
+    while true do
+        Wait(3000)
+        local ped = PlayerPedId()
+        local anyActive = false
+        local chosenAnim = nil
+
+        for part, _ in pairs(activeFractureParts) do
+            anyActive = true
+            chosenAnim = walkstyleAnims[part] or 'injured_general'
+            if walkstyleAnims[part] then
+                break -- prioriza mancada de perna/braço específica sobre a genérica
+            end
+        end
+
+        if anyActive then
+            Citizen.InvokeNative(0x923583741DC87BCE, ped, 'default')
+            Citizen.InvokeNative(0x89F5E7ADECCCB49C, ped, chosenAnim)
+            wasActive = true
+        elseif wasActive then
+            Citizen.InvokeNative(0x923583741DC87BCE, ped, 'arthur_healthy')
+            Citizen.InvokeNative(0xAA74EC0CB0AAEA2C, ped, 'default')
+            wasActive = false
+        end
+    end
+end)
+
+-- ============================================================
 -- AIM SWAY (fractured arm)
 -- Applies smooth sinusoidal offset to camera heading/pitch
 -- while the player is aiming. It's not a shake - it's a "sway".
@@ -92,5 +141,6 @@ AddEventHandler('onResourceStop', function(resourceName)
     if resourceName == GetCurrentResourceName() then
         HasArmFracture = false
         HasTorsoFracture = false
+        activeFractureParts = {}
     end
 end)
