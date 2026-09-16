@@ -726,7 +726,7 @@ AddEventHandler('fdb-medic:client:OpenMedicSupplies', function()
         lib.notify({ title = locale('cl_access_denied'), description = locale('cl_no_access_facility'), type = 'error', duration = 5000 })
         return 
     end
-    TriggerServerEvent('rsg-shops:server:openstore', 'medic', 'medic', locale('cl_medical_supplies'))
+    TriggerServerEvent('fdb-shops:server:openstore', 'medic', 'medic', locale('cl_medical_supplies'))
 end)
 
 ---------------------------------------------------------------------
