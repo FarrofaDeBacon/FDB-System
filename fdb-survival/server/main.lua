@@ -357,6 +357,17 @@ FDBCore.Commands.Add('drunkme', 'Debug de Embriaguez', {{name = 'nivel', help = 
         TriggerClientEvent('ox_lib:notify', src, {title = locale('notify_drunk_test_title') or 'Debug', description = 'Embriaguez adicionada: ' .. val, type = 'inform'})
     end
 end, 'admin')
+
+FDBCore.Commands.Add('peeme', 'Debug de Bexiga', {{name = 'nivel', help = '0 a 100'}}, false, function(source, args)
+    local src = source
+    local val = tonumber(args[1]) or 90
+    local Player = FDBCore.Functions.GetPlayer(src)
+    if Player then
+        Player.Functions.SetMetaData("bladder", val)
+        TriggerClientEvent('fdb-survival:client:stateChanged', src, { field = 'bladder', value = val })
+        TriggerClientEvent('ox_lib:notify', src, {title = 'Debug Bexiga', description = 'Nível de urina definido: ' .. val, type = 'inform'})
+    end
+end, 'admin')
 FDBCore.Commands.Add('dirtyme', 'Debug de Sujeira', {{name = 'nivel', help = '0 a 100'}}, false, function(source, args)
     local src = source
     local val = tonumber(args[1]) or 5
