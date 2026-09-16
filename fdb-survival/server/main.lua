@@ -348,6 +348,15 @@ FDBCore.Commands.Add('cleardrunk', 'Remove toda a embriaguez', {}, false, functi
     end
 end, 'admin')
 
+FDBCore.Commands.Add('drunkme', 'Debug de Embriaguez', {{name = 'nivel', help = '0 a 100'}}, false, function(source, args)
+    local src = source
+    local val = tonumber(args[1]) or 50
+    local Player = FDBCore.Functions.GetPlayer(src)
+    if Player then
+        exports['fdb-survival']:AddAlcohol(src, val)
+        TriggerClientEvent('ox_lib:notify', src, {title = locale('notify_drunk_test_title') or 'Debug', description = 'Embriaguez adicionada: ' .. val, type = 'inform'})
+    end
+end, 'admin')
 FDBCore.Commands.Add('dirtyme', 'Debug de Sujeira', {{name = 'nivel', help = '0 a 100'}}, false, function(source, args)
     local src = source
     local val = tonumber(args[1]) or 5
