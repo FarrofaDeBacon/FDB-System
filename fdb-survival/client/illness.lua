@@ -59,16 +59,24 @@ CreateThread(function()
             -- Nível 1: Tosse (Frequência escala com a doença)
             if illness >= Config.Biological.SymptomThreshold then
                 if math.random(1, 100) <= (10 + (illness / 2)) then
-                    local dict = "mech_loco_m@character@arthur@fidgets@sick@normal@unarmed"
-                    RequestAnimDict(dict)
-                    local t = 0
-                    while not HasAnimDictLoaded(dict) and t < 50 do
-                        Wait(10)
-                        t = t + 1
-                    end
-                    if HasAnimDictLoaded(dict) then
-                        -- Flag 31: Upper body, permite mover, não aborta fácil. Duração 2500ms.
-                        TaskPlayAnim(ped, dict, "cough_a", 8.0, -8.0, 2500, 31, 0, false, false, false)
+                    local animList = Config.Biological.CoughAnimations
+                    if animList and #animList > 0 then
+                        local selected = animList[math.random(1, #animList)]
+                        local dict = selected.dict
+                        local animName = selected.anim
+                        
+                        RequestAnimDict(dict)
+                        local t = 0
+                        while not HasAnimDictLoaded(dict) and t < 50 do
+                            Wait(10)
+                            t = t + 1
+                        end
+                        if HasAnimDictLoaded(dict) then
+                            -- Flag 31: Upper body, permite mover, não aborta fácil. Duração 2500ms.
+                            TaskPlayAnim(ped, dict, animName, 8.0, -8.0, 2500, 31, 0, false, false, false)
+                            -- Som de dor associado à tosse (requer banco de voz ativo no ped)
+                            PlayPain(ped, 12, 1, true, true)
+                        end
                     end
                 end
             end
@@ -109,7 +117,27 @@ CreateThread(function()
                 if math.random(1, 100) <= chance then
                     if not LocalPlayer.state.isBathingActive then
                         isVomiting = true
-                        TaskStartScenarioInPlace(ped, GetHashKey("WORLD_HUMAN_VOMIT"), -1, true, false, false, false)
+                        
+                        local animList = Config.Biological.VomitAnimations
+                        if animList and #animList > 0 then
+                            local selected = animList[math.random(1, #animList)]
+                            local dict = selected.dict
+                            local animName = selected.anim
+                            
+                            RequestAnimDict(dict)
+                            local t = 0
+                            while not HasAnimDictLoaded(dict) and t < 50 do
+                                Wait(10)
+                                t = t + 1
+                            end
+                            if HasAnimDictLoaded(dict) then
+                                -- Flag 1: Default
+                                TaskPlayAnim(ped, dict, animName, 8.0, -8.0, -1, 1, 0, false, false, false)
+                            end
+                        else
+                            -- Fallback caso falte o config
+                            TaskStartScenarioInPlace(ped, GetHashKey("WORLD_HUMAN_VOMIT"), -1, true, false, false, false)
+                        end
                         
                         -- Timeout de segurança: limpa a task e dá um respiro antes do próximo
                         SetTimeout(Config.Biological.VomitDuration, function()

@@ -69,16 +69,30 @@ Config.Biological = {
     -- VÃƒÆ’Ã‚Â´mito (Veneno)
     VomitChanceModerate = 5,  -- 5% de chance por tick de 3s
     VomitChanceSevere = 15,   -- 15% de chance por tick de 3s
-    VomitDuration = 7000,     -- Tempo preso na animaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o (ms)
+    VomitDuration = 4000,     -- Tempo preso na animaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o (ms)
     VomitCooldown = 5000,     -- Janela de imunidade apÃƒÆ’Ã‚Â³s o vÃƒÆ’Ã‚Â´mito (ms)
     
     -- Dano FÃƒÆ’Ã‚Â­sico (HP Drain no NÃƒÆ’Ã‚Â­vel Severo)
     IllnessHPDrain = 1,       -- Dreno de HP por tick na doenÃƒÆ’Ã‚Â§a severa
-    PoisonHPDrain = 3         -- Dreno de HP por tick no veneno severo
+    PoisonHPDrain = 3,        -- Dreno de HP por tick no veneno severo
+
+    -- AnimaÃƒÂ§ÃƒÂµes de Tosse (sorteio aleatÃƒÂ³rio entre as ativas)
+    CoughAnimations = {
+        { dict = 'amb_misc@world_human_coughing@male_a@wip_base', anim = 'wip_base' },
+        { dict = 'amb_wander@code_human_coughing_hacking@male_a@wip_base', anim = 'wip_base' },
+        { dict = 'mech_loco_m@character@arthur@fidgets@sick@normal@unarmed', anim = 'cough_f' }
+    },
+    
+    -- AnimaÃƒÂ§ÃƒÂµes de VÃƒÂ´mito (sorteio aleatÃƒÂ³rio entre as ativas)
+    VomitAnimations = {
+        { dict = 'amb_misc@world_human_vomit@male_a@idle_a', anim = 'idle_a' },
+        { dict = 'amb_misc@world_human_vomit_kneel@male_a@idle_a', anim = 'idle_a' },
+        { dict = 'amb_rest_drunk@world_human_drunk_brace_wall@vomit@male_a@idle_a', anim = 'idle_a' }
+    }
 }
 
 -- ==========================================
--- EFEITOS DE BUFFS DE CONSUMÃƒÆ’Ã‚ÂVEIS
+-- EFEITOS DE BUFFS DE CONSUMÃƒÆ’Ã‚Â VEIS
 -- ==========================================
 Config.Buffs = {
     ThermalDuration = 180      -- DuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o padrÃƒÆ’Ã‚Â£o em segundos para proteÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o contra frio/calor (ex: hot_soup)
