@@ -79,7 +79,8 @@ Config.Biological = {
     -- Animações de Tosse (sorteio aleatório entre as ativas)
     CoughAnimations = {
         { dict = 'amb_misc@world_human_coughing@male_a@wip_base', anim = 'wip_base' },
-        { dict = 'amb_wander@code_human_coughing_hacking@male_a@wip_base', anim = 'wip_base' }
+        { dict = 'amb_wander@code_human_coughing_hacking@male_a@wip_base', anim = 'wip_base' },
+        { dict = 'mech_loco_m@character@arthur@fidgets@sick@normal@unarmed', anim = 'cough_f' }
     },
     
     -- AnimaÃƒÂ§ÃƒÂµes de VÃƒÂ´mito (sorteio aleatÃƒÂ³rio entre as ativas)
