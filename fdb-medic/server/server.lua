@@ -53,7 +53,7 @@ for cureType, cureConfig in pairs(Config.InfectionSystem.cureItems) do
         
         -- Remove item from inventory
         Player.Functions.RemoveItem(itemName, 1)
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[itemName], "remove", 1)
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[itemName], "remove", 1)
     end)
     
     if Config.InfectionSystem.debugging.enabled then
@@ -98,7 +98,7 @@ RegisterNetEvent('fdb-medic:server:openstash', function(location)
     if not Player then return end
     local data = { label = locale('sv_medical_storage'), maxweight = Config.StorageMaxWeight, slots = Config.StorageMaxSlots }
     local stashName = 'medic_' .. location
-    exports['rsg-inventory']:OpenInventory(src, stashName, data)
+    exports['fdb-inventory']:OpenInventory(src, stashName, data)
 end)
 
 ----------------------------------
@@ -294,7 +294,7 @@ RegisterNetEvent('fdb-medic:server:RevivePlayer', function(playerId)
     end
 
     if Player.Functions.RemoveItem('firstaid', 1) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items['firstaid'], 'remove')
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items['firstaid'], 'remove')
         TriggerClientEvent('fdb-medic:client:playerRevive', Patient.PlayerData.source)
     end
 end)
@@ -313,7 +313,7 @@ RegisterNetEvent('fdb-medic:server:TreatWounds', function(playerId)
     end
 
     if Player.Functions.RemoveItem('bandage', 1) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items['bandage'], 'remove')
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items['bandage'], 'remove')
         TriggerClientEvent('fdb-medic:client:HealInjuries', Patient.PlayerData.source, 'full')
     end
 end)
@@ -378,7 +378,7 @@ RegisterServerEvent('fdb-medic:server:removeitem', function(item, amount)
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
     Player.Functions.RemoveItem(item, amount)
-    TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[item], 'remove', amount)
+    TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[item], 'remove', amount)
 end)
 
 RegisterServerEvent('fdb-medic:SyncWounds')
@@ -577,7 +577,7 @@ AddEventHandler('fdb-medic:server:PurchasePharmaceutical', function(data)
     end
     
     -- Check if player has inventory space
-    local hasSpace = Player.Functions.AddItem(data.item, data.quantity, false, nil, true) -- dry run
+    local hasSpace = exports['fdb-inventory']:CanAddItem(src, data.item, data.quantity)
     if not hasSpace then
         TriggerClientEvent('ox_lib:notify', src, {
             title = locale('sv_inventory_full'),
@@ -592,7 +592,7 @@ AddEventHandler('fdb-medic:server:PurchasePharmaceutical', function(data)
     Player.Functions.RemoveMoney('cash', data.totalCost, 'pharmaceutical-purchase')
     Player.Functions.AddItem(data.item, data.quantity)
     
-    TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[data.item], "add", data.quantity)
+    TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[data.item], "add", data.quantity)
     
     TriggerClientEvent('ox_lib:notify', src, {
         title = locale('sv_purchase_successful'),
