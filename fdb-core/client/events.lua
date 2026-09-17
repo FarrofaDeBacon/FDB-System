@@ -32,9 +32,9 @@ RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', function()
     SetTimeout(5000, function()
         local ped = PlayerPedId()
         if IsPedMale(ped) then
-            Citizen.InvokeNative(0x6C8065A3B780185B, ped, GetHashKey('03F01C31'))
+            Citizen.InvokeNative(0x6C8065A3B780185B, ped, '03F01C31')
         else
-            Citizen.InvokeNative(0x6C8065A3B780185B, ped, GetHashKey('02298EE3'))
+            Citizen.InvokeNative(0x6C8065A3B780185B, ped, '02298EE3')
         end
     end)
 end)
