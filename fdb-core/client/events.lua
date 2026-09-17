@@ -27,6 +27,16 @@ RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', function()
     Citizen.InvokeNative(0x39363DFD04E91496, PlayerId(), true) -- enable mercy kil
     Citizen.InvokeNative(0x8899C244EBCF70DE, PlayerPedId(), 0.0) -- SetPlayerHealthRechargeMultiplier
     Citizen.InvokeNative(0xDE1B1907A83A1550, PlayerPedId(), 0.0) -- SetHealthRechargeMultiplier
+
+    -- Initialize Voice Bank for MP Peds (required for PlayPain and ambient sounds)
+    SetTimeout(5000, function()
+        local ped = PlayerPedId()
+        if IsPedMale(ped) then
+            Citizen.InvokeNative(0x6C8065A3B780185B, ped, GetHashKey('03F01C31'))
+        else
+            Citizen.InvokeNative(0x6C8065A3B780185B, ped, GetHashKey('02298EE3'))
+        end
+    end)
 end)
 
 RegisterNetEvent('FDBCore:Client:OnPlayerUnload', function()
