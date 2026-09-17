@@ -76,11 +76,10 @@ Config.Biological = {
     IllnessHPDrain = 1,       -- Dreno de HP por tick na doenÃƒÆ’Ã‚Â§a severa
     PoisonHPDrain = 3,        -- Dreno de HP por tick no veneno severo
 
-    -- AnimaÃƒÂ§ÃƒÂµes de Tosse (sorteio aleatÃƒÂ³rio entre as ativas)
+    -- Animações de Tosse (sorteio aleatório entre as ativas)
     CoughAnimations = {
         { dict = 'amb_misc@world_human_coughing@male_a@wip_base', anim = 'wip_base' },
-        { dict = 'amb_wander@code_human_coughing_hacking@male_a@wip_base', anim = 'wip_base' },
-        { dict = 'mech_loco_m@character@arthur@fidgets@sick@normal@unarmed', anim = 'cough_f' }
+        { dict = 'amb_wander@code_human_coughing_hacking@male_a@wip_base', anim = 'wip_base' }
     },
     
     -- AnimaÃƒÂ§ÃƒÂµes de VÃƒÂ´mito (sorteio aleatÃƒÂ³rio entre as ativas)
