@@ -42,8 +42,8 @@ Config.DeathTimer = 70                         -- Death timer in seconds 300 (5 
 Config.UseScreenEffects = true                  -- Enable bleeding/injury screen effects
 
 -- Inventory Integration
-Config.ImagePath = 'rsg-inventory/html/images/' -- Image path for inventory icons
-Config.Image = "rsg-inventory/html/images/"     -- Alternative image path
+Config.ImagePath = 'fdb-inventory/html/images/' -- Image path for inventory icons
+Config.Image = "fdb-inventory/html/images/"     -- Alternative image path
 
 -- Death Camera Settings
 Config.DeadMoveCam = true  -- true = 360° free-look camera (WARNING: High performance impact ~0.10-0.14ms)

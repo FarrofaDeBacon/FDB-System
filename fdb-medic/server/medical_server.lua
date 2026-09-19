@@ -253,7 +253,7 @@ AddEventHandler('fdb-medic:server:MedicApplyBandage', function(targetId, bodyPar
     
     -- Remove item from medic
     if Medic.Functions.RemoveItem(bandageType, 1) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[bandageType], 'remove', 1)
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[bandageType], 'remove', 1)
         
         -- Apply treatment to patient
         TriggerClientEvent('fdb-medic:client:ApplyBandage', Patient.PlayerData.source, bodyPart, bandageType, src)
@@ -316,7 +316,7 @@ AddEventHandler('fdb-medic:server:MedicApplyTourniquet', function(targetId, body
     
     -- Remove item from medic
     if Medic.Functions.RemoveItem(tourniquetType, 1) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[tourniquetType], 'remove', 1)
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[tourniquetType], 'remove', 1)
         
         -- Apply emergency treatment to patient
         TriggerClientEvent('fdb-medic:client:ApplyTourniquet', Patient.PlayerData.source, bodyPart, tourniquetType, src)
@@ -401,7 +401,7 @@ AddEventHandler('fdb-medic:server:MedicApplyMedicine', function(targetId, medici
     
     -- Remove item from medic
     if Medic.Functions.RemoveItem(itemName, 1) then
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[itemName], 'remove', 1)
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[itemName], 'remove', 1)
         
         -- Apply medicine treatment to patient (mark as treated, don't clear wounds)
         TriggerClientEvent('fdb-medic:client:ApplyMedicine', Patient.PlayerData.source, medicineType, src)

@@ -6,7 +6,7 @@ FDBCore.Functions.CreateUseableItem("medicalbag", function(source, item)
 	local Player = FDBCore.Functions.GetPlayer(src)
 	TriggerClientEvent('fdb-medic:client:medicbag', src)
 	Player.Functions.RemoveItem('medicalbag', 1)
-	TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items['medicalbag'], "remove", 1)
+	TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items['medicalbag'], "remove", 1)
 end)
 
 RegisterServerEvent('fdb-medic:server:pickuptab')
@@ -14,7 +14,7 @@ AddEventHandler('fdb-medic:server:pickuptab', function()
 	local src = source
     local Player = FDBCore.Functions.GetPlayer(src)
 	Player.Functions.AddItem('medicalbag', 1)
-	TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items['medicalbag'], "add", 1)
+	TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items['medicalbag'], "add", 1)
 end)
 
 RegisterNetEvent('fdb-medic:server:pickup')
@@ -54,7 +54,7 @@ RegisterServerEvent('fdb-medic:server:finishcrafting', function(data)
         local removed = Player.Functions.RemoveItem(ingredient.item, ingredient.amount)
         if removed then
             print("[DEBUG] Removed " .. ingredient.amount .. " of " .. ingredient.item)
-            TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[ingredient.item], 'remove', ingredient.amount)
+            TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[ingredient.item], 'remove', ingredient.amount)
         else
             print("[DEBUG] Failed to remove item: " .. ingredient.item .. " - Player may not have enough.")
             return
@@ -63,7 +63,7 @@ RegisterServerEvent('fdb-medic:server:finishcrafting', function(data)
     local added = Player.Functions.AddItem(data.receive, data.giveamount)
     if added then
         print("[DEBUG] Successfully added crafted item: " .. data.receive .. " x" .. data.giveamount)
-        TriggerClientEvent('rsg-inventory:client:ItemBox', src, FDBCore.Shared.Items[data.receive], 'add', data.giveamount)
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[data.receive], 'add', data.giveamount)
     else
         print("[DEBUG] Failed to add crafted item: " .. data.receive)
         print("[DEBUG] Check if the item exists in FDBCore.Shared.Items or inventory configuration.")
@@ -78,5 +78,5 @@ RegisterNetEvent('fdb-medic:server:openbaginv', function(location)
     if not Player then return end
     local data = { label = 'Medical Bag', maxweight = Config.BagMaxWeight, slots = Config.BagMaxSlots }
     local stashName = 'medic_bag' .. Player.PlayerData.citizenid
-    exports['rsg-inventory']:OpenInventory(src, stashName, data)
+    exports['fdb-inventory']:OpenInventory(src, stashName, data)
 end)
