@@ -5,7 +5,7 @@ game 'rdr3'
 description 'fdb-shops'
 version '1.0.1'
 
-ui_page 'ui/index.html'
+ui_page 'ui/dist/index.html'
 
 shared_scripts {
     '@ox_lib/init.lua',
@@ -13,6 +13,8 @@ shared_scripts {
 }
 
 client_scripts {
+    'client/freecam.lua',
+    'client/editor.lua',
     'client/client.lua',
     'client/owner_menu.lua',
     'client/crafting.lua',
@@ -27,6 +29,7 @@ server_scripts {
     'server/stash_manager.lua',
     'server/craft_manager.lua',
     'server/admin_commands.lua',
+    'server/editor.lua',
     'server/seed.lua',
     'server/server.lua',
 }
