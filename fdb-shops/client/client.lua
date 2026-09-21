@@ -13,7 +13,7 @@ local shopStations = {}
 
 -- Load Stations from server on player load
 RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', function()
-    fdbLibs:TriggerServerCallbackAsync('fdb-shops:server:getStations', function(stations)
+    fdbLibs:TriggerServerCallback('fdb-shops:server:getStations', function(stations)
         shopStations = stations
         InitializeStations()
     end)
@@ -23,7 +23,7 @@ end)
 CreateThread(function()
     Wait(2000)
     print('[fdb-shops] Requesting stations from server on resource start...')
-    fdbLibs:TriggerServerCallbackAsync('fdb-shops:server:getStations', function(stations)
+    fdbLibs:TriggerServerCallback('fdb-shops:server:getStations', function(stations)
         shopStations = stations
         print(('[fdb-shops] Loaded %s stations from server.'):format(#shopStations))
         InitializeStations()
@@ -33,7 +33,7 @@ end)
 -- Manual fallback command for testing
 RegisterCommand('shopreload', function()
     print('[fdb-shops] Manually requesting stations...')
-    fdbLibs:TriggerServerCallbackAsync('fdb-shops:server:getStations', function(stations)
+    fdbLibs:TriggerServerCallback('fdb-shops:server:getStations', function(stations)
         shopStations = stations
         print(('[fdb-shops] Loaded %s stations from server.'):format(#shopStations))
         InitializeStations()
@@ -126,7 +126,7 @@ function InteractWithStation(station)
 
     elseif station.type == 'registradora' then
         -- Open Owner Menu (NUI)
-        fdbLibs:TriggerServerCallbackAsync('fdb-shops:server:requestOwnerMenu', function(response)
+        fdbLibs:TriggerServerCallback('fdb-shops:server:requestOwnerMenu', function(response)
             if response and response.success then
                 SetNuiFocus(true, true)
                 SendNUIMessage({
@@ -143,7 +143,7 @@ function InteractWithStation(station)
     elseif station.type == 'bau' then
         -- Open Physical Stash
         -- Verify permissions first
-        fdbLibs:TriggerServerCallbackAsync('fdb-shops:server:requestOwnerMenu', function(response)
+        fdbLibs:TriggerServerCallback('fdb-shops:server:requestOwnerMenu', function(response)
             if response and response.success and response.permissions.repor_estoque then
                 TriggerServerEvent('fdb-shops:server:openStash', station.shop_id)
             else

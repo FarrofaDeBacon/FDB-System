@@ -11,7 +11,7 @@ local isCrafting = false
 function OpenCraftMenu(station)
     if isCrafting then return end
 
-    fdbLibs:TriggerServerCallbackAsync('fdb-shops:server:getCraftMenu', function(success, recipesOrError)
+    fdbLibs:TriggerServerCallback('fdb-shops:server:getCraftMenu', function(success, recipesOrError)
         if not success then
             fdbLibs:Notify(recipesOrError, 'error', 3000)
             return
@@ -48,7 +48,7 @@ function StartCrafting(station, recipeId)
     if isCrafting then return end
     isCrafting = true
 
-    fdbLibs:TriggerServerCallbackAsync('fdb-shops:server:requestCraft', function(success, recipeOrError, serverStation)
+    fdbLibs:TriggerServerCallback('fdb-shops:server:requestCraft', function(success, recipeOrError, serverStation)
         if not success then
             fdbLibs:Notify(recipeOrError, 'error', 3000)
             isCrafting = false
