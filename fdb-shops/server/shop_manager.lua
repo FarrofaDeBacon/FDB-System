@@ -56,8 +56,8 @@ end
 
 --- Resolve region and save it when a shop is created or moved
 function ShopManager.UpdateShopRegion(shopId, coords)
-    local zoneName = exports['fdb-core']:GetZoneAtCoords(coords) or "UNKNOWN"
-    local regionId = exports['fdb-economy']:resolveRegion(zoneName)
+    -- Server cannot natively resolve zones. This should be set manually or via client.
+    local regionId = nil
 
     if regionId then
         MySQL.update('UPDATE shops SET region_id = ? WHERE shop_id = ?', { regionId, shopId })

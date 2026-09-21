@@ -243,6 +243,15 @@ local fallbackStores = {
     }
 }
 
+local function GuessRegion(shopName)
+    local n = string.lower(shopName)
+    if n:find("valentine") or n:find("annesburg") or n:find("vanhorn") or n:find("val-") or n:find("ann-") or n:find("old-") then return "new_hanover" end
+    if n:find("rhodes") or n:find("stdenis") or n:find("rho-") or n:find("lab-") then return "lemoyne" end
+    if n:find("tumbleweed") or n:find("armadillo") or n:find("tum-") or n:find("arm-") then return "new_austin" end
+    if n:find("blackwater") or n:find("blk-") then return "west_elizabeth" end
+    return nil
+end
+
 CreateThread(function()
     Wait(5000) -- Wait for schemas and ShopManager to load
 
@@ -278,8 +287,7 @@ CreateThread(function()
             local blip = loc.blipsprite
 
             -- Find region
-            local zoneName = exports['fdb-core']:GetZoneAtCoords(coords) or "UNKNOWN"
-            local regionId = exports['fdb-economy']:resolveRegion(zoneName)
+            local regionId = GuessRegion(shopId)
 
             -- Insert Shop
             MySQL.insert('INSERT IGNORE INTO shops (shop_id, template_id, label, region_id, buy_catalog, config) VALUES (?, ?, ?, ?, ?, ?)', {
