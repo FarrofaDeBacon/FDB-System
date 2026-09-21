@@ -2,9 +2,9 @@
   import { onMount } from 'svelte';
   import './app.css';
 
-  let visible = false;
-  let stores = [];
-  let selectedStore = null;
+  let visible = $state(false);
+  let stores = $state([]);
+  let selectedStore = $state(null);
 
   onMount(() => {
     window.addEventListener('message', (event) => {
