@@ -22,12 +22,12 @@ end)
 -- Temporary fallback for restart script
 CreateThread(function()
     Wait(2000)
-    if LocalPlayer.state.isLoggedIn then
-        fdbLibs:TriggerServerCallbackAsync('fdb-shops:server:getStations', function(stations)
-            shopStations = stations
-            InitializeStations()
-        end)
-    end
+    print('[fdb-shops] Requesting stations from server on resource start...')
+    fdbLibs:TriggerServerCallbackAsync('fdb-shops:server:getStations', function(stations)
+        shopStations = stations
+        print(('[fdb-shops] Loaded %s stations from server.'):format(#shopStations))
+        InitializeStations()
+    end)
 end)
 
 function InitializeStations()
@@ -36,6 +36,7 @@ function InitializeStations()
         if DoesEntityExist(entity) then DeleteEntity(entity) end
     end
     spawnedEntities = {}
+    print('[fdb-shops] Initializing stations...')
 
     for _, station in ipairs(shopStations) do
         -- 1. Create Zone / Interaction Point using fdb-libs
@@ -55,6 +56,7 @@ function InitializeStations()
             SpawnStationProp(station)
         end
     end
+    print(('[fdb-shops] Successfully created %s interaction zones.'):format(#shopStations))
 end
 
 function GetStationPrompt(stationType)
