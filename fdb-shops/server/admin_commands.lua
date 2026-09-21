@@ -4,6 +4,7 @@
 -- ============================================================
 
 local FDBCore = exports['fdb-core']:GetCoreObject()
+local fdbLibs = exports['fdb-libs']
 
 -- /shopcreate [templateId] [shopId] [label]
 FDBCore.Commands.Add('shopcreate', 'Criar uma nova loja física a partir de um template', {
@@ -16,17 +17,17 @@ FDBCore.Commands.Add('shopcreate', 'Criar uma nova loja física a partir de um t
     local label = table.concat(args, ' ', 3)
 
     if not templateId or not shopId or not label or label == '' then
-        TriggerClientEvent('ox_lib:notify', source, {title = 'Uso Incorreto', description = '/shopcreate [template] [id] [nome]', type = 'error'})
+        fdbLibs:Notify(source, '/shopcreate [template] [id] [nome]', 'error')
         return
     end
 
     if not ShopManager.Templates[templateId] then
-        TriggerClientEvent('ox_lib:notify', source, {title = 'Erro', description = 'Template não encontrado: ' .. templateId, type = 'error'})
+        fdbLibs:Notify(source, 'Template não encontrado: ' .. templateId, 'error')
         return
     end
 
     if ShopManager.Shops[shopId] then
-        TriggerClientEvent('ox_lib:notify', source, {title = 'Erro', description = 'Loja com ID ' .. shopId .. ' já existe.', type = 'error'})
+        fdbLibs:Notify(source, 'Loja com ID ' .. shopId .. ' já existe.', 'error')
         return
     end
 
@@ -57,7 +58,7 @@ FDBCore.Commands.Add('shopcreate', 'Criar uma nova loja física a partir de um t
 
     ShopManager.UpdateShopRegion(shopId, coords)
 
-    TriggerClientEvent('ox_lib:notify', source, {title = 'Sucesso', description = 'Loja criada e adicionada à memória.', type = 'success'})
+    fdbLibs:Notify(source, 'Loja criada e adicionada à memória.', 'success')
 end, 'admin')
 
 
@@ -75,7 +76,7 @@ FDBCore.Commands.Add('shopsetowner', 'Define o dono de uma loja', {
 
     local shop = ShopManager.GetShop(shopId)
     if not shop then
-        TriggerClientEvent('ox_lib:notify', source, {title = 'Erro', description = 'Loja não encontrada', type = 'error'})
+        fdbLibs:Notify(source, 'Loja não encontrada', 'error')
         return
     end
 
@@ -92,7 +93,7 @@ FDBCore.Commands.Add('shopsetowner', 'Define o dono de uma loja', {
         end
 
         if ownedCount >= Config.MaxShopsPerOwner then
-            TriggerClientEvent('ox_lib:notify', source, {title = 'Erro', description = 'Jogador atingiu o limite de lojas: ' .. Config.MaxShopsPerOwner, type = 'error'})
+            fdbLibs:Notify(source, 'Jogador atingiu o limite de lojas: ' .. Config.MaxShopsPerOwner, 'error')
             return
         end
     end
@@ -100,7 +101,7 @@ FDBCore.Commands.Add('shopsetowner', 'Define o dono de uma loja', {
     shop.ownerId = citizenid
     MySQL.update('UPDATE shops SET owner_id = ? WHERE shop_id = ?', {citizenid, shopId})
 
-    TriggerClientEvent('ox_lib:notify', source, {title = 'Sucesso', description = 'Dono atualizado para: ' .. (citizenid or "Nenhum"), type = 'success'})
+    fdbLibs:Notify(source, 'Dono atualizado para: ' .. (citizenid or "Nenhum"), 'success')
 end, 'admin')
 
 -- /shopinfo [shopId]
@@ -112,7 +113,7 @@ FDBCore.Commands.Add('shopinfo', 'Exibe informações de debug da loja', {
 
     local shop = ShopManager.GetShop(shopId)
     if not shop then
-        TriggerClientEvent('ox_lib:notify', source, {title = 'Erro', description = 'Loja não encontrada', type = 'error'})
+        fdbLibs:Notify(source, 'Loja não encontrada', 'error')
         return
     end
 
