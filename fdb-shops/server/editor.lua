@@ -1,8 +1,9 @@
 -- fdb-shops/server/editor.lua
 local FDBCore = exports['fdb-core']:GetCoreObject()
 
-FDBCore.Commands.Add('editshops', 'Abre o painel visual Svelte para gerenciar lojas', {}, false, function(source, args)
+RegisterCommand('editshops', function(source, args)
     local src = source
+    if not FDBCore.Functions.HasPermission(src, 'admin') then return end
     
     -- Load all shops to display in the UI
     local shopsList = {}
@@ -27,4 +28,12 @@ FDBCore.Commands.Add('editshops', 'Abre o painel visual Svelte para gerenciar lo
     end
 
     TriggerClientEvent('fdb-shops:client:openEditor', src, shopsList)
-end, 'admin')
+end, true)
+
+-- Add suggestion for connected players
+CreateThread(function()
+    Wait(1000)
+    for _, playerId in ipairs(GetPlayers()) do
+        TriggerClientEvent('chat:addSuggestion', playerId, '/editshops', 'Abre o painel visual Svelte para gerenciar lojas', {})
+    end
+end)
