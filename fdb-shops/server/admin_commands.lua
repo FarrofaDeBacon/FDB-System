@@ -68,7 +68,7 @@ FDBCore.Commands.Add('shopcreate', 'Criar uma nova loja física a partir de um t
 
     -- 2. Physical Stash
     MySQL.insert('INSERT INTO shop_stations (shop_id, type, position) VALUES (?, ?, ?)', {
-        shopId, 'stash', json.encode({ x = cx + 1.5, y = cy, z = cz })
+        shopId, 'bau', json.encode({ x = cx + 1.5, y = cy, z = cz })
     })
 
     -- 3. Craft Station (allowing all template recipes by default for testing)
@@ -82,6 +82,14 @@ FDBCore.Commands.Add('shopcreate', 'Criar uma nova loja física a partir de um t
     MySQL.insert('INSERT INTO shop_stations (shop_id, type, position, allowed_recipes, animation_dict, animation_name) VALUES (?, ?, ?, ?, ?, ?)', {
         shopId, 'craft', json.encode({ x = cx - 1.5, y = cy, z = cz }), json.encode(allowedRecipes), 'mini@repair', 'fixing_a_ped'
     })
+
+    -- 4. Enable Recipes in shop_recipes table
+    if #allowedRecipes > 0 then
+        for _, recipeId in ipairs(allowedRecipes) do
+            MySQL.insert('INSERT IGNORE INTO shop_recipes (shop_id, recipe_id) VALUES (?, ?)', { shopId, recipeId })
+            table.insert(ShopManager.Shops[shopId].enabledRecipes, recipeId)
+        end
+    end
 
     fdbLibs:Notify(source, 'Loja salva! REINICIE o script (ensure fdb-shops) para spawnar os blips e bancadas.', 'success', 8000)
 end, 'admin')
