@@ -94,6 +94,27 @@ FDBCore.Commands.Add('shopcreate', 'Criar uma nova loja física a partir de um t
     fdbLibs:Notify(source, 'Loja salva! REINICIE o script (ensure fdb-shops) para spawnar os blips e bancadas.', 'success', 8000)
 end, 'admin')
 
+-- Teleporta até uma loja existente (Para testes do admin)
+FDBCore.Commands.Add('shopgo', 'Teleporta até uma loja', {{name = 'shopId', help = 'ID da loja (ex: gen-valentine)'}}, true, function(source, args)
+    local shopId = args[1]
+    if not shopId then return end
+    
+    -- Busca as coordenadas da registradora ou do npc dessa loja
+    local result = MySQL.query.await('SELECT position FROM shop_stations WHERE shop_id = ? LIMIT 1', { shopId })
+    if result and result[1] then
+        local pos = json.decode(result[1].position)
+        local Player = FDBCore.Functions.GetPlayer(source)
+        
+        if pos and pos.x then
+            -- SetPedCoordsKeepVehicle requires x,y,z
+            SetEntityCoords(GetPlayerPed(source), pos.x, pos.y, pos.z, false, false, false, false)
+            fdbLibs:Notify(source, 'Teleportado para a loja: ' .. shopId, 'success', 3000)
+        end
+    else
+        fdbLibs:Notify(source, 'Loja não encontrada', 'error', 3000)
+    end
+end, 'admin')
+
 
 -- /shopsetowner [shopId] [citizenid]
 FDBCore.Commands.Add('shopsetowner', 'Define o dono de uma loja', {
