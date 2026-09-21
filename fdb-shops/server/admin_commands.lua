@@ -115,6 +115,32 @@ FDBCore.Commands.Add('shopgo', 'Teleporta até uma loja', {{name = 'shopId', hel
     end
 end, 'admin')
 
+-- Comando para mover uma bancada/NPC para onde o admin está pisando
+FDBCore.Commands.Add('shopmovestation', 'Move uma bancada/NPC para sua posição atual', {
+    {name = 'shopId', help = 'ID da loja (ex: gen-valentine)'},
+    {name = 'type', help = 'Tipo (registradora, npc, bau, craft, etc)'}
+}, true, function(source, args)
+    local shopId = args[1]
+    local type = args[2]
+    if not shopId or not type then return end
+    
+    local ped = GetPlayerPed(source)
+    local coords = GetEntityCoords(ped)
+    local heading = GetEntityHeading(ped)
+    
+    local posStr = json.encode({ x = math.floor(coords.x*100)/100, y = math.floor(coords.y*100)/100, z = math.floor(coords.z*100)/100 })
+    
+    local rows = MySQL.update.await('UPDATE shop_stations SET position = ?, npc_heading = ? WHERE shop_id = ? AND type = ?', {
+        posStr, heading, shopId, type
+    })
+    
+    if rows > 0 then
+        fdbLibs:Notify(source, ('Bancada %s atualizada! Dê /shopreload'):format(type), 'success', 5000)
+    else
+        fdbLibs:Notify(source, 'Bancada não encontrada nessa loja.', 'error', 5000)
+    end
+end, 'admin')
+
 
 -- /shopsetowner [shopId] [citizenid]
 FDBCore.Commands.Add('shopsetowner', 'Define o dono de uma loja', {
