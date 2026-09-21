@@ -35,11 +35,16 @@ CreateThread(function()
     end
 end)
 
--- Mapping: Zone Name -> Region ID
+-- Mapping: Zone Name -> Region ID with validation
 local zoneToRegionMap = {}
 for regionId, zones in pairs(Config.RegionZones) do
     for _, zone in ipairs(zones) do
-        zoneToRegionMap[string.upper(zone)] = regionId
+        local uZone = string.upper(zone)
+        if zoneToRegionMap[uZone] then
+            print(('^1[%s] ERROR: Zone %s is duplicated in regions %s and %s!^7'):format(resourceName, uZone, zoneToRegionMap[uZone], regionId))
+        else
+            zoneToRegionMap[uZone] = regionId
+        end
     end
 end
 

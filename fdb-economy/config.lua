@@ -56,7 +56,7 @@ Config.RegionZones = {
     },
     ambarino = {
         'COLTER', 'GRIZZLIES', 'GRIZZ', 'WAPITI',
-        'DAKOTA', 'CUMBER', 'WINDOW', 'SPIDER',
+        'DAKOTA', 'WINDOW', 'SPIDER',
         'TEMPER', 'BARROW', 'CAIRN', 'DONNER',
     },
     new_austin = {
