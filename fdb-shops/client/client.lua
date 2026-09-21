@@ -88,7 +88,7 @@ function SpawnStationNPC(station)
     lib.requestModel(model, 5000)
     if not HasModelLoaded(joaat(model)) then return end
 
-    local npc = CreatePed(model, coords.x, coords.y, coords.z - 1.0, station.npc_heading or 0.0, false, false, false, false)
+    local npc = CreatePed(joaat(model), coords.x, coords.y, coords.z - 1.0, station.npc_heading or 0.0, false, false, false, false)
     if npc and npc ~= 0 then
         Citizen.InvokeNative(0x283978A15512B2FE, npc, true)
         SetEntityNoCollisionEntity(npc, PlayerPedId(), false)
