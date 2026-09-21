@@ -6,6 +6,10 @@
 local FDBCore = exports['fdb-core']:GetCoreObject()
 local fdbLibs = exports['fdb-libs']
 
+-- Memory map for active crafts to prevent timing cheats
+-- Structure: ActiveCrafts[citizenid] = { recipeId = '...', stationId = '...', startedAt = os.time(), timeNeeded = 5 }
+local ActiveCrafts = {}
+
 -- ==========================================
 -- Helper Functions
 -- ==========================================
@@ -70,6 +74,11 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:getCraftMenu', function(source,
         return
     end
 
+    if station.shop_id ~= shopId then
+        cb(false, "Esta bancada não pertence a esta loja.")
+        return
+    end
+
     -- 2. Build 3-Layer Cascaded Recipe List (Template -> Shop -> Station)
     local availableRecipes = {}
     
@@ -115,6 +124,11 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:requestCraft', function(source,
         return
     end
 
+    if station.shop_id ~= shopId then
+        cb(false, "Esta bancada não pertence a esta loja.")
+        return
+    end
+
     if not tableContains(shop.enabledRecipes, recipeId) then
         cb(false, "Esta receita está desativada na loja.")
         return
@@ -133,6 +147,14 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:requestCraft', function(source,
         cb(false, "Receita não encontrada no template.")
         return
     end
+
+    -- Register the craft in memory to prevent speed hacking
+    ActiveCrafts[citizenid] = {
+        recipeId = recipeId,
+        stationId = stationId,
+        startedAt = os.time(),
+        timeNeeded = math.ceil((targetRecipe.time or 5000) / 1000)
+    }
 
     -- Return success to client so it can start the progress bar and animations
     cb(true, targetRecipe, station)
@@ -161,6 +183,29 @@ RegisterNetEvent('fdb-shops:server:completeCraft', function(shopId, recipeId, st
     local station = getStationFromDB(stationId)
 
     if not shop or not template or not station then return end
+
+    if station.shop_id ~= shopId then
+        fdbLibs:Notify(src, "Bancada inválida.", "error")
+        return
+    end
+
+    -- Anti-Cheat Time Verification
+    local activeCraft = ActiveCrafts[citizenid]
+    if not activeCraft or activeCraft.recipeId ~= recipeId or activeCraft.stationId ~= stationId then
+        fdbLibs:Notify(src, "Fabricação não autorizada ou já processada.", "error")
+        return
+    end
+
+    local timePassed = os.time() - activeCraft.startedAt
+    if timePassed < (activeCraft.timeNeeded - 1) then -- 1 second tolerance for network lag
+        fdbLibs:Notify(src, "Fabricação rápida detectada (Anti-Cheat).", "error")
+        -- Clear state
+        ActiveCrafts[citizenid] = nil
+        return
+    end
+
+    -- Clear state to prevent double execution
+    ActiveCrafts[citizenid] = nil
 
     -- Distance check (Security to ensure player didn't teleport away)
     local ped = GetPlayerPed(src)

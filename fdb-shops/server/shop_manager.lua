@@ -100,7 +100,7 @@ function ShopManager.GetFinalPrice(shopId, itemName)
 end
 
 --- Log a transaction and notify the economy engine
-function ShopManager.LogTransaction(shopId, playerId, txType, itemName, qty, unitPrice, totalPrice)
+function ShopManager.LogTransaction(shopId, playerId, txType, itemName, qty, unitPrice, totalPrice, categoryOverride)
     local shop = ShopManager.GetShop(shopId)
     if not shop then return end
 
@@ -111,11 +111,15 @@ function ShopManager.LogTransaction(shopId, playerId, txType, itemName, qty, uni
 
     -- Notify economy engine
     if shop.regionId then
-        local cat = "materials"
-        for _, item in ipairs(shop.buyCatalog) do
-            if item.name == itemName then
-                cat = item.category or "materials"
-                break
+        local cat = categoryOverride
+        
+        if not cat then
+            cat = "materials"
+            for _, item in ipairs(shop.buyCatalog) do
+                if item.name == itemName then
+                    cat = item.category or "materials"
+                    break
+                end
             end
         end
 
