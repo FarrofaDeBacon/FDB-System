@@ -51,15 +51,15 @@ CreateThread(function()
             INSERT IGNORE INTO region_economy (region_id, base_rate, category_modifiers, min_rate, max_rate, volume_weight, money_supply_weight, recalc_interval_minutes, decay_toward_baseline)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ]], {
-            regionId,
+            regionId, 
             Config.DefaultBaseRate,
-            json.encode({}), -- CategoryModifiers placeholder or default
-            Config.DefaultRegionConfig.minRate,
-            Config.DefaultRegionConfig.maxRate,
-            Config.DefaultRegionConfig.volumeWeight,
-            Config.DefaultRegionConfig.moneySupplyWeight,
+            json.encode(Config.CategoryModifiers),
+            Config.DefaultMinRate,
+            Config.DefaultMaxRate,
+            Config.VolumeWeight,
+            Config.MoneySupplyWeight,
             Config.RecalcIntervalMinutes,
-            Config.DefaultRegionConfig.decayTowardBaseline,
+            Config.DecayTowardBaseline
         })
     end
 
