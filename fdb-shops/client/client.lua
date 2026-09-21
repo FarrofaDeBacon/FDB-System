@@ -12,7 +12,7 @@ local spawnedEntities = {}
 local shopStations = {}
 
 -- Load Stations from server on player load
-RegisterNetEvent('fdb-core:client:PlayerLoaded', function()
+RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', function()
     fdbLibs:TriggerServerCallbackAsync('fdb-shops:server:getStations', function(stations)
         shopStations = stations
         InitializeStations()
