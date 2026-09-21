@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel da Loja</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: transparent;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #app {
+            background-color: rgba(30, 30, 30, 0.95);
+            color: #fff;
+            width: 800px;
+            height: 600px;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #444;
+            padding-bottom: 10px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .close-btn {
+            background: #d9534f;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .content {
+            display: flex;
+            flex: 1;
+            margin-top: 20px;
+        }
+
+        .sidebar {
+            width: 200px;
+            border-right: 2px solid #444;
+            padding-right: 20px;
+        }
+
+        .sidebar button {
+            width: 100%;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            text-align: left;
+            border-radius: 3px;
+        }
+
+        .sidebar button:hover, .sidebar button.active {
+            background: #555;
+        }
+
+        .main-panel {
+            flex: 1;
+            padding-left: 20px;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .stat-box {
+            background: #222;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #444;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 15px 0;
+            background: #333;
+            border: 1px solid #555;
+            color: white;
+            box-sizing: border-box;
+        }
+
+        .action-btn {
+            background: #5cb85c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="header">
+            <h1 id="shop-title">Painel da Loja</h1>
+            <button class="close-btn" onclick="closeUI()">Fechar</button>
+        </div>
+        
+        <div class="content">
+            <div class="sidebar">
+                <button class="nav-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+                <button class="nav-btn" onclick="switchTab('finances')">Financeiro</button>
+                <button class="nav-btn" onclick="switchTab('prices')">Preços</button>
+                <button class="nav-btn" onclick="switchTab('employees')">Funcionários</button>
+            </div>
+            
+            <div class="main-panel">
+                <!-- Dashboard -->
+                <div id="dashboard" class="panel active">
+                    <h2>Visão Geral</h2>
+                    <div class="stat-box">
+                        <p><strong>Dono:</strong> <span id="owner-id">Nenhum</span></p>
+                        <p><strong>Região:</strong> <span id="region-id">Nenhuma</span></p>
+                    </div>
+                </div>
+
+                <!-- Financeiro -->
+                <div id="finances" class="panel">
+                    <h2>Financeiro</h2>
+                    <div class="stat-box">
+                        <h3>Caixa Atual: <span style="color: #5cb85c;">$<span id="cash-balance">0.00</span></span></h3>
+                    </div>
+                    
+                    <label>Valor:</label>
+                    <input type="number" id="finance-amount" placeholder="0.00" step="0.01">
+                    
+                    <button class="action-btn" onclick="handleDeposit()">Depositar</button>
+                    <button class="action-btn" style="background: #d9534f;" onclick="handleWithdraw()">Sacar</button>
+                </div>
+
+                <!-- Preços -->
+                <div id="prices" class="panel">
+                    <h2>Variação de Preços</h2>
+                    <p>Defina o ajuste de preço para sua loja em relação à economia regional. (Ex: 0.10 para +10%, -0.05 para -5%)</p>
+                    
+                    <label>Variação Atual: <span id="current-variation">0%</span></label>
+                    <input type="number" id="price-variation" placeholder="0.00" step="0.01">
+                    
+                    <button class="action-btn" onclick="handleUpdateVariation()">Atualizar Variação</button>
+                </div>
+
+                <!-- Funcionários -->
+                <div id="employees" class="panel">
+                    <h2>Funcionários</h2>
+                    <div class="stat-box">
+                        <p>Recurso em desenvolvimento para a NUI.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentShopId = null;
+
+        window.addEventListener('message', function(event) {
+            let data = event.data;
+            if (data.action === 'openOwnerMenu') {
+                document.body.style.display = 'flex';
+                currentShopId = data.shopId;
+                
+                // Popula os dados
+                document.getElementById('shop-title').innerText = "Painel: " + data.shopData.label;
+                document.getElementById('owner-id').innerText = data.shopData.ownerId || "Nenhum";
+                document.getElementById('region-id').innerText = data.shopData.regionId || "Nenhuma";
+                document.getElementById('cash-balance').innerText = parseFloat(data.shopData.cashBalance).toFixed(2);
+                document.getElementById('current-variation').innerText = (parseFloat(data.shopData.ownerPriceVariation) * 100).toFixed(0) + "%";
+                document.getElementById('price-variation').value = parseFloat(data.shopData.ownerPriceVariation).toFixed(2);
+            }
+        });
+
+        function closeUI() {
+            document.body.style.display = 'none';
+            fetch(`https://${GetParentResourceName()}/close`, {
+                method: 'POST',
+                body: JSON.stringify({})
+            });
+        }
+
+        document.onkeyup = function (data) {
+            if (data.key === 'Escape') {
+                closeUI();
+            }
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function handleDeposit() {
+            let amount = parseFloat(document.getElementById('finance-amount').value);
+            if (isNaN(amount) || amount <= 0) return;
+            
+            fetch(`https://${GetParentResourceName()}/deposit`, {
+                method: 'POST',
+                body: JSON.stringify({ shopId: currentShopId, amount: amount })
+            }).then(() => {
+                closeUI();
+            });
+        }
+
+        function handleWithdraw() {
+            let amount = parseFloat(document.getElementById('finance-amount').value);
+            if (isNaN(amount) || amount <= 0) return;
+            
+            fetch(`https://${GetParentResourceName()}/withdraw`, {
+                method: 'POST',
+                body: JSON.stringify({ shopId: currentShopId, amount: amount })
+            }).then(() => {
+                closeUI();
+            });
+        }
+
+        function handleUpdateVariation() {
+            let variation = parseFloat(document.getElementById('price-variation').value);
+            if (isNaN(variation)) return;
+            
+            fetch(`https://${GetParentResourceName()}/updateVariation`, {
+                method: 'POST',
+                body: JSON.stringify({ shopId: currentShopId, variation: variation })
+            }).then(() => {
+                closeUI();
+            });
+        }
+    </script>
+</body>
+</html>

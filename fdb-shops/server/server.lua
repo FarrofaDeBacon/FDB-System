@@ -14,6 +14,34 @@ local fdbLibs = exports['fdb-libs']
 -- Callbacks (Client -> Server Requests)
 -- ==========================================
 
+-- Fetch physical stations for a client
+fdbLibs:RegisterServerCallback('fdb-shops:server:getStations', function(source, cb)
+    local stations = {}
+    local result = MySQL.query.await('SELECT * FROM shop_stations')
+    if result then
+        for _, row in ipairs(result) do
+            table.insert(stations, {
+                id = row.id,
+                shop_id = row.shop_id,
+                type = row.type,
+                position = json.decode(row.position),
+                allowed_recipes = json.decode(row.allowed_recipes) or {},
+                prop_model = row.prop_model,
+                animation_dict = row.animation_dict,
+                animation_name = row.animation_name,
+                npc_model = row.npc_model,
+                npc_heading = row.npc_heading,
+                spawn_condition = row.spawn_condition,
+                hide_when_owner_present = row.hide_when_owner_present == 1,
+                hide_radius = row.hide_radius,
+                fallback_npc = json.decode(row.fallback_npc) or {},
+                config = json.decode(row.config) or {}
+            })
+        end
+    end
+    cb(stations)
+end)
+
 -- Check if a player can open the owner NUI
 fdbLibs:RegisterServerCallback('fdb-shops:server:requestOwnerMenu', function(source, cb, shopId)
     local Player = FDBCore.Functions.GetPlayer(source)
@@ -109,6 +137,18 @@ RegisterNetEvent('fdb-shops:server:openstore', function(shopId)
 end)
 
 -- Owner/Employee Actions
+
+RegisterNetEvent('fdb-shops:server:openStash', function(shopId)
+    local src = source
+    local Player = FDBCore.Functions.GetPlayer(src)
+    if not Player then return end
+
+    if EmployeeManager.HasPermission(shopId, Player.PlayerData.citizenid, 'repor_estoque') then
+        StashManager.OpenStock(src, shopId)
+    else
+        fdbLibs:Notify(src, "Você não tem permissão para acessar o estoque", "error")
+    end
+end)
 
 RegisterNetEvent('fdb-shops:server:depositCash', function(shopId, amount)
     local src = source

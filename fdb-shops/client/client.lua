@@ -1,160 +1,183 @@
+-- ============================================================
+-- FDB System | fdb-shops | client/client.lua
+-- Core Client Logic (Spawning stations, handling interactions)
+-- ============================================================
+
 local FDBCore = exports['fdb-core']:GetCoreObject()
+local fdbLibs = exports['fdb-libs']
 local resourceName = GetCurrentResourceName()
-local spawnedNPCs = {}
 lib.locale()
 
-local function logError(msg)
-    print(('[%s] ^1ERROR^7 %s'):format(resourceName, msg))
-end
+local spawnedEntities = {}
+local shopStations = {}
 
-local function logWarn(msg)
-    print(('[%s] ^3WARN^7 %s'):format(resourceName, msg))
-end
+-- Load Stations from server on player load
+RegisterNetEvent('fdb-core:client:PlayerLoaded', function()
+    fdbLibs:TriggerServerCallbackAsync('fdb-shops:server:getStations', function(stations)
+        shopStations = stations
+        InitializeStations()
+    end)
+end)
 
--------------------------
--- spawn npc
--------------------------
-local function SpawnShopNPC(shopData)
-    if not shopData or not shopData.shopcoords then
-        logError(locale('spawn_npc_invalid_data'))
-        return nil
-    end
-
-    local model = shopData.npcmodel or Config.NPCModel
-    local coords = shopData.npccoords or vector4(shopData.shopcoords.x, shopData.shopcoords.y, shopData.shopcoords.z, 0.0)
-
-    local modelLoaded, modelLoadError = pcall(lib.requestModel, model, 5000)
-    if not modelLoaded or not HasModelLoaded(joaat(model)) then
-        logWarn(locale('model_load_failed', tostring(model), tostring(shopData.name)))
-        return nil
-    end
-
-    local npc = CreatePed(model, coords.x, coords.y, coords.z - 1, coords.w, false, false, false, false)
-    if not npc or npc == 0 then
-        logWarn(locale('npc_create_failed', tostring(shopData.name)))
-        return nil
-    end
-
-    Citizen.InvokeNative(0x283978A15512B2FE, npc, true)
-    SetEntityNoCollisionEntity(npc, PlayerPedId(), false)
-    SetEntityCanBeDamaged(npc, false)
-    SetEntityInvincible(npc, true)
-    FreezeEntityPosition(npc, true)
-
-    -- Permite que outros scripts (como o illegal-system) injetem lógica no NPC criado
-    TriggerEvent('fdb-shops:client:npcCreated', npc, shopData)
-
-    if shopData.scenario then
-        pcall(TaskStartScenarioInPlace, npc, joaat(shopData.scenario), -1, true, false, false, false)
-    end
-
-    return npc
-end
-
--------------------------
--- setup ox_target for npc
--------------------------
-local function SetupNPCTarget(npc, shopData)
-    if not npc or npc == 0 then return end
-
-    local success, err = pcall(exports.ox_target.addLocalEntity, exports.ox_target, npc, {
-        {
-            name = 'shop_' .. shopData.name,
-            label = locale('lang_1') .. shopData.label,
-            icon = 'fa-solid fa-basket-shopping',
-            distance = 3.0,
-            onSelect = function()
-                TriggerServerEvent('fdb-shops:server:openstore', shopData.products, shopData.name, shopData.label)
-            end
-        }
-    })
-    if not success then
-        logWarn(locale('ox_target_setup_failed', tostring(shopData.name), tostring(err)))
-    end
-end
-
--------------------------
--- prompts & blips
--------------------------
+-- Temporary fallback for restart script
 CreateThread(function()
-    local keybind = FDBCore.Shared.Keybinds[Config.Keybind] or Config.Keybind
-    local createdPrompts = {}
-
-    -- Inicialização: Cria blips e prompts (se não usar NPC) apenas uma vez
-    for _, v in pairs(Config.StoreLocations) do
-        if not v.name or not v.shopcoords then
-            logWarn(locale('shop_skipped_missing_fields'))
-            goto continue
-        end
-
-        if not Config.UseNPCs or not v.npccoords then
-            pcall(exports['fdb-core'].createPrompt, exports['fdb-core'],
-                v.name, v.shopcoords, keybind,
-                locale('lang_1') .. v.label, {
-                    type = 'server',
-                    event = 'fdb-shops:server:openstore',
-                    args = {v.products, v.name, v.label},
-                })
-        end
-
-        if v.showblip == true then
-            local StoreBlip = BlipAddForCoords(1664425300, v.shopcoords)
-            if StoreBlip and StoreBlip ~= 0 then
-                SetBlipSprite(StoreBlip, joaat(v.blipsprite), true)
-                SetBlipScale(StoreBlip, v.blipscale)
-                SetBlipName(StoreBlip, v.label)
-            else
-                logWarn(locale('blip_create_failed', tostring(v.label)))
-            end
-        end
-
-        ::continue::
-    end
-
-    -- Loop de gerenciamento dinâmico de NPCs (Ciclo Dia/Noite)
-    while true do
-        Wait(5000)
-        local hour = GetClockHours()
-        
-        for _, v in pairs(Config.StoreLocations) do
-            if Config.UseNPCs and v.npccoords then
-                local openH = v.openHour or Config.DefaultOpenHour
-                local closeH = v.closeHour or Config.DefaultCloseHour
-                
-                local isOpen = false
-                if openH < closeH then
-                    isOpen = (hour >= openH and hour < closeH)
-                else
-                    isOpen = (hour >= openH or hour < closeH)
-                end
-                
-                if isOpen and not spawnedNPCs[v.name] then
-                    local npc = SpawnShopNPC(v)
-                    if npc then
-                        spawnedNPCs[v.name] = npc
-                        SetupNPCTarget(npc, v)
-                    end
-                elseif not isOpen and spawnedNPCs[v.name] then
-                    local npc = spawnedNPCs[v.name]
-                    if DoesEntityExist(npc) then
-                        exports.ox_target:removeLocalEntity(npc)
-                        DeleteEntity(npc)
-                    end
-                    spawnedNPCs[v.name] = nil
-                end
-            end
-        end
+    Wait(2000)
+    if LocalPlayer.state.isLoggedIn then
+        fdbLibs:TriggerServerCallbackAsync('fdb-shops:server:getStations', function(stations)
+            shopStations = stations
+            InitializeStations()
+        end)
     end
 end)
 
--------------------------
--- cleanup on resource stop
--------------------------
-AddEventHandler('onResourceStop', function(resourceName)
-    if GetCurrentResourceName() ~= resourceName then return end
-    for _, npc in pairs(spawnedNPCs) do
-        if DoesEntityExist(npc) then
-            pcall(DeleteEntity, npc)
+function InitializeStations()
+    -- Cleanup previous
+    for _, entity in pairs(spawnedEntities) do
+        if DoesEntityExist(entity) then DeleteEntity(entity) end
+    end
+    spawnedEntities = {}
+
+    for _, station in ipairs(shopStations) do
+        -- 1. Create Zone / Interaction Point using fdb-libs
+        fdbLibs:CreateZone('shop_station_' .. station.id, vec3(station.position.x, station.position.y, station.position.z), 2.0, {
+            drawMarker = (station.type ~= 'npc'), -- Only draw marker if it's not an NPC
+            showPrompt = true,
+            promptText = GetStationPrompt(station.type),
+            onKeyPress = function()
+                InteractWithStation(station)
+            end
+        })
+
+        -- 2. Spawn Visuals (NPCs or Props)
+        if station.type == 'npc' and station.npc_model then
+            SpawnStationNPC(station)
+        elseif station.prop_model then
+            SpawnStationProp(station)
+        end
+    end
+end
+
+function GetStationPrompt(stationType)
+    local prompts = {
+        ['registradora'] = 'Abrir Registradora',
+        ['bau'] = 'Abrir Estoque',
+        ['craft'] = 'Produzir Itens',
+        ['venda'] = 'Abrir Catálogo',
+        ['npc'] = 'Falar',
+        ['supply_board'] = 'Quadro de Entregas'
+    }
+    return prompts[stationType] or 'Interagir'
+end
+
+function SpawnStationNPC(station)
+    local model = station.npc_model
+    local coords = station.position
+    
+    lib.requestModel(model, 5000)
+    if not HasModelLoaded(joaat(model)) then return end
+
+    local npc = CreatePed(model, coords.x, coords.y, coords.z - 1.0, station.npc_heading or 0.0, false, false, false, false)
+    if npc and npc ~= 0 then
+        Citizen.InvokeNative(0x283978A15512B2FE, npc, true)
+        SetEntityNoCollisionEntity(npc, PlayerPedId(), false)
+        SetEntityCanBeDamaged(npc, false)
+        SetEntityInvincible(npc, true)
+        FreezeEntityPosition(npc, true)
+
+        if station.animation_name then
+            TaskStartScenarioInPlace(npc, joaat(station.animation_name), -1, true, false, false, false)
+        end
+
+        spawnedEntities['npc_' .. station.id] = npc
+    end
+end
+
+function SpawnStationProp(station)
+    local model = station.prop_model
+    local coords = station.position
+    
+    lib.requestModel(model, 5000)
+    if not HasModelLoaded(joaat(model)) then return end
+
+    local prop = CreateObject(joaat(model), coords.x, coords.y, coords.z - 1.0, false, false, false)
+    if prop and prop ~= 0 then
+        SetEntityRotation(prop, 0.0, 0.0, station.npc_heading or 0.0, 2, true)
+        FreezeEntityPosition(prop, true)
+        spawnedEntities['prop_' .. station.id] = prop
+    end
+end
+
+function InteractWithStation(station)
+    if station.type == 'npc' or station.type == 'venda' then
+        -- Open Shop Buy Menu
+        TriggerServerEvent('fdb-shops:server:openstore', station.shop_id)
+
+    elseif station.type == 'registradora' then
+        -- Open Owner Menu (NUI)
+        fdbLibs:TriggerServerCallbackAsync('fdb-shops:server:requestOwnerMenu', function(response)
+            if response and response.success then
+                SetNuiFocus(true, true)
+                SendNUIMessage({
+                    action = 'openOwnerMenu',
+                    shopId = station.shop_id,
+                    shopData = response.shopData,
+                    permissions = response.permissions
+                })
+            else
+                fdbLibs:Notify('Acesso Negado', 'error', 3000)
+            end
+        end, station.shop_id)
+
+    elseif station.type == 'bau' then
+        -- Open Physical Stash
+        -- Verify permissions first
+        fdbLibs:TriggerServerCallbackAsync('fdb-shops:server:requestOwnerMenu', function(response)
+            if response and response.success and response.permissions.repor_estoque then
+                TriggerServerEvent('fdb-shops:server:openStash', station.shop_id)
+            else
+                fdbLibs:Notify('Você não tem acesso a este estoque', 'error', 3000)
+            end
+        end, station.shop_id)
+
+    elseif station.type == 'craft' then
+        -- Open Crafting Menu (Future Phase 2)
+        fdbLibs:Notify('Sistema de craft em desenvolvimento', 'info', 3000)
+    
+    elseif station.type == 'supply_board' then
+        -- Open Supply Board (Future Phase 3)
+        fdbLibs:Notify('Nenhuma entrega disponível no momento', 'info', 3000)
+    end
+end
+
+-- ==========================================
+-- NUI Callbacks
+-- ==========================================
+
+RegisterNUICallback('close', function(data, cb)
+    SetNuiFocus(false, false)
+    cb('ok')
+end)
+
+RegisterNUICallback('withdraw', function(data, cb)
+    TriggerServerEvent('fdb-shops:server:withdrawCash', data.shopId, data.amount)
+    cb('ok')
+end)
+
+RegisterNUICallback('deposit', function(data, cb)
+    TriggerServerEvent('fdb-shops:server:depositCash', data.shopId, data.amount)
+    cb('ok')
+end)
+
+RegisterNUICallback('updateVariation', function(data, cb)
+    TriggerServerEvent('fdb-shops:server:updatePriceVariation', data.shopId, data.variation)
+    cb('ok')
+end)
+
+-- Cleanup on resource stop
+AddEventHandler('onResourceStop', function(resName)
+    if resName == resourceName then
+        for _, entity in pairs(spawnedEntities) do
+            if DoesEntityExist(entity) then DeleteEntity(entity) end
         end
     end
 end)

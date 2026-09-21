@@ -5,6 +5,8 @@ game 'rdr3'
 description 'fdb-shops'
 version '1.0.1'
 
+ui_page 'ui/index.html'
+
 shared_scripts {
     '@ox_lib/init.lua',
     'config.lua'
@@ -28,7 +30,7 @@ server_scripts {
 
 files {
     'locales/*.json',
-    -- NUI files will go here if added inside fdb-shops
+    'ui/index.html'
 }
 
 dependencies {
