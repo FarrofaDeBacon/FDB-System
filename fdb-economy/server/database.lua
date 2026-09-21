@@ -9,7 +9,7 @@ CreateThread(function()
     Wait(1000) -- Aguarda conexão com o banco
 
     -- Tabela principal de economia regional
-    MySQL.Async.execute([[
+    MySQL.query.await([[
         CREATE TABLE IF NOT EXISTS region_economy (
             region_id VARCHAR(50) PRIMARY KEY,
             base_rate FLOAT NOT NULL DEFAULT 1.0,
@@ -27,7 +27,7 @@ CreateThread(function()
     ]])
 
     -- Tabela de log de transações (alimenta o recálculo de volume)
-    MySQL.Async.execute([[
+    MySQL.query.await([[
         CREATE TABLE IF NOT EXISTS economy_transactions (
             id INT AUTO_INCREMENT PRIMARY KEY,
             region_id VARCHAR(50) NOT NULL,
@@ -47,7 +47,7 @@ CreateThread(function()
 
     -- Seed: cria as regiões padrão se não existirem
     for regionId, _ in pairs(Config.RegionZones) do
-        MySQL.Async.execute([[
+        MySQL.query.await([[
             INSERT IGNORE INTO region_economy (region_id, base_rate, category_modifiers, min_rate, max_rate, volume_weight, money_supply_weight, recalc_interval_minutes, decay_toward_baseline)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ]], {
@@ -65,7 +65,7 @@ CreateThread(function()
 
     -- Limpeza automática de transações antigas
     if Config.MaxTransactionHistoryDays and Config.MaxTransactionHistoryDays > 0 then
-        MySQL.Async.execute([[
+        MySQL.query.await([[
             DELETE FROM economy_transactions WHERE created_at < DATE_SUB(NOW(), INTERVAL ? DAY)
         ]], { Config.MaxTransactionHistoryDays })
     end

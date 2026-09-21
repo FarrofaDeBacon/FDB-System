@@ -9,7 +9,7 @@ CreateThread(function()
     Wait(1500) -- Aguarda conexão com o banco
 
     -- Templates são o "tipo de negócio" (armaria, ferraria, saloon...)
-    MySQL.Async.execute([[
+    MySQL.query.await([[
         CREATE TABLE IF NOT EXISTS shop_templates (
             template_id VARCHAR(50) PRIMARY KEY,
             label VARCHAR(100) NOT NULL,
@@ -21,7 +21,7 @@ CreateThread(function()
     ]])
 
     -- Instância de uma loja
-    MySQL.Async.execute([[
+    MySQL.query.await([[
         CREATE TABLE IF NOT EXISTS shops (
             shop_id VARCHAR(50) PRIMARY KEY,
             template_id VARCHAR(50) NOT NULL,
@@ -43,7 +43,7 @@ CreateThread(function()
     ]])
 
     -- Funcionários
-    MySQL.Async.execute([[
+    MySQL.query.await([[
         CREATE TABLE IF NOT EXISTS shop_employees (
             id INT AUTO_INCREMENT PRIMARY KEY,
             shop_id VARCHAR(50) NOT NULL,
@@ -61,7 +61,7 @@ CreateThread(function()
     ]])
 
     -- Estações físicas (registradora, baú, craft, venda, npc)
-    MySQL.Async.execute([[
+    MySQL.query.await([[
         CREATE TABLE IF NOT EXISTS shop_stations (
             id INT AUTO_INCREMENT PRIMARY KEY,
             shop_id VARCHAR(50) NOT NULL,
@@ -83,7 +83,7 @@ CreateThread(function()
     ]])
 
     -- Log de transações da loja
-    MySQL.Async.execute([[
+    MySQL.query.await([[
         CREATE TABLE IF NOT EXISTS shop_transactions (
             id INT AUTO_INCREMENT PRIMARY KEY,
             shop_id VARCHAR(50) NOT NULL,
