@@ -30,6 +30,16 @@ CreateThread(function()
     end)
 end)
 
+-- Manual fallback command for testing
+RegisterCommand('shopreload', function()
+    print('[fdb-shops] Manually requesting stations...')
+    fdbLibs:TriggerServerCallbackAsync('fdb-shops:server:getStations', function(stations)
+        shopStations = stations
+        print(('[fdb-shops] Loaded %s stations from server.'):format(#shopStations))
+        InitializeStations()
+    end)
+end, false)
+
 function InitializeStations()
     -- Cleanup previous
     for _, entity in pairs(spawnedEntities) do
