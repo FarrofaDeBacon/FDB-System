@@ -29,11 +29,3 @@ RegisterCommand('editshops', function(source, args)
 
     TriggerClientEvent('fdb-shops:client:openEditor', src, shopsList)
 end, true)
-
--- Add suggestion for connected players
-CreateThread(function()
-    Wait(1000)
-    for _, playerId in ipairs(GetPlayers()) do
-        TriggerClientEvent('chat:addSuggestion', playerId, '/editshops', 'Abre o painel visual Svelte para gerenciar lojas', {})
-    end
-end)

@@ -41,3 +41,7 @@ RegisterNetEvent('fdb-shops:client:openEditor', function(storesData)
         stores = storesData or {}
     })
 end)
+
+CreateThread(function()
+    TriggerEvent('chat:addSuggestion', '/editshops', 'Abre o painel visual Svelte para gerenciar lojas', {})
+end)
