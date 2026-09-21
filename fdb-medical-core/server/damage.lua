@@ -91,7 +91,7 @@ function ProcessTreatment(src, woundId, treatmentType, itemUsed)
         elseif treatmentType == 'splint' and wound.boneDamage then
             local range = Config.Fractures.HealDaysGame[bodyPart] or {min=15, max=22}
             local days = math.random(range.min, range.max)
-            wound.healUntil = GetGameMinutes() + (days * 1440)
+            wound.healUntil = os.time() + (days * 86400)
         end
     end
 

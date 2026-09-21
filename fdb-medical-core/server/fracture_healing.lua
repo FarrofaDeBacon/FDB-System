@@ -7,14 +7,14 @@ local TICK_INTERVAL = 30000 -- 30s real-time
 CreateThread(function()
     while true do
         Wait(TICK_INTERVAL)
-        local nowMinutes = GetGameMinutes()
+        local nowTime = os.time()
         
         for src, vitals in pairs(PlayerVitals) do
             if vitals and vitals.wounds then
                 local needsSync = false
                 
                 for bodyPart, wound in pairs(vitals.wounds) do
-                    if wound.boneDamage and wound.healUntil and nowMinutes >= wound.healUntil then
+                    if wound.boneDamage and wound.healUntil and nowTime >= wound.healUntil then
                         wound.boneDamage = false
                         wound.healUntil = nil
                         RemoveFracturePenalty(src, bodyPart)
