@@ -58,7 +58,32 @@ FDBCore.Commands.Add('shopcreate', 'Criar uma nova loja física a partir de um t
 
     ShopManager.UpdateShopRegion(shopId, coords)
 
-    fdbLibs:Notify(source, 'Loja criada e adicionada à memória.', 'success')
+    -- Create Default Test Stations around the player
+    local cx, cy, cz = coords.x, coords.y, coords.z
+
+    -- 1. Register
+    MySQL.insert('INSERT INTO shop_stations (shop_id, type, position) VALUES (?, ?, ?)', {
+        shopId, 'registradora', json.encode({ x = cx, y = cy, z = cz })
+    })
+
+    -- 2. Physical Stash
+    MySQL.insert('INSERT INTO shop_stations (shop_id, type, position) VALUES (?, ?, ?)', {
+        shopId, 'stash', json.encode({ x = cx + 1.5, y = cy, z = cz })
+    })
+
+    -- 3. Craft Station (allowing all template recipes by default for testing)
+    local allowedRecipes = {}
+    if ShopManager.Templates[templateId] and ShopManager.Templates[templateId].craftableRecipes then
+        for _, r in ipairs(ShopManager.Templates[templateId].craftableRecipes) do
+            if r.id then table.insert(allowedRecipes, r.id) end
+        end
+    end
+
+    MySQL.insert('INSERT INTO shop_stations (shop_id, type, position, allowed_recipes, animation_dict, animation_name) VALUES (?, ?, ?, ?, ?, ?)', {
+        shopId, 'craft', json.encode({ x = cx - 1.5, y = cy, z = cz }), json.encode(allowedRecipes), 'mini@repair', 'fixing_a_ped'
+    })
+
+    fdbLibs:Notify(source, 'Loja salva! REINICIE o script (ensure fdb-shops) para spawnar os blips e bancadas.', 'success', 8000)
 end, 'admin')
 
 
