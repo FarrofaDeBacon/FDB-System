@@ -3,30 +3,40 @@ rdr3_warning 'I acknowledge that this is a prerelease build of RedM, and I am aw
 game 'rdr3'
 
 description 'fdb-shops'
-version '2.1.3'
+version '1.0.1'
 
 shared_scripts {
     '@ox_lib/init.lua',
-    'config.lua',
+    'config.lua'
 }
 
 client_scripts {
-    'client/client.lua'
+    'client/client.lua',
+    'client/owner_menu.lua'
 }
 
 server_scripts {
+    '@oxmysql/lib/MySQL.lua',
+    'server/database.lua',
+    'server/shop_manager.lua',
+    'server/employee_manager.lua',
+    'server/stash_manager.lua',
+    'server/admin_commands.lua',
+    'server/seed.lua',
     'server/server.lua',
-    'server/versionchecker.lua'
 }
 
 files {
     'locales/*.json',
+    -- NUI files will go here if added inside fdb-shops
 }
 
 dependencies {
     'fdb-core',
     'fdb-inventory',
-    'ox_lib',
+    'fdb-economy',
+    'fdb-libs',
+    'oxmysql',
     'ox_target'
 }
 
