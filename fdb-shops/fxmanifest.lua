@@ -14,7 +14,8 @@ shared_scripts {
 
 client_scripts {
     'client/client.lua',
-    'client/owner_menu.lua'
+    'client/owner_menu.lua',
+    'client/crafting.lua'
 }
 
 server_scripts {
@@ -23,6 +24,7 @@ server_scripts {
     'server/shop_manager.lua',
     'server/employee_manager.lua',
     'server/stash_manager.lua',
+    'server/craft_manager.lua',
     'server/admin_commands.lua',
     'server/seed.lua',
     'server/server.lua',

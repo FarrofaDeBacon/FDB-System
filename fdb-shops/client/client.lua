@@ -140,8 +140,8 @@ function InteractWithStation(station)
         end, station.shop_id)
 
     elseif station.type == 'craft' then
-        -- Open Crafting Menu (Future Phase 2)
-        fdbLibs:Notify('Sistema de craft em desenvolvimento', 'info', 3000)
+        -- Open Crafting Menu (Phase 2)
+        OpenCraftMenu(station)
     
     elseif station.type == 'supply_board' then
         -- Open Supply Board (Future Phase 3)
