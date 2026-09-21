@@ -115,30 +115,31 @@ FDBCore.Commands.Add('shopgo', 'Teleporta até uma loja', {{name = 'shopId', hel
     end
 end, 'admin')
 
--- Comando para mover uma bancada/NPC para onde o admin está pisando
-FDBCore.Commands.Add('shopmovestation', 'Move uma bancada/NPC para sua posição atual', {
+-- Comando para iniciar o modo de construção visual (Shop Placer)
+FDBCore.Commands.Add('shopplacer', 'Abre o construtor visual para posicionar bancadas/NPCs', {
     {name = 'shopId', help = 'ID da loja (ex: gen-valentine)'},
-    {name = 'type', help = 'Tipo (registradora, npc, bau, craft, etc)'}
+    {name = 'type', help = 'Tipo (registradora, npc, bau, craft)'}
 }, true, function(source, args)
     local shopId = args[1]
     local type = args[2]
     if not shopId or not type then return end
     
-    local ped = GetPlayerPed(source)
-    local coords = GetEntityCoords(ped)
-    local heading = GetEntityHeading(ped)
-    
-    local posStr = json.encode({ x = math.floor(coords.x*100)/100, y = math.floor(coords.y*100)/100, z = math.floor(coords.z*100)/100 })
-    
-    local rows = MySQL.update.await('UPDATE shop_stations SET position = ?, npc_heading = ? WHERE shop_id = ? AND type = ?', {
-        posStr, heading, shopId, type
-    })
-    
-    if rows > 0 then
-        fdbLibs:Notify(source, ('Bancada %s atualizada! Dê /shopreload'):format(type), 'success', 5000)
-    else
-        fdbLibs:Notify(source, 'Bancada não encontrada nessa loja.', 'error', 5000)
+    local row = MySQL.single.await('SELECT * FROM shop_stations WHERE shop_id = ? AND type = ?', {shopId, type})
+    if not row then
+        fdbLibs:Notify(source, 'Bancada não encontrada no banco de dados.', 'error', 5000)
+        return
     end
+    
+    local model = "p_cashregister01x" -- default registradora
+    if type == 'npc' and row.npc_model then
+        model = row.npc_model
+    elseif type == 'bau' then
+        model = "p_chest01x" -- caixa basica genérica
+    elseif type == 'craft' then
+        model = "p_cs_table_01x" -- mesa generica
+    end
+    
+    TriggerClientEvent('fdb-shops:client:startPlacement', source, shopId, type, model)
 end, 'admin')
 
 

@@ -15,7 +15,8 @@ shared_scripts {
 client_scripts {
     'client/client.lua',
     'client/owner_menu.lua',
-    'client/crafting.lua'
+    'client/crafting.lua',
+    'client/placement.lua'
 }
 
 server_scripts {
