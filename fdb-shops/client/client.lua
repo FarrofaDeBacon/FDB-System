@@ -86,14 +86,19 @@ function SpawnStationNPC(station)
     local coords = station.position
     
     print('[fdb-shops] Attempting to spawn NPC model: ' .. tostring(model))
-    lib.requestModel(model, 5000)
+    local hash = joaat(model)
+    RequestModel(hash)
     
-    if not HasModelLoaded(joaat(model)) then 
-        print('[fdb-shops] ERROR: Failed to load model ' .. tostring(model))
-        return 
+    local timeout = GetGameTimer() + 5000
+    while not HasModelLoaded(hash) do
+        Wait(10)
+        if GetGameTimer() > timeout then
+            print('[fdb-shops] ERROR: Failed to load model ' .. tostring(model) .. ' (timeout)')
+            return
+        end
     end
 
-    local npc = CreatePed(joaat(model), coords.x, coords.y, coords.z - 1.0, station.npc_heading or 0.0, false, false, false, false)
+    local npc = CreatePed(hash, coords.x, coords.y, coords.z - 1.0, station.npc_heading or 0.0, false, false, false, false)
     if npc and npc ~= 0 then
         print('[fdb-shops] Successfully spawned NPC. Entity ID: ' .. tostring(npc))
         Citizen.InvokeNative(0x283978A15512B2FE, npc, true)
@@ -114,10 +119,16 @@ function SpawnStationProp(station)
     local model = station.prop_model
     local coords = station.position
     
-    lib.requestModel(model, 5000)
-    if not HasModelLoaded(joaat(model)) then return end
+    local hash = joaat(model)
+    RequestModel(hash)
+    
+    local timeout = GetGameTimer() + 5000
+    while not HasModelLoaded(hash) do
+        Wait(10)
+        if GetGameTimer() > timeout then return end
+    end
 
-    local prop = CreateObject(joaat(model), coords.x, coords.y, coords.z - 1.0, false, false, false)
+    local prop = CreateObject(hash, coords.x, coords.y, coords.z - 1.0, false, false, false)
     if prop and prop ~= 0 then
         SetEntityRotation(prop, 0.0, 0.0, station.npc_heading or 0.0, 2, true)
         FreezeEntityPosition(prop, true)
