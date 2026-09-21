@@ -85,11 +85,17 @@ function SpawnStationNPC(station)
     local model = station.npc_model
     local coords = station.position
     
+    print('[fdb-shops] Attempting to spawn NPC model: ' .. tostring(model))
     lib.requestModel(model, 5000)
-    if not HasModelLoaded(joaat(model)) then return end
+    
+    if not HasModelLoaded(joaat(model)) then 
+        print('[fdb-shops] ERROR: Failed to load model ' .. tostring(model))
+        return 
+    end
 
     local npc = CreatePed(joaat(model), coords.x, coords.y, coords.z - 1.0, station.npc_heading or 0.0, false, false, false, false)
     if npc and npc ~= 0 then
+        print('[fdb-shops] Successfully spawned NPC. Entity ID: ' .. tostring(npc))
         Citizen.InvokeNative(0x283978A15512B2FE, npc, true)
         SetEntityNoCollisionEntity(npc, PlayerPedId(), false)
         SetEntityCanBeDamaged(npc, false)
