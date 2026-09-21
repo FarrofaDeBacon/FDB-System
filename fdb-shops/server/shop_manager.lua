@@ -111,7 +111,14 @@ function ShopManager.LogTransaction(shopId, playerId, txType, itemName, qty, uni
 
     -- Notify economy engine
     if shop.regionId then
-        -- Default to 'materials' category if not found, ideally we should lookup item category
-        exports['fdb-economy']:logTransaction(shop.regionId, shopId, itemName, "materials", qty, unitPrice, totalPrice, txType)
+        local cat = "materials"
+        for _, item in ipairs(shop.buyCatalog) do
+            if item.name == itemName then
+                cat = item.category or "materials"
+                break
+            end
+        end
+
+        exports['fdb-economy']:logTransaction(shop.regionId, shopId, itemName, cat, qty, unitPrice, totalPrice, txType)
     end
 end

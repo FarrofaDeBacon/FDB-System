@@ -39,19 +39,25 @@ function StashManager.UpdateBalance(shopId, amountDelta, reason)
     local newBalance = shop.cashBalance + amountDelta
     if newBalance < 0 then return false end -- Cannot go below zero
 
-    -- Update Source of Truth
-    shop.cashBalance = newBalance
-    MySQL.update.await('UPDATE shops SET cash_balance = ? WHERE shop_id = ?', { newBalance, shopId })
-
-    -- If in Physical mode, we must sync the stash item
+    -- If in Physical mode, we must sync the stash item FIRST
     if Config.CashRegisterMode == 'physical' then
         local stashName = 'shop_register_' .. shopId
+        local success = false
+        
         if amountDelta > 0 then
-            exports['fdb-inventory']:AddItem(stashName, 'cash', amountDelta)
+            success = exports['fdb-inventory']:AddItem(stashName, 'cash', amountDelta)
         elseif amountDelta < 0 then
-            exports['fdb-inventory']:RemoveItem(stashName, 'cash', math.abs(amountDelta))
+            success = exports['fdb-inventory']:RemoveItem(stashName, 'cash', math.abs(amountDelta))
+        else
+            success = true -- delta is 0
         end
+
+        if not success then return false end -- Stash operation failed (e.g., full or not enough items)
     end
+
+    -- Update Source of Truth only if physical operation succeeded (or if mode is numeric)
+    shop.cashBalance = newBalance
+    MySQL.update.await('UPDATE shops SET cash_balance = ? WHERE shop_id = ?', { newBalance, shopId })
 
     return true
 end

@@ -8,18 +8,13 @@ Config = {}
 -- Keybind prompt to interact with shops (if not using ox_target)
 Config.Keybind = 'J' 
 
--- Use ox_target and NPCs for shops
-Config.UseNPCs = true 
-
--- Default NPC Model if none specified
-Config.NPCModel = 's_m_m_unibutchers_01' 
-
--- Opening and closing hours (0-23)
-Config.DefaultOpenHour = 6 
-Config.DefaultCloseHour = 22 
-
 -- Limits the amount of shops a single player can own
 Config.MaxShopsPerOwner = 3
+
+-- NOTA DE NOMENCLATURA:
+-- buyCatalog = Itens que a LOJA vende (o player COMPRA)
+-- sellCatalog = Itens que a LOJA compra (o player VENDE)
+
 
 -- How often (in ms) to check if the owner is present to hide NPCs (if hide_when_owner_present is enabled)
 Config.NpcCheckInterval = 5000

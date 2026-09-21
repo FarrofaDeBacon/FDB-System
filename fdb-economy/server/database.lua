@@ -53,13 +53,13 @@ CreateThread(function()
         ]], {
             regionId,
             Config.DefaultBaseRate,
-            json.encode(Config.CategoryModifiers),
-            Config.DefaultMinRate,
-            Config.DefaultMaxRate,
-            Config.VolumeWeight,
-            Config.MoneySupplyWeight,
+            json.encode({}), -- CategoryModifiers placeholder or default
+            Config.DefaultRegionConfig.minRate,
+            Config.DefaultRegionConfig.maxRate,
+            Config.DefaultRegionConfig.volumeWeight,
+            Config.DefaultRegionConfig.moneySupplyWeight,
             Config.RecalcIntervalMinutes,
-            Config.DecayTowardBaseline,
+            Config.DefaultRegionConfig.decayTowardBaseline,
         })
     end
 

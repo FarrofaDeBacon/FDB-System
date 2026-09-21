@@ -83,6 +83,20 @@ FDBCore.Commands.Add('shopsetowner', 'Define o dono de uma loja', {
         citizenid = nil
     end
 
+    if citizenid then
+        local ownedCount = 0
+        for _, s in pairs(ShopManager.Shops) do
+            if s.ownerId == citizenid then
+                ownedCount = ownedCount + 1
+            end
+        end
+
+        if ownedCount >= Config.MaxShopsPerOwner then
+            TriggerClientEvent('ox_lib:notify', source, {title = 'Erro', description = 'Jogador atingiu o limite de lojas: ' .. Config.MaxShopsPerOwner, type = 'error'})
+            return
+        end
+    end
+
     shop.ownerId = citizenid
     MySQL.update('UPDATE shops SET owner_id = ? WHERE shop_id = ?', {citizenid, shopId})
 
