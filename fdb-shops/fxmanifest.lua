@@ -16,7 +16,6 @@ client_scripts {
     'client/freecam.lua',
     'client/editor.lua',
     'client/client.lua',
-    'client/owner_menu.lua',
     'client/crafting.lua',
     'client/placement.lua'
 }
