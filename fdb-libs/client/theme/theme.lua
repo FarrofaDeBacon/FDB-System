@@ -67,3 +67,18 @@ function fdb.theme.applyOverride(customTheme)
         theme = customTheme
     })
 end
+
+--- Retorna o tema ativo (override salvo no KVP, ou o preset padrão do config.lua)
+--- Uso de outro resource: exports['fdb-libs']:GetActiveTheme()
+exports('GetActiveTheme', function()
+    local theme = fdb.themeStore.Get('active_override')
+    if not theme then
+        if Config.ThemePresets and Config.ActiveTheme then
+            theme = Config.ThemePresets[Config.ActiveTheme]
+        end
+    end
+    if not theme then
+        theme = Config.ThemePresets and Config.ThemePresets.western_gold or Config.Theme
+    end
+    return theme
+end)

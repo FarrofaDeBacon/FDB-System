@@ -42,3 +42,7 @@ files {
     'ui/build/index.html',
     'ui/build/assets/*'
 }
+
+exports {
+    'GetActiveTheme'
+}
