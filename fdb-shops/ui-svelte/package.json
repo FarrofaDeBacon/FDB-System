@@ -11,7 +11,6 @@
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
     "@tailwindcss/postcss": "^4.3.3",
-    "@vitejs/plugin-legacy": "^8.2.3",
     "autoprefixer": "^10.6.1",
     "postcss": "^8.5.28",
     "svelte": "^4.2.19",
