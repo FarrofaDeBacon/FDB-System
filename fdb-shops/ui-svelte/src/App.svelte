@@ -5,6 +5,7 @@
     let visible = false;
     let theme = {};
     let stores = [];
+    let selectedStore = null;
 
     // Recebe mensagens do Lua
     onMount(() => {
@@ -13,6 +14,7 @@
             if (data.action === 'openEditor') {
                 theme = data.theme || {};
                 stores = data.stores || [];
+                selectedStore = stores.length > 0 ? stores[0] : null;
                 visible = true;
                 
                 // Aplica variáveis do tema na raiz
@@ -30,11 +32,7 @@
 
         const handleKeyDown = (e) => {
             if (visible && e.key === 'Escape') {
-                fetch(`https://${window.GetParentResourceName()}/closeEditor`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({})
-                });
+                closeUI();
             }
         };
 
@@ -46,30 +44,45 @@
             window.removeEventListener('keydown', handleKeyDown);
         };
     });
+
+    function closeUI() {
+        fetch(`https://${window.GetParentResourceName()}/closeEditor`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+    }
+
+    function selectStore(store) {
+        selectedStore = store;
+    }
 </script>
 
 {#if visible}
     <div class="fdb-shops-app">
-        <div class="header-bar">
-            <h1>Gerenciador de Lojas</h1>
-            <button class="close-btn" on:click={() => {
-                fetch(`https://${window.GetParentResourceName()}/closeEditor`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({})
-                });
-            }}>FECHAR (ESC)</button>
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2 class="sidebar-title">Lojas ({stores.length})</h2>
+            <div class="store-list">
+                {#each stores as store}
+                    <button 
+                        class="sidebar-item {selectedStore?.id === store.id ? 'active' : ''}"
+                        on:click={() => selectStore(store)}
+                    >
+                        {store.label || store.id}
+                        <span class="badge">{store.template || 'general'}</span>
+                    </button>
+                {/each}
+            </div>
         </div>
 
-        <div class="stores-container">
-            {#if stores.length === 0}
-                <p class="empty-state">Nenhuma loja encontrada.</p>
+        <!-- Main Content -->
+        <div class="main-content">
+            {#if selectedStore}
+                <StoreConfig store={selectedStore} onClose={closeUI} />
             {:else}
-                <!-- Grid dinâmico que renderiza o componente reutilizável para cada loja recebida -->
-                <div class="stores-grid">
-                    {#each stores as store}
-                        <StoreConfig {store} />
-                    {/each}
+                <div class="empty-state">
+                    <p>Selecione uma loja na lateral para editar.</p>
                 </div>
             {/if}
         </div>
@@ -77,7 +90,6 @@
 {/if}
 
 <style>
-    /* Reset do scroll global provocado por margin no body */
     :global(body), :global(html) {
         margin: 0;
         padding: 0;
@@ -90,62 +102,89 @@
         width: 100vw;
         height: 100vh;
         display: flex;
-        flex-direction: column;
-        background-color: rgba(0, 0, 0, 0.7); /* Fundo opaco para dar destaque */
+        background-color: transparent; /* Removemos o fundo preto opaco gigante */
         font-family: var(--fdb-font-body, sans-serif);
+        padding: 4rem;
+        box-sizing: border-box;
     }
 
-    .header-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem 2rem;
+    .sidebar {
+        width: 300px;
         background-color: var(--fdb-background-color, #1a1a1a);
-        border-bottom: 2px solid var(--fdb-accent-color, #ffaa00);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        border: 2px solid var(--fdb-border-color-wood, #555);
+        border-radius: var(--fdb-border-radius, 8px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        margin-right: 2rem;
     }
 
-    .header-bar h1 {
+    .sidebar-title {
+        background-color: rgba(0, 0, 0, 0.3);
         margin: 0;
+        padding: 1rem;
         font-family: var(--fdb-font-display, serif);
         color: var(--fdb-accent-color, #ffaa00);
-        font-size: 2rem;
+        font-size: 1.2rem;
+        border-bottom: 2px solid var(--fdb-border-color-wood, #555);
+        text-align: center;
     }
 
-    .close-btn {
-        background-color: var(--fdb-status-critical, #cc0000);
-        color: white;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: var(--fdb-border-radius, 4px);
-        font-family: var(--fdb-font-body, sans-serif);
-        font-weight: bold;
-        cursor: pointer;
-        transition: opacity 0.2s;
-    }
-
-    .close-btn:hover {
-        opacity: 0.8;
-    }
-
-    .stores-container {
+    .store-list {
         flex: 1;
-        padding: 2rem;
-        overflow-y: auto; /* Permite scroll VERTICAL apenas na área das lojas se tiver muitas */
+        overflow-y: auto;
+        padding: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
     }
 
-    .stores-grid {
+    .sidebar-item {
+        background: transparent;
+        border: 1px solid transparent;
+        color: var(--fdb-text-primary, #fff);
+        padding: 0.75rem;
+        text-align: left;
+        border-radius: 4px;
+        cursor: pointer;
+        font-family: var(--fdb-font-body, sans-serif);
+        font-size: 0.9rem;
         display: flex;
-        flex-wrap: wrap;
-        gap: 2rem;
-        justify-content: center;
+        flex-direction: column;
+        gap: 0.25rem;
+        transition: all 0.2s;
+    }
+
+    .sidebar-item:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .sidebar-item.active {
+        background-color: rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--fdb-accent-color, #ffaa00);
+        color: var(--fdb-accent-color, #ffaa00);
+    }
+
+    .badge {
+        font-size: 0.7rem;
+        color: var(--fdb-text-secondary, #999);
+        text-transform: uppercase;
+    }
+
+    .main-content {
+        flex: 1;
+        display: flex;
         align-items: flex-start;
+        justify-content: flex-start;
     }
 
     .empty-state {
+        background-color: var(--fdb-background-color, #1a1a1a);
+        border: 2px solid var(--fdb-border-color-wood, #555);
+        border-radius: var(--fdb-border-radius, 8px);
+        padding: 2rem;
         color: var(--fdb-text-secondary, #999);
-        text-align: center;
-        font-size: 1.2rem;
-        margin-top: 4rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
 </style>
