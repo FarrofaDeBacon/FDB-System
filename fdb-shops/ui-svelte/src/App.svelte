@@ -1,8 +1,10 @@
 <script>
     import { onMount } from 'svelte';
+    import StoreConfig from './lib/StoreConfig.svelte';
 
     let visible = false;
     let theme = {};
+    let stores = [];
 
     // Recebe mensagens do Lua
     onMount(() => {
@@ -10,13 +12,13 @@
             const data = event.data;
             if (data.action === 'openEditor') {
                 theme = data.theme || {};
+                stores = data.stores || [];
                 visible = true;
                 
-                // Aplica variáveis do tema na raiz (document.documentElement ou no próprio App)
+                // Aplica variáveis do tema na raiz
                 if (theme) {
                     const root = document.documentElement;
                     Object.entries(theme).forEach(([key, value]) => {
-                        // Exemplo: converte "accentColor" para "--fdb-accent-color"
                         const cssKey = '--fdb-' + key.replace(/([A-Z])/g, "-$1").toLowerCase();
                         root.style.setProperty(cssKey, value);
                     });
@@ -48,90 +50,102 @@
 
 {#if visible}
     <div class="fdb-shops-app">
-        <div class="theme-test-card">
-            <h1>FDB-Shops: Theme Test</h1>
-            <p>Se você consegue ler isso e as cores batem com o fdb-libs, o tema global está funcionando!</p>
-            <div class="status-grid">
-                <div class="status-box" style="background-color: var(--fdb-status-good)">Good</div>
-                <div class="status-box" style="background-color: var(--fdb-status-warning)">Warning</div>
-                <div class="status-box" style="background-color: var(--fdb-status-critical)">Critical</div>
-                <div class="status-box" style="background-color: var(--fdb-status-info)">Info</div>
-            </div>
-            <button class="test-button" on:click={() => {
+        <div class="header-bar">
+            <h1>Gerenciador de Lojas</h1>
+            <button class="close-btn" on:click={() => {
                 fetch(`https://${window.GetParentResourceName()}/closeEditor`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({})
                 });
-            }}>
-                Fechar (ou aperte ESC)
-            </button>
+            }}>FECHAR (ESC)</button>
+        </div>
+
+        <div class="stores-container">
+            {#if stores.length === 0}
+                <p class="empty-state">Nenhuma loja encontrada.</p>
+            {:else}
+                <!-- Grid dinâmico que renderiza o componente reutilizável para cada loja recebida -->
+                <div class="stores-grid">
+                    {#each stores as store}
+                        <StoreConfig {store} />
+                    {/each}
+                </div>
+            {/if}
         </div>
     </div>
 {/if}
 
 <style>
+    /* Reset do scroll global provocado por margin no body */
+    :global(body), :global(html) {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        width: 100vw;
+        height: 100vh;
+    }
+
     .fdb-shops-app {
         width: 100vw;
         height: 100vh;
         display: flex;
-        align-items: center;
-        justify-content: center;
-        background: transparent;
-        /* Usando a fonte do tema como default pro container */
+        flex-direction: column;
+        background-color: rgba(0, 0, 0, 0.7); /* Fundo opaco para dar destaque */
         font-family: var(--fdb-font-body, sans-serif);
     }
 
-    .theme-test-card {
+    .header-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
         background-color: var(--fdb-background-color, #1a1a1a);
-        color: var(--fdb-text-primary, #ffffff);
-        padding: 2rem;
-        border: 2px solid var(--fdb-border-color-wood, #555);
-        border-radius: var(--fdb-border-radius, 8px);
-        max-width: 500px;
-        text-align: center;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        border-bottom: 2px solid var(--fdb-accent-color, #ffaa00);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     }
 
-    h1 {
+    .header-bar h1 {
+        margin: 0;
         font-family: var(--fdb-font-display, serif);
         color: var(--fdb-accent-color, #ffaa00);
-        margin-top: 0;
+        font-size: 2rem;
     }
 
-    p {
-        color: var(--fdb-text-secondary, #ccc);
-        margin-bottom: 2rem;
-    }
-
-    .status-grid {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-        margin-bottom: 2rem;
-    }
-
-    .status-box {
+    .close-btn {
+        background-color: var(--fdb-status-critical, #cc0000);
+        color: white;
+        border: none;
         padding: 0.5rem 1rem;
         border-radius: var(--fdb-border-radius, 4px);
+        font-family: var(--fdb-font-body, sans-serif);
         font-weight: bold;
-        color: #fff;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-    }
-
-    .test-button {
-        background-color: var(--fdb-accent-color-dark, #cc8800);
-        color: var(--fdb-text-primary, #fff);
-        border: 1px solid var(--fdb-accent-color, #ffaa00);
-        padding: 0.75rem 1.5rem;
-        border-radius: var(--fdb-border-radius, 4px);
         cursor: pointer;
-        font-family: var(--fdb-font-display, serif);
-        font-size: 1.1rem;
-        transition: all 0.2s;
+        transition: opacity 0.2s;
     }
 
-    .test-button:hover {
-        background-color: var(--fdb-accent-color, #ffaa00);
+    .close-btn:hover {
+        opacity: 0.8;
+    }
+
+    .stores-container {
+        flex: 1;
+        padding: 2rem;
+        overflow-y: auto; /* Permite scroll VERTICAL apenas na área das lojas se tiver muitas */
+    }
+
+    .stores-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        justify-content: center;
+        align-items: flex-start;
+    }
+
+    .empty-state {
+        color: var(--fdb-text-secondary, #999);
+        text-align: center;
+        font-size: 1.2rem;
+        margin-top: 4rem;
     }
 </style>
