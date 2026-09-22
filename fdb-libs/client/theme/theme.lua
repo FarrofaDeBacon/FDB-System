@@ -82,3 +82,8 @@ exports('GetActiveTheme', function()
     end
     return theme
 end)
+
+RegisterCommand('testtheme', function()
+    local theme = exports['fdb-libs']:GetActiveTheme()
+    print(json.encode(theme))
+end, false)
