@@ -36,9 +36,12 @@ RegisterNetEvent('fdb-shops:client:openEditor', function(storesData)
     isEditorOpen = true
     SetNuiFocus(true, true)
     
+    local theme = exports['fdb-libs']:GetActiveTheme()
+    
     SendNUIMessage({
         action = "openEditor",
-        stores = storesData or {}
+        stores = storesData or {},
+        theme = theme
     })
 end)
 
