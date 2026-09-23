@@ -37,6 +37,7 @@
             body: JSON.stringify({
                 type: field.id === 'npc_model' ? 'npc' : 'prop',
                 model: store[field.id],
+                shopId: store.id
             })
         });
     }
