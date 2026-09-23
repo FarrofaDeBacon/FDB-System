@@ -544,9 +544,9 @@ local function finish(ok)
     local resultData = nil
     if ok then
         resultData = {
-            x = round2(placementPosX),
-            y = round2(placementPosY),
-            z = round2(placementPosZ),
+            x = placementPosX,
+            y = placementPosY,
+            z = placementPosZ,
             h = ghostHeading
         }
     end
