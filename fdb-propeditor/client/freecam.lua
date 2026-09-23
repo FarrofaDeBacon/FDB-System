@@ -560,8 +560,32 @@ end
 exports('StartPlacementCamera', function(resourceName, type, model, callbackData)
     if isPlacing then return false end
 
-    -- Removida a checagem de permissão dupla, pois o recurso requisitante já deve validar (fdb-shops já valida).
-    -- Isso evita o travamento infinito do lib.callback.await caso o ox_lib não esteja rodando no servidor.
+    local ticket = GetGameTimer() .. tostring(math.random(1000, 9999))
+    local responded = false
+    local isAllowed = false
+    
+    local handler = RegisterNetEvent('fdb-propeditor:client:ReceivePermission_' .. ticket, function(allowed)
+        isAllowed = allowed
+        responded = true
+    end)
+    
+    TriggerServerEvent('fdb-propeditor:server:RequestPermission', ticket)
+    
+    local timeout = GetGameTimer() + 2000
+    while not responded do
+        Wait(10)
+        if GetGameTimer() > timeout then
+            print("[fdb-propeditor] ERRO: Timeout validando ACE no servidor.")
+            break
+        end
+    end
+    RemoveEventHandler(handler)
+    
+    if not isAllowed then
+        lib.notify({ title = 'Prop Editor', description = 'Você não tem permissão (command.propedit) para usar a câmera livre.', type = 'error' })
+        TriggerEvent(resourceName .. ":placementFinished", false, nil, type, model, callbackData)
+        return false
+    end
 
     placementResourceName = resourceName
     placementType = type
