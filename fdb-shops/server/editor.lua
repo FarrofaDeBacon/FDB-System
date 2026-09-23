@@ -29,3 +29,27 @@ RegisterCommand('editshops', function(source, args)
 
     TriggerClientEvent('fdb-shops:client:openEditor', src, shopsList)
 end, true)
+
+RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
+    local src = source
+    if not FDBCore.Functions.HasPermission(src, 'admin') then return end
+    
+    local shopId = storeData.id
+    local label = storeData.label
+    local npcModel = storeData.npc_model
+    
+    if label then
+        MySQL.update.await('UPDATE shops SET label = ? WHERE shop_id = ?', {label, shopId})
+    end
+    
+    if npcModel then
+        MySQL.update.await('UPDATE shop_stations SET npc_model = ? WHERE shop_id = ? AND type = "npc"', {npcModel, shopId})
+    end
+    
+    exports['fdb-libs']:Notify(src, 'Loja ' .. shopId .. ' salva com sucesso!', 'success')
+    
+    -- Recarrega lojas globalmente
+    -- Como a recarga pode ser complexa e envolver N coisas, o ideal é só reiniciar o script ou chamar a função se existir
+    -- Mas como não temos LoadShops público definido na task atual, apenas alertamos.
+    print("^2[fdb-shops] Loja " .. shopId .. " teve suas propriedades alteradas no BD.^7")
+end)

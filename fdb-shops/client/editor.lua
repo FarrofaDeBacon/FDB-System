@@ -14,6 +14,11 @@ RegisterNUICallback("startPlacement", function(data, cb)
     cb('ok')
 end)
 
+RegisterNUICallback("saveStoreConfig", function(data, cb)
+    TriggerServerEvent('fdb-shops:server:saveStoreConfig', data.store)
+    cb('ok')
+end)
+
 AddEventHandler(GetCurrentResourceName() .. ":placementFinished", function(ok, resultData, spawnType, model, callbackData)
     if ok and resultData then
         local shopId = callbackData

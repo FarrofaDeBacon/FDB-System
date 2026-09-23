@@ -37,8 +37,17 @@
             body: JSON.stringify({
                 type: field.id === 'npc_model' ? 'npc' : 'prop',
                 model: store[field.id],
-                shopId: store.id
             })
+        });
+    }
+
+    function saveConfig() {
+        fetch(`https://${window.GetParentResourceName()}/saveStoreConfig`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ store })
+        }).then(() => {
+            onClose();
         });
     }
 </script>
@@ -61,7 +70,7 @@
                 
                 {#if field.type === 'text'}
                     <div style="display: flex; gap: 0.5rem; width: 100%;">
-                        <input id="{store.id}-{field.id}" type="text" value={store[field.id] || ''} class="fdb-input" style="flex: 1;" />
+                        <input id="{store.id}-{field.id}" type="text" value={store[field.id] || ''} on:input={(e) => store[field.id] = e.target.value} class="fdb-input" style="flex: 1;" />
                         {#if field.id === 'npc_model' || field.id === 'register_model'}
                             <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" on:click={() => placeObject(field)}>
                                 Posicionar
@@ -69,10 +78,10 @@
                         {/if}
                     </div>
                 {:else if field.type === 'number'}
-                    <input id="{store.id}-{field.id}" type="number" value={store[field.id] || 0} class="fdb-input" />
+                    <input id="{store.id}-{field.id}" type="number" value={store[field.id] || 0} on:input={(e) => store[field.id] = parseFloat(e.target.value)} class="fdb-input" />
                 {:else if field.type === 'checkbox'}
                     <label class="checkbox-container">
-                        <input id="{store.id}-{field.id}" type="checkbox" checked={store[field.id]} />
+                        <input id="{store.id}-{field.id}" type="checkbox" checked={store[field.id]} on:change={(e) => store[field.id] = e.target.checked} />
                         <span class="checkmark">Sim / Ativo</span>
                     </label>
                 {/if}
@@ -81,7 +90,7 @@
     </div>
 
     <div class="footer">
-        <button class="test-button submit">Salvar Alterações</button>
+        <button class="test-button submit" on:click={saveConfig}>Salvar Alterações</button>
         <button class="test-button cancel" on:click={onClose}>Fechar (ESC)</button>
     </div>
 </div>
