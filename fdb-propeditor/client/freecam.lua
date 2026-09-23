@@ -431,7 +431,6 @@ local function SpawnGhost(modelHash, isPed)
         Wait(10)
         if GetGameTimer() > deadline then
             print("[fdb-propeditor] EDITOR ERRO: modelo " .. tostring(modelHash) .. " não carregou em 5s. Fantasma não pode ser criado.")
-            Bridge.Notify("Falha ao carregar o modelo do preview (timeout).", "error")
             return
         end
     end
@@ -453,7 +452,7 @@ local function SpawnGhost(modelHash, isPed)
         SetEntityInvincible(ghostEntity, true)
     else
         print("[fdb-propeditor] EDITOR ERRO: CreatePed/CreateObject retornou handle inválido para " .. tostring(modelHash))
-        Bridge.Notify("Falha ao criar o preview (handle inválido).", "error")
+        lib.notify({ title = 'Prop Editor', description = 'Falha ao criar o preview (handle inválido).', type = 'error' })
     end
 end
 
@@ -566,7 +565,7 @@ exports('StartPlacementCamera', function(resourceName, type, model, callbackData
     local isAllowed = lib.callback.await('fdb-propeditor:server:CheckPermission', 500)
     
     if not isAllowed then
-        Bridge.Notify("Você não tem permissão (command.propedit) para usar a câmera livre.", "error")
+        lib.notify({ title = 'Prop Editor', description = 'Você não tem permissão (command.propedit) para usar a câmera livre.', type = 'error' })
         -- Mesmo rejeitado, enviar callback dizendo que cancelou
         TriggerEvent(resourceName .. ":placementFinished", false, nil, type, model, callbackData)
         return false
