@@ -24,6 +24,23 @@
     };
 
     let fields = $derived(templateConfig[store.template] || templateConfig.default);
+
+    function placeObject(field) {
+        if (!store.id || !store[field.id]) {
+            alert("Preencha o modelo antes de posicionar!");
+            return;
+        }
+        
+        fetch(`https://${window.GetParentResourceName()}/startPlacement`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: field.id === 'npc_model' ? 'npc' : 'prop',
+                model: store[field.id],
+                shopId: store.id
+            })
+        });
+    }
 </script>
 
 <div class="theme-test-card">
@@ -43,7 +60,14 @@
                 <label for="{store.id}-{field.id}">{field.name}</label>
                 
                 {#if field.type === 'text'}
-                    <input id="{store.id}-{field.id}" type="text" value={store[field.id] || ''} class="fdb-input" />
+                    <div style="display: flex; gap: 0.5rem; width: 100%;">
+                        <input id="{store.id}-{field.id}" type="text" value={store[field.id] || ''} class="fdb-input" style="flex: 1;" />
+                        {#if field.id === 'npc_model' || field.id === 'register_model'}
+                            <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" on:click={() => placeObject(field)}>
+                                Posicionar
+                            </button>
+                        {/if}
+                    </div>
                 {:else if field.type === 'number'}
                     <input id="{store.id}-{field.id}" type="number" value={store[field.id] || 0} class="fdb-input" />
                 {:else if field.type === 'checkbox'}

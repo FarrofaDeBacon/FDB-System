@@ -27,6 +27,13 @@
                 }
             } else if (data.action === 'closeEditor') {
                 visible = false;
+            } else if (data.action === 'hideUI') {
+                visible = false; // Hide temporarily
+            } else if (data.action === 'showUI') {
+                visible = true; // Show again
+            } else if (data.action === 'placementResult') {
+                // The backend handles the coords, but we could show a toast here if we had one
+                console.log("Placement success for shopId:", data.shopId);
             }
         };
 
