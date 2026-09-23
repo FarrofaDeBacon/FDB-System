@@ -87,6 +87,11 @@ function SpawnStationNPC(station)
     
     print('[fdb-shops] Attempting to spawn NPC model: ' .. tostring(model))
     local hash = joaat(model)
+    if not IsModelValid(hash) then
+        print('[fdb-shops] ERROR: Model ' .. tostring(model) .. ' is invalid (does not exist in CD image).')
+        return
+    end
+    
     RequestModel(hash)
     
     local timeout = GetGameTimer() + 5000
