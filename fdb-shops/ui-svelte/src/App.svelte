@@ -6,6 +6,7 @@
     let theme = {};
     let stores = [];
     let selectedStore = null;
+    let isPlacementMode = false;
 
     // Recebe mensagens do Lua
     onMount(() => {
@@ -16,6 +17,7 @@
                 stores = data.stores || [];
                 selectedStore = stores.length > 0 ? stores[0] : null;
                 visible = true;
+                isPlacementMode = false;
                 
                 // Aplica variáveis do tema na raiz
                 if (theme) {
@@ -27,10 +29,11 @@
                 }
             } else if (data.action === 'closeEditor') {
                 visible = false;
+                isPlacementMode = false;
             } else if (data.action === 'hideUI') {
-                visible = false; // Hide temporarily
+                isPlacementMode = true;
             } else if (data.action === 'showUI') {
-                visible = true; // Show again
+                isPlacementMode = false;
             } else if (data.action === 'placementResult') {
                 // The backend handles the coords, but we could show a toast here if we had one
                 console.log("Placement success for shopId:", data.shopId);
@@ -38,7 +41,7 @@
         };
 
         const handleKeyDown = (e) => {
-            if (visible && e.key === 'Escape') {
+            if (visible && !isPlacementMode && e.key === 'Escape') {
                 closeUI();
             }
         };
@@ -66,6 +69,7 @@
 </script>
 
 {#if visible}
+    {#if !isPlacementMode}
     <div class="fdb-shops-app">
         <!-- Sidebar -->
         <div class="sidebar">
@@ -94,6 +98,63 @@
             {/if}
         </div>
     </div>
+    {/if}
+
+    {#if isPlacementMode}
+    <div class="noclip-hud noclip-hud--visible" aria-hidden="false">
+        <div class="noclip-hud__inner">
+            <div class="noclip-hud__head">
+                <span class="noclip-hud__title" id="ph-title">Posicionamento</span>
+                <span class="noclip-hud__speed" id="ph-speed">Normal</span>
+            </div>
+            <div class="noclip-hud__accent"></div>
+            <ul class="noclip-hud__lines" id="ph-lines">
+                <li class="noclip-hud__row">
+                    <div class="noclip-hud__keys">
+                        <span class="noclip-hud__kbd">W</span><span class="noclip-hud__kbd">A</span><span class="noclip-hud__kbd">S</span><span class="noclip-hud__kbd">D</span>
+                    </div>
+                    <div class="noclip-hud__desc">Mover marcador</div>
+                </li>
+                <li class="noclip-hud__row">
+                    <div class="noclip-hud__keys">
+                        <span class="noclip-hud__kbd">Q</span><span class="noclip-hud__kbd">E</span>
+                    </div>
+                    <div class="noclip-hud__desc">Subir / Descer</div>
+                </li>
+                <li class="noclip-hud__row">
+                    <div class="noclip-hud__keys">
+                        <span class="noclip-hud__kbd">LAlt</span>
+                    </div>
+                    <div class="noclip-hud__desc">Grudar no chão</div>
+                </li>
+                <li class="noclip-hud__row">
+                    <div class="noclip-hud__keys">
+                        <span class="noclip-hud__kbd">Scroll</span>
+                    </div>
+                    <div class="noclip-hud__desc">Afastar/Aproximar</div>
+                </li>
+                <li class="noclip-hud__row">
+                    <div class="noclip-hud__keys">
+                        <span class="noclip-hud__kbd">←</span> <span class="noclip-hud__kbd">→</span>
+                    </div>
+                    <div class="noclip-hud__desc">Girar fantasma</div>
+                </li>
+                <li class="noclip-hud__row">
+                    <div class="noclip-hud__keys">
+                        <span class="noclip-hud__kbd">Enter</span>
+                    </div>
+                    <div class="noclip-hud__desc">Confirmar</div>
+                </li>
+                <li class="noclip-hud__row">
+                    <div class="noclip-hud__keys">
+                        <span class="noclip-hud__kbd">Backspace</span>
+                    </div>
+                    <div class="noclip-hud__desc">Cancelar</div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    {/if}
 {/if}
 
 <style>
@@ -194,4 +255,19 @@
         color: var(--fdb-text-secondary, #999);
         box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
+
+    /* HUD CSS */
+    .noclip-hud { z-index: 25000; pointer-events: none; opacity: 0; max-width: min(300px, 100vw - 40px); transition: opacity 0.2s, transform 0.2s; position: fixed; bottom: 20px; right: 20px; transform: translateY(6px); }
+    .noclip-hud.noclip-hud--visible { opacity: 1; transform: translateY(0); }
+    .noclip-hud__inner { background: linear-gradient(#1c1c1c, #111); border: 1px solid #333; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
+    .noclip-hud__head { background: #000; border-bottom: 1px solid #333; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 12px; display: flex; }
+    .noclip-hud__title { letter-spacing: 0.04em; color: #fff; font-size: 14px; font-weight: 600; }
+    .noclip-hud__speed { color: #888; white-space: nowrap; font-size: 12px; }
+    .noclip-hud__accent { background: #3498db; height: 2px; }
+    .noclip-hud__lines { color: #888; margin: 0; padding: 8px 12px 10px; font-size: 12px; line-height: 1.45; list-style: none; }
+    .noclip-hud__row { border-bottom: 1px solid rgba(255,255,255,0.06); justify-content: space-between; align-items: center; gap: 10px; padding: 5px 0; display: flex; }
+    .noclip-hud__row:last-child { border-bottom: none; padding-bottom: 2px; }
+    .noclip-hud__keys { flex-shrink: 0; align-items: center; gap: 5px; display: flex; }
+    .noclip-hud__kbd { letter-spacing: 0.03em; color: #3498db; text-align: center; background: linear-gradient(#2e2e36, #202026); border: 1px solid #3d3d48; border-radius: 5px; min-width: 1.35em; padding: 4px 8px; font-family: system-ui, Segoe UI, sans-serif; font-size: 10px; font-weight: 700; line-height: 1.2; box-shadow: 0 2px rgba(0,0,0,0.4), inset 0 1px rgba(255,255,255,0.07); }
+    .noclip-hud__desc { color: #fff; opacity: 0.88; text-align: right; font-size: 11px; }
 </style>
