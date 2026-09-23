@@ -444,7 +444,6 @@ local function SpawnGhost(modelHash, isPed)
     end
 
     if ghostEntity and ghostEntity ~= 0 then
-        SetEntityAlpha(ghostEntity, 150, false)
         SetEntityCollision(ghostEntity, false, false)
         if isPed then
             SetBlockingOfNonTemporaryEvents(ghostEntity, true)
