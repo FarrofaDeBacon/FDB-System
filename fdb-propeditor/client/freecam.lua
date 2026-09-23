@@ -561,15 +561,8 @@ end
 exports('StartPlacementCamera', function(resourceName, type, model, callbackData)
     if isPlacing then return false end
 
-    -- Verifica ACE no servidor de forma assíncrona
-    local isAllowed = lib.callback.await('fdb-propeditor:server:CheckPermission', 500)
-    
-    if not isAllowed then
-        lib.notify({ title = 'Prop Editor', description = 'Você não tem permissão (command.propedit) para usar a câmera livre.', type = 'error' })
-        -- Mesmo rejeitado, enviar callback dizendo que cancelou
-        TriggerEvent(resourceName .. ":placementFinished", false, nil, type, model, callbackData)
-        return false
-    end
+    -- Removida a checagem de permissão dupla, pois o recurso requisitante já deve validar (fdb-shops já valida).
+    -- Isso evita o travamento infinito do lib.callback.await caso o ox_lib não esteja rodando no servidor.
 
     placementResourceName = resourceName
     placementType = type
