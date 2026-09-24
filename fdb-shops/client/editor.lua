@@ -59,8 +59,8 @@ RegisterNUICallback("requestRemoval", function(data, cb)
         
         if shopStations then
             for i, station in ipairs(shopStations) do
-                if station.shop_id == shopId and station.type == typeName then
-                    exports['fdb-libs']:RemoveZone('shop_station_' .. station.id)
+                if station.shop_id == shopId and station.type == typeName and station.targetZoneId then
+                    exports.ox_target:removeZone(station.targetZoneId)
                 end
             end
         end
@@ -103,8 +103,8 @@ RegisterNUICallback("deleteStore", function(data, cb)
         
         if shopStations then
             for i, station in ipairs(shopStations) do
-                if station.shop_id == shopId then
-                    exports['fdb-libs']:RemoveZone('shop_station_' .. station.id)
+                if station.shop_id == shopId and station.targetZoneId then
+                    exports.ox_target:removeZone(station.targetZoneId)
                 end
             end
         end
