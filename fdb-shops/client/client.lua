@@ -9,7 +9,7 @@ local resourceName = GetCurrentResourceName()
 lib.locale()
 
 spawnedEntities = {}
-local shopStations = {}
+shopStations = {}
 
 -- Load Stations from server on player load
 RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', function()

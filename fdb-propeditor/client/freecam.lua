@@ -419,7 +419,7 @@ end
 local function SpawnGhost(modelHash, isPed)
     if not modelHash or modelHash == 0 then return end
     
-    if not IsModelInCdimage(modelHash) then
+    if not IsModelValid(modelHash) then
         print("[fdb-propeditor] EDITOR ERRO: modelo " .. tostring(modelHash) .. " não existe no CD image. Fantasma não pode ser criado.")
         lib.notify({ title = 'Prop Editor', description = 'Modelo inválido para preview. Veja o console (F8).', type = 'error' })
         return

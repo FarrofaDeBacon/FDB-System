@@ -57,6 +57,14 @@ RegisterNUICallback("requestRemoval", function(data, cb)
             spawnedEntities[spawnKey] = nil
         end
         
+        if shopStations then
+            for i, station in ipairs(shopStations) do
+                if station.shop_id == shopId and station.type == typeName then
+                    exports['fdb-libs']:RemoveZone('shop_station_' .. station.id)
+                end
+            end
+        end
+        
         SendNUIMessage({ action = "showUI" })
         SetNuiFocus(true, true)
         cb(true)
@@ -90,6 +98,14 @@ RegisterNUICallback("deleteStore", function(data, cb)
             if spawnedEntities and spawnedEntities[spawnKey] then
                 DeleteEntity(spawnedEntities[spawnKey])
                 spawnedEntities[spawnKey] = nil
+            end
+        end
+        
+        if shopStations then
+            for i, station in ipairs(shopStations) do
+                if station.shop_id == shopId then
+                    exports['fdb-libs']:RemoveZone('shop_station_' .. station.id)
+                end
             end
         end
         
