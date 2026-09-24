@@ -76,7 +76,8 @@ function GetStationPrompt(stationType)
         ['craft'] = 'Produzir Itens',
         ['venda'] = 'Abrir Catálogo',
         ['npc'] = 'Falar',
-        ['supply_board'] = 'Quadro de Entregas'
+        ['supply_board'] = 'Quadro de Entregas',
+        ['admin_panel'] = 'Painel de Administração'
     }
     return prompts[stationType] or 'Interagir'
 end
@@ -116,7 +117,7 @@ function SpawnStationNPC(station)
             TaskStartScenarioInPlace(npc, joaat(station.animation_name), -1, true, false, false, false)
         end
 
-        spawnedEntities['npc_' .. station.id] = npc
+        spawnedEntities[station.type .. '_' .. station.shop_id] = npc
     end
 end
 
@@ -142,7 +143,7 @@ function SpawnStationProp(station)
     if prop and prop ~= 0 then
         SetEntityRotation(prop, 0.0, 0.0, station.npc_heading or 0.0, 2, true)
         FreezeEntityPosition(prop, true)
-        spawnedEntities['prop_' .. station.id] = prop
+        spawnedEntities[station.type .. '_' .. station.shop_id] = prop
     end
 end
 

@@ -31,13 +31,50 @@
             return;
         }
         
+        let mode = 'ghost';
+        let spawnType = field.id === 'npc_model' ? 'npc' : 'prop';
+
         fetch(`https://${window.GetParentResourceName()}/startPlacement`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                type: field.id === 'npc_model' ? 'npc' : 'prop',
+                type: spawnType,
                 model: store[field.id],
-                shopId: store.id
+                shopId: store.id,
+                mode: mode
+            })
+        });
+    }
+
+    function placeComponent(type) {
+        let model = null;
+        let mode = 'ghost';
+
+        if (type === 'admin_panel') {
+            mode = 'marker';
+        } else {
+            let modelKey = type + '_model';
+            let coordsKey = type + '_coords';
+
+            if (!store[modelKey]) {
+                alert("Preencha o modelo antes de posicionar!");
+                return;
+            }
+            model = store[modelKey];
+            
+            if (store[coordsKey]) {
+                mode = 'adjust';
+            }
+        }
+
+        fetch(`https://${window.GetParentResourceName()}/startPlacement`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: type,
+                model: model,
+                shopId: store.id,
+                mode: mode
             })
         });
     }
@@ -88,6 +125,44 @@
                 {/if}
             </div>
         {/each}
+    </div>
+
+    <!-- Seção de Componentes Físicos/Abstratos -->
+    <div class="header" style="margin-top: 1.5rem;">
+        <h2 style="font-size: 1.2rem; color: var(--fdb-text-muted);">Componentes da Loja</h2>
+    </div>
+    
+    <div class="form-grid">
+        <!-- Registradora -->
+        <div class="input-group">
+            <label for="{store.id}-registradora_model">Modelo da Registradora</label>
+            <div style="display: flex; gap: 0.5rem; width: 100%;">
+                <input id="{store.id}-registradora_model" type="text" value={store.registradora_model || ''} on:input={(e) => store.registradora_model = e.target.value} class="fdb-input" style="flex: 1;" placeholder="Ex: p_cashregister02x" />
+                <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" on:click={() => placeComponent('registradora')}>
+                    {store.registradora_coords ? "Ajustar Posição" : "Adicionar Registradora"}
+                </button>
+            </div>
+        </div>
+
+        <!-- Baú de Estoque -->
+        <div class="input-group">
+            <label for="{store.id}-bau_model">Modelo do Baú de Estoque</label>
+            <div style="display: flex; gap: 0.5rem; width: 100%;">
+                <input id="{store.id}-bau_model" type="text" value={store.bau_model || ''} on:input={(e) => store.bau_model = e.target.value} class="fdb-input" style="flex: 1;" placeholder="Ex: p_trunk01x" />
+                <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" on:click={() => placeComponent('bau')}>
+                    {store.bau_coords ? "Ajustar Posição" : "Adicionar Baú"}
+                </button>
+            </div>
+        </div>
+
+        <!-- Painel Admin -->
+        <div class="input-group">
+            <label>Ponto de Acesso Admin</label>
+            <button class="test-button submit" style="width: 100%;" on:click={() => placeComponent('admin_panel')}>
+                Marcar Posição do Painel
+            </button>
+            <span style="font-size: 0.8rem; color: var(--fdb-text-muted); margin-top: 0.3rem;">Define o gatilho para acessar as configurações desta loja.</span>
+        </div>
     </div>
 
     <div class="footer">

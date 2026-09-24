@@ -10,7 +10,17 @@ end)
 RegisterNUICallback("startPlacement", function(data, cb)
     SetNuiFocus(false, false)
     SendNUIMessage({ action = "hideUI" })
-    exports['fdb-propeditor']:StartPlacementCamera(GetCurrentResourceName(), data.type, data.model, data.shopId)
+    
+    local entityToHide = nil
+    if data.mode == "adjust" then
+        -- Procurar na lista local de entidades spawnadas
+        local spawnKey = data.type .. '_' .. data.shopId
+        if spawnedEntities and spawnedEntities[spawnKey] then
+            entityToHide = spawnedEntities[spawnKey]
+        end
+    end
+    
+    exports['fdb-propeditor']:StartPlacementCamera(GetCurrentResourceName(), data.type, data.model, data.shopId, data.mode, entityToHide)
     cb('ok')
 end)
 

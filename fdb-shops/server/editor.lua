@@ -11,10 +11,20 @@ RegisterCommand('editshops', function(source, args)
     if rows then
         for _, row in ipairs(rows) do
             local stations = MySQL.query.await('SELECT * FROM shop_stations WHERE shop_id = ?', {row.shop_id})
-            local npcModel = nil
+            local npcModel, regModel, bauModel = nil, nil, nil
+            local regCoords, bauCoords, adminCoords = nil, nil, nil
+            
             for _, s in ipairs(stations) do
                 if s.type == 'npc' then
                     npcModel = s.npc_model
+                elseif s.type == 'registradora' then
+                    regModel = s.prop_model
+                    regCoords = s.position
+                elseif s.type == 'bau' then
+                    bauModel = s.prop_model
+                    bauCoords = s.position
+                elseif s.type == 'admin_panel' then
+                    adminCoords = s.position
                 end
             end
             
@@ -22,7 +32,12 @@ RegisterCommand('editshops', function(source, args)
                 id = row.shop_id,
                 label = row.label,
                 template = row.template_id,
-                npc_model = npcModel
+                npc_model = npcModel,
+                registradora_model = regModel,
+                registradora_coords = regCoords,
+                bau_model = bauModel,
+                bau_coords = bauCoords,
+                admin_panel_coords = adminCoords
             })
         end
     end
@@ -35,16 +50,33 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
     if not FDBCore.Functions.HasPermission(src, 'admin') then return end
     
     local shopId = storeData.id
-    local label = storeData.label
-    local npcModel = storeData.npc_model
     
-    if label then
-        MySQL.update.await('UPDATE shops SET label = ? WHERE shop_id = ?', {label, shopId})
+    if storeData.label then
+        MySQL.update.await('UPDATE shops SET label = ? WHERE shop_id = ?', {storeData.label, shopId})
     end
     
-    if npcModel then
-        MySQL.update.await('UPDATE shop_stations SET npc_model = ? WHERE shop_id = ? AND type = "npc"', {npcModel, shopId})
+    local function upsertStationModel(sType, modelVal, isProp)
+        if not modelVal then return end
+        local existing = MySQL.scalar.await('SELECT id FROM shop_stations WHERE shop_id = ? AND type = ?', {shopId, sType})
+        if existing then
+            if isProp then
+                MySQL.update.await('UPDATE shop_stations SET prop_model = ? WHERE id = ?', {modelVal, existing})
+            else
+                MySQL.update.await('UPDATE shop_stations SET npc_model = ? WHERE id = ?', {modelVal, existing})
+            end
+        else
+            -- Create a dummy entry so we can save the model before having coords, or just insert it.
+            if isProp then
+                MySQL.insert.await('INSERT INTO shop_stations (shop_id, type, prop_model) VALUES (?, ?, ?)', {shopId, sType, modelVal})
+            else
+                MySQL.insert.await('INSERT INTO shop_stations (shop_id, type, npc_model) VALUES (?, ?, ?)', {shopId, sType, modelVal})
+            end
+        end
     end
+
+    upsertStationModel('npc', storeData.npc_model, false)
+    upsertStationModel('registradora', storeData.registradora_model, true)
+    upsertStationModel('bau', storeData.bau_model, true)
     
     exports['fdb-libs']:Notify(src, 'Loja ' .. shopId .. ' salva com sucesso!', 'success')
     

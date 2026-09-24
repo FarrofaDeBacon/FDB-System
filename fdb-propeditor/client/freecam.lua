@@ -443,6 +443,10 @@ local function SpawnGhost(modelHash, isPed)
         ghostEntity = CreateObject(modelHash, pos.x, pos.y, pos.z, false, false, false)
     end
 
+    if placementEntityToHide and DoesEntityExist(placementEntityToHide) then
+        SetEntityVisible(placementEntityToHide, true)
+    end
+
     if ghostEntity and ghostEntity ~= 0 then
         SetEntityCollision(ghostEntity, false, false)
         if isPed then
@@ -536,6 +540,10 @@ local function finish(ok)
         ghostEntity = nil
     end
 
+    if placementEntityToHide and DoesEntityExist(placementEntityToHide) then
+        SetEntityVisible(placementEntityToHide, true)
+    end
+
     if placementModel then
         SetModelAsNoLongerNeeded(GetHashKey(placementModel))
     end
@@ -556,9 +564,11 @@ local function finish(ok)
     end
 end
 
--- EXPORT: Iniciar a câmera livre (Gated por ACE)
-exports('StartPlacementCamera', function(resourceName, type, model, callbackData)
+exports('StartPlacementCamera', function(resourceName, type, model, callbackData, mode, entityToHide)
     if isPlacing then return false end
+
+    placementMode = mode or "ghost"
+    placementEntityToHide = entityToHide
 
     local ticket = GetGameTimer() .. tostring(math.random(1000, 9999))
     local responded = false
@@ -598,6 +608,10 @@ exports('StartPlacementCamera', function(resourceName, type, model, callbackData
     rawKeyState = {}
 
     placementPosX, placementPosY, placementPosZ = getPlacementStartPos()
+    
+    if placementMode == "adjust" and placementEntityToHide and DoesEntityExist(placementEntityToHide) then
+        SetEntityVisible(placementEntityToHide, false)
+    end
 
     isPlacing = true
     freezePlacementPlayer()
@@ -606,10 +620,12 @@ exports('StartPlacementCamera', function(resourceName, type, model, callbackData
     local c = Config.PlacementControls
 
     CreateThread(function()
-        if type == "guard" or type == "dog" or type == "npc" then
-            SpawnGhost(GetHashKey(model), true)
-        else
-            SpawnGhost(GetHashKey(model), false)
+        if placementMode ~= "marker" then
+            if type == "guard" or type == "dog" or type == "npc" then
+                SpawnGhost(GetHashKey(model), true)
+            else
+                SpawnGhost(GetHashKey(model), false)
+            end
         end
 
         while isPlacing do
