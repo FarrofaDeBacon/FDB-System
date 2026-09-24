@@ -119,6 +119,37 @@ RegisterNUICallback("deleteStore", function(data, cb)
     end
 end)
 
+RegisterNUICallback("createNewStore", function(data, cb)
+    SendNUIMessage({ action = "hideUI" })
+    SetNuiFocus(false, false)
+    
+    local input = lib.inputDialog('Criar Nova Loja', {
+        { type = 'input', label = 'ID da Loja (ex: loja_centro)', required = true },
+        { type = 'input', label = 'Nome da Loja (ex: Loja do Centro)', required = true },
+        { type = 'select', label = 'Template', required = true, options = {
+            { value = 'general', label = 'General Store' },
+            { value = 'saloon', label = 'Saloon' },
+            { value = 'weapons', label = 'Gunsmith' }
+        }}
+    })
+
+    if not input then
+        SendNUIMessage({ action = "showUI" })
+        SetNuiFocus(true, true)
+        return cb('cancel')
+    end
+
+    local shopId = input[1]
+    local label = input[2]
+    local template = input[3]
+
+    -- Formatar o ID para remover espaços
+    shopId = string.gsub(string.lower(shopId), "%s+", "_")
+
+    TriggerServerEvent('fdb-shops:server:createShopFromUI', shopId, label, template)
+    cb('ok')
+end)
+
 AddEventHandler(GetCurrentResourceName() .. ":placementFinished", function(ok, resultData, spawnType, model, callbackData)
     if ok and resultData then
         local shopId = callbackData

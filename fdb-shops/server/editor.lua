@@ -149,3 +149,22 @@ RegisterNetEvent('fdb-shops:server:deleteStore', function(shopId)
     
     exports['fdb-libs']:Notify(src, 'Loja excluída permanentemente!', 'success')
 end)
+
+RegisterNetEvent('fdb-shops:server:createShopFromUI', function(shopId, label, template)
+    local src = source
+    if not FDBCore.Functions.HasPermission(src, 'admin') then return end
+
+    -- Verifica se já existe
+    local exists = MySQL.scalar.await('SELECT 1 FROM shops WHERE shop_id = ?', {shopId})
+    if exists then
+        exports['fdb-libs']:Notify(src, 'Já existe uma loja com esse ID!', 'error')
+        ExecuteCommand('editshops') -- Reabre o painel
+        return
+    end
+
+    MySQL.insert.await('INSERT INTO shops (shop_id, template_id, label) VALUES (?, ?, ?)', {shopId, template, label})
+    exports['fdb-libs']:Notify(src, 'Loja criada com sucesso! Você já pode configurá-la.', 'success')
+    
+    -- Força a reabertura do painel para carregar a lista nova
+    ExecuteCommand('editshops')
+end)

@@ -63,6 +63,14 @@
         });
     }
 
+    async function createNewStore() {
+        await fetch(`https://${window.GetParentResourceName()}/createNewStore`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+    }
+
     function selectStore(store) {
         selectedStore = store;
     }
@@ -79,11 +87,16 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <h2 class="sidebar-title">Lojas ({stores.length})</h2>
+            
+            <button class="test-button submit" style="margin: 0.5rem 1rem; width: calc(100% - 2rem);" onclick={createNewStore}>
+                + Criar Nova Loja
+            </button>
+
             <div class="store-list">
                 {#each stores as store}
                     <button 
                         class="sidebar-item {selectedStore?.id === store.id ? 'active' : ''}"
-                        on:click={() => selectStore(store)}
+                        onclick={() => selectStore(store)}
                     >
                         {store.label || store.id}
                         <span class="badge">{store.template || 'general'}</span>
