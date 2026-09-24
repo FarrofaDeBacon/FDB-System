@@ -138,3 +138,14 @@ RegisterNetEvent('fdb-shops:server:removePlacement', function(shopId, spawnType)
     
     exports['fdb-libs']:Notify(src, 'Componente removido do banco com sucesso!', 'success')
 end)
+
+RegisterNetEvent('fdb-shops:server:deleteStore', function(shopId)
+    local src = source
+    if not FDBCore.Functions.HasPermission(src, 'admin') then return end
+
+    -- Remove todas as estações e configurações da loja
+    MySQL.update.await('DELETE FROM shop_stations WHERE shop_id = ?', {shopId})
+    MySQL.update.await('DELETE FROM shops WHERE shop_id = ?', {shopId})
+    
+    exports['fdb-libs']:Notify(src, 'Loja excluída permanentemente!', 'success')
+end)

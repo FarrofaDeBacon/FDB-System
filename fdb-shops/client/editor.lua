@@ -41,7 +41,7 @@ RegisterNUICallback("requestRemoval", function(data, cb)
     SendNUIMessage({ action = "hideUI" })
     SetNuiFocus(false, false)
 
-    local alert = exports['fdb-libs']:alertDialog({
+    local alert = lib.alertDialog({
         header = 'Remover Componente',
         content = ('Deseja realmente remover %s desta loja?'):format(data.label or typeName),
         centered = true,
@@ -55,6 +55,42 @@ RegisterNUICallback("requestRemoval", function(data, cb)
         if spawnedEntities and spawnedEntities[spawnKey] then
             DeleteEntity(spawnedEntities[spawnKey])
             spawnedEntities[spawnKey] = nil
+        end
+        
+        SendNUIMessage({ action = "showUI" })
+        SetNuiFocus(true, true)
+        cb(true)
+    else
+        SendNUIMessage({ action = "showUI" })
+        SetNuiFocus(true, true)
+        cb(false)
+    end
+end)
+
+RegisterNUICallback("deleteStore", function(data, cb)
+    local shopId = data.shopId
+
+    SendNUIMessage({ action = "hideUI" })
+    SetNuiFocus(false, false)
+
+    local alert = lib.alertDialog({
+        header = 'Excluir Loja',
+        content = ('Deseja realmente EXCLUIR DEFINITIVAMENTE a loja %s?\nIsso apagará o registro e todas as posições associadas.'):format(data.label or shopId),
+        centered = true,
+        cancel = true
+    })
+
+    if alert == 'confirm' then
+        TriggerServerEvent('fdb-shops:server:deleteStore', shopId)
+        
+        -- Cleanup entities locally immediately
+        local types = {'registradora', 'bau', 'npc', 'admin_panel'}
+        for _, t in ipairs(types) do
+            local spawnKey = t .. '_' .. shopId
+            if spawnedEntities and spawnedEntities[spawnKey] then
+                DeleteEntity(spawnedEntities[spawnKey])
+                spawnedEntities[spawnKey] = nil
+            end
         end
         
         SendNUIMessage({ action = "showUI" })

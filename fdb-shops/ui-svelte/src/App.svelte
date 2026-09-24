@@ -66,6 +66,11 @@
     function selectStore(store) {
         selectedStore = store;
     }
+
+    function handleStoreDeleted(shopId) {
+        stores = stores.filter(s => s.id !== shopId);
+        selectedStore = null;
+    }
 </script>
 
 {#if visible}
@@ -90,7 +95,7 @@
         <!-- Main Content -->
         <div class="main-content">
             {#if selectedStore}
-                <StoreConfig store={selectedStore} onClose={closeUI} />
+                <StoreConfig store={selectedStore} onClose={closeUI} onDeleted={handleStoreDeleted} />
             {:else}
                 <div class="empty-state">
                     <p>Selecione uma loja na lateral para editar.</p>

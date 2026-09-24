@@ -1,5 +1,5 @@
 <script>
-    let { store, onClose } = $props();
+    let { store, onClose, onDeleted = () => {} } = $props();
 
     const templateConfig = {
         general: [
@@ -128,6 +128,19 @@
             if (type === 'admin_panel') {
                 store.admin_panel_coords = null;
             }
+        }
+    }
+
+    async function deleteStore() {
+        let res = await fetch(`https://${window.GetParentResourceName()}/deleteStore`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ shopId: store.id, label: store.label || store.id })
+        });
+        
+        let confirmed = await res.json();
+        if (confirmed) {
+            onDeleted(store.id);
         }
     }
 
@@ -268,9 +281,12 @@
         </div>
     </div>
 
-    <div class="footer">
-        <button class="test-button submit" onclick={saveConfig}>Salvar Alterações</button>
-        <button class="test-button cancel" onclick={onClose}>Fechar (ESC)</button>
+    <div class="footer" style="justify-content: space-between;">
+        <button class="test-button cancel" style="background-color: rgba(170, 51, 51, 0.7);" onclick={deleteStore}>Excluir Loja</button>
+        <div style="display: flex; gap: 0.5rem;">
+            <button class="test-button submit" onclick={saveConfig}>Salvar Alterações</button>
+            <button class="test-button cancel" onclick={onClose}>Fechar (ESC)</button>
+        </div>
     </div>
 </div>
 
