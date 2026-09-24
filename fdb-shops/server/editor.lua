@@ -35,8 +35,10 @@ RegisterCommand('editshops', function(source, args)
                 npc_model = npcModel,
                 registradora_model = regModel,
                 registradora_coords = regCoords,
+                registradora_is_marker = (regCoords ~= nil and regModel == nil),
                 bau_model = bauModel,
                 bau_coords = bauCoords,
+                bau_is_marker = (bauCoords ~= nil and bauModel == nil),
                 admin_panel_coords = adminCoords
             })
         end
@@ -55,28 +57,32 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
         MySQL.update.await('UPDATE shops SET label = ? WHERE shop_id = ?', {storeData.label, shopId})
     end
     
-    local function upsertStationModel(sType, modelVal, isProp)
-        if not modelVal then return end
+    local function upsertStationModel(sType, modelVal, isProp, isMarker)
         local existing = MySQL.scalar.await('SELECT id FROM shop_stations WHERE shop_id = ? AND type = ?', {shopId, sType})
+        
+        -- Se isMarker for verdadeiro, forçamos o model a null para que o cliente pule o spawn do prop
+        local targetModel = isMarker and nil or modelVal
+
         if existing then
             if isProp then
-                MySQL.update.await('UPDATE shop_stations SET prop_model = ? WHERE id = ?', {modelVal, existing})
+                MySQL.update.await('UPDATE shop_stations SET prop_model = ? WHERE id = ?', {targetModel, existing})
             else
-                MySQL.update.await('UPDATE shop_stations SET npc_model = ? WHERE id = ?', {modelVal, existing})
+                MySQL.update.await('UPDATE shop_stations SET npc_model = ? WHERE id = ?', {targetModel, existing})
             end
         else
+            if not targetModel then return end -- Não vamos criar uma linha fantasma sem coordenadas nem modelo
             -- Create a dummy entry so we can save the model before having coords, or just insert it.
             if isProp then
-                MySQL.insert.await('INSERT INTO shop_stations (shop_id, type, prop_model) VALUES (?, ?, ?)', {shopId, sType, modelVal})
+                MySQL.insert.await('INSERT INTO shop_stations (shop_id, type, prop_model) VALUES (?, ?, ?)', {shopId, sType, targetModel})
             else
-                MySQL.insert.await('INSERT INTO shop_stations (shop_id, type, npc_model) VALUES (?, ?, ?)', {shopId, sType, modelVal})
+                MySQL.insert.await('INSERT INTO shop_stations (shop_id, type, npc_model) VALUES (?, ?, ?)', {shopId, sType, targetModel})
             end
         end
     end
 
-    upsertStationModel('npc', storeData.npc_model, false)
-    upsertStationModel('registradora', storeData.registradora_model, true)
-    upsertStationModel('bau', storeData.bau_model, true)
+    upsertStationModel('npc', storeData.npc_model, false, false)
+    upsertStationModel('registradora', storeData.registradora_model, true, storeData.registradora_is_marker)
+    upsertStationModel('bau', storeData.bau_model, true, storeData.bau_is_marker)
     
     exports['fdb-libs']:Notify(src, 'Loja ' .. shopId .. ' salva com sucesso!', 'success')
     
