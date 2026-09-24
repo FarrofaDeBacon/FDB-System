@@ -25,9 +25,31 @@
 
     let fields = $derived(templateConfig[store.template] || templateConfig.default);
 
+    const registerModels = [
+        'p_cashregister01x', 'p_cashregister02x', 'p_cashregister03x', 
+        'p_cashregister04x', 'p_cashregister05x', 'p_cashregister06x'
+    ];
+    
+    const chestModels = [
+        'p_trunk01x', 'p_trunk02x', 'p_chest01x', 
+        'p_chest02x', 'p_chest03x', 'p_strongbox01x'
+    ];
+    
+    const npcModels = [
+        'u_m_o_blwbartender_01', 'u_f_o_blwbartender_01', 
+        'u_m_m_valbartender_01', 'u_m_m_valgunsmith_01', 
+        'u_m_m_valgenstoreowner_01', 'u_f_m_valtownfolk_01',
+        'u_m_m_bht_bartender', 'u_m_m_bwm_bartender_01',
+        'u_m_m_sdobartender_01'
+    ];
+
     function placeObject(field) {
         if (!store.id || !store[field.id]) {
-            alert("Preencha o modelo antes de posicionar!");
+            fetch(`https://${window.GetParentResourceName()}/notify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: "Preencha o modelo antes de posicionar!", type: 'error' })
+            });
             return;
         }
         
@@ -55,15 +77,25 @@
         } else {
             let modelKey = type + '_model';
             let coordsKey = type + '_coords';
+            let markerKey = type + '_is_marker';
 
-            if (!store[modelKey]) {
-                alert("Preencha o modelo antes de posicionar!");
-                return;
-            }
-            model = store[modelKey];
-            
-            if (store[coordsKey]) {
-                mode = 'adjust';
+            if (store[markerKey]) {
+                mode = 'marker';
+                model = null;
+            } else {
+                if (!store[modelKey]) {
+                    fetch(`https://${window.GetParentResourceName()}/notify`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: "Selecione o modelo antes de posicionar!", type: 'error' })
+                    });
+                    return;
+                }
+                model = store[modelKey];
+                
+                if (store[coordsKey]) {
+                    mode = 'adjust';
+                }
             }
         }
 
@@ -107,19 +139,31 @@
                 <label for="{store.id}-{field.id}">{field.name}</label>
                 
                 {#if field.type === 'text'}
-                    <div style="display: flex; gap: 0.5rem; width: 100%;">
-                        <input id="{store.id}-{field.id}" type="text" value={store[field.id] || ''} on:input={(e) => store[field.id] = e.target.value} class="fdb-input" style="flex: 1;" />
-                        {#if field.id === 'npc_model' || field.id === 'register_model'}
-                            <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" on:click={() => placeObject(field)}>
-                                Posicionar
-                            </button>
-                        {/if}
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
+                        <div style="display: flex; gap: 0.5rem; width: 100%;">
+                            {#if field.id === 'npc_model'}
+                                <select id="{store.id}-{field.id}" bind:value={store[field.id]} class="fdb-input" style="flex: 1;">
+                                    <option value="">-- Escolha um NPC --</option>
+                                    {#each npcModels as nm}
+                                        <option value={nm}>{nm}</option>
+                                    {/each}
+                                </select>
+                            {:else}
+                                <input id="{store.id}-{field.id}" type="text" bind:value={store[field.id]} class="fdb-input" style="flex: 1;" />
+                            {/if}
+                            
+                            {#if field.id === 'npc_model' || field.id === 'register_model'}
+                                <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick={() => placeObject(field)}>
+                                    Posicionar
+                                </button>
+                            {/if}
+                        </div>
                     </div>
                 {:else if field.type === 'number'}
-                    <input id="{store.id}-{field.id}" type="number" value={store[field.id] || 0} on:input={(e) => store[field.id] = parseFloat(e.target.value)} class="fdb-input" />
+                    <input id="{store.id}-{field.id}" type="number" value={store[field.id] || 0} oninput={(e) => store[field.id] = parseFloat(e.target.value)} class="fdb-input" />
                 {:else if field.type === 'checkbox'}
                     <label class="checkbox-container">
-                        <input id="{store.id}-{field.id}" type="checkbox" checked={store[field.id]} on:change={(e) => store[field.id] = e.target.checked} />
+                        <input id="{store.id}-{field.id}" type="checkbox" checked={store[field.id]} onchange={(e) => store[field.id] = e.target.checked} />
                         <span class="checkmark">Sim / Ativo</span>
                     </label>
                 {/if}
@@ -135,30 +179,52 @@
     <div class="form-grid">
         <!-- Registradora -->
         <div class="input-group">
-            <label for="{store.id}-registradora_model">Modelo da Registradora</label>
-            <div style="display: flex; gap: 0.5rem; width: 100%;">
-                <input id="{store.id}-registradora_model" type="text" value={store.registradora_model || ''} on:input={(e) => store.registradora_model = e.target.value} class="fdb-input" style="flex: 1;" placeholder="Ex: p_cashregister02x" />
-                <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" on:click={() => placeComponent('registradora')}>
-                    {store.registradora_coords ? "Ajustar Posição" : "Adicionar Registradora"}
-                </button>
+            <label for="{store.id}-registradora_model">Registradora</label>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
+                <div style="display: flex; gap: 0.5rem; width: 100%;">
+                    <select id="{store.id}-registradora_model" bind:value={store.registradora_model} class="fdb-input" style="flex: 1;" disabled={store.registradora_is_marker}>
+                        <option value="">-- Escolha o Modelo --</option>
+                        {#each registerModels as rm}
+                            <option value={rm}>{rm}</option>
+                        {/each}
+                    </select>
+                    <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick={() => placeComponent('registradora')}>
+                        {store.registradora_coords ? "Ajustar Posição" : "Adicionar Registradora"}
+                    </button>
+                </div>
+                <label class="checkbox-container" style="margin-top: 0.2rem;">
+                    <input type="checkbox" bind:checked={store.registradora_is_marker} />
+                    <span class="checkmark">Só Marcador (Sem objeto físico)</span>
+                </label>
             </div>
         </div>
 
         <!-- Baú de Estoque -->
         <div class="input-group">
-            <label for="{store.id}-bau_model">Modelo do Baú de Estoque</label>
-            <div style="display: flex; gap: 0.5rem; width: 100%;">
-                <input id="{store.id}-bau_model" type="text" value={store.bau_model || ''} on:input={(e) => store.bau_model = e.target.value} class="fdb-input" style="flex: 1;" placeholder="Ex: p_trunk01x" />
-                <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" on:click={() => placeComponent('bau')}>
-                    {store.bau_coords ? "Ajustar Posição" : "Adicionar Baú"}
-                </button>
+            <label for="{store.id}-bau_model">Baú de Estoque</label>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
+                <div style="display: flex; gap: 0.5rem; width: 100%;">
+                    <select id="{store.id}-bau_model" bind:value={store.bau_model} class="fdb-input" style="flex: 1;" disabled={store.bau_is_marker}>
+                        <option value="">-- Escolha o Modelo --</option>
+                        {#each chestModels as cm}
+                            <option value={cm}>{cm}</option>
+                        {/each}
+                    </select>
+                    <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick={() => placeComponent('bau')}>
+                        {store.bau_coords ? "Ajustar Posição" : "Adicionar Baú"}
+                    </button>
+                </div>
+                <label class="checkbox-container" style="margin-top: 0.2rem;">
+                    <input type="checkbox" bind:checked={store.bau_is_marker} />
+                    <span class="checkmark">Só Marcador (Sem objeto físico)</span>
+                </label>
             </div>
         </div>
 
         <!-- Painel Admin -->
         <div class="input-group">
             <label>Ponto de Acesso Admin</label>
-            <button class="test-button submit" style="width: 100%;" on:click={() => placeComponent('admin_panel')}>
+            <button class="test-button submit" style="width: 100%;" onclick={() => placeComponent('admin_panel')}>
                 Marcar Posição do Painel
             </button>
             <span style="font-size: 0.8rem; color: var(--fdb-text-muted); margin-top: 0.3rem;">Define o gatilho para acessar as configurações desta loja.</span>
@@ -166,8 +232,8 @@
     </div>
 
     <div class="footer">
-        <button class="test-button submit" on:click={saveConfig}>Salvar Alterações</button>
-        <button class="test-button cancel" on:click={onClose}>Fechar (ESC)</button>
+        <button class="test-button submit" onclick={saveConfig}>Salvar Alterações</button>
+        <button class="test-button cancel" onclick={onClose}>Fechar (ESC)</button>
     </div>
 </div>
 
