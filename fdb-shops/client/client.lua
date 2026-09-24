@@ -8,7 +8,7 @@ local fdbLibs = exports['fdb-libs']
 local resourceName = GetCurrentResourceName()
 lib.locale()
 
-local spawnedEntities = {}
+spawnedEntities = {}
 local shopStations = {}
 
 -- Load Stations from server on player load
@@ -49,21 +49,23 @@ function InitializeStations()
     print('[fdb-shops] Initializing stations...')
 
     for _, station in ipairs(shopStations) do
-        -- 1. Create Zone / Interaction Point using fdb-libs
-        fdbLibs:CreateZone('shop_station_' .. station.id, vec3(station.position.x, station.position.y, station.position.z), 2.0, {
-            drawMarker = (station.type ~= 'npc'), -- Only draw marker if it's not an NPC
-            showPrompt = true,
-            promptText = GetStationPrompt(station.type),
-            onKeyPress = function()
-                InteractWithStation(station)
-            end
-        })
+        if station.position then
+            -- 1. Create Zone / Interaction Point using fdb-libs
+            fdbLibs:CreateZone('shop_station_' .. station.id, vec3(station.position.x, station.position.y, station.position.z), 2.0, {
+                drawMarker = (station.type ~= 'npc'), -- Only draw marker if it's not an NPC
+                showPrompt = true,
+                promptText = GetStationPrompt(station.type),
+                onKeyPress = function()
+                    InteractWithStation(station)
+                end
+            })
 
-        -- 2. Spawn Visuals (NPCs or Props)
-        if station.type == 'npc' and station.npc_model then
-            SpawnStationNPC(station)
-        elseif station.prop_model then
-            SpawnStationProp(station)
+            -- 2. Spawn Visuals (NPCs or Props)
+            if station.type == 'npc' and station.npc_model then
+                SpawnStationNPC(station)
+            elseif station.prop_model then
+                SpawnStationProp(station)
+            end
         end
     end
     print(('[fdb-shops] Successfully created %s interaction zones.'):format(#shopStations))

@@ -128,3 +128,13 @@ RegisterNetEvent('fdb-shops:server:savePlacement', function(shopId, spawnType, c
     -- Notificar cliente para fazer refresh local ou só instruir a usar /shopreload
     exports['fdb-libs']:Notify(src, 'Use /shopreload para aplicar as novas posições no mundo.', 'primary')
 end)
+
+RegisterNetEvent('fdb-shops:server:removePlacement', function(shopId, spawnType)
+    local src = source
+    if not FDBCore.Functions.HasPermission(src, 'admin') then return end
+
+    -- Remove completamento a estação do banco (isso anula modelo, coords e limpa o registro)
+    MySQL.update.await('DELETE FROM shop_stations WHERE shop_id = ? AND type = ?', {shopId, spawnType})
+    
+    exports['fdb-libs']:Notify(src, 'Componente removido do banco com sucesso!', 'success')
+end)

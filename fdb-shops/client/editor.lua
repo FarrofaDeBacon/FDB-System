@@ -34,6 +34,39 @@ RegisterNUICallback("notify", function(data, cb)
     cb('ok')
 end)
 
+RegisterNUICallback("requestRemoval", function(data, cb)
+    local typeName = data.type
+    local shopId = data.shopId
+
+    SendNUIMessage({ action = "hideUI" })
+    SetNuiFocus(false, false)
+
+    local alert = exports['fdb-libs']:alertDialog({
+        header = 'Remover Componente',
+        content = ('Deseja realmente remover %s desta loja?'):format(data.label or typeName),
+        centered = true,
+        cancel = true
+    })
+
+    if alert == 'confirm' then
+        TriggerServerEvent('fdb-shops:server:removePlacement', shopId, typeName)
+        
+        local spawnKey = typeName .. '_' .. shopId
+        if spawnedEntities and spawnedEntities[spawnKey] then
+            DeleteEntity(spawnedEntities[spawnKey])
+            spawnedEntities[spawnKey] = nil
+        end
+        
+        SendNUIMessage({ action = "showUI" })
+        SetNuiFocus(true, true)
+        cb(true)
+    else
+        SendNUIMessage({ action = "showUI" })
+        SetNuiFocus(true, true)
+        cb(false)
+    end
+end)
+
 AddEventHandler(GetCurrentResourceName() .. ":placementFinished", function(ok, resultData, spawnType, model, callbackData)
     if ok and resultData then
         local shopId = callbackData

@@ -111,6 +111,26 @@
         });
     }
 
+    async function removeComponent(type, label) {
+        let res = await fetch(`https://${window.GetParentResourceName()}/requestRemoval`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: type, shopId: store.id, label: label })
+        });
+        
+        let confirmed = await res.json();
+        if (confirmed) {
+            store[type + '_coords'] = null;
+            store[type + '_is_marker'] = false;
+            store[type + '_model'] = '';
+            
+            // For admin panel
+            if (type === 'admin_panel') {
+                store.admin_panel_coords = null;
+            }
+        }
+    }
+
     function saveConfig() {
         fetch(`https://${window.GetParentResourceName()}/saveStoreConfig`, {
             method: 'POST',
@@ -191,6 +211,11 @@
                     <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick={() => placeComponent('registradora')}>
                         {store.registradora_coords ? "Ajustar Posição" : "Adicionar Registradora"}
                     </button>
+                    {#if store.registradora_coords}
+                        <button class="test-button cancel" style="padding: 0.5rem 0.8rem; font-size: 0.9rem; background-color: rgba(170, 51, 51, 0.7);" title="Remover Registradora" onclick={() => removeComponent('registradora', 'Registradora')}>
+                            ❌
+                        </button>
+                    {/if}
                 </div>
                 <label class="checkbox-container" style="margin-top: 0.2rem;">
                     <input type="checkbox" bind:checked={store.registradora_is_marker} />
@@ -213,6 +238,11 @@
                     <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick={() => placeComponent('bau')}>
                         {store.bau_coords ? "Ajustar Posição" : "Adicionar Baú"}
                     </button>
+                    {#if store.bau_coords}
+                        <button class="test-button cancel" style="padding: 0.5rem 0.8rem; font-size: 0.9rem; background-color: rgba(170, 51, 51, 0.7);" title="Remover Baú" onclick={() => removeComponent('bau', 'Baú de Estoque')}>
+                            ❌
+                        </button>
+                    {/if}
                 </div>
                 <label class="checkbox-container" style="margin-top: 0.2rem;">
                     <input type="checkbox" bind:checked={store.bau_is_marker} />
@@ -224,9 +254,16 @@
         <!-- Painel Admin -->
         <div class="input-group">
             <label>Ponto de Acesso Admin</label>
-            <button class="test-button submit" style="width: 100%;" onclick={() => placeComponent('admin_panel')}>
-                Marcar Posição do Painel
-            </button>
+            <div style="display: flex; gap: 0.5rem; width: 100%;">
+                <button class="test-button submit" style="flex: 1;" onclick={() => placeComponent('admin_panel')}>
+                    {store.admin_panel_coords ? "Ajustar Posição do Painel" : "Marcar Posição do Painel"}
+                </button>
+                {#if store.admin_panel_coords}
+                    <button class="test-button cancel" style="padding: 0.5rem 0.8rem; font-size: 0.9rem; background-color: rgba(170, 51, 51, 0.7);" title="Remover Painel Admin" onclick={() => removeComponent('admin_panel', 'Painel Admin')}>
+                        ❌
+                    </button>
+                {/if}
+            </div>
             <span style="font-size: 0.8rem; color: var(--fdb-text-muted); margin-top: 0.3rem;">Define o gatilho para acessar as configurações desta loja.</span>
         </div>
     </div>
