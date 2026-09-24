@@ -10,6 +10,7 @@ lib.locale()
 
 spawnedEntities = {}
 shopStations = {}
+local spawnedZones = {}
 
 -- Load Stations from server on player load
 RegisterNetEvent('FDBCore:Client:OnPlayerLoaded', function()
@@ -46,12 +47,19 @@ function InitializeStations()
         if DoesEntityExist(entity) then DeleteEntity(entity) end
     end
     spawnedEntities = {}
+    
+    for _, zoneId in ipairs(spawnedZones) do
+        fdbLibs:RemoveZone(zoneId)
+    end
+    spawnedZones = {}
+
     print('[fdb-shops] Initializing stations...')
 
     for _, station in ipairs(shopStations) do
         if station.position then
             -- 1. Create Zone / Interaction Point using fdb-libs
-            fdbLibs:CreateZone('shop_station_' .. station.id, vec3(station.position.x, station.position.y, station.position.z), 2.0, {
+            local zoneId = 'shop_station_' .. station.id
+            fdbLibs:CreateZone(zoneId, vec3(station.position.x, station.position.y, station.position.z), 2.0, {
                 drawMarker = (station.type ~= 'npc'), -- Only draw marker if it's not an NPC
                 showPrompt = true,
                 promptText = GetStationPrompt(station.type),
@@ -59,6 +67,7 @@ function InitializeStations()
                     InteractWithStation(station)
                 end
             })
+            table.insert(spawnedZones, zoneId)
 
             -- 2. Spawn Visuals (NPCs or Props)
             if station.type == 'npc' and station.npc_model then
