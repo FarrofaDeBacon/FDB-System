@@ -420,10 +420,10 @@ local function SpawnGhost(modelHash, isPed)
     if not modelHash or modelHash == 0 then return end
     
     if not IsModelValid(modelHash) then
-        print("[fdb-propeditor] EDITOR ERRO: modelo " .. tostring(modelHash) .. " não existe no CD image. Fantasma não pode ser criado.")
-        lib.notify({ title = 'Prop Editor', description = 'Modelo inválido para preview. Veja o console (F8).', type = 'error' })
+        print("[fdb-propeditor] EDITOR ERRO: modelo " .. tostring(modelHash) .. " é inválido (não existe no CD image).")
         return
     end
+
     RequestModel(modelHash)
 
     local deadline = GetGameTimer() + 5000
@@ -451,6 +451,8 @@ local function SpawnGhost(modelHash, isPed)
         SetEntityCollision(ghostEntity, false, false)
         if isPed then
             SetBlockingOfNonTemporaryEvents(ghostEntity, true)
+        else
+            SetEntityAlpha(ghostEntity, 150, false)
         end
         SetEntityInvincible(ghostEntity, true)
     else
@@ -521,10 +523,10 @@ local function handlePointInput()
     if bindHeld(c.heightDown) then placementPosZ = placementPosZ - hStep end
 
     -- Zoom (Scroll)
-    if IsDisabledControlJustPressed(0, 0x295175BF) then
+    if IsDisabledControlJustPressed(0, GetHashKey("INPUT_PREV_WEAPON")) or IsDisabledControlJustPressed(0, 0x295175BF) then
         placementCamDistance = math.max(1.0, placementCamDistance - 0.5)
     end
-    if IsDisabledControlJustPressed(0, 0x3698B813) then
+    if IsDisabledControlJustPressed(0, GetHashKey("INPUT_NEXT_WEAPON")) or IsDisabledControlJustPressed(0, 0x3698B813) then
         placementCamDistance = math.min(15.0, placementCamDistance + 0.5)
     end
 end

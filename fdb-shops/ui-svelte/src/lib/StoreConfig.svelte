@@ -1,4 +1,5 @@
 <script>
+    import Select from '../../../../fdb-libs/ui/src/components/Select.svelte';
     let { store, onClose, onDeleted = () => {} } = $props();
 
     const templateConfig = {
@@ -167,6 +168,11 @@
             <input type="text" value={store.id} disabled class="fdb-input disabled" />
         </div>
 
+        <div class="input-group">
+            <label for="{store.id}-owner_id">Dono da Loja (Citizen ID)</label>
+            <input id="{store.id}-owner_id" type="text" bind:value={store.owner_id} class="fdb-input" placeholder="Ex: RBM12345 (opcional)" />
+        </div>
+
         {#each fields as field}
             <div class="input-group">
                 <label for="{store.id}-{field.id}">{field.name}</label>
@@ -175,12 +181,9 @@
                     <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
                         <div style="display: flex; gap: 0.5rem; width: 100%;">
                             {#if field.id === 'npc_model'}
-                                <select id="{store.id}-{field.id}" bind:value={store[field.id]} class="fdb-input" style="flex: 1;">
-                                    <option value="">-- Escolha um NPC --</option>
-                                    {#each npcModels as nm}
-                                        <option value={nm}>{nm}</option>
-                                    {/each}
-                                </select>
+                                <div style="flex: 1;">
+                                    <Select id="{store.id}-{field.id}" bind:value={store[field.id]} options={npcModels} />
+                                </div>
                             {:else}
                                 <input id="{store.id}-{field.id}" type="text" bind:value={store[field.id]} class="fdb-input" style="flex: 1;" />
                             {/if}
@@ -215,12 +218,9 @@
             <label for="{store.id}-registradora_model">Registradora</label>
             <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
                 <div style="display: flex; gap: 0.5rem; width: 100%;">
-                    <select id="{store.id}-registradora_model" bind:value={store.registradora_model} class="fdb-input" style="flex: 1;" disabled={store.registradora_is_marker}>
-                        <option value="">-- Escolha o Modelo --</option>
-                        {#each registerModels as rm}
-                            <option value={rm}>{rm}</option>
-                        {/each}
-                    </select>
+                    <div style="flex: 1;">
+                        <Select id="{store.id}-registradora_model" bind:value={store.registradora_model} options={registerModels} disabled={store.registradora_is_marker} />
+                    </div>
                     <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick={() => placeComponent('registradora')}>
                         {store.registradora_coords ? "Ajustar Posição" : "Adicionar Registradora"}
                     </button>
@@ -242,12 +242,9 @@
             <label for="{store.id}-bau_model">Baú de Estoque</label>
             <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
                 <div style="display: flex; gap: 0.5rem; width: 100%;">
-                    <select id="{store.id}-bau_model" bind:value={store.bau_model} class="fdb-input" style="flex: 1;" disabled={store.bau_is_marker}>
-                        <option value="">-- Escolha o Modelo --</option>
-                        {#each chestModels as cm}
-                            <option value={cm}>{cm}</option>
-                        {/each}
-                    </select>
+                    <div style="flex: 1;">
+                        <Select id="{store.id}-bau_model" bind:value={store.bau_model} options={chestModels} disabled={store.bau_is_marker} />
+                    </div>
                     <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick={() => placeComponent('bau')}>
                         {store.bau_coords ? "Ajustar Posição" : "Adicionar Baú"}
                     </button>

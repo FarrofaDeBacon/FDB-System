@@ -31,6 +31,7 @@ RegisterCommand('editshops', function(source, args)
             table.insert(shopsList, {
                 id = row.shop_id,
                 label = row.label,
+                owner_id = row.owner_id,
                 template = row.template_id,
                 npc_model = npcModel,
                 registradora_model = regModel,
@@ -54,7 +55,15 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
     local shopId = storeData.id
     
     if storeData.label then
-        MySQL.update.await('UPDATE shops SET label = ? WHERE shop_id = ?', {storeData.label, shopId})
+        local ownerId = storeData.owner_id
+        if ownerId == "" then ownerId = nil end
+        MySQL.update.await('UPDATE shops SET label = ?, owner_id = ? WHERE shop_id = ?', {storeData.label, ownerId, shopId})
+        
+        -- Atualiza a memória para evitar reiniciar o script
+        if ShopManager.Shops[shopId] then
+            ShopManager.Shops[shopId].label = storeData.label
+            ShopManager.Shops[shopId].ownerId = ownerId
+        end
     end
     
     local function upsertStationModel(sType, modelVal, isProp, isMarker)
