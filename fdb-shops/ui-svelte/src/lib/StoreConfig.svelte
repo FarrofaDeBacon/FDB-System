@@ -15,8 +15,7 @@
         ],
         weapons: [
             { id: 'label', name: 'Armeiro', type: 'text' },
-            { id: 'npc_model', name: 'Modelo NPC', type: 'text' },
-            { id: 'permit_level', name: 'Nível de Permissão', type: 'number' }
+            { id: 'npc_model', name: 'Modelo NPC', type: 'text' }
         ],
         default: [
             { id: 'label', name: 'Nome', type: 'text' },
@@ -34,6 +33,10 @@
     const chestModels = [
         'p_trunk01x', 'p_trunk02x', 'p_chest01x', 
         'p_chest02x', 'p_chest03x', 'p_strongbox01x'
+    ];
+    
+    const craftModels = [
+        'p_worktable01x', 'p_cs_tooltable01x', 'p_anvil01x', 'p_cs_workbench01x'
     ];
     
     const npcModels = [
@@ -256,6 +259,30 @@
                 </div>
                 <label class="checkbox-container" style="margin-top: 0.2rem;">
                     <input type="checkbox" bind:checked={store.bau_is_marker} />
+                    <span class="checkmark">Só Marcador (Sem objeto físico)</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Bancada de Craft -->
+        <div class="input-group">
+            <label for="{store.id}-craft_model">Bancada de Craft</label>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
+                <div style="display: flex; gap: 0.5rem; width: 100%;">
+                    <div style="flex: 1;">
+                        <Select id="{store.id}-craft_model" bind:value={store.craft_model} options={craftModels} disabled={store.craft_is_marker} />
+                    </div>
+                    <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick={() => placeComponent('craft')}>
+                        {store.craft_coords ? "Ajustar Posição" : "Adicionar Bancada"}
+                    </button>
+                    {#if store.craft_coords}
+                        <button class="test-button cancel" style="padding: 0.5rem 0.8rem; font-size: 0.9rem; background-color: rgba(170, 51, 51, 0.7);" title="Remover Bancada" onclick={() => removeComponent('craft', 'Bancada de Craft')}>
+                            ❌
+                        </button>
+                    {/if}
+                </div>
+                <label class="checkbox-container" style="margin-top: 0.2rem;">
+                    <input type="checkbox" bind:checked={store.craft_is_marker} />
                     <span class="checkmark">Só Marcador (Sem objeto físico)</span>
                 </label>
             </div>

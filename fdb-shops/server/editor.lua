@@ -10,8 +10,8 @@ local function OpenEditor(src)
     if rows then
         for _, row in ipairs(rows) do
             local stations = MySQL.query.await('SELECT * FROM shop_stations WHERE shop_id = ?', {row.shop_id})
-            local npcModel, regModel, bauModel = nil, nil, nil
-            local regCoords, bauCoords, adminCoords = nil, nil, nil
+            local npcModel, regModel, bauModel, craftModel = nil, nil, nil, nil
+            local regCoords, bauCoords, craftCoords, adminCoords = nil, nil, nil, nil
             
             for _, s in ipairs(stations) do
                 if s.type == 'npc' then
@@ -22,6 +22,9 @@ local function OpenEditor(src)
                 elseif s.type == 'bau' then
                     bauModel = s.prop_model
                     bauCoords = s.position
+                elseif s.type == 'craft' then
+                    craftModel = s.prop_model
+                    craftCoords = s.position
                 elseif s.type == 'admin_panel' then
                     adminCoords = s.position
                 end
@@ -39,6 +42,9 @@ local function OpenEditor(src)
                 bau_model = bauModel,
                 bau_coords = bauCoords,
                 bau_is_marker = (bauCoords ~= nil and bauModel == nil),
+                craft_model = craftModel,
+                craft_coords = craftCoords,
+                craft_is_marker = (craftCoords ~= nil and craftModel == nil),
                 admin_panel_coords = adminCoords
             })
         end
@@ -95,6 +101,7 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
     upsertStationModel('npc', storeData.npc_model, false, false)
     upsertStationModel('registradora', storeData.registradora_model, true, storeData.registradora_is_marker)
     upsertStationModel('bau', storeData.bau_model, true, storeData.bau_is_marker)
+    upsertStationModel('craft', storeData.craft_model, true, storeData.craft_is_marker)
     
     exports['fdb-libs']:Notify(src, 'Loja ' .. shopId .. ' salva com sucesso!', 'success')
     
