@@ -14,18 +14,25 @@ local fdbLibs = exports['fdb-libs']
 -- Callbacks (Client -> Server Requests)
 -- ==========================================
 
-local function hasStationModule(stationId, moduleName)
+local function hasStationModule(stationId, shopId, moduleName)
     if not stationId then return false end
-    local result = MySQL.scalar.await("SELECT metadata FROM shop_stations WHERE id = ?", {stationId})
-    if result then
-        local meta = json.decode(result) or {}
+    
+    local row = MySQL.single.await("SELECT shop_id, metadata FROM shop_stations WHERE id = ?", {stationId})
+    if not row then return false end -- Station doesn't exist
+    
+    if row.shop_id ~= shopId then return false end -- Mismatch/spoofing prevention
+    
+    if row.metadata then
+        local meta = json.decode(row.metadata) or {}
         local modules = meta.modules or {"dashboard", "finances", "prices", "employees", "stock"}
         for _, m in ipairs(modules) do
             if m == moduleName then return true end
         end
+        return false -- metadata explicitly denies
     end
-    -- Legacy stations fallback if result is nil but station exists (handled by default above if query works)
-    return false
+    
+    -- Legacy stations fallback: se metadata for NULL, libera tudo
+    return true
 end
 
 -- Fetch physical stations for a client
@@ -170,7 +177,7 @@ RegisterNetEvent('fdb-shops:server:depositCash', function(shopId, stationId, amo
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
-    if not hasStationModule(stationId, 'finances') then
+    if not hasStationModule(stationId, shopId, 'finances') then
         fdbLibs:Notify(src, "Este painel não possui módulo financeiro", "error")
         return
     end
@@ -191,7 +198,7 @@ RegisterNetEvent('fdb-shops:server:withdrawCash', function(shopId, stationId, am
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
-    if not hasStationModule(stationId, 'finances') then
+    if not hasStationModule(stationId, shopId, 'finances') then
         fdbLibs:Notify(src, "Este painel não possui módulo financeiro", "error")
         return
     end
@@ -218,7 +225,7 @@ RegisterNetEvent('fdb-shops:server:updatePriceVariation', function(shopId, stati
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
-    if not hasStationModule(stationId, 'prices') then
+    if not hasStationModule(stationId, shopId, 'prices') then
         fdbLibs:Notify(src, "Este painel não possui módulo de preços", "error")
         return
     end
