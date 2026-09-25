@@ -4,30 +4,28 @@ local FDBCore = exports['fdb-core']:GetCoreObject()
 local function OpenEditor(src)
     if not FDBCore.Functions.HasPermission(src, 'admin') then return end
     
-    -- Load all shops to display in the UI
     local shopsList = {}
     local rows = MySQL.query.await('SELECT * FROM shops')
     if rows then
         for _, row in ipairs(rows) do
             local stations = MySQL.query.await('SELECT * FROM shop_stations WHERE shop_id = ?', {row.shop_id})
-            local npcModel, regModel, bauModel, craftModel = nil, nil, nil, nil
-            local regCoords, bauCoords, craftCoords, adminCoords = nil, nil, nil, nil
-            
+            local parsedStations = {}
             for _, s in ipairs(stations) do
-                if s.type == 'npc' then
-                    npcModel = s.npc_model
-                elseif s.type == 'registradora' then
-                    regModel = s.prop_model
-                    regCoords = s.position
-                elseif s.type == 'bau' then
-                    bauModel = s.prop_model
-                    bauCoords = s.position
-                elseif s.type == 'craft' then
-                    craftModel = s.prop_model
-                    craftCoords = s.position
-                elseif s.type == 'admin_panel' then
-                    adminCoords = s.position
+                local isMarker = false
+                if s.position ~= nil and s.prop_model == nil and s.npc_model == nil then
+                    isMarker = true
                 end
+                if s.type == 'admin_panel' then isMarker = true end
+                
+                table.insert(parsedStations, {
+                    id = s.id,
+                    type = s.type,
+                    prop_model = s.prop_model,
+                    npc_model = s.npc_model,
+                    position = s.position and json.decode(s.position) or nil,
+                    is_marker = isMarker,
+                    metadata = s.metadata and json.decode(s.metadata) or nil
+                })
             end
             
             table.insert(shopsList, {
@@ -35,17 +33,7 @@ local function OpenEditor(src)
                 label = row.label,
                 owner_id = row.owner_id,
                 template = row.template_id,
-                npc_model = npcModel,
-                registradora_model = regModel,
-                registradora_coords = regCoords,
-                registradora_is_marker = (regCoords ~= nil and regModel == nil),
-                bau_model = bauModel,
-                bau_coords = bauCoords,
-                bau_is_marker = (bauCoords ~= nil and bauModel == nil),
-                craft_model = craftModel,
-                craft_coords = craftCoords,
-                craft_is_marker = (craftCoords ~= nil and craftModel == nil),
-                admin_panel_coords = adminCoords
+                stations = parsedStations
             })
         end
     end
@@ -68,94 +56,67 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
         if ownerId == "" then ownerId = nil end
         MySQL.update.await('UPDATE shops SET label = ?, owner_id = ? WHERE shop_id = ?', {storeData.label, ownerId, shopId})
         
-        -- Atualiza a memória para evitar reiniciar o script
         if ShopManager.Shops[shopId] then
             ShopManager.Shops[shopId].label = storeData.label
             ShopManager.Shops[shopId].ownerId = ownerId
         end
     end
     
-    local function upsertStationModel(sType, modelVal, isProp, isMarker)
-        local existing = MySQL.scalar.await('SELECT id FROM shop_stations WHERE shop_id = ? AND type = ?', {shopId, sType})
-        
-        -- Se isMarker for verdadeiro, forçamos o model a null para que o cliente pule o spawn do prop
-        local targetModel = isMarker and nil or modelVal
-
-        if existing then
-            if isProp then
-                MySQL.update.await('UPDATE shop_stations SET prop_model = ? WHERE id = ?', {targetModel, existing})
-            else
-                MySQL.update.await('UPDATE shop_stations SET npc_model = ? WHERE id = ?', {targetModel, existing})
-            end
-        else
-            if not targetModel then return end -- Não vamos criar uma linha fantasma sem coordenadas nem modelo
-            -- Create a dummy entry so we can save the model before having coords, or just insert it.
-            if isProp then
-                MySQL.insert.await('INSERT INTO shop_stations (shop_id, type, prop_model) VALUES (?, ?, ?)', {shopId, sType, targetModel})
-            else
-                MySQL.insert.await('INSERT INTO shop_stations (shop_id, type, npc_model) VALUES (?, ?, ?)', {shopId, sType, targetModel})
-            end
+    for _, st in ipairs(storeData.stations) do
+        if type(st.id) == "number" then
+            local targetProp = (st.is_marker or st.type == 'admin_panel') and nil or st.prop_model
+            local targetNpc = (st.is_marker) and nil or st.npc_model
+            if st.type == 'npc' then targetProp = nil end
+            
+            MySQL.update.await('UPDATE shop_stations SET prop_model = ?, npc_model = ? WHERE id = ?', {targetProp, targetNpc, st.id})
         end
     end
-
-    upsertStationModel('npc', storeData.npc_model, false, false)
-    upsertStationModel('registradora', storeData.registradora_model, true, storeData.registradora_is_marker)
-    upsertStationModel('bau', storeData.bau_model, true, storeData.bau_is_marker)
-    upsertStationModel('craft', storeData.craft_model, true, storeData.craft_is_marker)
     
     exports['fdb-libs']:Notify(src, 'Loja ' .. shopId .. ' salva com sucesso!', 'success')
-    
-    -- Recarrega lojas globalmente
-    -- Como a recarga pode ser complexa e envolver N coisas, o ideal é só reiniciar o script ou chamar a função se existir
-    -- Mas como não temos LoadShops público definido na task atual, apenas alertamos.
     print("^2[fdb-shops] Loja " .. shopId .. " teve suas propriedades alteradas no BD.^7")
 end)
 
-RegisterNetEvent('fdb-shops:server:savePlacement', function(shopId, spawnType, coords, heading)
+RegisterNetEvent('fdb-shops:server:savePlacement', function(shopId, stationId, spawnType, coords, heading, model)
     local src = source
     if not FDBCore.Functions.HasPermission(src, 'admin') then return end
 
     local posTable = { x = coords.x, y = coords.y, z = coords.z }
     local posStr = json.encode(posTable)
+    
+    local targetProp = spawnType == 'npc' and nil or model
+    local targetNpc = spawnType == 'npc' and model or nil
 
-    -- Verifica se a station já existe
-    local existing = MySQL.scalar.await('SELECT id FROM shop_stations WHERE shop_id = ? AND type = ?', {shopId, spawnType})
-
-    if existing then
+    if type(stationId) == "number" then
         if spawnType == 'npc' then
-            MySQL.update.await('UPDATE shop_stations SET position = ?, npc_heading = ? WHERE id = ?', {posStr, heading, existing})
+            MySQL.update.await('UPDATE shop_stations SET position = ?, npc_heading = ?, npc_model = ? WHERE id = ?', {posStr, heading, targetNpc, stationId})
         else
-            MySQL.update.await('UPDATE shop_stations SET position = ? WHERE id = ?', {posStr, existing})
+            MySQL.update.await('UPDATE shop_stations SET position = ?, prop_model = ? WHERE id = ?', {posStr, targetProp, stationId})
         end
     else
+        -- Insert new
+        local newId
         if spawnType == 'npc' then
-            -- Get default npc_model if possible, or leave null for now (UI defines it)
-            local shop = ShopManager.GetShop(shopId)
-            local npcModel = nil
-            if shop then
-                -- Try to find an existing npc_model in the list if the cache exists
-            end
-            MySQL.insert.await('INSERT INTO shop_stations (shop_id, type, position, npc_heading) VALUES (?, ?, ?, ?)', {shopId, spawnType, posStr, heading})
+            newId = MySQL.insert.await('INSERT INTO shop_stations (shop_id, type, position, npc_heading, npc_model) VALUES (?, ?, ?, ?, ?)', {shopId, spawnType, posStr, heading, targetNpc})
         else
-            MySQL.insert.await('INSERT INTO shop_stations (shop_id, type, position) VALUES (?, ?, ?)', {shopId, spawnType, posStr})
+            newId = MySQL.insert.await('INSERT INTO shop_stations (shop_id, type, position, prop_model) VALUES (?, ?, ?, ?)', {shopId, spawnType, posStr, targetProp})
         end
+        
+        TriggerClientEvent('fdb-shops:client:updateStationId', src, stationId, newId)
     end
 
-    exports['fdb-libs']:Notify(src, 'Posição do ' .. spawnType .. ' salva com sucesso!', 'success')
-    print("^2[fdb-shops] Loja " .. shopId .. " (station: " .. spawnType .. ") teve sua posição salva.^7")
-    
-    -- Notificar cliente para fazer refresh local ou só instruir a usar /shopreload
+    exports['fdb-libs']:Notify(src, 'Posição salva com sucesso!', 'success')
+    print("^2[fdb-shops] Loja " .. shopId .. " teve sua posição salva.^7")
     exports['fdb-libs']:Notify(src, 'Use /shopreload para aplicar as novas posições no mundo.', 'primary')
 end)
 
-RegisterNetEvent('fdb-shops:server:removePlacement', function(shopId, spawnType)
+RegisterNetEvent('fdb-shops:server:removePlacement', function(shopId, stationId)
     local src = source
     if not FDBCore.Functions.HasPermission(src, 'admin') then return end
 
-    -- Remove completamento a estação do banco (isso anula modelo, coords e limpa o registro)
-    MySQL.update.await('DELETE FROM shop_stations WHERE shop_id = ? AND type = ?', {shopId, spawnType})
-    
-    exports['fdb-libs']:Notify(src, 'Componente removido do banco com sucesso!', 'success')
+    if type(stationId) == "number" then
+        MySQL.update.await('DELETE FROM shop_stations WHERE id = ?', {stationId})
+        exports['fdb-libs']:Notify(src, 'Componente removido do banco com sucesso!', 'success')
+    end
 end)
 
 RegisterNetEvent('fdb-shops:server:deleteStore', function(shopId)

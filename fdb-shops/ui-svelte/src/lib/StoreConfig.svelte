@@ -2,28 +2,10 @@
     import Select from '../../../../fdb-libs/ui/src/components/Select.svelte';
     let { store, onClose, onDeleted = () => {} } = $props();
 
-    const templateConfig = {
-        general: [
-            { id: 'label', name: 'Nome da Loja', type: 'text' },
-            { id: 'npc_model', name: 'Modelo do NPC', type: 'text' },
-            { id: 'stock_limit', name: 'Limite de Estoque', type: 'number' }
-        ],
-        saloon: [
-            { id: 'label', name: 'Nome do Saloon', type: 'text' },
-            { id: 'npc_model', name: 'Bartender', type: 'text' },
-            { id: 'drinks_license', name: 'Licença de Bebidas', type: 'checkbox' }
-        ],
-        weapons: [
-            { id: 'label', name: 'Armeiro', type: 'text' },
-            { id: 'npc_model', name: 'Modelo NPC', type: 'text' }
-        ],
-        default: [
-            { id: 'label', name: 'Nome', type: 'text' },
-            { id: 'npc_model', name: 'Modelo NPC', type: 'text' }
-        ]
-    };
-
-    let fields = $derived(templateConfig[store.template] || templateConfig.default);
+    // Migrate old flat structure to new stations array if needed
+    if (!store.stations) {
+        store.stations = [];
+    }
 
     const registerModels = [
         'p_cashregister01x', 'p_cashregister02x', 'p_cashregister03x', 
@@ -47,91 +29,77 @@
         'u_m_m_sdobartender_01'
     ];
 
-    function placeObject(field) {
-        if (!store.id || !store[field.id]) {
-            fetch(`https://${window.GetParentResourceName()}/notify`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: "Preencha o modelo antes de posicionar!", type: 'error' })
-            });
-            return;
-        }
+    function addStation(type) {
+        const tempId = 'temp-' + crypto.randomUUID();
+        let defaultModel = '';
+        if (type === 'registradora') defaultModel = registerModels[0];
+        if (type === 'bau') defaultModel = chestModels[0];
+        if (type === 'craft') defaultModel = craftModels[0];
+        if (type === 'npc') defaultModel = npcModels[0];
         
-        let mode = 'ghost';
-        let spawnType = field.id === 'npc_model' ? 'npc' : 'prop';
+        let newStation = {
+            id: tempId,
+            type: type,
+            is_marker: type === 'admin_panel' ? true : false,
+            position: null
+        };
+        
+        if (type === 'npc') {
+            newStation.npc_model = defaultModel;
+        } else {
+            newStation.prop_model = defaultModel;
+        }
 
-        fetch(`https://${window.GetParentResourceName()}/startPlacement`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                type: spawnType,
-                model: store[field.id],
-                shopId: store.id,
-                mode: mode
-            })
-        });
+        store.stations = [...store.stations, newStation];
     }
 
-    function placeComponent(type) {
-        let model = null;
-        let mode = 'ghost';
-
-        if (type === 'admin_panel') {
-            mode = 'marker';
-        } else {
-            let modelKey = type + '_model';
-            let coordsKey = type + '_coords';
-            let markerKey = type + '_is_marker';
-
-            if (store[markerKey]) {
-                mode = 'marker';
-                model = null;
-            } else {
-                if (!store[modelKey]) {
-                    fetch(`https://${window.GetParentResourceName()}/notify`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message: "Selecione o modelo antes de posicionar!", type: 'error' })
-                    });
-                    return;
-                }
-                model = store[modelKey];
-                
-                if (store[coordsKey]) {
-                    mode = 'adjust';
-                }
+    function placeComponent(station) {
+        if (!station.is_marker && station.type !== 'admin_panel') {
+            let model = station.type === 'npc' ? station.npc_model : station.prop_model;
+            if (!model) {
+                fetch(`https://${window.GetParentResourceName()}/notify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: "Selecione o modelo antes de posicionar!", type: 'error' })
+                });
+                return;
             }
         }
 
+        let mode = station.position ? 'adjust' : 'ghost';
+        if (station.is_marker || station.type === 'admin_panel') {
+            mode = 'marker';
+        }
+
         fetch(`https://${window.GetParentResourceName()}/startPlacement`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                type: type,
-                model: model,
+                type: station.type,
+                model: station.type === 'npc' ? station.npc_model : station.prop_model,
                 shopId: store.id,
+                stationId: station.id,
                 mode: mode
             })
         });
     }
 
-    async function removeComponent(type, label) {
+    async function removeComponent(station) {
+        if (typeof station.id === 'string' && station.id.startsWith('temp-')) {
+            // Unsaved station, just remove from UI array
+            store.stations = store.stations.filter(s => s.id !== station.id);
+            return;
+        }
+
         let res = await fetch(`https://${window.GetParentResourceName()}/requestRemoval`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: type, shopId: store.id, label: label })
+            body: JSON.stringify({ shopId: store.id, stationId: station.id })
         });
         
         let confirmed = await res.json();
         if (confirmed) {
-            store[type + '_coords'] = null;
-            store[type + '_is_marker'] = false;
-            store[type + '_model'] = '';
-            
-            // For admin panel
-            if (type === 'admin_panel') {
-                store.admin_panel_coords = null;
-            }
+            store.stations = store.stations.filter(s => s.id !== station.id);
         }
     }
 
@@ -162,150 +130,86 @@
 <div class="theme-test-card">
     <div class="header">
         <h1>{store.label || store.id}</h1>
-        <p>Editando Template: {store.template}</p>
+        <p>ID: {store.id}</p>
     </div>
 
     <div class="form-grid">
         <div class="input-group">
-            <label>ID da Loja (Somente Leitura)</label>
-            <input type="text" value={store.id} disabled class="fdb-input disabled" />
+            <label for="{store.id}-label">Nome da Loja</label>
+            <input id="{store.id}-label" type="text" bind:value={store.label} class="fdb-input" />
         </div>
 
         <div class="input-group">
             <label for="{store.id}-owner_id">Dono da Loja (Citizen ID)</label>
             <input id="{store.id}-owner_id" type="text" bind:value={store.owner_id} class="fdb-input" placeholder="Ex: RBM12345 (opcional)" />
         </div>
-
-        {#each fields as field}
-            <div class="input-group">
-                <label for="{store.id}-{field.id}">{field.name}</label>
-                
-                {#if field.type === 'text'}
-                    <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
-                        <div style="display: flex; gap: 0.5rem; width: 100%;">
-                            {#if field.id === 'npc_model'}
-                                <div style="flex: 1;">
-                                    <Select id="{store.id}-{field.id}" bind:value={store[field.id]} options={npcModels} />
-                                </div>
-                            {:else}
-                                <input id="{store.id}-{field.id}" type="text" bind:value={store[field.id]} class="fdb-input" style="flex: 1;" />
-                            {/if}
-                            
-                            {#if field.id === 'npc_model' || field.id === 'register_model'}
-                                <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick={() => placeObject(field)}>
-                                    Posicionar
-                                </button>
-                            {/if}
-                        </div>
-                    </div>
-                {:else if field.type === 'number'}
-                    <input id="{store.id}-{field.id}" type="number" value={store[field.id] || 0} oninput={(e) => store[field.id] = parseFloat(e.target.value)} class="fdb-input" />
-                {:else if field.type === 'checkbox'}
-                    <label class="checkbox-container">
-                        <input id="{store.id}-{field.id}" type="checkbox" checked={store[field.id]} onchange={(e) => store[field.id] = e.target.checked} />
-                        <span class="checkmark">Sim / Ativo</span>
-                    </label>
-                {/if}
-            </div>
-        {/each}
     </div>
 
-    <!-- Seção de Componentes Físicos/Abstratos -->
-    <div class="header" style="margin-top: 1.5rem;">
-        <h2 style="font-size: 1.2rem; color: var(--fdb-text-muted);">Componentes da Loja</h2>
+    <div class="header" style="margin-top: 1.5rem; margin-bottom: 1rem;">
+        <h2 style="font-size: 1.2rem; color: var(--fdb-text-muted);">Estações da Loja</h2>
     </div>
     
-    <div class="form-grid">
-        <!-- Registradora -->
-        <div class="input-group">
-            <label for="{store.id}-registradora_model">Registradora</label>
-            <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
-                <div style="display: flex; gap: 0.5rem; width: 100%;">
-                    <div style="flex: 1;">
-                        <Select id="{store.id}-registradora_model" bind:value={store.registradora_model} options={registerModels} disabled={store.registradora_is_marker} />
-                    </div>
-                    <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick={() => placeComponent('registradora')}>
-                        {store.registradora_coords ? "Ajustar Posição" : "Adicionar Registradora"}
+    <div class="form-grid" style="gap: 1rem; max-height: 400px; overflow-y: auto; padding-right: 0.5rem;">
+        {#each store.stations as station (station.id)}
+            <div class="input-group" style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 6px; border: 1px solid var(--fdb-border-color-wood, #444);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <label style="margin: 0; color: var(--fdb-accent-color); font-size: 1rem;">
+                        {station.type.toUpperCase()} 
+                        {#if station.id && typeof station.id === 'number'}
+                            <span style="font-size: 0.75rem; color: var(--fdb-text-muted);">[ID: {station.id}]</span>
+                        {/if}
+                    </label>
+                    <button class="test-button cancel" style="padding: 0.3rem 0.5rem; font-size: 0.8rem; border: none;" title="Remover Estação" onclick={() => removeComponent(station)}>
+                        ❌ Remover
                     </button>
-                    {#if store.registradora_coords}
-                        <button class="test-button cancel" style="padding: 0.5rem 0.8rem; font-size: 0.9rem; background-color: rgba(170, 51, 51, 0.7);" title="Remover Registradora" onclick={() => removeComponent('registradora', 'Registradora')}>
-                            ❌
-                        </button>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
+                    {#if station.type !== 'admin_panel'}
+                        <div style="display: flex; gap: 0.5rem; width: 100%;">
+                            <div style="flex: 1;">
+                                {#if station.type === 'npc'}
+                                    <Select id="model-{station.id}" bind:value={station.npc_model} options={npcModels} />
+                                {:else if station.type === 'registradora'}
+                                    <Select id="model-{station.id}" bind:value={station.prop_model} options={registerModels} disabled={station.is_marker} />
+                                {:else if station.type === 'bau'}
+                                    <Select id="model-{station.id}" bind:value={station.prop_model} options={chestModels} disabled={station.is_marker} />
+                                {:else if station.type === 'craft'}
+                                    <Select id="model-{station.id}" bind:value={station.prop_model} options={craftModels} disabled={station.is_marker} />
+                                {/if}
+                            </div>
+                        </div>
+                    {/if}
+                    
+                    <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick={() => placeComponent(station)}>
+                        {station.position ? "Ajustar Posição" : "Marcar Posição"}
+                    </button>
+
+                    {#if station.type !== 'admin_panel' && station.type !== 'npc'}
+                        <label class="checkbox-container" style="margin-top: 0.2rem;">
+                            <input type="checkbox" bind:checked={station.is_marker} />
+                            <span class="checkmark">Só Marcador (Sem objeto físico)</span>
+                        </label>
                     {/if}
                 </div>
-                <label class="checkbox-container" style="margin-top: 0.2rem;">
-                    <input type="checkbox" bind:checked={store.registradora_is_marker} />
-                    <span class="checkmark">Só Marcador (Sem objeto físico)</span>
-                </label>
             </div>
-        </div>
+        {/each}
 
-        <!-- Baú de Estoque -->
-        <div class="input-group">
-            <label for="{store.id}-bau_model">Baú de Estoque</label>
-            <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
-                <div style="display: flex; gap: 0.5rem; width: 100%;">
-                    <div style="flex: 1;">
-                        <Select id="{store.id}-bau_model" bind:value={store.bau_model} options={chestModels} disabled={store.bau_is_marker} />
-                    </div>
-                    <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick={() => placeComponent('bau')}>
-                        {store.bau_coords ? "Ajustar Posição" : "Adicionar Baú"}
-                    </button>
-                    {#if store.bau_coords}
-                        <button class="test-button cancel" style="padding: 0.5rem 0.8rem; font-size: 0.9rem; background-color: rgba(170, 51, 51, 0.7);" title="Remover Baú" onclick={() => removeComponent('bau', 'Baú de Estoque')}>
-                            ❌
-                        </button>
-                    {/if}
-                </div>
-                <label class="checkbox-container" style="margin-top: 0.2rem;">
-                    <input type="checkbox" bind:checked={store.bau_is_marker} />
-                    <span class="checkmark">Só Marcador (Sem objeto físico)</span>
-                </label>
-            </div>
-        </div>
-
-        <!-- Bancada de Craft -->
-        <div class="input-group">
-            <label for="{store.id}-craft_model">Bancada de Craft</label>
-            <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
-                <div style="display: flex; gap: 0.5rem; width: 100%;">
-                    <div style="flex: 1;">
-                        <Select id="{store.id}-craft_model" bind:value={store.craft_model} options={craftModels} disabled={store.craft_is_marker} />
-                    </div>
-                    <button class="test-button submit" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick={() => placeComponent('craft')}>
-                        {store.craft_coords ? "Ajustar Posição" : "Adicionar Bancada"}
-                    </button>
-                    {#if store.craft_coords}
-                        <button class="test-button cancel" style="padding: 0.5rem 0.8rem; font-size: 0.9rem; background-color: rgba(170, 51, 51, 0.7);" title="Remover Bancada" onclick={() => removeComponent('craft', 'Bancada de Craft')}>
-                            ❌
-                        </button>
-                    {/if}
-                </div>
-                <label class="checkbox-container" style="margin-top: 0.2rem;">
-                    <input type="checkbox" bind:checked={store.craft_is_marker} />
-                    <span class="checkmark">Só Marcador (Sem objeto físico)</span>
-                </label>
-            </div>
-        </div>
-
-        <!-- Painel Admin -->
-        <div class="input-group">
-            <label>Ponto de Acesso Admin</label>
-            <div style="display: flex; gap: 0.5rem; width: 100%;">
-                <button class="test-button submit" style="flex: 1;" onclick={() => placeComponent('admin_panel')}>
-                    {store.admin_panel_coords ? "Ajustar Posição do Painel" : "Marcar Posição do Painel"}
-                </button>
-                {#if store.admin_panel_coords}
-                    <button class="test-button cancel" style="padding: 0.5rem 0.8rem; font-size: 0.9rem; background-color: rgba(170, 51, 51, 0.7);" title="Remover Painel Admin" onclick={() => removeComponent('admin_panel', 'Painel Admin')}>
-                        ❌
-                    </button>
-                {/if}
-            </div>
-            <span style="font-size: 0.8rem; color: var(--fdb-text-muted); margin-top: 0.3rem;">Define o gatilho para acessar as configurações desta loja.</span>
-        </div>
+        {#if store.stations.length === 0}
+            <p style="text-align: center; color: var(--fdb-text-muted);">Nenhuma estação adicionada.</p>
+        {/if}
     </div>
 
-    <div class="footer" style="justify-content: space-between;">
+    <!-- Barra de Adicionar Nova Estação -->
+    <div style="display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap;">
+        <button class="test-button" style="flex: 1; font-size: 0.8rem; padding: 0.5rem; border: 1px solid #444;" onclick={() => addStation('npc')}>+ NPC</button>
+        <button class="test-button" style="flex: 1; font-size: 0.8rem; padding: 0.5rem; border: 1px solid #444;" onclick={() => addStation('registradora')}>+ Registradora</button>
+        <button class="test-button" style="flex: 1; font-size: 0.8rem; padding: 0.5rem; border: 1px solid #444;" onclick={() => addStation('bau')}>+ Baú</button>
+        <button class="test-button" style="flex: 1; font-size: 0.8rem; padding: 0.5rem; border: 1px solid #444;" onclick={() => addStation('craft')}>+ Craft</button>
+        <button class="test-button" style="flex: 1; font-size: 0.8rem; padding: 0.5rem; border: 1px solid #444;" onclick={() => addStation('admin_panel')}>+ Painel Admin</button>
+    </div>
+
+    <div class="footer" style="justify-content: space-between; margin-top: 2rem;">
         <button class="test-button cancel" style="background-color: rgba(170, 51, 51, 0.7);" onclick={deleteStore}>Excluir Loja</button>
         <div style="display: flex; gap: 0.5rem;">
             <button class="test-button submit" onclick={saveConfig}>Salvar Alterações</button>
@@ -315,20 +219,22 @@
 </div>
 
 <style>
-    /* Usando exatamente o CSS do Theme Test original */
     .theme-test-card {
         background-color: var(--fdb-background-color, #1a1a1a);
         color: var(--fdb-text-primary, #ffffff);
         padding: 2rem;
         border: 2px solid var(--fdb-border-color-wood, #555);
         border-radius: var(--fdb-border-radius, 8px);
-        width: 500px;
+        width: 600px;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
         box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
 
     .header {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 1rem;
     }
 
     h1 {
@@ -347,8 +253,7 @@
     .form-grid {
         display: flex;
         flex-direction: column;
-        gap: 1.5rem;
-        margin-bottom: 2rem;
+        gap: 1rem;
     }
 
     .input-group {
@@ -390,6 +295,7 @@
         gap: 0.5rem;
         cursor: pointer;
         color: var(--fdb-text-primary, #fff);
+        font-size: 0.85rem;
     }
 
     .footer {
@@ -406,6 +312,12 @@
         font-size: 1.1rem;
         transition: all 0.2s;
         border: 1px solid transparent;
+        background: transparent;
+        color: #fff;
+    }
+    
+    .test-button:hover {
+        background-color: rgba(255, 255, 255, 0.1);
     }
 
     .test-button.submit {
@@ -427,5 +339,21 @@
     .test-button.cancel:hover {
         background-color: var(--fdb-status-critical, #cc0000);
         color: #fff;
+    }
+    
+    /* Scrollbar for stations list */
+    .form-grid::-webkit-scrollbar {
+        width: 8px;
+    }
+    .form-grid::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+    }
+    .form-grid::-webkit-scrollbar-thumb {
+        background: var(--fdb-border-color-wood, #555);
+        border-radius: 4px;
+    }
+    .form-grid::-webkit-scrollbar-thumb:hover {
+        background: var(--fdb-accent-color, #ffaa00);
     }
 </style>

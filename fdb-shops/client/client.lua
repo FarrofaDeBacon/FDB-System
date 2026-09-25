@@ -135,7 +135,7 @@ function SpawnStationNPC(station)
             TaskStartScenarioInPlace(npc, joaat(station.animation_name), -1, true, false, false, false)
         end
 
-        spawnedEntities[station.type .. '_' .. station.shop_id] = npc
+        spawnedEntities[station.id] = npc
     end
 end
 
@@ -161,7 +161,7 @@ function SpawnStationProp(station)
     if prop and prop ~= 0 then
         SetEntityRotation(prop, 0.0, 0.0, station.npc_heading or 0.0, 2, true)
         FreezeEntityPosition(prop, true)
-        spawnedEntities[station.type .. '_' .. station.shop_id] = prop
+        spawnedEntities[station.id] = prop
     end
 end
 

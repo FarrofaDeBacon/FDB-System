@@ -13,14 +13,13 @@ RegisterNUICallback("startPlacement", function(data, cb)
     
     local entityToHide = nil
     if data.mode == "adjust" then
-        -- Procurar na lista local de entidades spawnadas
-        local spawnKey = data.type .. '_' .. data.shopId
-        if spawnedEntities and spawnedEntities[spawnKey] then
-            entityToHide = spawnedEntities[spawnKey]
+        if spawnedEntities and spawnedEntities[data.stationId] then
+            entityToHide = spawnedEntities[data.stationId]
         end
     end
     
-    exports['fdb-propeditor']:StartPlacementCamera(GetCurrentResourceName(), data.type, data.model, data.shopId, data.mode, entityToHide)
+    local cbData = { shopId = data.shopId, stationId = data.stationId }
+    exports['fdb-propeditor']:StartPlacementCamera(GetCurrentResourceName(), data.type, data.model, json.encode(cbData), data.mode, entityToHide)
     cb('ok')
 end)
 
@@ -49,17 +48,16 @@ RegisterNUICallback("requestRemoval", function(data, cb)
     })
 
     if alert == 'confirm' then
-        TriggerServerEvent('fdb-shops:server:removePlacement', shopId, typeName)
+        TriggerServerEvent('fdb-shops:server:removePlacement', shopId, data.stationId)
         
-        local spawnKey = typeName .. '_' .. shopId
-        if spawnedEntities and spawnedEntities[spawnKey] then
-            DeleteEntity(spawnedEntities[spawnKey])
-            spawnedEntities[spawnKey] = nil
+        if spawnedEntities and spawnedEntities[data.stationId] then
+            DeleteEntity(spawnedEntities[data.stationId])
+            spawnedEntities[data.stationId] = nil
         end
         
         if shopStations then
             for i, station in ipairs(shopStations) do
-                if station.shop_id == shopId and station.type == typeName and station.targetZoneId then
+                if station.id == data.stationId and station.targetZoneId then
                     exports.ox_target:removeZone(station.targetZoneId)
                 end
             end
@@ -92,19 +90,16 @@ RegisterNUICallback("deleteStore", function(data, cb)
         TriggerServerEvent('fdb-shops:server:deleteStore', shopId)
         
         -- Cleanup entities locally immediately
-        local types = {'registradora', 'bau', 'npc', 'admin_panel'}
-        for _, t in ipairs(types) do
-            local spawnKey = t .. '_' .. shopId
-            if spawnedEntities and spawnedEntities[spawnKey] then
-                DeleteEntity(spawnedEntities[spawnKey])
-                spawnedEntities[spawnKey] = nil
-            end
-        end
-        
         if shopStations then
             for i, station in ipairs(shopStations) do
-                if station.shop_id == shopId and station.targetZoneId then
-                    exports.ox_target:removeZone(station.targetZoneId)
+                if station.shop_id == shopId then
+                    if spawnedEntities and spawnedEntities[station.id] then
+                        DeleteEntity(spawnedEntities[station.id])
+                        spawnedEntities[station.id] = nil
+                    end
+                    if station.targetZoneId then
+                        exports.ox_target:removeZone(station.targetZoneId)
+                    end
                 end
             end
         end
@@ -154,18 +149,21 @@ RegisterNUICallback("createNewStore", function(data, cb)
     cb('ok')
 end)
 
-AddEventHandler(GetCurrentResourceName() .. ":placementFinished", function(ok, resultData, spawnType, model, callbackData)
+AddEventHandler(GetCurrentResourceName() .. ":placementFinished", function(ok, resultData, spawnType, model, callbackDataStr)
     if ok and resultData then
-        local shopId = callbackData
+        local cbData = json.decode(callbackDataStr)
+        local shopId = cbData.shopId
+        local stationId = cbData.stationId
         local coords = vector3(resultData.x, resultData.y, resultData.z)
         local heading = resultData.h
         
-        TriggerServerEvent('fdb-shops:server:savePlacement', shopId, spawnType, coords, heading)
+        TriggerServerEvent('fdb-shops:server:savePlacement', shopId, stationId, spawnType, coords, heading, model)
         
         -- Atualiza a NUI
         SendNUIMessage({
             action = "placementResult",
             shopId = shopId,
+            stationId = stationId,
             spawnType = spawnType,
             result = resultData
         })
@@ -194,4 +192,26 @@ end)
 
 CreateThread(function()
     TriggerEvent('chat:addSuggestion', '/editshops', 'Abre o painel visual Svelte para gerenciar lojas', {})
+end)
+
+RegisterNetEvent('fdb-shops:client:updateStationId', function(oldTempId, newId)
+    SendNUIMessage({
+        action = "updateStationId",
+        oldId = oldTempId,
+        newId = newId
+    })
+    
+    if spawnedEntities and spawnedEntities[oldTempId] then
+        spawnedEntities[newId] = spawnedEntities[oldTempId]
+        spawnedEntities[oldTempId] = nil
+    end
+    
+    if shopStations then
+        for i, station in ipairs(shopStations) do
+            if station.id == oldTempId then
+                station.id = newId
+                break
+            end
+        end
+    end
 end)

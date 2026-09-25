@@ -35,8 +35,23 @@
             } else if (data.action === 'showUI') {
                 isPlacementMode = false;
             } else if (data.action === 'placementResult') {
-                // The backend handles the coords, but we could show a toast here if we had one
-                console.log("Placement success for shopId:", data.shopId);
+                // Atualiza as coordenadas na UI
+                if (selectedStore && selectedStore.stations) {
+                    const st = selectedStore.stations.find(s => s.id === data.stationId);
+                    if (st) {
+                        st.position = data.result;
+                        selectedStore = { ...selectedStore }; // trigger reactivity
+                    }
+                }
+            } else if (data.action === 'updateStationId') {
+                // Swap temp-uuid for real database id
+                if (selectedStore && selectedStore.stations) {
+                    const st = selectedStore.stations.find(s => s.id === data.oldId);
+                    if (st) {
+                        st.id = data.newId;
+                        selectedStore = { ...selectedStore };
+                    }
+                }
             }
         };
 
