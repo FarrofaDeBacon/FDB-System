@@ -1,8 +1,7 @@
 -- fdb-shops/server/editor.lua
 local FDBCore = exports['fdb-core']:GetCoreObject()
 
-RegisterCommand('editshops', function(source, args)
-    local src = source
+local function OpenEditor(src)
     if not FDBCore.Functions.HasPermission(src, 'admin') then return end
     
     -- Load all shops to display in the UI
@@ -46,6 +45,10 @@ RegisterCommand('editshops', function(source, args)
     end
 
     TriggerClientEvent('fdb-shops:client:openEditor', src, shopsList)
+end
+
+RegisterCommand('editshops', function(source, args)
+    OpenEditor(source)
 end, true)
 
 RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
@@ -159,7 +162,7 @@ RegisterNetEvent('fdb-shops:server:deleteStore', function(shopId)
     exports['fdb-libs']:Notify(src, 'Loja excluída permanentemente!', 'success')
 end)
 
-RegisterNetEvent('fdb-shops:server:createShopFromUI', function(shopId, label, template)
+RegisterNetEvent('fdb-shops:server:createShopFromUI', function(shopId, label, template, ownerId)
     local src = source
     if not FDBCore.Functions.HasPermission(src, 'admin') then return end
 
@@ -167,13 +170,13 @@ RegisterNetEvent('fdb-shops:server:createShopFromUI', function(shopId, label, te
     local exists = MySQL.scalar.await('SELECT 1 FROM shops WHERE shop_id = ?', {shopId})
     if exists then
         exports['fdb-libs']:Notify(src, 'Já existe uma loja com esse ID!', 'error')
-        ExecuteCommand('editshops') -- Reabre o painel
+        OpenEditor(src)
         return
     end
 
-    MySQL.insert.await('INSERT INTO shops (shop_id, template_id, label) VALUES (?, ?, ?)', {shopId, template, label})
+    MySQL.insert.await('INSERT INTO shops (shop_id, template_id, label, owner_id) VALUES (?, ?, ?, ?)', {shopId, template, label, ownerId})
     exports['fdb-libs']:Notify(src, 'Loja criada com sucesso! Você já pode configurá-la.', 'success')
     
     -- Força a reabertura do painel para carregar a lista nova
-    ExecuteCommand('editshops')
+    OpenEditor(src)
 end)

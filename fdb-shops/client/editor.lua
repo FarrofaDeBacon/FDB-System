@@ -120,7 +120,8 @@ RegisterNUICallback("deleteStore", function(data, cb)
 end)
 
 RegisterNUICallback("createNewStore", function(data, cb)
-    SendNUIMessage({ action = "hideUI" })
+    isEditorOpen = false
+    SendNUIMessage({ action = "closeEditor" })
     SetNuiFocus(false, false)
     
     local input = lib.inputDialog('Criar Nova Loja', {
@@ -130,23 +131,26 @@ RegisterNUICallback("createNewStore", function(data, cb)
             { value = 'general', label = 'General Store' },
             { value = 'saloon', label = 'Saloon' },
             { value = 'weapons', label = 'Gunsmith' }
-        }}
+        }},
+        { type = 'input', label = 'Citizen ID do Dono (Opcional)', required = false }
     })
 
     if not input then
-        SendNUIMessage({ action = "showUI" })
-        SetNuiFocus(true, true)
+        ExecuteCommand('editshops')
         return cb('cancel')
     end
 
     local shopId = input[1]
     local label = input[2]
     local template = input[3]
+    local ownerId = input[4]
+    
+    if ownerId == "" then ownerId = nil end
 
     -- Formatar o ID para remover espaços
     shopId = string.gsub(string.lower(shopId), "%s+", "_")
 
-    TriggerServerEvent('fdb-shops:server:createShopFromUI', shopId, label, template)
+    TriggerServerEvent('fdb-shops:server:createShopFromUI', shopId, label, template, ownerId)
     cb('ok')
 end)
 
