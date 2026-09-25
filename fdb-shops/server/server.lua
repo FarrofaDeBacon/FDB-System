@@ -14,6 +14,20 @@ local fdbLibs = exports['fdb-libs']
 -- Callbacks (Client -> Server Requests)
 -- ==========================================
 
+local function hasStationModule(stationId, moduleName)
+    if not stationId then return false end
+    local result = MySQL.scalar.await("SELECT metadata FROM shop_stations WHERE id = ?", {stationId})
+    if result then
+        local meta = json.decode(result) or {}
+        local modules = meta.modules or {"dashboard", "finances", "prices", "employees", "stock"}
+        for _, m in ipairs(modules) do
+            if m == moduleName then return true end
+        end
+    end
+    -- Legacy stations fallback if result is nil but station exists (handled by default above if query works)
+    return false
+end
+
 -- Fetch physical stations for a client
 fdbLibs:RegisterServerCallback('fdb-shops:server:getStations', function(source, cb)
     local stations = {}
@@ -35,7 +49,8 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:getStations', function(source, 
                 hide_when_owner_present = row.hide_when_owner_present == 1,
                 hide_radius = row.hide_radius,
                 fallback_npc = json.decode(row.fallback_npc) or {},
-                config = json.decode(row.config) or {}
+                config = json.decode(row.config) or {},
+                metadata = json.decode(row.metadata) or {}
             })
         end
     end
@@ -150,10 +165,15 @@ RegisterNetEvent('fdb-shops:server:openStash', function(shopId)
     end
 end)
 
-RegisterNetEvent('fdb-shops:server:depositCash', function(shopId, amount)
+RegisterNetEvent('fdb-shops:server:depositCash', function(shopId, stationId, amount)
     local src = source
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
+
+    if not hasStationModule(stationId, 'finances') then
+        fdbLibs:Notify(src, "Este painel não possui módulo financeiro", "error")
+        return
+    end
 
     if EmployeeManager.HasPermission(shopId, Player.PlayerData.citizenid, 'financeiro') then
         if StashManager.DepositCash(src, shopId, amount) then
@@ -166,10 +186,15 @@ RegisterNetEvent('fdb-shops:server:depositCash', function(shopId, amount)
     end
 end)
 
-RegisterNetEvent('fdb-shops:server:withdrawCash', function(shopId, amount)
+RegisterNetEvent('fdb-shops:server:withdrawCash', function(shopId, stationId, amount)
     local src = source
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
+
+    if not hasStationModule(stationId, 'finances') then
+        fdbLibs:Notify(src, "Este painel não possui módulo financeiro", "error")
+        return
+    end
 
     if EmployeeManager.HasPermission(shopId, Player.PlayerData.citizenid, 'financeiro') then
         local bal = StashManager.GetBalance(shopId)
@@ -188,10 +213,15 @@ RegisterNetEvent('fdb-shops:server:withdrawCash', function(shopId, amount)
     end
 end)
 
-RegisterNetEvent('fdb-shops:server:updatePriceVariation', function(shopId, variation)
+RegisterNetEvent('fdb-shops:server:updatePriceVariation', function(shopId, stationId, variation)
     local src = source
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
+
+    if not hasStationModule(stationId, 'prices') then
+        fdbLibs:Notify(src, "Este painel não possui módulo de preços", "error")
+        return
+    end
 
     if EmployeeManager.HasPermission(shopId, Player.PlayerData.citizenid, 'editar_precos') then
         local shop = ShopManager.GetShop(shopId)

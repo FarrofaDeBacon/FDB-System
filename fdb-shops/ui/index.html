@@ -128,10 +128,10 @@
         
         <div class="content">
             <div class="sidebar">
-                <button class="nav-btn active" onclick="switchTab('dashboard')">Dashboard</button>
-                <button class="nav-btn" onclick="switchTab('finances')">Financeiro</button>
-                <button class="nav-btn" onclick="switchTab('prices')">Preços</button>
-                <button class="nav-btn" onclick="switchTab('employees')">Funcionários</button>
+                <button id="nav-dashboard" class="nav-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+                <button id="nav-finances" class="nav-btn" onclick="switchTab('finances')">Financeiro</button>
+                <button id="nav-prices" class="nav-btn" onclick="switchTab('prices')">Preços</button>
+                <button id="nav-employees" class="nav-btn" onclick="switchTab('employees')">Funcionários</button>
             </div>
             
             <div class="main-panel">
@@ -182,12 +182,46 @@
 
     <script>
         let currentShopId = null;
+        let currentStationId = null;
 
         window.addEventListener('message', function(event) {
             let data = event.data;
             if (data.action === 'openOwnerMenu') {
                 document.body.style.display = 'flex';
                 currentShopId = data.shopId;
+                currentStationId = data.stationId;
+                
+                // Cross-match modules & permissions
+                let perms = data.permissions || {};
+                let stationModules = data.stationModules || ["dashboard", "finances", "prices", "employees"];
+                
+                let playerAllowedModules = ["dashboard"];
+                if (perms.financeiro) { playerAllowedModules.push("finances"); }
+                if (perms.editar_precos) { playerAllowedModules.push("prices"); }
+                if (perms.gerenciar_funcionarios) { playerAllowedModules.push("employees"); }
+                
+                document.querySelectorAll('.nav-btn').forEach(b => {
+                    b.style.display = 'none';
+                    b.classList.remove('active');
+                });
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                
+                let firstVisibleTab = null;
+                
+                stationModules.forEach(mod => {
+                    if (playerAllowedModules.includes(mod)) {
+                        let btn = document.getElementById('nav-' + mod);
+                        if (btn) {
+                            btn.style.display = 'block';
+                            if (!firstVisibleTab) firstVisibleTab = mod;
+                        }
+                    }
+                });
+                
+                if (firstVisibleTab) {
+                    document.getElementById('nav-' + firstVisibleTab).classList.add('active');
+                    document.getElementById(firstVisibleTab).classList.add('active');
+                }
                 
                 // Popula os dados
                 document.getElementById('shop-title').innerText = "Painel: " + data.shopData.label;
@@ -218,7 +252,8 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             
             document.getElementById(tabId).classList.add('active');
-            event.target.classList.add('active');
+            let navBtn = document.getElementById('nav-' + tabId);
+            if (navBtn) navBtn.classList.add('active');
         }
 
         function handleDeposit() {
@@ -227,7 +262,7 @@
             
             fetch(`https://${GetParentResourceName()}/deposit`, {
                 method: 'POST',
-                body: JSON.stringify({ shopId: currentShopId, amount: amount })
+                body: JSON.stringify({ shopId: currentShopId, stationId: currentStationId, amount: amount })
             }).then(() => {
                 closeUI();
             });
@@ -239,7 +274,7 @@
             
             fetch(`https://${GetParentResourceName()}/withdraw`, {
                 method: 'POST',
-                body: JSON.stringify({ shopId: currentShopId, amount: amount })
+                body: JSON.stringify({ shopId: currentShopId, stationId: currentStationId, amount: amount })
             }).then(() => {
                 closeUI();
             });
@@ -251,7 +286,7 @@
             
             fetch(`https://${GetParentResourceName()}/updateVariation`, {
                 method: 'POST',
-                body: JSON.stringify({ shopId: currentShopId, variation: variation })
+                body: JSON.stringify({ shopId: currentShopId, stationId: currentStationId, variation: variation })
             }).then(() => {
                 closeUI();
             });

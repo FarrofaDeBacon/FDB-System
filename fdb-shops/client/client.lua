@@ -170,7 +170,7 @@ function InteractWithStation(station)
         -- Open Shop Buy Menu
         TriggerServerEvent('fdb-shops:server:openstore', station.shop_id)
 
-    elseif station.type == 'registradora' then
+    elseif station.type == 'admin_panel' then
         -- Open Owner Menu (NUI)
         fdbLibs:TriggerServerCallback('fdb-shops:server:requestOwnerMenu', function(response)
             if response and response.success then
@@ -178,13 +178,19 @@ function InteractWithStation(station)
                 SendNUIMessage({
                     action = 'openOwnerMenu',
                     shopId = station.shop_id,
+                    stationId = station.id,
                     shopData = response.shopData,
-                    permissions = response.permissions
+                    permissions = response.permissions,
+                    stationModules = (station.metadata and station.metadata.modules) or {"dashboard", "finances", "prices", "employees"}
                 })
             else
                 fdbLibs:Notify('Acesso Negado', 'error', 3000)
             end
         end, station.shop_id)
+
+    elseif station.type == 'registradora' then
+        -- Venda/Caixa é pelo type 'venda' ou 'npc'
+        fdbLibs:Notify('Acesso Administrativo requer Painel do Chefe.', 'info', 3000)
 
     elseif station.type == 'bau' then
         -- Open Physical Stash
@@ -217,17 +223,17 @@ RegisterNUICallback('close', function(data, cb)
 end)
 
 RegisterNUICallback('withdraw', function(data, cb)
-    TriggerServerEvent('fdb-shops:server:withdrawCash', data.shopId, data.amount)
+    TriggerServerEvent('fdb-shops:server:withdrawCash', data.shopId, data.stationId, data.amount)
     cb('ok')
 end)
 
 RegisterNUICallback('deposit', function(data, cb)
-    TriggerServerEvent('fdb-shops:server:depositCash', data.shopId, data.amount)
+    TriggerServerEvent('fdb-shops:server:depositCash', data.shopId, data.stationId, data.amount)
     cb('ok')
 end)
 
 RegisterNUICallback('updateVariation', function(data, cb)
-    TriggerServerEvent('fdb-shops:server:updatePriceVariation', data.shopId, data.variation)
+    TriggerServerEvent('fdb-shops:server:updatePriceVariation', data.shopId, data.stationId, data.variation)
     cb('ok')
 end)
 

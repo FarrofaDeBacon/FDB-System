@@ -65,7 +65,7 @@ CreateThread(function()
         CREATE TABLE IF NOT EXISTS shop_stations (
             id INT AUTO_INCREMENT PRIMARY KEY,
             shop_id VARCHAR(50) NOT NULL,
-            type ENUM('registradora', 'bau', 'craft', 'venda', 'npc', 'supply_board') NOT NULL,
+            type ENUM('registradora', 'bau', 'craft', 'venda', 'npc', 'supply_board', 'admin_panel') NOT NULL,
             position JSON NOT NULL,
             allowed_recipes JSON,
             prop_model VARCHAR(100),
@@ -78,6 +78,8 @@ CreateThread(function()
             hide_radius FLOAT DEFAULT 50.0,
             fallback_npc JSON,
             config JSON,
+            metadata JSON DEFAULT NULL,
+            label VARCHAR(50) DEFAULT NULL,
             FOREIGN KEY (shop_id) REFERENCES shops(shop_id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ]])
@@ -100,6 +102,16 @@ CreateThread(function()
             INDEX(created_at)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ]])
+
+    -- Migrations para Business System
+    local hasMetadata = MySQL.scalar.await("SHOW COLUMNS FROM `shop_stations` LIKE 'metadata'")
+    if not hasMetadata then
+        MySQL.query.await("ALTER TABLE `shop_stations` MODIFY `type` ENUM('registradora', 'bau', 'craft', 'venda', 'npc', 'supply_board', 'admin_panel') NOT NULL")
+        MySQL.query.await("ALTER TABLE `shop_stations` ADD COLUMN `metadata` JSON DEFAULT NULL")
+        MySQL.query.await("ALTER TABLE `shop_stations` ADD COLUMN `label` VARCHAR(50) DEFAULT NULL")
+        MySQL.query.await("UPDATE `shop_stations` SET `label` = CONCAT(`type`, ' ', `id`) WHERE `label` IS NULL")
+        print('^2[' .. resourceName .. '] Migrations for Business System applied.^7')
+    end
 
     print('^2[' .. resourceName .. '] Database schema initialized.^7')
 end)
