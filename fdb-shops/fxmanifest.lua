@@ -5,7 +5,7 @@ game 'rdr3'
 description 'fdb-shops'
 version '1.0.1'
 
-ui_page 'ui-svelte/dist/index.html?v=2'
+ui_page 'ui-svelte/build/index.html'
 
 shared_scripts {
     '@ox_lib/init.lua',
@@ -35,8 +35,8 @@ server_scripts {
 
 files {
     'locales/*.json',
-    'ui-svelte/dist/index.html',
-    'ui-svelte/dist/assets/*'
+    'ui-svelte/build/index.html',
+    'ui-svelte/build/assets/*'
 }
 
 dependencies {

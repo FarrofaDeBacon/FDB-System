@@ -4,4 +4,7 @@ import { svelte } from '@sveltejs/vite-plugin-svelte'
 export default defineConfig({
   plugins: [svelte()],
   base: './', // CRITICAL for FiveM NUI
+  build: {
+    outDir: 'build'
+  }
 })
