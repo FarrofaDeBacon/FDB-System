@@ -71,9 +71,12 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
             local targetNpc = (st.is_marker) and nil or st.npc_model
             if st.type == 'npc' then targetProp = nil end
             
-            local metadataStr = st.metadata and json.encode(st.metadata) or nil
-            
-            MySQL.update.await('UPDATE shop_stations SET prop_model = ?, npc_model = ?, metadata = ? WHERE id = ?', {targetProp, targetNpc, metadataStr, st.id})
+            if st.type == 'admin_panel' then
+                local metadataStr = st.metadata and json.encode(st.metadata) or nil
+                MySQL.update.await('UPDATE shop_stations SET prop_model = ?, npc_model = ?, metadata = ? WHERE id = ?', {targetProp, targetNpc, metadataStr, st.id})
+            else
+                MySQL.update.await('UPDATE shop_stations SET prop_model = ?, npc_model = ? WHERE id = ?', {targetProp, targetNpc, st.id})
+            end
         end
     end
     
