@@ -33,6 +33,7 @@ local function OpenEditor(src)
                 label = row.label,
                 owner_id = row.owner_id,
                 template = row.template_id,
+                config = row.config and json.decode(row.config) or {},
                 stations = parsedStations
             })
         end
@@ -54,11 +55,13 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
     if storeData.label then
         local ownerId = storeData.owner_id
         if ownerId == "" then ownerId = nil end
-        MySQL.update.await('UPDATE shops SET label = ?, owner_id = ? WHERE shop_id = ?', {storeData.label, ownerId, shopId})
+        local configStr = storeData.config and json.encode(storeData.config) or nil
+        MySQL.update.await('UPDATE shops SET label = ?, owner_id = ?, config = ? WHERE shop_id = ?', {storeData.label, ownerId, configStr, shopId})
         
         if ShopManager.Shops[shopId] then
             ShopManager.Shops[shopId].label = storeData.label
             ShopManager.Shops[shopId].ownerId = ownerId
+            ShopManager.Shops[shopId].config = storeData.config or {}
         end
     end
     
@@ -68,7 +71,9 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
             local targetNpc = (st.is_marker) and nil or st.npc_model
             if st.type == 'npc' then targetProp = nil end
             
-            MySQL.update.await('UPDATE shop_stations SET prop_model = ?, npc_model = ? WHERE id = ?', {targetProp, targetNpc, st.id})
+            local metadataStr = st.metadata and json.encode(st.metadata) or nil
+            
+            MySQL.update.await('UPDATE shop_stations SET prop_model = ?, npc_model = ?, metadata = ? WHERE id = ?', {targetProp, targetNpc, metadataStr, st.id})
         end
     end
     
