@@ -191,6 +191,10 @@
 {/if}
 
 <style>
+    :global(:root) {
+        --fdb-bg-image-mask: url('nui://fdb-libs/ui/build/assets/background_mask.png');
+    }
+
     :global(body), :global(html) {
         margin: 0;
         padding: 0;
@@ -211,25 +215,43 @@
 
     .sidebar {
         width: 300px;
-        background-color: var(--fdb-background-color, #1a1a1a);
-        border: 2px solid var(--fdb-border-color-wood, #555);
+        background-color: transparent;
+        border: 1px solid var(--fdb-border-color, #555);
         border-radius: var(--fdb-border-radius, 8px);
         display: flex;
         flex-direction: column;
         overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
         margin-right: 2rem;
+        position: relative;
+    }
+
+    .sidebar::before {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background-color: rgba(10, 10, 10, 0.95);
+        -webkit-mask-image: var(--fdb-bg-image-mask);
+        -webkit-mask-size: 100% 100%;
+        mask-image: var(--fdb-bg-image-mask);
+        mask-size: 100% 100%;
+        z-index: -1;
     }
 
     .sidebar-title {
-        background-color: rgba(0, 0, 0, 0.3);
+        background-color: rgba(0, 0, 0, 0.5);
         margin: 0;
         padding: 1rem;
         font-family: var(--fdb-font-display, serif);
         color: var(--fdb-accent-color, #ffaa00);
         font-size: 1.2rem;
-        border-bottom: 2px solid var(--fdb-border-color-wood, #555);
         text-align: center;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .store-list {
@@ -276,8 +298,8 @@
     .main-content {
         flex: 1;
         display: flex;
-        align-items: flex-start;
-        justify-content: flex-start;
+        align-items: center;
+        justify-content: center;
     }
 
     .empty-state {

@@ -8,6 +8,18 @@
     if (!store.stations) store.stations = [];
     if (!store.config) store.config = {};
 
+    let activeTab = $state('geral');
+    
+    function switchTab(tab) {
+        activeTab = tab;
+    }
+    
+    let countReg = $derived(store.stations.filter(s => s.type === 'registradora').length);
+    let countBau = $derived(store.stations.filter(s => s.type === 'bau').length);
+    let countCraft = $derived(store.stations.filter(s => s.type === 'craft').length);
+    let countNpc = $derived(store.stations.filter(s => s.type === 'npc').length);
+    let countAdmin = $derived(store.stations.filter(s => s.type === 'admin_panel').length);
+
     const templateConfig = {
         general: [
             { id: 'stock_limit', name: 'Limite de Estoque', type: 'number' }
@@ -152,122 +164,149 @@
     }
 </script>
 
-<Panel title={store.label || store.id} id={store.id} width="450px">
+<Panel title={store.label || store.id} id={store.id} width="clamp(320px, 65vw, 800px)">
+    <div slot="tabs" class="fdb-tabs-container">
+        <button class="fdb-tab {activeTab === 'geral' ? 'active' : ''}" onclick={() => switchTab('geral')}>Geral</button>
+        <button class="fdb-tab {activeTab === 'registradora' ? 'active' : ''}" onclick={() => switchTab('registradora')}>Registradoras {#if countReg > 0}({countReg}){/if}</button>
+        <button class="fdb-tab {activeTab === 'bau' ? 'active' : ''}" onclick={() => switchTab('bau')}>Baús {#if countBau > 0}({countBau}){/if}</button>
+        <button class="fdb-tab {activeTab === 'craft' ? 'active' : ''}" onclick={() => switchTab('craft')}>Craft {#if countCraft > 0}({countCraft}){/if}</button>
+        <button class="fdb-tab {activeTab === 'npc' ? 'active' : ''}" onclick={() => switchTab('npc')}>NPCs {#if countNpc > 0}({countNpc}){/if}</button>
+        <button class="fdb-tab {activeTab === 'admin_panel' ? 'active' : ''}" onclick={() => switchTab('admin_panel')}>Admin {#if countAdmin > 0}({countAdmin}){/if}</button>
+    </div>
+
     <div class="fdb-form">
+        <h3 class="fdb-tab-title">
+            {#if activeTab === 'geral'} Configurações Gerais
+            {:else if activeTab === 'registradora'} Registradoras
+            {:else if activeTab === 'bau'} Baús de Estoque
+            {:else if activeTab === 'craft'} Bancadas de Craft
+            {:else if activeTab === 'npc'} NPCs Extras
+            {:else if activeTab === 'admin_panel'} Pontos de Acesso Admin
+            {/if}
+        </h3>
         
-        <div class="fdb-group">
-            <label>ID da Loja</label>
-            <Input id="store-id-ro" type="text" value={store.id} disabled={true} />
-        </div>
+        {#if activeTab === 'geral'}
+            <div class="fdb-group">
+                <label>ID da Loja</label>
+                <Input id="store-id-ro" type="text" value={store.id} disabled={true} />
+            </div>
 
-        <div class="fdb-group">
-            <label>Dono da Loja (Citizen ID)</label>
-            <Input id="{store.id}-owner_id" type="text" bind:value={store.owner_id} />
-        </div>
+            <div class="fdb-group">
+                <label>Dono da Loja (Citizen ID)</label>
+                <Input id="{store.id}-owner_id" type="text" bind:value={store.owner_id} />
+            </div>
 
-        <div class="fdb-group">
-            <label>Nome da Loja</label>
-            <Input id="{store.id}-label" type="text" bind:value={store.label} />
-        </div>
+            <div class="fdb-group">
+                <label>Nome da Loja</label>
+                <Input id="{store.id}-label" type="text" bind:value={store.label} />
+            </div>
 
-        {#if fields.length > 0}
-            <div class="fdb-divider"></div>
-            <h4 class="fdb-subtitle">Configurações Gerais da Loja</h4>
+            {#each fields as field}
+                <div class="fdb-group">
+                    <label>{field.name}</label>
+                    {#if field.type === 'text'}
+                        <Input id="{store.id}-{field.id}" type="text" bind:value={store.config[field.id]} />
+                    {:else if field.type === 'number'}
+                        <Input id="{store.id}-{field.id}" type="number" bind:value={store.config[field.id]} />
+                    {:else if field.type === 'select'}
+                        <div class="fdb-row">
+                            <div style="flex: 1;">
+                                <Select id="{store.id}-{field.id}" bind:value={store.config[field.id]} options={getOptionsForField(field.options)} />
+                            </div>
+                        </div>
+                    {:else if field.type === 'checkbox'}
+                        <label class="fdb-check">
+                            <input type="checkbox" bind:checked={store.config[field.id]} /> Sim / Ativo
+                        </label>
+                    {/if}
+                </div>
+            {/each}
         {/if}
 
-        {#each fields as field}
-            <div class="fdb-group">
-                <label>{field.name}</label>
-                {#if field.type === 'text'}
-                    <Input id="{store.id}-{field.id}" type="text" bind:value={store.config[field.id]} />
-                {:else if field.type === 'number'}
-                    <Input id="{store.id}-{field.id}" type="number" bind:value={store.config[field.id]} />
-                {:else if field.type === 'select'}
-                    <div class="fdb-row">
-                        <div style="flex: 1;">
-                            <Select id="{store.id}-{field.id}" bind:value={store.config[field.id]} options={getOptionsForField(field.options)} />
-                        </div>
-                    </div>
-                {:else if field.type === 'checkbox'}
-                    <label class="fdb-check">
-                        <input type="checkbox" bind:checked={store.config[field.id]} /> Sim / Ativo
-                    </label>
-                {/if}
-            </div>
-        {/each}
-
-        <div class="fdb-divider"></div>
-        <h4 class="fdb-subtitle">Componentes da Loja</h4>
-        
-        <!-- Registradoras -->
-        <div class="fdb-group">
-            <label>Registradoras</label>
+        {#if activeTab === 'registradora'}
             {#each store.stations.filter(s => s.type === 'registradora') as station (station.id)}
                 <div class="fdb-card">
                     <div class="fdb-row">
                         <div style="flex: 1;"><Select id="m-{station.id}" bind:value={station.prop_model} options={registerModels} disabled={station.is_marker} /></div>
-                        <button class="fdb-btn-primary" style="padding: 0 1vh;" onclick={() => placeComponent(station)}>{station.position ? "Ajustar" : "Posicionar"}</button>
+                        <button class="fdb-btn-outline" style="padding: 0 1vh;" onclick={() => placeComponent(station)}>{station.position ? "Ajustar" : "Posicionar"}</button>
                         <button class="fdb-btn-danger" style="padding: 0 1vh;" onclick={() => removeComponent(station)}>X</button>
                     </div>
                     <label class="fdb-check"><input type="checkbox" bind:checked={station.is_marker} /> Somente Marcador (Invisível)</label>
                 </div>
             {/each}
+            {#if countReg === 0}
+                <div class="fdb-empty-state">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><path d="M4 10h16"></path></svg>
+                    <p>Nenhuma registradora adicionada.</p>
+                </div>
+            {/if}
             <button class="fdb-btn-outline" onclick={() => addStation('registradora')}>+ Adicionar Registradora</button>
-        </div>
+        {/if}
 
-        <!-- Baús -->
-        <div class="fdb-group">
-            <label>Baús de Estoque</label>
+        {#if activeTab === 'bau'}
             {#each store.stations.filter(s => s.type === 'bau') as station (station.id)}
                 <div class="fdb-card">
                     <div class="fdb-row">
                         <div style="flex: 1;"><Select id="m-{station.id}" bind:value={station.prop_model} options={chestModels} disabled={station.is_marker} /></div>
-                        <button class="fdb-btn-primary" style="padding: 0 1vh;" onclick={() => placeComponent(station)}>{station.position ? "Ajustar" : "Posicionar"}</button>
+                        <button class="fdb-btn-outline" style="padding: 0 1vh;" onclick={() => placeComponent(station)}>{station.position ? "Ajustar" : "Posicionar"}</button>
                         <button class="fdb-btn-danger" style="padding: 0 1vh;" onclick={() => removeComponent(station)}>X</button>
                     </div>
                     <label class="fdb-check"><input type="checkbox" bind:checked={station.is_marker} /> Somente Marcador (Invisível)</label>
                 </div>
             {/each}
+            {#if countBau === 0}
+                <div class="fdb-empty-state">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    <p>Nenhum baú adicionado.</p>
+                </div>
+            {/if}
             <button class="fdb-btn-outline" onclick={() => addStation('bau')}>+ Adicionar Baú</button>
-        </div>
+        {/if}
 
-        <!-- Craft -->
-        <div class="fdb-group">
-            <label>Bancadas de Craft</label>
+        {#if activeTab === 'craft'}
             {#each store.stations.filter(s => s.type === 'craft') as station (station.id)}
                 <div class="fdb-card">
                     <div class="fdb-row">
                         <div style="flex: 1;"><Select id="m-{station.id}" bind:value={station.prop_model} options={craftModels} disabled={station.is_marker} /></div>
-                        <button class="fdb-btn-primary" style="padding: 0 1vh;" onclick={() => placeComponent(station)}>{station.position ? "Ajustar" : "Posicionar"}</button>
+                        <button class="fdb-btn-outline" style="padding: 0 1vh;" onclick={() => placeComponent(station)}>{station.position ? "Ajustar" : "Posicionar"}</button>
                         <button class="fdb-btn-danger" style="padding: 0 1vh;" onclick={() => removeComponent(station)}>X</button>
                     </div>
                     <label class="fdb-check"><input type="checkbox" bind:checked={station.is_marker} /> Somente Marcador (Invisível)</label>
                 </div>
             {/each}
+            {#if countCraft === 0}
+                <div class="fdb-empty-state">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                    <p>Nenhuma bancada de craft adicionada.</p>
+                </div>
+            {/if}
             <button class="fdb-btn-outline" onclick={() => addStation('craft')}>+ Adicionar Bancada</button>
-        </div>
+        {/if}
 
-        <!-- NPCs Extras -->
-        <div class="fdb-group">
-            <label>NPCs Extras</label>
+        {#if activeTab === 'npc'}
             {#each store.stations.filter(s => s.type === 'npc') as station (station.id)}
-                <div class="fdb-row">
-                    <div style="flex: 1;"><Select id="m-{station.id}" bind:value={station.npc_model} options={npcModels} /></div>
-                    <button class="fdb-btn-primary" style="padding: 0 1vh;" onclick={() => placeComponent(station)}>{station.position ? "Ajustar" : "Posicionar"}</button>
-                    <button class="fdb-btn-danger" style="padding: 0 1vh;" onclick={() => removeComponent(station)}>X</button>
+                <div class="fdb-card">
+                    <div class="fdb-row">
+                        <div style="flex: 1;"><Select id="m-{station.id}" bind:value={station.npc_model} options={npcModels} /></div>
+                        <button class="fdb-btn-outline" style="padding: 0 1vh;" onclick={() => placeComponent(station)}>{station.position ? "Ajustar" : "Posicionar"}</button>
+                        <button class="fdb-btn-danger" style="padding: 0 1vh;" onclick={() => removeComponent(station)}>X</button>
+                    </div>
                 </div>
             {/each}
+            {#if countNpc === 0}
+                <div class="fdb-empty-state">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="7" r="4"></circle><path d="M5.5 21v-2a4 4 0 0 1 4-4h5a4 4 0 0 1 4 4v2"></path></svg>
+                    <p>Nenhum NPC extra adicionado.</p>
+                </div>
+            {/if}
             <button class="fdb-btn-outline" onclick={() => addStation('npc')}>+ Adicionar NPC</button>
-        </div>
+        {/if}
 
-        <!-- Admin -->
-        <div class="fdb-group">
-            <label>Pontos de Acesso Admin</label>
-            <p style="font-size: 0.8rem; color: var(--fdb-text-secondary); margin: 0;">Onde o dono acessa o painel da loja.</p>
+        {#if activeTab === 'admin_panel'}
             {#each store.stations.filter(s => s.type === 'admin_panel') as station (station.id)}
                 <div class="fdb-card">
                     <div class="fdb-row">
-                        <button class="fdb-btn-primary" style="flex: 1;" onclick={() => placeComponent(station)}>{station.position ? "Ajustar Posição" : "Marcar Posição"}</button>
+                        <button class="fdb-btn-outline" style="flex: 1;" onclick={() => placeComponent(station)}>{station.position ? "Ajustar Posição" : "Marcar Posição"}</button>
                         <button class="fdb-btn-danger" style="padding: 0 1vh;" onclick={() => removeComponent(station)}>X</button>
                     </div>
                     <div style="margin-top: 1vh; display: flex; flex-direction: column; gap: 0.5vh;">
@@ -287,9 +326,14 @@
                     </div>
                 </div>
             {/each}
+            {#if countAdmin === 0}
+                <div class="fdb-empty-state">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    <p>Nenhum ponto de admin configurado.</p>
+                </div>
+            {/if}
             <button class="fdb-btn-outline" onclick={() => addStation('admin_panel')}>+ Adicionar Painel Admin</button>
-        </div>
-
+        {/if}
     </div>
 
     <div class="fdb-actions">
@@ -302,6 +346,52 @@
 </Panel>
 
 <style>
+    /* Tabs System */
+    .fdb-tabs-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1vh;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 1vh;
+    }
+
+    .fdb-tab {
+        background: transparent;
+        border: none;
+        color: var(--fdb-text-secondary, #999);
+        font-family: var(--fdb-font-body, sans-serif);
+        font-size: 0.9rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        transition: color 0.2s, border-bottom 0.2s;
+        border-bottom: 2px solid transparent;
+        border-radius: 4px 4px 0 0;
+    }
+
+    .fdb-tab:hover {
+        color: var(--fdb-text-primary, #fff);
+        background-color: rgba(255,255,255,0.02);
+    }
+
+    .fdb-tab.active {
+        color: var(--fdb-accent-color, #ffaa00);
+        border-bottom: 2px solid var(--fdb-accent-color, #ffaa00);
+    }
+
+    .fdb-tab-title {
+        font-family: var(--fdb-font-display, serif);
+        color: var(--fdb-text-primary, #fff);
+        font-size: 1.3rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 0 0 1.5vh 0;
+        padding-bottom: 1vh;
+        border-bottom: 1px solid var(--fdb-accent-color, #ffaa00);
+    }
+
     .fdb-form {
         display: flex;
         flex-direction: column;
@@ -330,13 +420,14 @@
     }
 
     .fdb-card {
-        background-color: rgba(255,255,255,0.03);
+        background-color: rgba(255,255,255,0.02);
         border: 1px solid rgba(255,255,255,0.05);
         border-radius: var(--fdb-border-radius, 4px);
-        padding: 1vh;
+        padding: 1.5vh;
         display: flex;
         flex-direction: column;
         gap: 0.8vh;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
     }
 
     .fdb-check {
@@ -348,22 +439,19 @@
         cursor: pointer;
     }
 
-    .fdb-divider {
-        height: 1px;
-        background-color: rgba(255, 255, 255, 0.1);
-        margin: 1vh 0;
+    .fdb-empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4vh;
+        color: var(--fdb-text-muted, rgba(255,255,255,0.3));
+        gap: 1.5vh;
+        text-align: center;
+        font-size: 0.95rem;
     }
 
-    .fdb-subtitle {
-        margin: 0;
-        font-family: var(--fdb-font-display, serif);
-        color: var(--fdb-text-primary, #fff);
-        font-size: 1.1rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    /* Botoes usando VH do fdb-libs */
+    /* Buttons */
     button {
         font-family: var(--fdb-font-body, sans-serif);
         font-size: 0.9rem;
