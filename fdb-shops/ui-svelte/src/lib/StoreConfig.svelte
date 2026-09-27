@@ -1,12 +1,24 @@
 <script>
     import Select from '../../../../fdb-libs/ui/src/components/Select.svelte';
     import Input from '../../../../fdb-libs/ui/src/components/Input.svelte';
-    import Panel from '../../../../fdb-libs/ui/src/components/Panel.svelte';
-    
     let { store, onClose, onDeleted = () => {} } = $props();
 
     if (!store.stations) store.stations = [];
     if (!store.config) store.config = {};
+    if (!store.city) store.city = 'outros';
+
+    const cityOptions = [
+        { value: 'valentine', label: 'Valentine' },
+        { value: 'saint_denis', label: 'Saint Denis' },
+        { value: 'rhodes', label: 'Rhodes' },
+        { value: 'blackwater', label: 'Blackwater' },
+        { value: 'annesburg', label: 'Annesburg' },
+        { value: 'armadillo', label: 'Armadillo' },
+        { value: 'tumbleweed', label: 'Tumbleweed' },
+        { value: 'van_horn', label: 'Van Horn' },
+        { value: 'strawberry', label: 'Strawberry' },
+        { value: 'outros', label: 'Outros' }
+    ];
 
     let activeTab = $state('geral');
     
@@ -164,8 +176,28 @@
     }
 </script>
 
-<Panel title={store.label || store.id} id={store.id} width="clamp(320px, 65vw, 800px)">
-    <div slot="tabs" class="fdb-tabs-container">
+<div class="fdb-panel-card">
+    <div class="fdb-panel-background"></div>
+    <div class="fdb-panel-border-overlay"></div>
+
+    <div class="fdb-panel-top-nav">
+        <button class="fdb-btn-back" onclick={onClose} type="button">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+            Voltar para Lista
+        </button>
+    </div>
+
+    <div class="fdb-panel-header">
+        <h2 class="fdb-panel-title">{store.label || store.id}</h2>
+        <div class="fdb-panel-divider"></div>
+        {#if store.id}
+            <p class="fdb-panel-subtitle">ID: {store.id}</p>
+        {/if}
+    </div>
+
+    <div class="fdb-panel-tabs fdb-tabs-container">
         <button class="fdb-tab {activeTab === 'geral' ? 'active' : ''}" onclick={() => switchTab('geral')}>Geral</button>
         <button class="fdb-tab {activeTab === 'registradora' ? 'active' : ''}" onclick={() => switchTab('registradora')}>Registradoras {#if countReg > 0}({countReg}){/if}</button>
         <button class="fdb-tab {activeTab === 'bau' ? 'active' : ''}" onclick={() => switchTab('bau')}>Baús {#if countBau > 0}({countBau}){/if}</button>
@@ -173,6 +205,8 @@
         <button class="fdb-tab {activeTab === 'npc' ? 'active' : ''}" onclick={() => switchTab('npc')}>NPCs {#if countNpc > 0}({countNpc}){/if}</button>
         <button class="fdb-tab {activeTab === 'admin_panel' ? 'active' : ''}" onclick={() => switchTab('admin_panel')}>Admin {#if countAdmin > 0}({countAdmin}){/if}</button>
     </div>
+
+    <div class="fdb-panel-content">
 
     <div class="fdb-form">
         <h3 class="fdb-tab-title">
@@ -199,6 +233,11 @@
             <div class="fdb-group">
                 <label>Nome da Loja</label>
                 <Input id="{store.id}-label" type="text" bind:value={store.label} />
+            </div>
+
+            <div class="fdb-group">
+                <label>Cidade / Localidade</label>
+                <Select id="{store.id}-city" bind:value={store.city} options={cityOptions} />
             </div>
 
             {#each fields as field}
@@ -343,9 +382,122 @@
             <button class="fdb-btn-primary" onclick={saveConfig}>Salvar</button>
         </div>
     </div>
-</Panel>
+    </div>
+</div>
 
 <style>
+    .fdb-panel-top-nav {
+        display: flex;
+        align-items: center;
+        margin-bottom: -1vh;
+    }
+
+    .fdb-btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.8vh;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: var(--fdb-text-secondary, #ccc);
+        font-family: inherit;
+        font-size: 0.85rem;
+        padding: 0.7vh 1.4vh;
+        border-radius: var(--fdb-border-radius, 4px);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .fdb-btn-back:hover {
+        background: rgba(220, 170, 100, 0.15);
+        border-color: var(--fdb-accent-color, #dcaa64);
+        color: var(--fdb-text-primary, #fff);
+        transform: translateX(-2px);
+    }
+
+    /* Panel System */
+    .fdb-panel-card {
+        position: relative;
+        background-color: var(--fdb-background-color, #1a1a1a);
+        border: 1px solid var(--fdb-border-color, #444);
+        padding: 3.5vh;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        display: flex;
+        flex-direction: column;
+        gap: 2.5vh;
+        overflow: hidden;
+        z-index: 1;
+        max-height: 90vh;
+        width: clamp(320px, 65vw, 800px);
+    }
+
+    .fdb-panel-background {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background-image: var(--fdb-bg-image-menu, none);
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        z-index: -1;
+        opacity: 0.95;
+    }
+
+    .fdb-panel-border-overlay {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        border-left: 4px solid var(--fdb-accent-color, #ffaa00);
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    .fdb-panel-header {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .fdb-panel-title {
+        font-family: var(--fdb-font-display, serif);
+        color: var(--fdb-text-primary, #fff);
+        font-size: 1.5rem;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-align: center;
+    }
+
+    .fdb-panel-divider {
+        height: 1px;
+        background-color: rgba(255, 255, 255, 0.15);
+        margin-top: 1.5vh;
+    }
+
+    .fdb-panel-subtitle {
+        color: var(--fdb-text-secondary, #ccc);
+        margin: 0.5vh 0 0 0;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-align: center;
+    }
+
+    .fdb-panel-content {
+        display: flex;
+        flex-direction: column;
+        gap: 2.7vh;
+        max-height: 70vh;
+        overflow-y: auto;
+        padding-right: 1vh;
+    }
+
+    .fdb-panel-content::-webkit-scrollbar {
+        width: 4px;
+    }
+    .fdb-panel-content::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 2px;
+    }
+
     /* Tabs System */
     .fdb-tabs-container {
         display: flex;

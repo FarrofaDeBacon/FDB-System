@@ -5,6 +5,7 @@ export default defineConfig({
   plugins: [svelte()],
   base: './', // CRITICAL for FiveM NUI
   build: {
-    outDir: 'build'
+    outDir: 'build',
+    target: 'es2015'
   }
 })

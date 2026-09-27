@@ -1,12 +1,19 @@
 <script>
     import { onMount } from 'svelte';
     import StoreConfig from './lib/StoreConfig.svelte';
+    import StoreTable from './lib/StoreTable.svelte';
 
     let visible = false;
     let theme = {};
     let stores = [];
     let selectedStore = null;
     let isPlacementMode = false;
+
+    // Filter states preserved across view transitions
+    let searchQuery = '';
+    let filterCity = 'all';
+    let filterTemplate = 'all';
+    let filterOwner = 'all';
 
     // Recebe mensagens do Lua
     onMount(() => {
@@ -15,7 +22,7 @@
             if (data.action === 'openEditor') {
                 theme = data.theme || {};
                 stores = data.stores || [];
-                selectedStore = stores.length > 0 ? stores[0] : null;
+                selectedStore = null; // Start at table catalog view
                 visible = true;
                 isPlacementMode = false;
                 
@@ -57,7 +64,11 @@
 
         const handleKeyDown = (e) => {
             if (visible && !isPlacementMode && e.key === 'Escape') {
-                closeUI();
+                if (selectedStore) {
+                    selectedStore = null; // Esc in edit mode returns to table
+                } else {
+                    closeUI(); // Esc in table mode closes NUI
+                }
             }
         };
 
@@ -99,37 +110,24 @@
 {#if visible}
     {#if !isPlacementMode}
     <div class="fdb-shops-app">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <h2 class="sidebar-title">Lojas ({stores.length})</h2>
-            
-            <button class="test-button submit" style="margin: 0.5rem 1rem; width: calc(100% - 2rem);" onclick={createNewStore}>
-                + Criar Nova Loja
-            </button>
-
-            <div class="store-list">
-                {#each stores as store}
-                    <button 
-                        class="sidebar-item {selectedStore?.id === store.id ? 'active' : ''}"
-                        onclick={() => selectStore(store)}
-                    >
-                        {store.label || store.id}
-                        <span class="badge">{store.template || 'general'}</span>
-                    </button>
-                {/each}
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            {#if selectedStore}
-                <StoreConfig store={selectedStore} onClose={closeUI} onDeleted={handleStoreDeleted} />
-            {:else}
-                <div class="empty-state">
-                    <p>Selecione uma loja na lateral para editar.</p>
-                </div>
-            {/if}
-        </div>
+        {#if selectedStore}
+            <StoreConfig 
+                store={selectedStore} 
+                onClose={() => selectedStore = null} 
+                onDeleted={handleStoreDeleted} 
+            />
+        {:else}
+            <StoreTable 
+                {stores}
+                bind:searchQuery
+                bind:filterCity
+                bind:filterTemplate
+                bind:filterOwner
+                onSelectStore={selectStore}
+                onCreateStore={createNewStore}
+                onClose={closeUI}
+            />
+        {/if}
     </div>
     {/if}
 
@@ -207,108 +205,12 @@
         width: 100vw;
         height: 100vh;
         display: flex;
-        background-color: transparent; /* Removemos o fundo preto opaco gigante */
-        font-family: var(--fdb-font-body, sans-serif);
-        padding: 4rem;
-        box-sizing: border-box;
-    }
-
-    .sidebar {
-        width: 300px;
-        background-color: transparent;
-        border: 1px solid var(--fdb-border-color, #555);
-        border-radius: var(--fdb-border-radius, 8px);
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-        margin-right: 2rem;
-        position: relative;
-    }
-
-    .sidebar::before {
-        content: "";
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        background-color: rgba(10, 10, 10, 0.95);
-        -webkit-mask-image: var(--fdb-bg-image-mask);
-        -webkit-mask-size: 100% 100%;
-        mask-image: var(--fdb-bg-image-mask);
-        mask-size: 100% 100%;
-        z-index: -1;
-    }
-
-    .sidebar-title {
-        background-color: rgba(0, 0, 0, 0.5);
-        margin: 0;
-        padding: 1rem;
-        font-family: var(--fdb-font-display, serif);
-        color: var(--fdb-accent-color, #ffaa00);
-        font-size: 1.2rem;
-        text-align: center;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .store-list {
-        flex: 1;
-        overflow-y: auto;
-        padding: 0.5rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .sidebar-item {
-        background: transparent;
-        border: 1px solid transparent;
-        color: var(--fdb-text-primary, #fff);
-        padding: 0.75rem;
-        text-align: left;
-        border-radius: 4px;
-        cursor: pointer;
-        font-family: var(--fdb-font-body, sans-serif);
-        font-size: 0.9rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-        transition: all 0.2s;
-    }
-
-    .sidebar-item:hover {
-        background-color: rgba(255, 255, 255, 0.05);
-    }
-
-    .sidebar-item.active {
-        background-color: rgba(0, 0, 0, 0.2);
-        border: 1px solid var(--fdb-accent-color, #ffaa00);
-        color: var(--fdb-accent-color, #ffaa00);
-    }
-
-    .badge {
-        font-size: 0.7rem;
-        color: var(--fdb-text-secondary, #999);
-        text-transform: uppercase;
-    }
-
-    .main-content {
-        flex: 1;
-        display: flex;
         align-items: center;
         justify-content: center;
-    }
-
-    .empty-state {
-        background-color: var(--fdb-background-color, #1a1a1a);
-        border: 2px solid var(--fdb-border-color-wood, #555);
-        border-radius: var(--fdb-border-radius, 8px);
+        background-color: rgba(0, 0, 0, 0.45);
+        font-family: var(--fdb-font-body, sans-serif);
         padding: 2rem;
-        color: var(--fdb-text-secondary, #999);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        box-sizing: border-box;
     }
 
     /* HUD CSS */
