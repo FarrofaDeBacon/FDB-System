@@ -603,16 +603,19 @@ exports('StartPlacementCamera', function(resourceName, type, model, callbackData
     placementType = type
     placementModel = model
     placementCallbackData = callbackData
-    ghostHeading = 0.0
-
     unfreezePlacementPlayer()
     placementStartMs = GetGameTimer()
     rawKeyState = {}
 
-    placementPosX, placementPosY, placementPosZ = getPlacementStartPos()
-    
     if placementMode == "adjust" and placementEntityToHide and DoesEntityExist(placementEntityToHide) then
+        local eCoords = GetEntityCoords(placementEntityToHide)
+        placementPosX, placementPosY, placementPosZ = eCoords.x, eCoords.y, eCoords.z
+        ghostHeading = GetEntityHeading(placementEntityToHide)
         SetEntityVisible(placementEntityToHide, false)
+    else
+        placementPosX, placementPosY, placementPosZ = getPlacementStartPos()
+        local ped = PlayerPedId()
+        ghostHeading = (GetEntityHeading(ped) + 180.0) % 360.0
     end
 
     isPlacing = true
