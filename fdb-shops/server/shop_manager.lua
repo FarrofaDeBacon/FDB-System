@@ -42,6 +42,7 @@ CreateThread(function()
                 ownerPriceVariation = s.owner_price_variation,
                 maxPriceVariation = s.max_price_variation,
                 regionId = s.region_id,
+                city = s.city or 'outros',
                 config = json.decode(s.config) or {}
             }
         end

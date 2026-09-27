@@ -33,6 +33,7 @@ local function OpenEditor(src)
                 label = row.label,
                 owner_id = row.owner_id,
                 template = row.template_id,
+                city = row.city or 'outros',
                 config = row.config and json.decode(row.config) or {},
                 stations = parsedStations
             })
@@ -55,12 +56,14 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
     if storeData.label then
         local ownerId = storeData.owner_id
         if ownerId == "" then ownerId = nil end
+        local city = (storeData.city and storeData.city ~= '') and storeData.city or 'outros'
         local configStr = storeData.config and json.encode(storeData.config) or nil
-        MySQL.update.await('UPDATE shops SET label = ?, owner_id = ?, config = ? WHERE shop_id = ?', {storeData.label, ownerId, configStr, shopId})
+        MySQL.update.await('UPDATE shops SET label = ?, owner_id = ?, city = ?, config = ? WHERE shop_id = ?', {storeData.label, ownerId, city, configStr, shopId})
         
         if ShopManager.Shops[shopId] then
             ShopManager.Shops[shopId].label = storeData.label
             ShopManager.Shops[shopId].ownerId = ownerId
+            ShopManager.Shops[shopId].city = city
             ShopManager.Shops[shopId].config = storeData.config or {}
         end
     end
@@ -138,7 +141,7 @@ RegisterNetEvent('fdb-shops:server:deleteStore', function(shopId)
     exports['fdb-libs']:Notify(src, 'Loja excluída permanentemente!', 'success')
 end)
 
-RegisterNetEvent('fdb-shops:server:createShopFromUI', function(shopId, label, template, ownerId)
+RegisterNetEvent('fdb-shops:server:createShopFromUI', function(shopId, label, template, ownerId, city)
     local src = source
     if not FDBCore.Functions.HasPermission(src, 'admin') then return end
 
@@ -150,9 +153,43 @@ RegisterNetEvent('fdb-shops:server:createShopFromUI', function(shopId, label, te
         return
     end
 
-    MySQL.insert.await('INSERT INTO shops (shop_id, template_id, label, owner_id) VALUES (?, ?, ?, ?)', {shopId, template, label, ownerId})
+    local shopCity = (city and city ~= '') and city or 'valentine'
+    MySQL.insert.await('INSERT INTO shops (shop_id, template_id, label, owner_id, city) VALUES (?, ?, ?, ?, ?)', {shopId, template, label, ownerId, shopCity})
     exports['fdb-libs']:Notify(src, 'Loja criada com sucesso! Você já pode configurá-la.', 'success')
     
     -- Força a reabertura do painel para carregar a lista nova
     OpenEditor(src)
 end)
+
+RegisterCommand('setshopcity', function(source, args)
+    local src = source
+    if src > 0 and not FDBCore.Functions.HasPermission(src, 'admin') then return end
+    
+    local shopId = args[1]
+    local city = args[2]
+    if not shopId or not city then
+        if src > 0 then
+            exports['fdb-libs']:Notify(src, 'Uso: /setshopcity <shop_id> <cidade>', 'error')
+        else
+            print('Uso: setshopcity <shop_id> <cidade>')
+        end
+        return
+    end
+    
+    local updated = MySQL.update.await('UPDATE shops SET city = ? WHERE shop_id = ?', {city, shopId})
+    if updated and updated > 0 then
+        if ShopManager.Shops[shopId] then ShopManager.Shops[shopId].city = city end
+        if src > 0 then
+            exports['fdb-libs']:Notify(src, ('Cidade da loja %s definida como %s.'):format(shopId, city), 'success')
+        else
+            print(('Cidade da loja %s definida como %s.'):format(shopId, city))
+        end
+    else
+        if src > 0 then
+            exports['fdb-libs']:Notify(src, ('Loja %s não encontrada.'):format(shopId), 'error')
+        else
+            print(('Loja %s não encontrada.'):format(shopId))
+        end
+    end
+end, true)
+

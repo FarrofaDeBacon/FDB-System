@@ -35,6 +35,7 @@ CreateThread(function()
             owner_price_variation FLOAT DEFAULT 0.0,
             max_price_variation FLOAT DEFAULT 0.15,
             region_id VARCHAR(50),
+            city VARCHAR(50) DEFAULT 'outros',
             config JSON,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
