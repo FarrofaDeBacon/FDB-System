@@ -122,20 +122,22 @@ function SpawnStationNPC(station)
         end
     end
 
-    local npc = CreatePed(hash, coords.x, coords.y, coords.z, station.npc_heading or 0.0, false, false, false, false)
+    local heading = tonumber(station.npc_heading) or 0.0
+    local npc = CreatePed(hash, coords.x, coords.y, coords.z, heading, false, false, false, false)
     if npc and npc ~= 0 then
-        print('[fdb-shops] Successfully spawned NPC. Entity ID: ' .. tostring(npc))
+        SetEntityHeading(npc, heading)
         Citizen.InvokeNative(0x283978A15512B2FE, npc, true)
         SetEntityNoCollisionEntity(npc, PlayerPedId(), false)
         SetEntityCanBeDamaged(npc, false)
         SetEntityInvincible(npc, true)
-        FreezeEntityPosition(npc, true)
 
-        if station.animation_name then
-            TaskStartScenarioInPlace(npc, joaat(station.animation_name), -1, true, false, false, false)
+        if station.animation_name and station.animation_name ~= '' then
+            TaskStartScenarioInPlace(npc, joaat(station.animation_name), -1, false, false, false, false)
         end
 
+        FreezeEntityPosition(npc, true)
         spawnedEntities[station.id] = npc
+        print('[fdb-shops] Successfully spawned NPC ' .. tostring(station.id) .. ' heading: ' .. tostring(heading))
     end
 end
 
@@ -157,13 +159,28 @@ function SpawnStationProp(station)
         if GetGameTimer() > timeout then return end
     end
 
+    local heading = tonumber(station.npc_heading) or 0.0
     local prop = CreateObject(hash, coords.x, coords.y, coords.z, false, false, false)
     if prop and prop ~= 0 then
-        SetEntityRotation(prop, 0.0, 0.0, station.npc_heading or 0.0, 2, true)
+        SetEntityHeading(prop, heading)
         FreezeEntityPosition(prop, true)
         spawnedEntities[station.id] = prop
     end
 end
+
+RegisterNetEvent('fdb-shops:client:setHeading', function(stationId, heading)
+    if spawnedEntities and spawnedEntities[stationId] then
+        SetEntityHeading(spawnedEntities[stationId], heading)
+    end
+    if shopStations then
+        for _, s in ipairs(shopStations) do
+            if s.id == stationId then
+                s.npc_heading = heading
+                break
+            end
+        end
+    end
+end)
 
 function InteractWithStation(station)
     if station.type == 'npc' or station.type == 'venda' then

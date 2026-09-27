@@ -6,6 +6,8 @@
     if (!store.stations) store.stations = [];
     if (!store.config) store.config = {};
     if (!store.city) store.city = 'outros';
+    if (!store.template) store.template = 'normal';
+    if (!store._originalId) store._originalId = store.id;
 
     const cityOptions = [
         { value: 'valentine', label: 'Valentine' },
@@ -18,6 +20,15 @@
         { value: 'van_horn', label: 'Van Horn' },
         { value: 'strawberry', label: 'Strawberry' },
         { value: 'outros', label: 'Outros' }
+    ];
+
+    const templateOptions = [
+        { value: 'normal', label: 'Armazém Geral (normal)' },
+        { value: 'weapons', label: 'Armeiro (weapons)' },
+        { value: 'saloon', label: 'Saloon (saloon)' },
+        { value: 'armoury', label: 'Arsenal Policial (armoury)' },
+        { value: 'medic', label: 'Farmácia (medic)' },
+        { value: 'prison', label: 'Cantina Prisional (prison)' }
     ];
 
     let activeTab = $state('geral');
@@ -87,7 +98,7 @@
     }
 
     function addStation(type) {
-        const tempId = 'temp-' + crypto.randomUUID();
+        const tempId = 'temp-' + Date.now() + '-' + Math.floor(Math.random() * 1000000);
         let defaultModel = '';
         if (type === 'npc') defaultModel = npcModels[0];
         if (type === 'registradora') defaultModel = registerModels[0];
@@ -171,8 +182,26 @@
         fetch(`https://${window.GetParentResourceName()}/saveStoreConfig`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ store })
+            body: JSON.stringify({ store: { ...store, originalId: store._originalId } })
         }).then(() => onClose());
+    }
+
+    function flipHeading(station) {
+        station.heading = Math.round(((station.heading || 0) + 180) % 360);
+        if (station.position) {
+            fetch(`https://${window.GetParentResourceName()}/flipStationHeading`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    shopId: store.id,
+                    stationId: station.id,
+                    type: station.type,
+                    model: station.type === 'npc' ? station.npc_model : station.prop_model,
+                    coords: station.position,
+                    heading: station.heading
+                })
+            }).catch(() => {});
+        }
     }
 </script>
 
@@ -222,12 +251,8 @@
         {#if activeTab === 'geral'}
             <div class="fdb-group">
                 <label>ID da Loja</label>
-                <Input id="store-id-ro" type="text" value={store.id} disabled={true} />
-            </div>
-
-            <div class="fdb-group">
-                <label>Dono da Loja (Citizen ID)</label>
-                <Input id="{store.id}-owner_id" type="text" bind:value={store.owner_id} />
+                <Input id="{store.id}-id-input" type="text" bind:value={store.id} />
+                <span class="fdb-field-hint">Altere o ID se desejar renomear o registro da loja.</span>
             </div>
 
             <div class="fdb-group">
@@ -236,8 +261,18 @@
             </div>
 
             <div class="fdb-group">
+                <label>Categoria / Template</label>
+                <Select id="{store.id}-template" bind:value={store.template} options={templateOptions} />
+            </div>
+
+            <div class="fdb-group">
                 <label>Cidade / Localidade</label>
                 <Select id="{store.id}-city" bind:value={store.city} options={cityOptions} />
+            </div>
+
+            <div class="fdb-group">
+                <label>Dono da Loja (Citizen ID)</label>
+                <Input id="{store.id}-owner_id" type="text" bind:value={store.owner_id} />
             </div>
 
             {#each fields as field}
@@ -268,6 +303,9 @@
                     <div class="fdb-row">
                         <div style="flex: 1;"><Select id="m-{station.id}" bind:value={station.prop_model} options={registerModels} disabled={station.is_marker} /></div>
                         <button class="fdb-btn-outline" style="padding: 0 1vh;" onclick={() => placeComponent(station)}>{station.position ? "Ajustar" : "Posicionar"}</button>
+                        {#if station.position}
+                            <button class="fdb-btn-outline" style="padding: 0 1vh;" onclick={() => flipHeading(station)} title="Girar 180°">🔄 180°</button>
+                        {/if}
                         <button class="fdb-btn-danger" style="padding: 0 1vh;" onclick={() => removeComponent(station)}>X</button>
                     </div>
                     <label class="fdb-check"><input type="checkbox" bind:checked={station.is_marker} /> Somente Marcador (Invisível)</label>
@@ -288,6 +326,9 @@
                     <div class="fdb-row">
                         <div style="flex: 1;"><Select id="m-{station.id}" bind:value={station.prop_model} options={chestModels} disabled={station.is_marker} /></div>
                         <button class="fdb-btn-outline" style="padding: 0 1vh;" onclick={() => placeComponent(station)}>{station.position ? "Ajustar" : "Posicionar"}</button>
+                        {#if station.position}
+                            <button class="fdb-btn-outline" style="padding: 0 1vh;" onclick={() => flipHeading(station)} title="Girar 180°">🔄 180°</button>
+                        {/if}
                         <button class="fdb-btn-danger" style="padding: 0 1vh;" onclick={() => removeComponent(station)}>X</button>
                     </div>
                     <label class="fdb-check"><input type="checkbox" bind:checked={station.is_marker} /> Somente Marcador (Invisível)</label>
@@ -308,6 +349,9 @@
                     <div class="fdb-row">
                         <div style="flex: 1;"><Select id="m-{station.id}" bind:value={station.prop_model} options={craftModels} disabled={station.is_marker} /></div>
                         <button class="fdb-btn-outline" style="padding: 0 1vh;" onclick={() => placeComponent(station)}>{station.position ? "Ajustar" : "Posicionar"}</button>
+                        {#if station.position}
+                            <button class="fdb-btn-outline" style="padding: 0 1vh;" onclick={() => flipHeading(station)} title="Girar 180°">🔄 180°</button>
+                        {/if}
                         <button class="fdb-btn-danger" style="padding: 0 1vh;" onclick={() => removeComponent(station)}>X</button>
                     </div>
                     <label class="fdb-check"><input type="checkbox" bind:checked={station.is_marker} /> Somente Marcador (Invisível)</label>
@@ -328,6 +372,9 @@
                     <div class="fdb-row">
                         <div style="flex: 1;"><Select id="m-{station.id}" bind:value={station.npc_model} options={npcModels} /></div>
                         <button class="fdb-btn-outline" style="padding: 0 1vh;" onclick={() => placeComponent(station)}>{station.position ? "Ajustar" : "Posicionar"}</button>
+                        {#if station.position}
+                            <button class="fdb-btn-outline" style="padding: 0 1vh;" onclick={() => flipHeading(station)} title="Girar 180°">🔄 180°</button>
+                        {/if}
                         <button class="fdb-btn-danger" style="padding: 0 1vh;" onclick={() => removeComponent(station)}>X</button>
                     </div>
                 </div>
@@ -554,6 +601,13 @@
         display: flex;
         flex-direction: column;
         gap: 0.5vh;
+    }
+
+    .fdb-field-hint {
+        font-size: 0.72rem;
+        color: var(--fdb-text-secondary, #aaa);
+        opacity: 0.75;
+        margin-top: 0.2vh;
     }
 
     .fdb-group label {

@@ -23,6 +23,7 @@ local function OpenEditor(src)
                     prop_model = s.prop_model,
                     npc_model = s.npc_model,
                     position = s.position and json.decode(s.position) or nil,
+                    heading = s.npc_heading or 0.0,
                     is_marker = isMarker,
                     metadata = s.metadata and json.decode(s.metadata) or nil
                 })
@@ -51,34 +52,63 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
     local src = source
     if not FDBCore.Functions.HasPermission(src, 'admin') then return end
     
+    local originalId = storeData.originalId or storeData.id
     local shopId = storeData.id
+    
+    -- Rename shop_id if changed
+    if shopId and originalId and shopId ~= originalId then
+        local exists = MySQL.scalar.await('SELECT 1 FROM shops WHERE shop_id = ?', {shopId})
+        if exists then
+            exports['fdb-libs']:Notify(src, 'Já existe uma loja com o ID ' .. shopId .. '!', 'error')
+            return
+        end
+        
+        -- Update foreign tables
+        MySQL.update.await('UPDATE shop_stations SET shop_id = ? WHERE shop_id = ?', {shopId, originalId})
+        pcall(function() MySQL.update.await('UPDATE shop_employees SET shop_id = ? WHERE shop_id = ?', {shopId, originalId}) end)
+        MySQL.update.await('UPDATE shops SET shop_id = ? WHERE shop_id = ?', {shopId, originalId})
+        
+        if ShopManager.Shops[originalId] then
+            ShopManager.Shops[shopId] = ShopManager.Shops[originalId]
+            ShopManager.Shops[originalId] = nil
+        end
+        print(("^2[fdb-shops] Loja renomeada de '%s' para '%s'^7"):format(originalId, shopId))
+    end
     
     if storeData.label then
         local ownerId = storeData.owner_id
         if ownerId == "" then ownerId = nil end
+        local template = (storeData.template and storeData.template ~= '') and storeData.template or 'normal'
         local city = (storeData.city and storeData.city ~= '') and storeData.city or 'outros'
         local configStr = storeData.config and json.encode(storeData.config) or nil
-        MySQL.update.await('UPDATE shops SET label = ?, owner_id = ?, city = ?, config = ? WHERE shop_id = ?', {storeData.label, ownerId, city, configStr, shopId})
+        MySQL.update.await('UPDATE shops SET label = ?, owner_id = ?, template_id = ?, city = ?, config = ? WHERE shop_id = ?', {storeData.label, ownerId, template, city, configStr, shopId})
         
         if ShopManager.Shops[shopId] then
             ShopManager.Shops[shopId].label = storeData.label
             ShopManager.Shops[shopId].ownerId = ownerId
+            ShopManager.Shops[shopId].templateId = template
             ShopManager.Shops[shopId].city = city
             ShopManager.Shops[shopId].config = storeData.config or {}
         end
     end
     
-    for _, st in ipairs(storeData.stations) do
-        if type(st.id) == "number" then
+    for _, st in ipairs(storeData.stations or {}) do
+        local stId = tonumber(st.id)
+        if stId then
             local targetProp = (st.is_marker or st.type == 'admin_panel') and nil or st.prop_model
             local targetNpc = (st.is_marker) and nil or st.npc_model
             if st.type == 'npc' then targetProp = nil end
+            local heading = tonumber(st.heading)
             
             if st.type == 'admin_panel' then
                 local metadataStr = st.metadata and json.encode(st.metadata) or nil
-                MySQL.update.await('UPDATE shop_stations SET prop_model = ?, npc_model = ?, metadata = ? WHERE id = ?', {targetProp, targetNpc, metadataStr, st.id})
+                MySQL.update.await('UPDATE shop_stations SET prop_model = ?, npc_model = ?, metadata = ? WHERE id = ?', {targetProp, targetNpc, metadataStr, stId})
             else
-                MySQL.update.await('UPDATE shop_stations SET prop_model = ?, npc_model = ? WHERE id = ?', {targetProp, targetNpc, st.id})
+                if heading ~= nil then
+                    MySQL.update.await('UPDATE shop_stations SET prop_model = ?, npc_model = ?, npc_heading = ? WHERE id = ?', {targetProp, targetNpc, heading, stId})
+                else
+                    MySQL.update.await('UPDATE shop_stations SET prop_model = ?, npc_model = ? WHERE id = ?', {targetProp, targetNpc, stId})
+                end
             end
         end
     end
@@ -96,37 +126,52 @@ RegisterNetEvent('fdb-shops:server:savePlacement', function(shopId, stationId, s
     
     local targetProp = spawnType == 'npc' and nil or model
     local targetNpc = spawnType == 'npc' and model or nil
+    local numStationId = tonumber(stationId)
 
-    if type(stationId) == "number" then
+    if numStationId then
         if spawnType == 'npc' then
-            MySQL.update.await('UPDATE shop_stations SET position = ?, npc_heading = ?, npc_model = ? WHERE id = ?', {posStr, heading, targetNpc, stationId})
+            MySQL.update.await('UPDATE shop_stations SET position = ?, npc_heading = ?, npc_model = ? WHERE id = ?', {posStr, heading, targetNpc, numStationId})
         else
-            MySQL.update.await('UPDATE shop_stations SET position = ?, prop_model = ? WHERE id = ?', {posStr, targetProp, stationId})
+            MySQL.update.await('UPDATE shop_stations SET position = ?, npc_heading = ?, prop_model = ? WHERE id = ?', {posStr, heading, targetProp, numStationId})
         end
+        TriggerClientEvent('fdb-shops:client:refreshStation', -1, numStationId, shopId, spawnType, targetNpc or targetProp, posTable, heading)
     else
         -- Insert new
         local newId
         if spawnType == 'npc' then
             newId = MySQL.insert.await('INSERT INTO shop_stations (shop_id, type, position, npc_heading, npc_model) VALUES (?, ?, ?, ?, ?)', {shopId, spawnType, posStr, heading, targetNpc})
         else
-            newId = MySQL.insert.await('INSERT INTO shop_stations (shop_id, type, position, prop_model) VALUES (?, ?, ?, ?)', {shopId, spawnType, posStr, targetProp})
+            newId = MySQL.insert.await('INSERT INTO shop_stations (shop_id, type, position, npc_heading, prop_model) VALUES (?, ?, ?, ?, ?)', {shopId, spawnType, posStr, heading, targetProp})
         end
         
         TriggerClientEvent('fdb-shops:client:updateStationId', src, stationId, newId)
+        TriggerClientEvent('fdb-shops:client:refreshStation', -1, newId, shopId, spawnType, targetNpc or targetProp, posTable, heading)
     end
 
     exports['fdb-libs']:Notify(src, 'Posição salva com sucesso!', 'success')
     print("^2[fdb-shops] Loja " .. shopId .. " teve sua posição salva.^7")
-    exports['fdb-libs']:Notify(src, 'Use /shopreload para aplicar as novas posições no mundo.', 'primary')
+end)
+
+RegisterNetEvent('fdb-shops:server:updateHeading', function(stationId, heading)
+    local src = source
+    if not FDBCore.Functions.HasPermission(src, 'admin') then return end
+    
+    local numId = tonumber(stationId)
+    if numId then
+        MySQL.update.await('UPDATE shop_stations SET npc_heading = ? WHERE id = ?', {heading, numId})
+        TriggerClientEvent('fdb-shops:client:setHeading', -1, numId, heading)
+    end
 end)
 
 RegisterNetEvent('fdb-shops:server:removePlacement', function(shopId, stationId)
     local src = source
     if not FDBCore.Functions.HasPermission(src, 'admin') then return end
 
-    if type(stationId) == "number" then
-        MySQL.update.await('DELETE FROM shop_stations WHERE id = ?', {stationId})
+    local numStationId = tonumber(stationId)
+    if numStationId then
+        MySQL.update.await('DELETE FROM shop_stations WHERE id = ?', {numStationId})
         exports['fdb-libs']:Notify(src, 'Componente removido do banco com sucesso!', 'success')
+        TriggerClientEvent('fdb-shops:client:stationDeleted', -1, numStationId)
     end
 end)
 

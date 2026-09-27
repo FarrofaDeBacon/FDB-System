@@ -12,14 +12,27 @@ RegisterNUICallback("startPlacement", function(data, cb)
     SendNUIMessage({ action = "hideUI" })
     
     local entityToHide = nil
+    local stId = tonumber(data.stationId) or data.stationId
     if data.mode == "adjust" then
-        if spawnedEntities and spawnedEntities[data.stationId] then
-            entityToHide = spawnedEntities[data.stationId]
+        if spawnedEntities and spawnedEntities[stId] then
+            entityToHide = spawnedEntities[stId]
         end
     end
     
     local cbData = { shopId = data.shopId, stationId = data.stationId }
     exports['fdb-propeditor']:StartPlacementCamera(GetCurrentResourceName(), data.type, data.model, json.encode(cbData), data.mode, entityToHide)
+    cb('ok')
+end)
+
+RegisterNUICallback("flipStationHeading", function(data, cb)
+    local stId = tonumber(data.stationId)
+    local newHeading = tonumber(data.heading) or 0.0
+    if stId then
+        TriggerServerEvent('fdb-shops:server:updateHeading', stId, newHeading)
+    end
+    if spawnedEntities and stId and spawnedEntities[stId] then
+        SetEntityHeading(spawnedEntities[stId], newHeading)
+    end
     cb('ok')
 end)
 
@@ -215,3 +228,38 @@ RegisterNetEvent('fdb-shops:client:updateStationId', function(oldTempId, newId)
         end
     end
 end)
+
+RegisterNetEvent('fdb-shops:client:refreshStation', function(stationId, shopId, spawnType, model, coords, heading)
+    if spawnedEntities and spawnedEntities[stationId] then
+        if DoesEntityExist(spawnedEntities[stationId]) then
+            DeleteEntity(spawnedEntities[stationId])
+        end
+        spawnedEntities[stationId] = nil
+    end
+    
+    local stData = {
+        id = stationId,
+        shop_id = shopId,
+        type = spawnType,
+        npc_model = spawnType == 'npc' and model or nil,
+        prop_model = spawnType ~= 'npc' and model or nil,
+        position = coords,
+        npc_heading = heading
+    }
+    
+    if spawnType == 'npc' then
+        SpawnStationNPC(stData)
+    elseif spawnType ~= 'admin_panel' then
+        SpawnStationProp(stData)
+    end
+end)
+
+RegisterNetEvent('fdb-shops:client:stationDeleted', function(stationId)
+    if spawnedEntities and spawnedEntities[stationId] then
+        if DoesEntityExist(spawnedEntities[stationId]) then
+            DeleteEntity(spawnedEntities[stationId])
+        end
+        spawnedEntities[stationId] = nil
+    end
+end)
+
