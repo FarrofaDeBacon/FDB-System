@@ -73,7 +73,9 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
         local ownerId = storeData.owner_id
         if ownerId == "" then ownerId = nil end
         local template = (storeData.template and storeData.template ~= '') and storeData.template or 'normal'
-        local city = (storeData.city and storeData.city ~= '') and storeData.city or 'outros'
+        local currentShop = ShopManager.Shops[shopId]
+        local currentCity = (currentShop and currentShop.city) or MySQL.scalar.await('SELECT city FROM shops WHERE shop_id = ?', {shopId}) or 'outros'
+        local city = (storeData.city and storeData.city ~= '') and storeData.city or currentCity
         local configStr = storeData.config and json.encode(storeData.config) or nil
         
         -- Check if template changed compared to database
@@ -112,6 +114,7 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
         end
     end
     
+    local unpositionedCount = 0
     for _, st in ipairs(storeData.stations or {}) do
         local stId = tonumber(st.id)
         if stId then
@@ -130,7 +133,15 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
                     MySQL.update.await('UPDATE shop_stations SET prop_model = ?, npc_model = ? WHERE id = ?', {targetProp, targetNpc, stId})
                 end
             end
+        else
+            if type(st.id) == "string" and string.sub(st.id, 1, 5) == "temp-" and not st.position then
+                unpositionedCount = unpositionedCount + 1
+            end
         end
+    end
+
+    if unpositionedCount > 0 then
+        exports['fdb-libs']:Notify(src, ('%d componente(s) novo(s) sem posição não foram salvos no mundo. Posicione-os antes de salvar.'):format(unpositionedCount), 'warning')
     end
     
     exports['fdb-libs']:Notify(src, 'Loja ' .. shopId .. ' salva com sucesso!', 'success')
@@ -221,7 +232,7 @@ RegisterNetEvent('fdb-shops:server:createShopFromUI', function(shopId, label, te
         return
     end
 
-    local shopCity = (city and city ~= '') and city or 'valentine'
+    local shopCity = (city and city ~= '') and city or 'outros'
     MySQL.insert.await('INSERT INTO shops (shop_id, template_id, label, owner_id, city) VALUES (?, ?, ?, ?, ?)', {shopId, template, label, ownerId, shopCity})
     exports['fdb-libs']:Notify(src, 'Loja criada com sucesso! Você já pode configurá-la.', 'success')
     
@@ -229,17 +240,40 @@ RegisterNetEvent('fdb-shops:server:createShopFromUI', function(shopId, label, te
     OpenEditor(src)
 end)
 
+local VALID_CITIES = {
+    ['valentine'] = true,
+    ['saint_denis'] = true,
+    ['rhodes'] = true,
+    ['blackwater'] = true,
+    ['annesburg'] = true,
+    ['armadillo'] = true,
+    ['tumbleweed'] = true,
+    ['van_horn'] = true,
+    ['strawberry'] = true,
+    ['outros'] = true
+}
+
 RegisterCommand('setshopcity', function(source, args)
     local src = source
     if src > 0 and not FDBCore.Functions.HasPermission(src, 'admin') then return end
     
     local shopId = args[1]
-    local city = args[2]
-    if not shopId or not city then
+    local city = string.lower(args[2] or '')
+    if not shopId or city == '' then
         if src > 0 then
             exports['fdb-libs']:Notify(src, 'Uso: /setshopcity <shop_id> <cidade>', 'error')
         else
             print('Uso: setshopcity <shop_id> <cidade>')
+        end
+        return
+    end
+
+    if not VALID_CITIES[city] then
+        local validList = 'valentine, saint_denis, rhodes, blackwater, annesburg, armadillo, tumbleweed, van_horn, strawberry, outros'
+        if src > 0 then
+            exports['fdb-libs']:Notify(src, 'Cidade inválida! Opções: ' .. validList, 'error')
+        else
+            print('Cidade inválida! Opções: ' .. validList)
         end
         return
     end
