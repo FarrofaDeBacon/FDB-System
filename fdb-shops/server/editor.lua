@@ -41,7 +41,18 @@ local function OpenEditor(src)
         end
     end
 
-    TriggerClientEvent('fdb-shops:client:openEditor', src, shopsList)
+    local rawTemplates = MySQL.query.await('SELECT template_id, label FROM shop_templates')
+    local templatesList = {}
+    if rawTemplates then
+        for _, t in ipairs(rawTemplates) do
+            table.insert(templatesList, {
+                value = t.template_id,
+                label = (t.label or t.template_id) .. " (" .. t.template_id .. ")"
+            })
+        end
+    end
+
+    TriggerClientEvent('fdb-shops:client:openEditor', src, shopsList, templatesList)
 end
 
 RegisterCommand('editshops', function(source, args)
@@ -64,6 +75,32 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
         local template = (storeData.template and storeData.template ~= '') and storeData.template or 'normal'
         local city = (storeData.city and storeData.city ~= '') and storeData.city or 'outros'
         local configStr = storeData.config and json.encode(storeData.config) or nil
+        
+        -- Check if template changed compared to database
+        local currentTemplate = MySQL.scalar.await('SELECT template_id FROM shops WHERE shop_id = ?', {shopId})
+        if currentTemplate and template ~= currentTemplate then
+            local tRow = MySQL.single.await('SELECT * FROM shop_templates WHERE template_id = ?', {template})
+            if tRow then
+                local defaultRecipes = tRow.craftable_recipes or '[]'
+                local defaultSellable = tRow.sellable_items or '[]'
+                local defaultConfig = tRow.default_config or '{}'
+                MySQL.update.await([[
+                    UPDATE shops 
+                    SET template_id = ?, enabled_recipes = ?, buy_catalog = ?, sell_catalog = '[]', config = ?
+                    WHERE shop_id = ?
+                ]], {template, defaultRecipes, defaultSellable, defaultConfig, shopId})
+                
+                if ShopManager.Shops[shopId] then
+                    ShopManager.Shops[shopId].templateId = template
+                    ShopManager.Shops[shopId].enabledRecipes = json.decode(defaultRecipes) or {}
+                    ShopManager.Shops[shopId].buyCatalog = json.decode(defaultSellable) or {}
+                    ShopManager.Shops[shopId].sellCatalog = {}
+                    ShopManager.Shops[shopId].config = json.decode(defaultConfig) or {}
+                end
+                print(("^2[fdb-shops] Loja '%s' mudou template: '%s' -> '%s'. Catálogos redefinidos para o padrão.^7"):format(shopId, currentTemplate, template))
+            end
+        end
+
         MySQL.update.await('UPDATE shops SET label = ?, owner_id = ?, template_id = ?, city = ?, config = ? WHERE shop_id = ?', {storeData.label, ownerId, template, city, configStr, shopId})
         
         if ShopManager.Shops[shopId] then

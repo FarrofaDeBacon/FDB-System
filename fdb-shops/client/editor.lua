@@ -189,7 +189,7 @@ AddEventHandler(GetCurrentResourceName() .. ":placementFinished", function(ok, r
     SetNuiFocus(true, true)
 end)
 
-RegisterNetEvent('fdb-shops:client:openEditor', function(storesData)
+RegisterNetEvent('fdb-shops:client:openEditor', function(storesData, templatesData)
     if isEditorOpen then return end
     isEditorOpen = true
     SetNuiFocus(true, true)
@@ -199,6 +199,7 @@ RegisterNetEvent('fdb-shops:client:openEditor', function(storesData)
     SendNUIMessage({
         action = "openEditor",
         stores = storesData or {},
+        templates = templatesData or {},
         theme = theme
     })
 end)

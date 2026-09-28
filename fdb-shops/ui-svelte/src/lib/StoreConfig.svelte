@@ -3,13 +3,14 @@
     import Select from '../../../../fdb-libs/ui/src/components/Select.svelte';
     import Input from '../../../../fdb-libs/ui/src/components/Input.svelte';
     
-    let { store, onClose, onDeleted = () => {} } = $props();
+    let { store, templates = [], onClose, onDeleted = () => {} } = $props();
 
     // Local reactive state for full Svelte 5 runes reactivity
     let storeId = $state(store.id || '');
-    let originalId = store._originalId || store.id || '';
     let storeLabel = $state(store.label || '');
+    let initialTemplate = store.template || 'normal';
     let storeTemplate = $state(store.template || 'normal');
+    let templateModalOpen = $state(false);
     let storeCity = $state(store.city || 'outros');
     let storeOwnerId = $state(store.owner_id || '');
     let storeConfig = $state(store.config ? JSON.parse(JSON.stringify(store.config)) : {});
@@ -28,14 +29,18 @@
         { value: 'outros', label: 'Outros' }
     ];
 
-    const templateOptions = [
-        { value: 'normal', label: 'Armazém Geral (normal)' },
-        { value: 'weapons', label: 'Armeiro (weapons)' },
-        { value: 'saloon', label: 'Saloon (saloon)' },
-        { value: 'armoury', label: 'Arsenal Policial (armoury)' },
-        { value: 'medic', label: 'Farmácia (medic)' },
-        { value: 'prison', label: 'Cantina Prisional (prison)' }
-    ];
+    let templateOptions = $derived(
+        templates && templates.length > 0
+            ? templates
+            : [
+                { value: 'normal', label: 'Armazém Geral (normal)' },
+                { value: 'weapons', label: 'Armeiro (weapons)' },
+                { value: 'saloon', label: 'Saloon (saloon)' },
+                { value: 'armoury', label: 'Arsenal Policial (armoury)' },
+                { value: 'medic', label: 'Farmácia (medic)' },
+                { value: 'prison', label: 'Cantina Prisional (prison)' }
+            ]
+    );
 
     let activeTab = $state('geral');
     
@@ -205,7 +210,12 @@
         if (confirmed) onDeleted(storeId);
     }
 
-    function saveConfig() {
+    function saveConfig(confirmed = false) {
+        if (storeTemplate !== initialTemplate && !confirmed) {
+            templateModalOpen = true;
+            return;
+        }
+        templateModalOpen = false;
         const payload = {
             id: storeId,
             label: storeLabel,
@@ -301,6 +311,11 @@
                 <div class="fdb-group">
                     <label>Categoria / Template</label>
                     <Select id="store-template-select" bind:value={storeTemplate} options={templateOptions} />
+                    {#if storeTemplate !== initialTemplate}
+                        <span class="fdb-field-hint" style="color: #f59e0b;">
+                            ⚠️ Atenção: Ao salvar com um novo template, os catálogos de itens e receitas serão resetados para o padrão.
+                        </span>
+                    {/if}
                 </div>
 
                 <div class="fdb-group">
@@ -464,10 +479,29 @@
             <button class="fdb-btn-danger-outline" onclick={deleteStore}>Excluir Loja</button>
             <div class="fdb-row" style="width: auto;">
                 <button class="fdb-btn-secondary" onclick={onClose}>Cancelar</button>
-                <button class="fdb-btn-primary" onclick={saveConfig}>Salvar</button>
+                <button class="fdb-btn-primary" onclick={() => saveConfig(false)}>Salvar</button>
             </div>
         </div>
     </div>
+
+    {#if templateModalOpen}
+        <div class="fdb-modal-backdrop">
+            <div class="fdb-modal-card">
+                <h4 style="color: #f59e0b; margin: 0 0 1.2vh 0; font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem;">
+                    ⚠️ Confirmar Troca de Template
+                </h4>
+                <p style="color: var(--fdb-text-primary); font-size: 0.95rem; line-height: 1.5; margin: 0 0 2vh 0;">
+                    Você está alterando o template de <strong>{initialTemplate}</strong> para <strong>{storeTemplate}</strong>.<br/><br/>
+                    Esta alteração irá <strong>redefinir os catálogos de itens e receitas</strong> para os padrões do novo template. As customizações manuais do dono serão redefinidas.<br/><br/>
+                    Deseja prosseguir e salvar?
+                </p>
+                <div style="display: flex; justify-content: flex-end; gap: 1vh;">
+                    <button type="button" class="fdb-btn-secondary" onclick={() => templateModalOpen = false}>Cancelar</button>
+                    <button type="button" class="fdb-btn-primary" style="background: #d97706; border-color: #f59e0b;" onclick={() => saveConfig(true)}>Sim, Redefinir e Salvar</button>
+                </div>
+            </div>
+        </div>
+    {/if}
 </div>
 
 <style>
@@ -753,5 +787,27 @@
         margin-top: 1vh;
         padding-top: 1.5vh;
         border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .fdb-modal-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        padding: 2vh;
+    }
+
+    .fdb-modal-card {
+        background: #1e1e1e;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: var(--fdb-border-radius, 6px);
+        padding: 2.5vh;
+        max-width: 480px;
+        width: 100%;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
     }
 </style>

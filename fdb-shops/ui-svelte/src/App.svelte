@@ -6,6 +6,7 @@
     let visible = false;
     let theme = {};
     let stores = [];
+    let templates = $state([]);
     let selectedStore = null;
     let isPlacementMode = false;
 
@@ -22,6 +23,7 @@
             if (data.action === 'openEditor') {
                 theme = data.theme || {};
                 stores = data.stores || [];
+                templates = data.templates || [];
                 selectedStore = null; // Start at table catalog view
                 visible = true;
                 isPlacementMode = false;
@@ -113,6 +115,7 @@
         {#if selectedStore}
             <StoreConfig 
                 store={selectedStore} 
+                templates={templates}
                 onClose={() => selectedStore = null} 
                 onDeleted={handleStoreDeleted} 
             />
