@@ -3,18 +3,18 @@
     import StoreConfig from './lib/StoreConfig.svelte';
     import StoreTable from './lib/StoreTable.svelte';
 
-    let visible = false;
-    let theme = {};
-    let stores = [];
+    let visible = $state(false);
+    let theme = $state({});
+    let stores = $state([]);
     let templates = $state([]);
-    let selectedStore = null;
-    let isPlacementMode = false;
+    let selectedStore = $state(null);
+    let isPlacementMode = $state(false);
 
     // Filter states preserved across view transitions
-    let searchQuery = '';
-    let filterCity = 'all';
-    let filterTemplate = 'all';
-    let filterOwner = 'all';
+    let searchQuery = $state('');
+    let filterCity = $state('all');
+    let filterTemplate = $state('all');
+    let filterOwner = $state('all');
 
     // Recebe mensagens do Lua
     onMount(() => {
@@ -65,7 +65,7 @@
         };
 
         const handleKeyDown = (e) => {
-            if (visible && !isPlacementMode && e.key === 'Escape') {
+            if (e.key === 'Escape' && !isPlacementMode) {
                 if (selectedStore) {
                     selectedStore = null; // Esc in edit mode returns to table
                 } else {

@@ -190,7 +190,6 @@ AddEventHandler(GetCurrentResourceName() .. ":placementFinished", function(ok, r
 end)
 
 RegisterNetEvent('fdb-shops:client:openEditor', function(storesData, templatesData)
-    if isEditorOpen then return end
     isEditorOpen = true
     SetNuiFocus(true, true)
     
@@ -203,6 +202,12 @@ RegisterNetEvent('fdb-shops:client:openEditor', function(storesData, templatesDa
         theme = theme
     })
 end)
+
+RegisterCommand('closeeditor', function()
+    isEditorOpen = false
+    SetNuiFocus(false, false)
+    SendNUIMessage({ action = "closeEditor" })
+end, false)
 
 CreateThread(function()
     TriggerEvent('chat:addSuggestion', '/editshops', 'Abre o painel visual Svelte para gerenciar lojas', {})
