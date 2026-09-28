@@ -14,8 +14,8 @@ shared_scripts {
 
 client_scripts {
     'client/freecam.lua',
-    'client/editor.lua',
     'client/client.lua',
+    'client/editor.lua',
     'client/crafting.lua',
     'client/placement.lua'
 }

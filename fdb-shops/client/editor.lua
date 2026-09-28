@@ -231,36 +231,92 @@ RegisterNetEvent('fdb-shops:client:updateStationId', function(oldTempId, newId)
 end)
 
 RegisterNetEvent('fdb-shops:client:refreshStation', function(stationId, shopId, spawnType, model, coords, heading)
-    if spawnedEntities and spawnedEntities[stationId] then
-        if DoesEntityExist(spawnedEntities[stationId]) then
-            DeleteEntity(spawnedEntities[stationId])
+    local numId = tonumber(stationId)
+
+    if spawnedEntities then
+        if stationId and spawnedEntities[stationId] then
+            if DoesEntityExist(spawnedEntities[stationId]) then
+                DeleteEntity(spawnedEntities[stationId])
+            end
+            spawnedEntities[stationId] = nil
         end
-        spawnedEntities[stationId] = nil
+        if numId and spawnedEntities[numId] then
+            if DoesEntityExist(spawnedEntities[numId]) then
+                DeleteEntity(spawnedEntities[numId])
+            end
+            spawnedEntities[numId] = nil
+        end
     end
     
-    local stData = {
-        id = stationId,
-        shop_id = shopId,
-        type = spawnType,
-        npc_model = spawnType == 'npc' and model or nil,
-        prop_model = spawnType ~= 'npc' and model or nil,
-        position = coords,
-        npc_heading = heading
-    }
+    local targetStation = nil
+    if shopStations then
+        for _, s in ipairs(shopStations) do
+            if s.id == stationId or (numId and s.id == numId) then
+                targetStation = s
+                break
+            end
+        end
+    end
     
-    if spawnType == 'npc' then
-        SpawnStationNPC(stData)
-    elseif spawnType ~= 'admin_panel' then
-        SpawnStationProp(stData)
+    if not targetStation then
+        targetStation = {
+            id = numId or stationId,
+            shop_id = shopId,
+            type = spawnType
+        }
+        if shopStations then
+            table.insert(shopStations, targetStation)
+        end
+    end
+    
+    targetStation.shop_id = shopId
+    targetStation.type = spawnType
+    targetStation.position = coords
+    targetStation.npc_heading = heading
+    targetStation.npc_model = (spawnType == 'npc' and model) and model or nil
+    targetStation.prop_model = (spawnType ~= 'npc' and spawnType ~= 'admin_panel' and model) and model or nil
+
+    if CreateStationZone then
+        CreateStationZone(targetStation)
+    end
+    
+    if model and model ~= '' then
+        if spawnType == 'npc' then
+            SpawnStationNPC(targetStation)
+        elseif spawnType ~= 'admin_panel' then
+            SpawnStationProp(targetStation)
+        end
     end
 end)
 
 RegisterNetEvent('fdb-shops:client:stationDeleted', function(stationId)
-    if spawnedEntities and spawnedEntities[stationId] then
-        if DoesEntityExist(spawnedEntities[stationId]) then
-            DeleteEntity(spawnedEntities[stationId])
+    local numId = tonumber(stationId)
+    if spawnedEntities then
+        if stationId and spawnedEntities[stationId] then
+            if DoesEntityExist(spawnedEntities[stationId]) then
+                DeleteEntity(spawnedEntities[stationId])
+            end
+            spawnedEntities[stationId] = nil
         end
-        spawnedEntities[stationId] = nil
+        if numId and spawnedEntities[numId] then
+            if DoesEntityExist(spawnedEntities[numId]) then
+                DeleteEntity(spawnedEntities[numId])
+            end
+            spawnedEntities[numId] = nil
+        end
+    end
+    
+    if shopStations then
+        for i = #shopStations, 1, -1 do
+            local s = shopStations[i]
+            if s.id == stationId or (numId and s.id == numId) then
+                if RemoveStationZone then
+                    RemoveStationZone(s)
+                end
+                table.remove(shopStations, i)
+                break
+            end
+        end
     end
 end)
 

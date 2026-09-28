@@ -41,6 +41,43 @@ RegisterCommand('shopreload', function()
     end)
 end, false)
 
+function RemoveStationZone(station)
+    if station and station.targetZoneId then
+        exports.ox_target:removeZone(station.targetZoneId)
+        for idx, zid in ipairs(spawnedZones) do
+            if zid == station.targetZoneId then
+                table.remove(spawnedZones, idx)
+                break
+            end
+        end
+        station.targetZoneId = nil
+    end
+end
+
+function CreateStationZone(station)
+    if not station or not station.position then return end
+    RemoveStationZone(station)
+
+    local zoneId = exports.ox_target:addSphereZone({
+        coords = vec3(station.position.x, station.position.y, station.position.z),
+        radius = 1.5,
+        debug = false,
+        options = {
+            {
+                name = 'shop_station_' .. tostring(station.id),
+                icon = 'fas fa-store',
+                label = GetStationPrompt(station.type),
+                onSelect = function()
+                    InteractWithStation(station)
+                end
+            }
+        }
+    })
+    table.insert(spawnedZones, zoneId)
+    station.targetZoneId = zoneId
+    return zoneId
+end
+
 function InitializeStations()
     -- Cleanup previous
     for _, entity in pairs(spawnedEntities) do
@@ -57,29 +94,11 @@ function InitializeStations()
 
     for _, station in ipairs(shopStations) do
         if station.position then
-            -- 1. Create Target Zone using ox_target
-            local zoneId = exports.ox_target:addSphereZone({
-                coords = vec3(station.position.x, station.position.y, station.position.z),
-                radius = 1.5,
-                debug = false,
-                options = {
-                    {
-                        name = 'shop_station_' .. station.id,
-                        icon = 'fas fa-store',
-                        label = GetStationPrompt(station.type),
-                        onSelect = function()
-                            InteractWithStation(station)
-                        end
-                    }
-                }
-            })
-            table.insert(spawnedZones, zoneId)
-            station.targetZoneId = zoneId
+            CreateStationZone(station)
 
-            -- 2. Spawn Visuals (NPCs or Props)
-            if station.type == 'npc' and station.npc_model then
+            if station.type == 'npc' and station.npc_model and station.npc_model ~= '' then
                 SpawnStationNPC(station)
-            elseif station.prop_model then
+            elseif station.prop_model and station.prop_model ~= '' then
                 SpawnStationProp(station)
             end
         end
@@ -102,7 +121,9 @@ end
 
 function SpawnStationNPC(station)
     local model = station.npc_model
+    if not model or model == '' then return end
     local coords = station.position
+    if not coords then return end
     
     print('[fdb-shops] Attempting to spawn NPC model: ' .. tostring(model))
     local hash = joaat(model)
@@ -143,7 +164,9 @@ end
 
 function SpawnStationProp(station)
     local model = station.prop_model
+    if not model or model == '' then return end
     local coords = station.position
+    if not coords then return end
     
     local hash = joaat(model)
     if not IsModelValid(hash) then
