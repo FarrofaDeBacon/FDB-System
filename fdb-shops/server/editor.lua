@@ -52,27 +52,10 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
     local src = source
     if not FDBCore.Functions.HasPermission(src, 'admin') then return end
     
-    local originalId = storeData.originalId or storeData.id
     local shopId = storeData.id
-    
-    -- Rename shop_id if changed
-    if shopId and originalId and shopId ~= originalId then
-        local exists = MySQL.scalar.await('SELECT 1 FROM shops WHERE shop_id = ?', {shopId})
-        if exists then
-            exports['fdb-libs']:Notify(src, 'Já existe uma loja com o ID ' .. shopId .. '!', 'error')
-            return
-        end
-        
-        -- Update foreign tables
-        MySQL.update.await('UPDATE shop_stations SET shop_id = ? WHERE shop_id = ?', {shopId, originalId})
-        pcall(function() MySQL.update.await('UPDATE shop_employees SET shop_id = ? WHERE shop_id = ?', {shopId, originalId}) end)
-        MySQL.update.await('UPDATE shops SET shop_id = ? WHERE shop_id = ?', {shopId, originalId})
-        
-        if ShopManager.Shops[originalId] then
-            ShopManager.Shops[shopId] = ShopManager.Shops[originalId]
-            ShopManager.Shops[originalId] = nil
-        end
-        print(("^2[fdb-shops] Loja renomeada de '%s' para '%s'^7"):format(originalId, shopId))
+    if not shopId or not ShopManager.Shops[shopId] then
+        exports['fdb-libs']:Notify(src, 'Loja inválida ou não encontrada!', 'error')
+        return
     end
     
     if storeData.label then

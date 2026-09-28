@@ -208,7 +208,6 @@
     function saveConfig() {
         const payload = {
             id: storeId,
-            originalId: originalId,
             label: storeLabel,
             template: storeTemplate,
             city: storeCity,
@@ -290,8 +289,8 @@
             {#if activeTab === 'geral'}
                 <div class="fdb-group">
                     <label>ID da Loja</label>
-                    <Input id="store-id-input" type="text" bind:value={storeId} />
-                    <span class="fdb-field-hint">Altere o ID se desejar renomear o registro da loja.</span>
+                    <Input id="store-id-input" type="text" bind:value={storeId} disabled={true} />
+                    <span class="fdb-field-hint">O identificador da loja não pode ser alterado após a criação.</span>
                 </div>
 
                 <div class="fdb-group">
