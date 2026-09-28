@@ -176,10 +176,13 @@ RegisterNetEvent('fdb-shops:server:updateHeading', function(stationId, heading)
     local src = source
     if not FDBCore.Functions.HasPermission(src, 'admin') then return end
     
+    local numHeading = tonumber(heading)
+    if not numHeading then return end
+
     local numId = tonumber(stationId)
     if numId then
-        MySQL.update.await('UPDATE shop_stations SET npc_heading = ? WHERE id = ?', {heading, numId})
-        TriggerClientEvent('fdb-shops:client:setHeading', -1, numId, heading)
+        MySQL.update.await('UPDATE shop_stations SET npc_heading = ? WHERE id = ?', {numHeading, numId})
+        TriggerClientEvent('fdb-shops:client:setHeading', -1, numId, numHeading)
     end
 end)
 
