@@ -114,5 +114,13 @@ CreateThread(function()
         print('^2[' .. resourceName .. '] Migrations for Business System applied.^7')
     end
 
+    -- Migration idempotente para coluna city na tabela shops
+    local hasCity = MySQL.scalar.await("SHOW COLUMNS FROM `shops` LIKE 'city'")
+    if not hasCity then
+        MySQL.query.await("ALTER TABLE `shops` ADD COLUMN `city` VARCHAR(50) DEFAULT 'outros' AFTER `region_id`")
+        MySQL.query.await("UPDATE `shops` SET `city` = 'outros' WHERE `city` IS NULL")
+        print('^2[' .. resourceName .. '] Migration: Column `city` added to `shops`.^7')
+    end
+
     print('^2[' .. resourceName .. '] Database schema initialized.^7')
 end)
