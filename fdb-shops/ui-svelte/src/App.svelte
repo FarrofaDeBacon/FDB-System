@@ -2,6 +2,8 @@
     import { onMount } from 'svelte';
     import StoreConfig from './lib/StoreConfig.svelte';
     import StoreTable from './lib/StoreTable.svelte';
+    import StoreFront from './lib/StoreFront.svelte';
+    import CraftingBench from './lib/CraftingBench.svelte';
 
     let visible = $state(false);
     let theme = $state({});
@@ -11,11 +13,25 @@
     let selectedStore = $state(null);
     let isPlacementMode = $state(false);
 
+    // Customer shop & Craft bench states
+    let customerShopData = $state(null);
+    let craftBenchData = $state(null);
+
     // Filter states preserved across view transitions
     let searchQuery = $state('');
     let filterCity = $state('all');
     let filterTemplate = $state('all');
     let filterOwner = $state('all');
+
+    function applyTheme(t) {
+        if (t) {
+            const root = document.documentElement;
+            Object.entries(t).forEach(([key, value]) => {
+                const cssKey = '--fdb-' + key.replace(/([A-Z])/g, "-$1").toLowerCase();
+                root.style.setProperty(cssKey, value);
+            });
+        }
+    }
 
     // Recebe mensagens do Lua
     onMount(() => {
@@ -27,20 +43,26 @@
                 templates = data.templates || [];
                 availableItems = data.availableItems || [];
                 selectedStore = null; // Start at table catalog view
+                customerShopData = null;
+                craftBenchData = null;
                 visible = true;
                 isPlacementMode = false;
-                
-                // Aplica variáveis do tema na raiz
-                if (theme) {
-                    const root = document.documentElement;
-                    Object.entries(theme).forEach(([key, value]) => {
-                        const cssKey = '--fdb-' + key.replace(/([A-Z])/g, "-$1").toLowerCase();
-                        root.style.setProperty(cssKey, value);
-                    });
-                }
+                applyTheme(theme);
             } else if (data.action === 'closeEditor') {
                 visible = false;
                 isPlacementMode = false;
+            } else if (data.action === 'openCustomerShop') {
+                customerShopData = data.shopData || null;
+                visible = false;
+                applyTheme(data.theme);
+            } else if (data.action === 'closeCustomerShop') {
+                customerShopData = null;
+            } else if (data.action === 'openCraftMenu') {
+                craftBenchData = data.craftData || null;
+                visible = false;
+                applyTheme(data.theme);
+            } else if (data.action === 'closeCraftMenu') {
+                craftBenchData = null;
             } else if (data.action === 'hideUI') {
                 isPlacementMode = true;
             } else if (data.action === 'showUI') {
@@ -135,6 +157,14 @@
             />
         {/if}
     </div>
+    {/if}
+
+    {#if customerShopData}
+        <StoreFront shopData={customerShopData} onClose={() => customerShopData = null} />
+    {/if}
+
+    {#if craftBenchData}
+        <CraftingBench craftData={craftBenchData} onClose={() => craftBenchData = null} />
     {/if}
 
     {#if isPlacementMode}

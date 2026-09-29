@@ -100,7 +100,7 @@ end)
 -- Events (Actions)
 -- ==========================================
 
--- Player interacting with NPC/Register to open Buy Catalog
+-- Player interacting with NPC/Register to open Buy Catalog (StoreFront)
 RegisterNetEvent('fdb-shops:server:openstore', function(shopId)
     local src = source
     local shop = ShopManager.GetShop(shopId)
@@ -110,52 +110,131 @@ RegisterNetEvent('fdb-shops:server:openstore', function(shopId)
         return
     end
 
-    -- Job restrictions are now handled by templates or config, not hardcoded
-    -- But for backward compatibility with old config structure (armoury requires leo, etc):
     local Player = FDBCore.Functions.GetPlayer(src)
+    if not Player then return end
+
     local jobType = Player.PlayerData.job.type
-    
-    if shop.templateId == 'armoury' and jobType ~= 'leo' then return end
-    if shop.templateId == 'medic' and jobType ~= 'medic' then return end
-
-    -- Build the formatted inventory for fdb-inventory shop API
-    -- The new system maintains this integration to display the shop UI
-    local itemTable = {}
-    for _, catItem in ipairs(shop.buyCatalog) do
-        local finalPrice = ShopManager.GetFinalPrice(shopId, catItem.name)
-        table.insert(itemTable, {
-            name = catItem.name,
-            amount = catItem.amount or 50, -- Or check stash if we use physical limits
-            price = finalPrice,
-            -- buyPrice (for selling to shop) is separate, usually in sellCatalog
-        })
+    if shop.templateId == 'armoury' and jobType ~= 'leo' then 
+        fdbLibs:Notify(src, "Apenas forças da lei têm acesso a este arsenal.", "error", 4000)
+        return 
+    end
+    if shop.templateId == 'medic' and jobType ~= 'medic' then 
+        fdbLibs:Notify(src, "Apenas médicos têm acesso a estes suprimentos.", "error", 4000)
+        return 
     end
 
-    local success, err
-    if not exports['fdb-inventory']:DoesShopExist(shopId) then
-        success, err = pcall(exports['fdb-inventory'].CreateShop, exports['fdb-inventory'], {
-            name = shopId,
-            label = shop.label,
-            slots = #itemTable,
-            items = itemTable,
-        })
-        if not success then
-            print(('^1[%s] ERROR: Failed to create inventory shop for %s - %s^7'):format(resourceName, shopId, tostring(err)))
-            return
+    -- Build catalog for modern StoreFront UI
+    local catalogList = {}
+    local sourceCatalog = (shop.catalog and #shop.catalog > 0) and shop.catalog or shop.buyCatalog or {}
+
+    for _, catItem in ipairs(sourceCatalog) do
+        local itemName = catItem.item_name or catItem.name
+        local isActive = (catItem.is_active ~= false and catItem.is_active ~= 0)
+        if itemName and isActive then
+            local finalPrice = ShopManager.GetFinalPrice(shopId, itemName)
+            local itemData = FDBCore.Shared.Items[itemName] or {}
+            table.insert(catalogList, {
+                item_name = itemName,
+                name = itemName,
+                label = itemData.label or itemName,
+                image = itemData.image or (itemName .. ".png"),
+                description = itemData.description or "",
+                weight = itemData.weight or 0,
+                type = itemData.type or "item",
+                price = finalPrice
+            })
         end
-    else
-        -- Update prices dynamically on open
-        exports['fdb-inventory']:CreateShop({
-            name = shopId,
-            label = shop.label,
-            items = itemTable
-        })
     end
 
-    success, err = pcall(exports['fdb-inventory'].OpenShop, exports['fdb-inventory'], src, shopId)
-    if not success then
-        print(('^1[%s] ERROR: Failed to open shop %s for player %s - %s^7'):format(resourceName, shopId, Player.PlayerData.citizenid, tostring(err)))
+    local moneyData = {
+        cash = (Player.PlayerData.money and Player.PlayerData.money.cash) or 0.0,
+        bank = (Player.PlayerData.money and Player.PlayerData.money.bank) or 0.0
+    }
+
+    local shopData = {
+        shopId = shopId,
+        shopLabel = shop.label or "Armazém",
+        catalog = catalogList,
+        playerMoney = moneyData
+    }
+
+    TriggerClientEvent('fdb-shops:client:openStoreFront', src, shopData)
+end)
+
+-- Process Cart Checkout
+fdbLibs:RegisterServerCallback('fdb-shops:server:checkoutCart', function(source, cb, data)
+    local src = source
+    local Player = FDBCore.Functions.GetPlayer(src)
+    if not Player then return cb({ success = false, message = "Jogador não encontrado." }) end
+
+    local shopId = data.shopId
+    local paymentMethod = data.paymentMethod or 'cash'
+    local cart = data.cart or {}
+
+    if #cart == 0 then
+        return cb({ success = false, message = "O carrinho está vazio." })
     end
+
+    local shop = ShopManager.GetShop(shopId)
+    if not shop then
+        return cb({ success = false, message = "Loja não encontrada." })
+    end
+
+    -- Server-side Price & Total Recalculation
+    local totalCost = 0.0
+    local validatedItems = {}
+
+    for _, item in ipairs(cart) do
+        local itemName = tostring(item.item_name or item.name or '')
+        local amount = math.floor(tonumber(item.amount) or 0)
+
+        if itemName ~= '' and amount > 0 then
+            local unitPrice = ShopManager.GetFinalPrice(shopId, itemName)
+            local subtotal = unitPrice * amount
+            totalCost = totalCost + subtotal
+            table.insert(validatedItems, {
+                name = itemName,
+                amount = amount,
+                unitPrice = unitPrice,
+                subtotal = subtotal
+            })
+        end
+    end
+
+    if #validatedItems == 0 then
+        return cb({ success = false, message = "Nenhum item válido no pedido." })
+    end
+
+    -- Verify Money
+    local playerBalance = (Player.PlayerData.money and Player.PlayerData.money[paymentMethod]) or 0.0
+    if playerBalance < totalCost then
+        return cb({ success = false, message = ("Saldo insuficiente (%s)."):format(paymentMethod == 'cash' and 'Dinheiro' or 'Banco') })
+    end
+
+    -- Deduct Money
+    local paymentSuccess = Player.Functions.RemoveMoney(paymentMethod, totalCost, "shop-purchase-" .. shopId)
+    if not paymentSuccess then
+        return cb({ success = false, message = "Falha ao debitar valor da conta." })
+    end
+
+    -- Add Items to Player Inventory
+    for _, itm in ipairs(validatedItems) do
+        Player.Functions.AddItem(itm.name, itm.amount)
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[itm.name], "add")
+    end
+
+    -- Credit Shop Cash Balance
+    MySQL.update('UPDATE shops SET cash_balance = cash_balance + ? WHERE shop_id = ?', {totalCost, shopId})
+    if shop.cashBalance then
+        shop.cashBalance = shop.cashBalance + totalCost
+    end
+
+    -- Log Transaction
+    ShopManager.LogTransaction(shopId, Player.PlayerData.citizenid, 'venda', 'carrinho', #validatedItems, totalCost, totalCost, 'produtos')
+
+    fdbLibs:Notify(src, ("Compra concluída! Pago: $%s"):format(string.format("%.2f", totalCost)), "success", 4000)
+
+    cb({ success = true })
 end)
 
 -- Owner/Employee Actions

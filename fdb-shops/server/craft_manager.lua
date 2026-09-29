@@ -82,13 +82,36 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:getCraftMenu', function(source,
     -- 2. Build 3-Layer Cascaded Recipe List (Template -> Shop -> Station)
     local availableRecipes = {}
     
-    for _, recipe in ipairs(template.craftableRecipes) do
+    local hasShopFilter = shop.enabledRecipes and #shop.enabledRecipes > 0
+    local hasStationFilter = station.allowed_recipes and #station.allowed_recipes > 0
+
+    for _, recipe in ipairs(template.craftableRecipes or {}) do
         if recipe.id then
-            local isEnabledInShop = tableContains(shop.enabledRecipes, recipe.id)
-            local isAllowedAtStation = tableContains(station.allowed_recipes, recipe.id)
+            local isEnabledInShop = (not hasShopFilter) or tableContains(shop.enabledRecipes, recipe.id)
+            local isAllowedAtStation = (not hasStationFilter) or tableContains(station.allowed_recipes, recipe.id)
 
             if isEnabledInShop and isAllowedAtStation then
-                table.insert(availableRecipes, recipe)
+                -- Enrich with item label and description if missing
+                local itemData = FDBCore.Shared.Items[recipe.result or recipe.id] or {}
+                local fullRecipe = {
+                    id = recipe.id,
+                    label = recipe.label or itemData.label or recipe.id,
+                    result = recipe.result or recipe.id,
+                    amount = recipe.amount or 1,
+                    time = recipe.time or 5000,
+                    category = recipe.category or "artesanato",
+                    description = recipe.description or itemData.description or "",
+                    ingredients = {}
+                }
+                for _, ing in ipairs(recipe.ingredients or {}) do
+                    local ingData = FDBCore.Shared.Items[ing.name] or {}
+                    table.insert(fullRecipe.ingredients, {
+                        name = ing.name,
+                        label = ing.label or ingData.label or ing.name,
+                        amount = ing.amount or 1
+                    })
+                end
+                table.insert(availableRecipes, fullRecipe)
             end
         end
     end
@@ -98,11 +121,22 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:getCraftMenu', function(source,
         return
     end
 
-    cb(true, availableRecipes)
+    -- 3. Gather player's inventory count for materials
+    local inventoryData = {}
+    local player = FDBCore.Functions.GetPlayer(source)
+    if player and player.PlayerData and player.PlayerData.items then
+        for _, itm in pairs(player.PlayerData.items) do
+            if itm and itm.name then
+                inventoryData[itm.name] = (inventoryData[itm.name] or 0) + (itm.amount or 1)
+            end
+        end
+    end
+
+    cb(true, availableRecipes, inventoryData)
 end)
 
 -- Request to start crafting (Pre-check)
-fdbLibs:RegisterServerCallback('fdb-shops:server:requestCraft', function(source, cb, shopId, recipeId, stationId)
+fdbLibs:RegisterServerCallback('fdb-shops:server:requestCraft', function(source, cb, shopId, recipeId, stationId, multiplier)
     local citizenid = FDBCore.Functions.GetPlayer(source).PlayerData.citizenid
 
     if not EmployeeManager.HasPermission(shopId, citizenid, 'craftar') then
@@ -118,9 +152,8 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:requestCraft', function(source,
 
     local template = ShopManager.Templates[shop.templateId]
     local station = getStationFromDB(stationId)
-    
-    if not station or not tableContains(station.allowed_recipes, recipeId) then
-        cb(false, "Esta receita não pode ser feita nesta bancada.")
+    if not station or station.type ~= 'craft' then
+        cb(false, "Bancada inválida.")
         return
     end
 
@@ -129,14 +162,21 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:requestCraft', function(source,
         return
     end
 
-    if not tableContains(shop.enabledRecipes, recipeId) then
+    local hasStationFilter = station.allowed_recipes and #station.allowed_recipes > 0
+    if hasStationFilter and not tableContains(station.allowed_recipes, recipeId) then
+        cb(false, "Esta receita não pode ser feita nesta bancada.")
+        return
+    end
+
+    local hasShopFilter = shop.enabledRecipes and #shop.enabledRecipes > 0
+    if hasShopFilter and not tableContains(shop.enabledRecipes, recipeId) then
         cb(false, "Esta receita está desativada na loja.")
         return
     end
 
     -- Find the full recipe object
     local targetRecipe = nil
-    for _, r in ipairs(template.craftableRecipes) do
+    for _, r in ipairs(template.craftableRecipes or {}) do
         if r.id == recipeId then
             targetRecipe = r
             break
@@ -148,12 +188,15 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:requestCraft', function(source,
         return
     end
 
+    local mult = math.max(1, math.floor(tonumber(multiplier) or 1))
+
     -- Register the craft in memory to prevent speed hacking
     ActiveCrafts[citizenid] = {
         recipeId = recipeId,
         stationId = stationId,
         startedAt = os.time(),
-        timeNeeded = math.ceil((targetRecipe.time or 5000) / 1000)
+        multiplier = mult,
+        timeNeeded = math.ceil(((targetRecipe.time or 5000) * mult) / 1000)
     }
 
     -- Return success to client so it can start the progress bar and animations
@@ -165,7 +208,7 @@ end)
 -- ==========================================
 
 -- Complete Crafting (Atomic Inventory Operation)
-RegisterNetEvent('fdb-shops:server:completeCraft', function(shopId, recipeId, stationId)
+RegisterNetEvent('fdb-shops:server:completeCraft', function(shopId, recipeId, stationId, multiplier)
     local src = source
     local player = FDBCore.Functions.GetPlayer(src)
     if not player then return end
@@ -199,70 +242,56 @@ RegisterNetEvent('fdb-shops:server:completeCraft', function(shopId, recipeId, st
     local timePassed = os.time() - activeCraft.startedAt
     if timePassed < (activeCraft.timeNeeded - 1) then -- 1 second tolerance for network lag
         fdbLibs:Notify(src, "Fabricação rápida detectada (Anti-Cheat).", "error")
-        -- Clear state
         ActiveCrafts[citizenid] = nil
         return
     end
 
-    -- Clear state to prevent double execution
+    local mult = activeCraft.multiplier or math.max(1, math.floor(tonumber(multiplier) or 1))
     ActiveCrafts[citizenid] = nil
 
-    -- Distance check (Security to ensure player didn't teleport away)
+    -- Distance check
     local ped = GetPlayerPed(src)
     local pos = GetEntityCoords(ped)
     local stationPos = vec3(station.position.x, station.position.y, station.position.z)
-    if #(pos - stationPos) > 5.0 then
+    if #(pos - stationPos) > 6.0 then
         fdbLibs:Notify(src, "Você se afastou muito da bancada.", "error")
         return
     end
 
     -- Find recipe
     local recipe = nil
-    for _, r in ipairs(template.craftableRecipes) do
+    for _, r in ipairs(template.craftableRecipes or {}) do
         if r.id == recipeId then recipe = r break end
     end
     if not recipe then return end
 
-    local stashName = 'shop_stock_' .. shopId
-
-    -- 1. Atomic Order: Remove ingredients first
-    local removedIngs = {}
-    local success = true
-
-    for _, ing in ipairs(recipe.ingredients) do
-        if exports['fdb-inventory']:RemoveItem(stashName, ing.name, ing.amount) then
-            table.insert(removedIngs, {name = ing.name, amount = ing.amount})
-        else
-            success = false
+    -- Verify player materials
+    local hasAll = true
+    for _, ing in ipairs(recipe.ingredients or {}) do
+        local needed = (ing.amount or 1) * mult
+        local item = player.Functions.GetItemByName(ing.name)
+        if not item or (item.amount or 0) < needed then
+            hasAll = false
             break
         end
     end
 
-    -- If we failed to get all ingredients, rollback the ones we DID remove
-    if not success then
-        for _, ing in ipairs(removedIngs) do
-            exports['fdb-inventory']:AddItem(stashName, ing.name, ing.amount)
-        end
-        fdbLibs:Notify(src, "Materiais insuficientes no baú da loja.", "error")
+    if not hasAll then
+        fdbLibs:Notify(src, "Materiais insuficientes em seu inventário.", "error")
         return
     end
 
-    -- 2. Atomic Order: Add crafted result to stash
-    local added = exports['fdb-inventory']:AddItem(stashName, recipe.result, recipe.amount)
-    
-    if not added then
-        -- Rollback all ingredients if stash is full
-        for _, ing in ipairs(removedIngs) do
-            exports['fdb-inventory']:AddItem(stashName, ing.name, ing.amount)
-        end
-        fdbLibs:Notify(src, "Baú da loja está cheio!", "error")
-        return
+    -- Remove ingredients from player
+    for _, ing in ipairs(recipe.ingredients or {}) do
+        local needed = (ing.amount or 1) * mult
+        player.Functions.RemoveItem(ing.name, needed)
+        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[ing.name], "remove")
     end
 
-    -- 3. Finalize
+    -- Add crafted result
+    local yieldAmount = (recipe.amount or 1) * mult
+    player.Functions.AddItem(recipe.result, yieldAmount)
+    TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[recipe.result], "add")
+
     fdbLibs:Notify(src, "Fabricação concluída com sucesso!", "success")
-
-    -- Log transaction dynamically
-    local category = recipe.category or "crafting"
-    ShopManager.LogTransaction(shopId, citizenid, 'craft', recipe.result, recipe.amount, 0, 0, category)
-end)
+    ShopManager.LogTransaction(shopId, citizenid, 'craft', recipe.result, yieldAmount, 0, 0, recipe.category or "crafting")

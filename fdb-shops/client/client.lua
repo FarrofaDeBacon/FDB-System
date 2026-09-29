@@ -205,9 +205,41 @@ RegisterNetEvent('fdb-shops:client:setHeading', function(stationId, heading)
     end
 end)
 
+RegisterNetEvent('fdb-shops:client:openStoreFront', function(shopData)
+    SetNuiFocus(true, true)
+    local theme = exports['fdb-libs']:GetActiveTheme()
+    SendNUIMessage({
+        action = 'openCustomerShop',
+        shopData = shopData,
+        theme = theme
+    })
+end)
+
+function OpenCraftMenu(station)
+    fdbLibs:TriggerServerCallback('fdb-shops:server:getCraftMenu', function(success, recipesData, inventoryData)
+        if success then
+            SetNuiFocus(true, true)
+            local theme = exports['fdb-libs']:GetActiveTheme()
+            SendNUIMessage({
+                action = 'openCraftMenu',
+                craftData = {
+                    shopId = station.shop_id,
+                    stationId = station.id,
+                    stationLabel = (station.metadata and station.metadata.label) or "Bancada de Fabricação",
+                    recipes = recipesData,
+                    inventory = inventoryData or {}
+                },
+                theme = theme
+            })
+        else
+            fdbLibs:Notify(recipesData or "Nenhuma receita disponível nesta bancada.", "error", 3000)
+        end
+    end, station.shop_id, station.id)
+end
+
 function InteractWithStation(station)
-    if station.type == 'npc' or station.type == 'venda' then
-        -- Open Shop Buy Menu
+    if station.type == 'npc' or station.type == 'venda' or station.type == 'registradora' then
+        -- Open Shop Buy Menu (StoreFront)
         TriggerServerEvent('fdb-shops:server:openstore', station.shop_id)
 
     elseif station.type == 'admin_panel' then
@@ -228,13 +260,8 @@ function InteractWithStation(station)
             end
         end, station.shop_id)
 
-    elseif station.type == 'registradora' then
-        -- Venda/Caixa é pelo type 'venda' ou 'npc'
-        fdbLibs:Notify('Acesso Administrativo requer Painel do Chefe.', 'info', 3000)
-
     elseif station.type == 'bau' then
         -- Open Physical Stash
-        -- Verify permissions first
         fdbLibs:TriggerServerCallback('fdb-shops:server:requestOwnerMenu', function(response)
             if response and response.success and response.permissions.repor_estoque then
                 TriggerServerEvent('fdb-shops:server:openStash', station.shop_id)
@@ -244,11 +271,11 @@ function InteractWithStation(station)
         end, station.shop_id)
 
     elseif station.type == 'craft' then
-        -- Open Crafting Menu (Phase 2)
+        -- Open Crafting Menu
         OpenCraftMenu(station)
     
     elseif station.type == 'supply_board' then
-        -- Open Supply Board (Future Phase 3)
+        -- Open Supply Board
         fdbLibs:Notify('Nenhuma entrega disponível no momento', 'info', 3000)
     end
 end
@@ -260,6 +287,39 @@ end
 RegisterNUICallback('close', function(data, cb)
     SetNuiFocus(false, false)
     cb('ok')
+end)
+
+-- StoreFront Callbacks
+RegisterNUICallback('closeCustomerShop', function(data, cb)
+    SetNuiFocus(false, false)
+    cb('ok')
+end)
+
+RegisterNUICallback('checkoutCustomerShop', function(data, cb)
+    fdbLibs:TriggerServerCallback('fdb-shops:server:checkoutCart', function(response)
+        cb(response or { success = false, message = "Erro ao processar compra." })
+    end, data)
+end)
+
+-- Crafting Bench Callbacks
+RegisterNUICallback('closeCraftMenu', function(data, cb)
+    SetNuiFocus(false, false)
+    cb('ok')
+end)
+
+RegisterNUICallback('startCraft', function(data, cb)
+    fdbLibs:TriggerServerCallback('fdb-shops:server:requestCraft', function(success, targetRecipe, station)
+        if success then
+            cb({ success = true, recipe = targetRecipe })
+        else
+            cb({ success = false, message = targetRecipe or "Não foi possível iniciar fabricação." })
+        end
+    end, data.shopId, data.recipeId, data.stationId, data.multiplier)
+end)
+
+RegisterNUICallback('completeCraft', function(data, cb)
+    TriggerServerEvent('fdb-shops:server:completeCraft', data.shopId, data.recipeId, data.stationId, data.multiplier)
+    cb({ success = true })
 end)
 
 RegisterNUICallback('withdraw', function(data, cb)
