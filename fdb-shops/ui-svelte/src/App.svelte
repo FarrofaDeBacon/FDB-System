@@ -7,6 +7,7 @@
     let theme = $state({});
     let stores = $state([]);
     let templates = $state([]);
+    let availableItems = $state([]);
     let selectedStore = $state(null);
     let isPlacementMode = $state(false);
 
@@ -24,6 +25,7 @@
                 theme = data.theme || {};
                 stores = data.stores || [];
                 templates = data.templates || [];
+                availableItems = data.availableItems || [];
                 selectedStore = null; // Start at table catalog view
                 visible = true;
                 isPlacementMode = false;
@@ -116,6 +118,7 @@
             <StoreConfig 
                 store={selectedStore} 
                 templates={templates}
+                availableItems={availableItems}
                 onClose={() => selectedStore = null} 
                 onDeleted={handleStoreDeleted} 
             />

@@ -27,9 +27,37 @@ CreateThread(function()
         end
     end
 
+    local catalogRows = MySQL.query.await('SELECT * FROM shop_catalog_items')
+    local shopCatalogs = {}
+    if catalogRows then
+        for _, row in ipairs(catalogRows) do
+            if not shopCatalogs[row.shop_id] then shopCatalogs[row.shop_id] = {} end
+            table.insert(shopCatalogs[row.shop_id], {
+                id = row.id,
+                item_name = row.item_name,
+                price = tonumber(row.price) or 0.0,
+                is_active = (row.is_active == 1 or row.is_active == true)
+            })
+        end
+    end
+
     local shops = MySQL.query.await('SELECT * FROM shops')
     if shops then
         for _, s in ipairs(shops) do
+            local cat = shopCatalogs[s.shop_id] or {}
+            if #cat == 0 then
+                local legacyBuy = json.decode(s.buy_catalog) or {}
+                for _, b in ipairs(legacyBuy) do
+                    if b.name then
+                        table.insert(cat, {
+                            item_name = b.name,
+                            price = tonumber(b.price) or 0.0,
+                            is_active = true
+                        })
+                    end
+                end
+            end
+
             ShopManager.Shops[s.shop_id] = {
                 templateId = s.template_id,
                 label = s.label,
@@ -38,6 +66,7 @@ CreateThread(function()
                 enabledSellItems = json.decode(s.enabled_sell_items) or {},
                 buyCatalog = json.decode(s.buy_catalog) or {},
                 sellCatalog = json.decode(s.sell_catalog) or {},
+                catalog = cat,
                 cashBalance = s.cash_balance,
                 ownerPriceVariation = s.owner_price_variation,
                 maxPriceVariation = s.max_price_variation,
@@ -46,7 +75,7 @@ CreateThread(function()
                 config = json.decode(s.config) or {}
             }
         end
-        print(('^2[%s] Loaded %d templates and %d shops.^7'):format(resourceName, #templates, #shops))
+        print(('^2[%s] Loaded %d templates and %d shops with catalog items.^7'):format(resourceName, #templates, #shops))
     end
 end)
 
@@ -74,12 +103,22 @@ function ShopManager.GetFinalPrice(shopId, itemName)
     local shop = ShopManager.GetShop(shopId)
     if not shop then return 0 end
 
-    -- Find base price in the catalog
+    -- Find base price in the catalog (active items first)
     local catalogItem = nil
-    for _, item in ipairs(shop.buyCatalog) do
-        if item.name == itemName then
-            catalogItem = item
-            break
+    if shop.catalog then
+        for _, item in ipairs(shop.catalog) do
+            if item.item_name == itemName and item.is_active then
+                catalogItem = { name = item.item_name, price = item.price }
+                break
+            end
+        end
+    end
+    if not catalogItem and shop.buyCatalog then
+        for _, item in ipairs(shop.buyCatalog) do
+            if item.name == itemName then
+                catalogItem = item
+                break
+            end
         end
     end
 
@@ -93,7 +132,6 @@ function ShopManager.GetFinalPrice(shopId, itemName)
     end
 
     -- Apply owner variation (- variation is discount, + is markup)
-    -- variation is a float like 0.10 for +10%
     local ownerVar = shop.ownerPriceVariation or 0.0
     local finalPrice = basePrice * (1.0 + ownerVar)
 

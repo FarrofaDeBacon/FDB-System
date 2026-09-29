@@ -2,8 +2,9 @@
     import { onMount } from 'svelte';
     import Select from '../../../../fdb-libs/ui/src/components/Select.svelte';
     import Input from '../../../../fdb-libs/ui/src/components/Input.svelte';
+    import ItemSelector from '../../../../fdb-libs/ui/src/components/ItemSelector.svelte';
     
-    let { store, templates = [], onClose, onDeleted = () => {} } = $props();
+    let { store, templates = [], availableItems = [], onClose, onDeleted = () => {} } = $props();
 
     // Local reactive state for full Svelte 5 runes reactivity
     let storeId = $state(store.id || '');
@@ -15,6 +16,49 @@
     let storeOwnerId = $state(store.owner_id || '');
     let storeConfig = $state(store.config ? JSON.parse(JSON.stringify(store.config)) : {});
     let stations = $state(store.stations ? JSON.parse(JSON.stringify(store.stations)) : []);
+    let catalog = $state(store.catalog ? JSON.parse(JSON.stringify(store.catalog)) : []);
+    let isItemSelectorOpen = $state(false);
+    let catalogSearch = $state('');
+
+    function getItemMetadata(itemName) {
+        const found = availableItems.find(i => i.name === itemName);
+        return {
+            label: found ? found.label : itemName,
+            image: found ? found.image : (itemName + '.png')
+        };
+    }
+
+    function getItemImageUrl(itemName) {
+        const meta = getItemMetadata(itemName);
+        return `nui://fdb-inventory/html/images/${meta.image}`;
+    }
+
+    let filteredCatalog = $derived(
+        catalog.filter(i => {
+            const q = catalogSearch.trim().toLowerCase();
+            if (!q) return true;
+            const meta = getItemMetadata(i.item_name);
+            return i.item_name.toLowerCase().includes(q) || meta.label.toLowerCase().includes(q);
+        })
+    );
+
+    function removeCatalogItem(itemName) {
+        catalog = catalog.filter(c => c.item_name !== itemName);
+    }
+
+    function handleItemsAdded(newItems) {
+        for (const item of newItems) {
+            if (!catalog.some(c => c.item_name === item.name)) {
+                catalog.push({
+                    item_name: item.name,
+                    price: 1.00,
+                    is_active: true
+                });
+            }
+        }
+        catalog = [...catalog];
+        isItemSelectorOpen = false;
+    }
 
     const cityOptions = [
         { value: 'valentine', label: 'Valentine' },
@@ -223,7 +267,8 @@
             city: storeCity,
             owner_id: storeOwnerId,
             config: storeConfig,
-            stations: stations
+            stations: stations,
+            catalog: catalog
         };
         Object.assign(store, payload);
 
@@ -277,6 +322,7 @@
 
     <div class="fdb-panel-tabs fdb-tabs-container">
         <button class="fdb-tab {activeTab === 'geral' ? 'active' : ''}" onclick={() => switchTab('geral')}>Geral</button>
+        <button class="fdb-tab {activeTab === 'catalogo' ? 'active' : ''}" onclick={() => switchTab('catalogo')}>Catálogo ({catalog.length})</button>
         <button class="fdb-tab {activeTab === 'registradora' ? 'active' : ''}" onclick={() => switchTab('registradora')}>Registradoras {#if countReg > 0}({countReg}){/if}</button>
         <button class="fdb-tab {activeTab === 'bau' ? 'active' : ''}" onclick={() => switchTab('bau')}>Baús {#if countBau > 0}({countBau}){/if}</button>
         <button class="fdb-tab {activeTab === 'craft' ? 'active' : ''}" onclick={() => switchTab('craft')}>Craft {#if countCraft > 0}({countCraft}){/if}</button>
@@ -288,6 +334,7 @@
         <div class="fdb-form">
             <h3 class="fdb-tab-title">
                 {#if activeTab === 'geral'} Configurações Gerais
+                {:else if activeTab === 'catalogo'} Catálogo de Vendas e Preços
                 {:else if activeTab === 'registradora'} Registradoras
                 {:else if activeTab === 'bau'} Baús de Estoque
                 {:else if activeTab === 'craft'} Bancadas de Craft
@@ -348,6 +395,89 @@
                         {/if}
                     </div>
                 {/each}
+            {/if}
+
+            {#if activeTab === 'catalogo'}
+                <div class="fdb-catalog-toolbar">
+                    <div class="fdb-catalog-search">
+                        <input 
+                            type="text" 
+                            placeholder="Buscar no catálogo desta loja..." 
+                            bind:value={catalogSearch} 
+                            class="fdb-search-field"
+                        />
+                    </div>
+                    <button type="button" class="fdb-btn-primary" onclick={() => isItemSelectorOpen = true}>
+                        + Adicionar Itens do Registro
+                    </button>
+                </div>
+
+                {#if filteredCatalog.length === 0}
+                    <div class="fdb-empty-state">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                        <p>{catalog.length === 0 ? "Nenhum item adicionado ao catálogo desta loja." : "Nenhum item corresponde à busca."}</p>
+                        {#if catalog.length === 0}
+                            <button type="button" class="fdb-btn-outline" style="margin-top: 10px;" onclick={() => isItemSelectorOpen = true}>
+                                Abrir Seletor de Itens
+                            </button>
+                        {/if}
+                    </div>
+                {:else}
+                    <div class="fdb-catalog-list">
+                        {#each filteredCatalog as item (item.item_name)}
+                            {@const itemMeta = getItemMetadata(item.item_name)}
+                            <div class="fdb-card fdb-catalog-card" class:inactive={!item.is_active}>
+                                <div class="fdb-catalog-item-left">
+                                    <div class="fdb-catalog-thumb">
+                                        <img 
+                                            src={getItemImageUrl(item.item_name)} 
+                                            alt={item.item_name}
+                                            onerror={(e) => { e.currentTarget.style.display = 'none'; }}
+                                        />
+                                        <span class="catalog-fallback-icon">📦</span>
+                                    </div>
+                                    <div class="fdb-catalog-item-info">
+                                        <span class="fdb-catalog-item-title">{itemMeta.label}</span>
+                                        <span class="fdb-catalog-item-name">{item.item_name}</span>
+                                    </div>
+                                </div>
+
+                                <div class="fdb-catalog-item-actions">
+                                    <label class="fdb-check" style="margin: 0;" title="Ativar ou pausar venda deste item">
+                                        <input type="checkbox" bind:checked={item.is_active} />
+                                        <span style="font-size: 0.85rem;">{item.is_active ? 'Ativo' : 'Pausado'}</span>
+                                    </label>
+
+                                    <div class="fdb-price-box">
+                                        <span class="currency-symbol">$</span>
+                                        <input 
+                                            type="number" 
+                                            step="0.10" 
+                                            min="0" 
+                                            class="price-input" 
+                                            bind:value={item.price} 
+                                            title="Preço unitário de venda"
+                                        />
+                                    </div>
+
+                                    <button 
+                                        type="button" 
+                                        class="fdb-btn-danger" 
+                                        style="padding: 0.4rem 0.75rem;" 
+                                        onclick={() => removeCatalogItem(item.item_name)}
+                                        title="Remover do catálogo"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            </div>
+                        {/each}
+                    </div>
+                {/if}
             {/if}
 
             {#if activeTab === 'registradora'}
@@ -502,9 +632,163 @@
             </div>
         </div>
     {/if}
+
+    {#if isItemSelectorOpen}
+        <ItemSelector 
+            items={availableItems} 
+            alreadySelected={catalog.map(c => c.item_name)} 
+            onConfirm={handleItemsAdded} 
+            onCancel={() => isItemSelectorOpen = false} 
+        />
+    {/if}
 </div>
 
 <style>
+    /* Catalog Tab Styles */
+    .fdb-catalog-toolbar {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 1.5vh;
+    }
+
+    .fdb-catalog-search {
+        flex: 1;
+    }
+
+    .fdb-search-field {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--fdb-border-color, #444);
+        border-radius: var(--fdb-border-radius, 4px);
+        color: var(--fdb-text-primary, #fff);
+        padding: 0.8vh 1.2vh;
+        font-family: inherit;
+        font-size: 0.9rem;
+        box-sizing: border-box;
+    }
+
+    .fdb-search-field:focus {
+        outline: none;
+        border-color: var(--fdb-accent-color, #dcaa64);
+    }
+
+    .fdb-catalog-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1vh;
+        max-height: 48vh;
+        overflow-y: auto;
+        padding-right: 0.5vh;
+    }
+
+    .fdb-catalog-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.2vh 1.6vh;
+        gap: 1rem;
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid var(--fdb-border-color, #444);
+        border-radius: var(--fdb-border-radius, 4px);
+        transition: opacity 0.2s ease, border-color 0.2s ease;
+    }
+
+    .fdb-catalog-card.inactive {
+        opacity: 0.55;
+    }
+
+    .fdb-catalog-item-left {
+        display: flex;
+        align-items: center;
+        gap: 1.2vh;
+        flex: 1;
+        overflow: hidden;
+    }
+
+    .fdb-catalog-thumb {
+        position: relative;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 4px;
+        flex-shrink: 0;
+    }
+
+    .fdb-catalog-thumb img {
+        max-width: 34px;
+        max-height: 34px;
+        object-fit: contain;
+        position: relative;
+        z-index: 2;
+    }
+
+    .catalog-fallback-icon {
+        position: absolute;
+        font-size: 1.2rem;
+        opacity: 0.4;
+        z-index: 1;
+    }
+
+    .fdb-catalog-item-info {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .fdb-catalog-item-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--fdb-text-primary, #fff);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .fdb-catalog-item-name {
+        font-size: 0.75rem;
+        color: var(--fdb-text-secondary, #999);
+        font-family: monospace;
+    }
+
+    .fdb-catalog-item-actions {
+        display: flex;
+        align-items: center;
+        gap: 1.2vh;
+        flex-shrink: 0;
+    }
+
+    .fdb-price-box {
+        display: flex;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid var(--fdb-border-color, #444);
+        border-radius: var(--fdb-border-radius, 4px);
+        padding: 0.3vh 0.6vh;
+    }
+
+    .currency-symbol {
+        color: var(--fdb-accent-color, #dcaa64);
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-right: 0.3vh;
+    }
+
+    .price-input {
+        width: 75px;
+        background: transparent;
+        border: none;
+        color: var(--fdb-text-primary, #fff);
+        font-size: 0.9rem;
+        font-weight: 600;
+        outline: none;
+        text-align: right;
+    }
+
     .fdb-panel-top-nav {
         display: flex;
         align-items: center;

@@ -29,6 +29,18 @@ local function OpenEditor(src)
                 })
             end
             
+            -- Get catalog items for this shop
+            local catalogItems = MySQL.query.await('SELECT id, item_name, price, is_active FROM shop_catalog_items WHERE shop_id = ?', {row.shop_id}) or {}
+            local parsedCatalog = {}
+            for _, c in ipairs(catalogItems) do
+                table.insert(parsedCatalog, {
+                    id = c.id,
+                    item_name = c.item_name,
+                    price = tonumber(c.price) or 0.0,
+                    is_active = (c.is_active == 1 or c.is_active == true)
+                })
+            end
+
             table.insert(shopsList, {
                 id = row.shop_id,
                 label = row.label,
@@ -36,7 +48,8 @@ local function OpenEditor(src)
                 template = row.template_id,
                 city = row.city or 'outros',
                 config = row.config and json.decode(row.config) or {},
-                stations = parsedStations
+                stations = parsedStations,
+                catalog = parsedCatalog
             })
         end
     end
@@ -52,7 +65,25 @@ local function OpenEditor(src)
         end
     end
 
-    TriggerClientEvent('fdb-shops:client:openEditor', src, shopsList, templatesList)
+    -- Extract full items registry from fdb-core for the admin item selector
+    local availableItems = {}
+    if FDBCore and FDBCore.Shared and FDBCore.Shared.Items then
+        for itemName, itemData in pairs(FDBCore.Shared.Items) do
+            table.insert(availableItems, {
+                name = itemName,
+                label = itemData.label or itemName,
+                image = itemData.image or (itemName .. ".png"),
+                description = itemData.description or "",
+                type = itemData.type or "item",
+                weight = itemData.weight or 0
+            })
+        end
+        table.sort(availableItems, function(a, b)
+            return (a.label or a.name):lower() < (b.label or b.name):lower()
+        end)
+    end
+
+    TriggerClientEvent('fdb-shops:client:openEditor', src, shopsList, templatesList, availableItems)
 end
 
 RegisterCommand('editshops', function(source, args)
@@ -111,6 +142,30 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
             ShopManager.Shops[shopId].templateId = template
             ShopManager.Shops[shopId].city = city
             ShopManager.Shops[shopId].config = storeData.config or {}
+        end
+    end
+
+    -- Save Catalog Items
+    if storeData.catalog and type(storeData.catalog) == 'table' then
+        MySQL.query.await('DELETE FROM shop_catalog_items WHERE shop_id = ?', {shopId})
+        local buyCatalogMemory = {}
+        for _, item in ipairs(storeData.catalog) do
+            local itemName = tostring(item.item_name or item.name or '')
+            local price = tonumber(item.price) or 0.0
+            local isActive = (item.is_active == false or item.is_active == 0) and 0 or 1
+            if itemName ~= '' then
+                MySQL.insert.await('INSERT INTO shop_catalog_items (shop_id, item_name, price, is_active) VALUES (?, ?, ?, ?)', {
+                    shopId, itemName, price, isActive
+                })
+                if isActive == 1 then
+                    table.insert(buyCatalogMemory, { name = itemName, price = price })
+                end
+            end
+        end
+        MySQL.update.await('UPDATE shops SET buy_catalog = ? WHERE shop_id = ?', {json.encode(buyCatalogMemory), shopId})
+        if ShopManager.Shops[shopId] then
+            ShopManager.Shops[shopId].buyCatalog = buyCatalogMemory
+            ShopManager.Shops[shopId].catalog = storeData.catalog
         end
     end
     

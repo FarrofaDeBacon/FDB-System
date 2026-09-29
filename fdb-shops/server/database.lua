@@ -122,5 +122,43 @@ CreateThread(function()
         print('^2[' .. resourceName .. '] Migration: Column `city` added to `shops`.^7')
     end
 
+    -- Itens do catálogo de cada loja (preço e ativação específicos por loja)
+    MySQL.query.await([[
+        CREATE TABLE IF NOT EXISTS shop_catalog_items (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            shop_id VARCHAR(50) NOT NULL,
+            item_name VARCHAR(100) NOT NULL,
+            price DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+            is_active TINYINT(1) NOT NULL DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_shop_item (shop_id, item_name),
+            FOREIGN KEY (shop_id) REFERENCES shops(shop_id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]])
+
+    -- Migration: Se shop_catalog_items estiver vazio, popula a partir de shops.buy_catalog
+    local catalogCount = MySQL.scalar.await("SELECT COUNT(*) FROM shop_catalog_items")
+    if catalogCount == 0 then
+        local existingShops = MySQL.query.await("SELECT shop_id, buy_catalog FROM shops WHERE buy_catalog IS NOT NULL")
+        if existingShops then
+            for _, s in ipairs(existingShops) do
+                local buyCat = json.decode(s.buy_catalog)
+                if buyCat and type(buyCat) == 'table' then
+                    for _, item in ipairs(buyCat) do
+                        if item.name then
+                            pcall(function()
+                                MySQL.insert.await("INSERT IGNORE INTO shop_catalog_items (shop_id, item_name, price, is_active) VALUES (?, ?, ?, 1)", {
+                                    s.shop_id, item.name, tonumber(item.price) or 0.0
+                                })
+                            end)
+                        end
+                    end
+                end
+            end
+            print('^2[' .. resourceName .. '] Migration: Seeded shop_catalog_items from existing shops.buy_catalog.^7')
+        end
+    end
+
     print('^2[' .. resourceName .. '] Database schema initialized.^7')
 end)
