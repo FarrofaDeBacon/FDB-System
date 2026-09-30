@@ -4,6 +4,7 @@
     import StoreTable from './lib/StoreTable.svelte';
     import StoreFront from './lib/StoreFront.svelte';
     import CraftingBench from './lib/CraftingBench.svelte';
+    import OwnerMenu from './lib/OwnerMenu.svelte';
 
     let visible = $state(false);
     let theme = $state({});
@@ -13,9 +14,10 @@
     let selectedStore = $state(null);
     let isPlacementMode = $state(false);
 
-    // Customer shop & Craft bench states
+    // Customer shop, Craft bench & Owner menu states
     let customerShopData = $state(null);
     let craftBenchData = $state(null);
+    let ownerMenuData = $state(null);
 
     // Filter states preserved across view transitions
     let searchQuery = $state('');
@@ -45,6 +47,7 @@
                 selectedStore = null; // Start at table catalog view
                 customerShopData = null;
                 craftBenchData = null;
+                ownerMenuData = null;
                 visible = true;
                 isPlacementMode = false;
                 applyTheme(theme);
@@ -53,16 +56,34 @@
                 isPlacementMode = false;
             } else if (data.action === 'openCustomerShop') {
                 customerShopData = data.shopData || null;
+                craftBenchData = null;
+                ownerMenuData = null;
                 visible = false;
                 applyTheme(data.theme);
             } else if (data.action === 'closeCustomerShop') {
                 customerShopData = null;
             } else if (data.action === 'openCraftMenu') {
                 craftBenchData = data.craftData || null;
+                customerShopData = null;
+                ownerMenuData = null;
                 visible = false;
                 applyTheme(data.theme);
             } else if (data.action === 'closeCraftMenu') {
                 craftBenchData = null;
+            } else if (data.action === 'openOwnerMenu') {
+                ownerMenuData = {
+                    shopId: data.shopId,
+                    stationId: data.stationId,
+                    shopData: data.shopData,
+                    permissions: data.permissions,
+                    stationModules: data.stationModules
+                };
+                customerShopData = null;
+                craftBenchData = null;
+                visible = false;
+                applyTheme(data.theme);
+            } else if (data.action === 'closeOwnerMenu') {
+                ownerMenuData = null;
             } else if (data.action === 'hideUI') {
                 isPlacementMode = true;
             } else if (data.action === 'showUI') {
@@ -89,7 +110,7 @@
         };
 
         const handleKeyDown = (e) => {
-            if (e.key === 'Escape' && !isPlacementMode) {
+            if (visible && e.key === 'Escape' && !isPlacementMode) {
                 if (selectedStore) {
                     selectedStore = null; // Esc in edit mode returns to table
                 } else {
@@ -159,14 +180,6 @@
     </div>
     {/if}
 
-    {#if customerShopData}
-        <StoreFront shopData={customerShopData} onClose={() => customerShopData = null} />
-    {/if}
-
-    {#if craftBenchData}
-        <CraftingBench craftData={craftBenchData} onClose={() => craftBenchData = null} />
-    {/if}
-
     {#if isPlacementMode}
     <div class="noclip-hud noclip-hud--visible" aria-hidden="false">
         <div class="noclip-hud__inner">
@@ -222,6 +235,18 @@
         </div>
     </div>
     {/if}
+{/if}
+
+{#if customerShopData}
+    <StoreFront shopData={customerShopData} onClose={() => customerShopData = null} />
+{/if}
+
+{#if craftBenchData}
+    <CraftingBench craftData={craftBenchData} onClose={() => craftBenchData = null} />
+{/if}
+
+{#if ownerMenuData}
+    <OwnerMenu menuData={ownerMenuData} onClose={() => ownerMenuData = null} />
 {/if}
 
 <style>

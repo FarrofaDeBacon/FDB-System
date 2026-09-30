@@ -158,6 +158,21 @@ function SpawnStationNPC(station)
 
         FreezeEntityPosition(npc, true)
         spawnedEntities[station.id] = npc
+
+        if exports.ox_target then
+            pcall(function()
+                exports.ox_target:addLocalEntity(npc, {
+                    {
+                        name = 'shop_npc_' .. tostring(station.id),
+                        icon = 'fas fa-store',
+                        label = GetStationPrompt(station.type),
+                        onSelect = function()
+                            InteractWithStation(station)
+                        end
+                    }
+                })
+            end)
+        end
         print('[fdb-shops] Successfully spawned NPC ' .. tostring(station.id) .. ' heading: ' .. tostring(heading))
     end
 end
@@ -188,6 +203,21 @@ function SpawnStationProp(station)
         SetEntityHeading(prop, heading)
         FreezeEntityPosition(prop, true)
         spawnedEntities[station.id] = prop
+
+        if exports.ox_target then
+            pcall(function()
+                exports.ox_target:addLocalEntity(prop, {
+                    {
+                        name = 'shop_prop_' .. tostring(station.id),
+                        icon = 'fas fa-store',
+                        label = GetStationPrompt(station.type),
+                        onSelect = function()
+                            InteractWithStation(station)
+                        end
+                    }
+                })
+            end)
+        end
     end
 end
 
@@ -204,6 +234,20 @@ RegisterNetEvent('fdb-shops:client:setHeading', function(stationId, heading)
         end
     end
 end)
+
+local function NotifyPlayer(msg, nType, duration)
+    if not msg then return end
+    if exports['fdb-libs'] then
+        pcall(function()
+            exports['fdb-libs']:Notify(tostring(msg), nType or 'info', tonumber(duration) or 4000)
+        end)
+    end
+    if FDBCore and FDBCore.Functions and FDBCore.Functions.Notify then
+        pcall(function()
+            FDBCore.Functions.Notify(tostring(msg), nType or 'info', tonumber(duration) or 4000)
+        end)
+    end
+end
 
 RegisterNetEvent('fdb-shops:client:openStoreFront', function(shopData)
     SetNuiFocus(true, true)
@@ -232,12 +276,15 @@ function OpenCraftMenu(station)
                 theme = theme
             })
         else
-            fdbLibs:Notify(recipesData or "Nenhuma receita disponível nesta bancada.", "error", 3000)
+            NotifyPlayer(recipesData or "Nenhuma receita disponível nesta bancada.", "error", 4000)
         end
     end, station.shop_id, station.id)
 end
 
 function InteractWithStation(station)
+    if not station then return end
+    print(('[fdb-shops] Interacting with station %s (type: %s, shop: %s)'):format(tostring(station.id), tostring(station.type), tostring(station.shop_id)))
+
     if station.type == 'npc' or station.type == 'venda' or station.type == 'registradora' then
         -- Open Shop Buy Menu (StoreFront)
         TriggerServerEvent('fdb-shops:server:openstore', station.shop_id)
@@ -247,16 +294,18 @@ function InteractWithStation(station)
         fdbLibs:TriggerServerCallback('fdb-shops:server:requestOwnerMenu', function(response)
             if response and response.success then
                 SetNuiFocus(true, true)
+                local theme = exports['fdb-libs']:GetActiveTheme()
                 SendNUIMessage({
                     action = 'openOwnerMenu',
                     shopId = station.shop_id,
                     stationId = station.id,
                     shopData = response.shopData,
                     permissions = response.permissions,
-                    stationModules = (station.metadata and station.metadata.modules) or {"dashboard", "finances", "prices", "employees"}
+                    stationModules = (station.metadata and station.metadata.modules) or {"dashboard", "finances", "prices", "employees"},
+                    theme = theme
                 })
             else
-                fdbLibs:Notify('Acesso Negado', 'error', 3000)
+                NotifyPlayer((response and response.message) or 'Acesso Negado', 'error', 4000)
             end
         end, station.shop_id)
 
@@ -266,7 +315,7 @@ function InteractWithStation(station)
             if response and response.success and response.permissions.repor_estoque then
                 TriggerServerEvent('fdb-shops:server:openStash', station.shop_id)
             else
-                fdbLibs:Notify('Você não tem acesso a este estoque', 'error', 3000)
+                NotifyPlayer('Você não tem acesso a este estoque', 'error', 4000)
             end
         end, station.shop_id)
 
@@ -276,7 +325,7 @@ function InteractWithStation(station)
     
     elseif station.type == 'supply_board' then
         -- Open Supply Board
-        fdbLibs:Notify('Nenhuma entrega disponível no momento', 'info', 3000)
+        NotifyPlayer('Nenhuma entrega disponível no momento', 'info', 4000)
     end
 end
 

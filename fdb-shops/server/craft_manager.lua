@@ -46,9 +46,71 @@ end
 -- Callbacks
 -- ==========================================
 
+local function GetDefaultTemplateRecipes(templateId)
+    if templateId == 'weapons' then
+        return {
+            {
+                id = "craft_ammo_revolver",
+                label = "Caixa de Munição de Revólver",
+                result = "ammo_box_revolver",
+                amount = 1,
+                time = 5000,
+                category = "municao",
+                ingredients = { { name = "iron", amount = 1 }, { name = "gunpowder", amount = 1 } }
+            },
+            {
+                id = "craft_ammo_repeater",
+                label = "Caixa de Munição de Repetição",
+                result = "ammo_box_repeater",
+                amount = 1,
+                time = 5000,
+                category = "municao",
+                ingredients = { { name = "iron", amount = 1 }, { name = "gunpowder", amount = 1 } }
+            },
+            {
+                id = "craft_ammo_shotgun",
+                label = "Caixa de Munição de Escopeta",
+                result = "ammo_box_shotgun",
+                amount = 1,
+                time = 6000,
+                category = "municao",
+                ingredients = { { name = "iron", amount = 1 }, { name = "gunpowder", amount = 1 } }
+            },
+            {
+                id = "craft_ammo_rifle",
+                label = "Caixa de Munição de Rifle",
+                result = "ammo_box_rifle",
+                amount = 1,
+                time = 6000,
+                category = "municao",
+                ingredients = { { name = "iron", amount = 1 }, { name = "gunpowder", amount = 1 } }
+            }
+        }
+    end
+    return {}
+end
+
+local function GetShopRecipes(shop)
+    if not shop then return {} end
+    if shop.enabledRecipes and type(shop.enabledRecipes) == 'table' and #shop.enabledRecipes > 0 then
+        if type(shop.enabledRecipes[1]) == 'table' then
+            return shop.enabledRecipes
+        end
+    end
+
+    local template = ShopManager.Templates[shop.templateId]
+    if template and template.craftableRecipes and #template.craftableRecipes > 0 then
+        return template.craftableRecipes
+    end
+
+    return GetDefaultTemplateRecipes(shop.templateId)
+end
+
 -- Fetch available recipes for a specific station
 fdbLibs:RegisterServerCallback('fdb-shops:server:getCraftMenu', function(source, cb, shopId, stationId)
-    local citizenid = FDBCore.Functions.GetPlayer(source).PlayerData.citizenid
+    local Player = FDBCore.Functions.GetPlayer(source)
+    if not Player then return cb(false, "Jogador não encontrado.") end
+    local citizenid = Player.PlayerData.citizenid
 
     -- 1. Check Permissions
     if not EmployeeManager.HasPermission(shopId, citizenid, 'craftar') then
@@ -62,12 +124,6 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:getCraftMenu', function(source,
         return
     end
 
-    local template = ShopManager.Templates[shop.templateId]
-    if not template then
-        cb(false, "Template da loja não encontrado.")
-        return
-    end
-
     local station = getStationFromDB(stationId)
     if not station or station.type ~= 'craft' then
         cb(false, "Bancada inválida.")
@@ -79,26 +135,24 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:getCraftMenu', function(source,
         return
     end
 
-    -- 2. Build 3-Layer Cascaded Recipe List (Template -> Shop -> Station)
+    -- 2. Build Recipe List
     local availableRecipes = {}
-    
-    local hasShopFilter = shop.enabledRecipes and #shop.enabledRecipes > 0
+    local rawRecipes = GetShopRecipes(shop)
     local hasStationFilter = station.allowed_recipes and #station.allowed_recipes > 0
 
-    for _, recipe in ipairs(template.craftableRecipes or {}) do
-        if recipe.id then
-            local isEnabledInShop = (not hasShopFilter) or tableContains(shop.enabledRecipes, recipe.id)
-            local isAllowedAtStation = (not hasStationFilter) or tableContains(station.allowed_recipes, recipe.id)
-
-            if isEnabledInShop and isAllowedAtStation then
-                -- Enrich with item label and description if missing
-                local itemData = FDBCore.Shared.Items[recipe.result or recipe.id] or {}
+    for _, recipe in ipairs(rawRecipes) do
+        local rId = recipe.id or recipe.result
+        if rId then
+            local isAllowedAtStation = (not hasStationFilter) or tableContains(station.allowed_recipes, rId)
+            if isAllowedAtStation then
+                local resName = recipe.result or rId
+                local itemData = FDBCore.Shared.Items[resName] or {}
                 local fullRecipe = {
-                    id = recipe.id,
-                    label = recipe.label or itemData.label or recipe.id,
-                    result = recipe.result or recipe.id,
-                    amount = recipe.amount or 1,
-                    time = recipe.time or 5000,
+                    id = rId,
+                    label = recipe.label or itemData.label or resName,
+                    result = resName,
+                    amount = tonumber(recipe.amount) or 1,
+                    time = tonumber(recipe.time) or 5000,
                     category = recipe.category or "artesanato",
                     description = recipe.description or itemData.description or "",
                     ingredients = {}
@@ -108,7 +162,7 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:getCraftMenu', function(source,
                     table.insert(fullRecipe.ingredients, {
                         name = ing.name,
                         label = ing.label or ingData.label or ing.name,
-                        amount = ing.amount or 1
+                        amount = tonumber(ing.amount) or 1
                     })
                 end
                 table.insert(availableRecipes, fullRecipe)
@@ -117,15 +171,14 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:getCraftMenu', function(source,
     end
 
     if #availableRecipes == 0 then
-        cb(false, "Nenhuma receita disponível nesta bancada.")
+        cb(false, "Nenhuma receita cadastrada nesta loja. Cadastre receitas na aba Craft de /editshops.")
         return
     end
 
     -- 3. Gather player's inventory count for materials
     local inventoryData = {}
-    local player = FDBCore.Functions.GetPlayer(source)
-    if player and player.PlayerData and player.PlayerData.items then
-        for _, itm in pairs(player.PlayerData.items) do
+    if Player.PlayerData and Player.PlayerData.items then
+        for _, itm in pairs(Player.PlayerData.items) do
             if itm and itm.name then
                 inventoryData[itm.name] = (inventoryData[itm.name] or 0) + (itm.amount or 1)
             end
@@ -137,7 +190,9 @@ end)
 
 -- Request to start crafting (Pre-check)
 fdbLibs:RegisterServerCallback('fdb-shops:server:requestCraft', function(source, cb, shopId, recipeId, stationId, multiplier)
-    local citizenid = FDBCore.Functions.GetPlayer(source).PlayerData.citizenid
+    local Player = FDBCore.Functions.GetPlayer(source)
+    if not Player then return cb(false, "Jogador não encontrado.") end
+    local citizenid = Player.PlayerData.citizenid
 
     if not EmployeeManager.HasPermission(shopId, citizenid, 'craftar') then
         cb(false, "Você não tem permissão para usar esta bancada.")
@@ -150,7 +205,6 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:requestCraft', function(source,
         return
     end
 
-    local template = ShopManager.Templates[shop.templateId]
     local station = getStationFromDB(stationId)
     if not station or station.type ~= 'craft' then
         cb(false, "Bancada inválida.")
@@ -162,29 +216,18 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:requestCraft', function(source,
         return
     end
 
-    local hasStationFilter = station.allowed_recipes and #station.allowed_recipes > 0
-    if hasStationFilter and not tableContains(station.allowed_recipes, recipeId) then
-        cb(false, "Esta receita não pode ser feita nesta bancada.")
-        return
-    end
-
-    local hasShopFilter = shop.enabledRecipes and #shop.enabledRecipes > 0
-    if hasShopFilter and not tableContains(shop.enabledRecipes, recipeId) then
-        cb(false, "Esta receita está desativada na loja.")
-        return
-    end
-
     -- Find the full recipe object
     local targetRecipe = nil
-    for _, r in ipairs(template.craftableRecipes or {}) do
-        if r.id == recipeId then
+    local rawRecipes = GetShopRecipes(shop)
+    for _, r in ipairs(rawRecipes) do
+        if (r.id or r.result) == recipeId then
             targetRecipe = r
             break
         end
     end
 
     if not targetRecipe then
-        cb(false, "Receita não encontrada no template.")
+        cb(false, "Receita não encontrada na loja.")
         return
     end
 
@@ -196,7 +239,7 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:requestCraft', function(source,
         stationId = stationId,
         startedAt = os.time(),
         multiplier = mult,
-        timeNeeded = math.ceil(((targetRecipe.time or 5000) * mult) / 1000)
+        timeNeeded = math.ceil(((tonumber(targetRecipe.time) or 5000) * mult) / 1000)
     }
 
     -- Return success to client so it can start the progress bar and animations
@@ -222,10 +265,9 @@ RegisterNetEvent('fdb-shops:server:completeCraft', function(shopId, recipeId, st
     end
 
     local shop = ShopManager.GetShop(shopId)
-    local template = ShopManager.Templates[shop.templateId]
     local station = getStationFromDB(stationId)
 
-    if not shop or not template or not station then return end
+    if not shop or not station then return end
 
     if station.shop_id ~= shopId then
         fdbLibs:Notify(src, "Bancada inválida.", "error")
@@ -240,7 +282,7 @@ RegisterNetEvent('fdb-shops:server:completeCraft', function(shopId, recipeId, st
     end
 
     local timePassed = os.time() - activeCraft.startedAt
-    if timePassed < (activeCraft.timeNeeded - 1) then -- 1 second tolerance for network lag
+    if timePassed < (activeCraft.timeNeeded - 1) then
         fdbLibs:Notify(src, "Fabricação rápida detectada (Anti-Cheat).", "error")
         ActiveCrafts[citizenid] = nil
         return
@@ -260,8 +302,9 @@ RegisterNetEvent('fdb-shops:server:completeCraft', function(shopId, recipeId, st
 
     -- Find recipe
     local recipe = nil
-    for _, r in ipairs(template.craftableRecipes or {}) do
-        if r.id == recipeId then recipe = r break end
+    local rawRecipes = GetShopRecipes(shop)
+    for _, r in ipairs(rawRecipes) do
+        if (r.id or r.result) == recipeId then recipe = r break end
     end
     if not recipe then return end
 

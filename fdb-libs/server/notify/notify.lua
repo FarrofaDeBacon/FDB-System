@@ -9,9 +9,14 @@ fdb = fdb or {}
 ---@param title string? Título opcional
 ----@param customBg string? Cor de fundo customizada (ex: 'rgba(0,0,0,0.5)')
 ----@param customBorder string? Cor de borda/progresso customizada
-function fdb.notify(source, message, type, duration, icon, title, customBg, customBorder)
+function fdb.notify(...)
+    local args = {...}
+    if type(args[1]) == 'table' and (type(args[2]) == 'number' or type(args[2]) == 'string') then
+        table.remove(args, 1)
+    end
+    local source, message, type, duration, icon, title, customBg, customBorder = table.unpack(args)
     if not source or not message then return end
-    TriggerClientEvent('fdb-libs:client:Notify', source, message, type, duration, icon, title, customBg, customBorder)
+    TriggerClientEvent('fdb-libs:client:Notify', source, tostring(message), type or "info", tonumber(duration) or 5000, icon, title, customBg, customBorder)
 end
 
 exports('Notify', fdb.notify)

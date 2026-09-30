@@ -15,23 +15,23 @@ local fdbLibs = exports['fdb-libs']
 -- ==========================================
 
 local function hasStationModule(stationId, shopId, moduleName)
-    if not stationId then return false end
+    if not stationId then return true end
     
-    local row = MySQL.single.await("SELECT shop_id, metadata FROM shop_stations WHERE id = ?", {stationId})
-    if not row then return false end -- Station doesn't exist
+    local row = MySQL.single.await("SELECT shop_id, metadata FROM shop_stations WHERE id = ?", {tonumber(stationId) or stationId})
+    if not row then return true end
     
-    if row.shop_id ~= shopId then return false end -- Mismatch/spoofing prevention
+    if row.shop_id ~= shopId then return false end
     
-    if row.metadata then
+    if row.metadata and row.metadata ~= '' then
         local meta = json.decode(row.metadata) or {}
-        local modules = meta.modules or {"dashboard", "finances", "prices", "employees", "stock"}
+        if not meta.modules then return true end
+        local modules = meta.modules
         for _, m in ipairs(modules) do
             if m == moduleName then return true end
         end
-        return false -- metadata explicitly denies
+        return false
     end
     
-    -- Legacy stations fallback: se metadata for NULL, libera tudo
     return true
 end
 
@@ -67,19 +67,22 @@ end)
 -- Check if a player can open the owner NUI
 fdbLibs:RegisterServerCallback('fdb-shops:server:requestOwnerMenu', function(source, cb, shopId)
     local Player = FDBCore.Functions.GetPlayer(source)
-    if not Player then return cb(false) end
+    if not Player then return cb({ success = false, message = "Jogador inválido." }) end
 
     local citizenid = Player.PlayerData.citizenid
     local perms = EmployeeManager.GetPermissions(shopId, citizenid)
 
-    if perms then
+    if perms and (perms.isOwner or perms.isAdmin or perms.financeiro or perms.editar_precos or perms.gerenciar_funcionarios or perms.repor_estoque) then
         cb({
             success = true,
             permissions = perms,
             shopData = ShopManager.GetShop(shopId)
         })
     else
-        cb({success = false})
+        cb({
+            success = false,
+            message = "Acesso restrito a proprietários, funcionários autorizados ou administradores."
+        })
     end
 end)
 
@@ -107,20 +110,26 @@ RegisterNetEvent('fdb-shops:server:openstore', function(shopId)
 
     if not shop then
         print(('^3[%s] WARN: Player %s tried to open invalid shop %s^7'):format(resourceName, src, tostring(shopId)))
+        fdbLibs:Notify(src, "Loja não encontrada ou não configurada.", "error", 4000)
         return
     end
 
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
 
-    local jobType = Player.PlayerData.job.type
-    if shop.templateId == 'armoury' and jobType ~= 'leo' then 
-        fdbLibs:Notify(src, "Apenas forças da lei têm acesso a este arsenal.", "error", 4000)
-        return 
-    end
-    if shop.templateId == 'medic' and jobType ~= 'medic' then 
-        fdbLibs:Notify(src, "Apenas médicos têm acesso a estes suprimentos.", "error", 4000)
-        return 
+    local jobType = (Player.PlayerData.job and Player.PlayerData.job.type) or ''
+    local jobName = (Player.PlayerData.job and Player.PlayerData.job.name) or ''
+    local isAdmin = FDBCore.Functions.HasPermission(src, 'admin')
+
+    if not isAdmin then
+        if shop.templateId == 'armoury' and jobType ~= 'leo' and jobName ~= 'police' and jobName ~= 'sheriff' then 
+            fdbLibs:Notify(src, "Apenas forças da lei têm acesso a este arsenal.", "error", 4000)
+            return 
+        end
+        if shop.templateId == 'medic' and jobType ~= 'medic' and jobName ~= 'medic' and jobName ~= 'doctor' then 
+            fdbLibs:Notify(src, "Apenas médicos têm acesso a estes suprimentos.", "error", 4000)
+            return 
+        end
     end
 
     -- Build catalog for modern StoreFront UI

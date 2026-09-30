@@ -66,8 +66,14 @@ function EmployeeManager.GetPermissions(shopId, citizenid)
     local shop = ShopManager.GetShop(shopId)
     if not shop then return nil end
 
-    if shop.ownerId == citizenid then
-        -- Owner has all permissions implicitly
+    local player = exports['fdb-core']:GetCoreObject().Functions.GetPlayerByCitizenId(citizenid)
+    local isAdmin = false
+    if player and player.PlayerData and player.PlayerData.source then
+        isAdmin = exports['fdb-core']:GetCoreObject().Functions.HasPermission(player.PlayerData.source, 'admin')
+    end
+
+    if isAdmin or (shop.ownerId and shop.ownerId == citizenid) then
+        -- Admin or Owner has all permissions implicitly
         return {
             atender = true,
             repor_estoque = true,
@@ -75,7 +81,22 @@ function EmployeeManager.GetPermissions(shopId, citizenid)
             financeiro = true,
             editar_precos = true,
             gerenciar_funcionarios = true,
-            isOwner = true
+            isOwner = true,
+            isAdmin = isAdmin
+        }
+    end
+
+    -- Public shop (no player owner): allow general public crafting and attending
+    if not shop.ownerId or shop.ownerId == "" then
+        return {
+            atender = true,
+            repor_estoque = false,
+            craftar = true,
+            financeiro = false,
+            editar_precos = false,
+            gerenciar_funcionarios = false,
+            isOwner = false,
+            isPublic = true
         }
     end
 
@@ -101,7 +122,7 @@ end
 function EmployeeManager.HasPermission(shopId, citizenid, permName)
     local perms = EmployeeManager.GetPermissions(shopId, citizenid)
     if not perms then return false end
-    if perms.isOwner then return true end
+    if perms.isOwner or perms.isAdmin then return true end
     return perms[permName] == true
 end
 

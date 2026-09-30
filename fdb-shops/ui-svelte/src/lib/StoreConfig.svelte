@@ -17,7 +17,10 @@
     let storeConfig = $state(store.config ? JSON.parse(JSON.stringify(store.config)) : {});
     let stations = $state(store.stations ? JSON.parse(JSON.stringify(store.stations)) : []);
     let catalog = $state(store.catalog ? JSON.parse(JSON.stringify(store.catalog)) : []);
+    let recipes = $state(store.recipes ? JSON.parse(JSON.stringify(store.recipes)) : []);
     let isItemSelectorOpen = $state(false);
+    let itemSelectorMode = $state('catalog'); // 'catalog' | 'recipe_result' | 'recipe_ingredient'
+    let activeRecipeIdx = $state(-1);
     let catalogSearch = $state('');
 
     function getItemMetadata(itemName) {
@@ -46,17 +49,74 @@
         catalog = catalog.filter(c => c.item_name !== itemName);
     }
 
+    function openCatalogSelector() {
+        itemSelectorMode = 'catalog';
+        activeRecipeIdx = -1;
+        isItemSelectorOpen = true;
+    }
+
+    function openRecipeResultSelector() {
+        itemSelectorMode = 'recipe_result';
+        activeRecipeIdx = -1;
+        isItemSelectorOpen = true;
+    }
+
+    function openRecipeIngredientSelector(recipeIdx) {
+        itemSelectorMode = 'recipe_ingredient';
+        activeRecipeIdx = recipeIdx;
+        isItemSelectorOpen = true;
+    }
+
+    function removeRecipe(idx) {
+        recipes = recipes.filter((_, i) => i !== idx);
+    }
+
+    function removeIngredient(recipeIdx, ingName) {
+        if (recipes[recipeIdx] && recipes[recipeIdx].ingredients) {
+            recipes[recipeIdx].ingredients = recipes[recipeIdx].ingredients.filter(ing => ing.name !== ingName);
+            recipes = [...recipes];
+        }
+    }
+
     function handleItemsAdded(newItems) {
-        for (const item of newItems) {
-            if (!catalog.some(c => c.item_name === item.name)) {
-                catalog.push({
-                    item_name: item.name,
-                    price: 1.00,
-                    is_active: true
+        if (itemSelectorMode === 'catalog') {
+            for (const item of newItems) {
+                if (!catalog.some(c => c.item_name === item.name)) {
+                    catalog.push({
+                        item_name: item.name,
+                        price: 1.00,
+                        is_active: true
+                    });
+                }
+            }
+            catalog = [...catalog];
+        } else if (itemSelectorMode === 'recipe_result') {
+            for (const item of newItems) {
+                recipes.push({
+                    id: 'craft_' + item.name + '_' + Math.floor(Math.random() * 10000),
+                    label: item.label || item.name,
+                    result: item.name,
+                    amount: 1,
+                    time: 5000,
+                    category: 'artesanato',
+                    ingredients: []
                 });
             }
+            recipes = [...recipes];
+        } else if (itemSelectorMode === 'recipe_ingredient' && activeRecipeIdx >= 0 && recipes[activeRecipeIdx]) {
+            const target = recipes[activeRecipeIdx];
+            if (!target.ingredients) target.ingredients = [];
+            for (const item of newItems) {
+                if (!target.ingredients.some(ing => ing.name === item.name)) {
+                    target.ingredients.push({
+                        name: item.name,
+                        label: item.label || item.name,
+                        amount: 1
+                    });
+                }
+            }
+            recipes = [...recipes];
         }
-        catalog = [...catalog];
         isItemSelectorOpen = false;
     }
 
@@ -268,7 +328,8 @@
             owner_id: storeOwnerId,
             config: storeConfig,
             stations: stations,
-            catalog: catalog
+            catalog: catalog,
+            recipes: recipes
         };
         Object.assign(store, payload);
 
@@ -407,7 +468,7 @@
                             class="fdb-search-field"
                         />
                     </div>
-                    <button type="button" class="fdb-btn-primary" onclick={() => isItemSelectorOpen = true}>
+                    <button type="button" class="fdb-btn-primary" onclick={openCatalogSelector}>
                         + Adicionar Itens do Registro
                     </button>
                 </div>
@@ -421,7 +482,7 @@
                         </svg>
                         <p>{catalog.length === 0 ? "Nenhum item adicionado ao catálogo desta loja." : "Nenhum item corresponde à busca."}</p>
                         {#if catalog.length === 0}
-                            <button type="button" class="fdb-btn-outline" style="margin-top: 10px;" onclick={() => isItemSelectorOpen = true}>
+                            <button type="button" class="fdb-btn-outline" style="margin-top: 10px;" onclick={openCatalogSelector}>
                                 Abrir Seletor de Itens
                             </button>
                         {/if}
@@ -527,26 +588,148 @@
             {/if}
 
             {#if activeTab === 'craft'}
-                {#each stations.filter(s => s.type === 'craft') as station (station.id)}
-                    <div class="fdb-card">
-                        <div class="fdb-row">
-                            <div style="flex: 1;"><Select id="m-{station.id}" bind:value={station.prop_model} options={craftModels} disabled={station.is_marker} /></div>
-                            <button class="fdb-btn-outline" style="padding: 0 1vh;" onclick={() => placeComponent(station)}>{station.position ? "Ajustar" : "Posicionar"}</button>
-                            {#if station.position}
-                                <button class="fdb-btn-outline" style="padding: 0 1vh;" onclick={() => flipHeading(station)} title="Girar 180°">🔄 180°</button>
-                            {/if}
-                            <button class="fdb-btn-danger" style="padding: 0 1vh;" onclick={() => removeComponent(station)}>X</button>
+                <div style="margin-bottom: 2vh;">
+                    <h4 style="margin: 0 0 1vh 0; color: var(--fdb-accent-primary, #c8963e); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em;">
+                        1. Bancadas Físicas de Fabricação ({countCraft})
+                    </h4>
+                    {#each stations.filter(s => s.type === 'craft') as station (station.id)}
+                        <div class="fdb-card">
+                            <div class="fdb-row">
+                                <div style="flex: 1;"><Select id="m-{station.id}" bind:value={station.prop_model} options={craftModels} disabled={station.is_marker} /></div>
+                                <button class="fdb-btn-outline" style="padding: 0 1vh;" onclick={() => placeComponent(station)}>{station.position ? "Ajustar" : "Posicionar"}</button>
+                                {#if station.position}
+                                    <button class="fdb-btn-outline" style="padding: 0 1vh;" onclick={() => flipHeading(station)} title="Girar 180°">🔄 180°</button>
+                                {/if}
+                                <button class="fdb-btn-danger" style="padding: 0 1vh;" onclick={() => removeComponent(station)}>X</button>
+                            </div>
+                            <label class="fdb-check"><input type="checkbox" bind:checked={station.is_marker} /> Somente Marcador (Invisível)</label>
                         </div>
-                        <label class="fdb-check"><input type="checkbox" bind:checked={station.is_marker} /> Somente Marcador (Invisível)</label>
+                    {/each}
+                    {#if countCraft === 0}
+                        <div class="fdb-empty-state" style="padding: 1.5vh;">
+                            <p>Nenhuma bancada física posicionada.</p>
+                        </div>
+                    {/if}
+                    <button class="fdb-btn-outline" onclick={() => addStation('craft')}>+ Adicionar Bancada Física</button>
+                </div>
+
+                <div class="fdb-divider"></div>
+
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2vh;">
+                        <h4 style="margin: 0; color: var(--fdb-accent-primary, #c8963e); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em;">
+                            2. Cadastro de Receitas de Craft ({recipes.length})
+                        </h4>
+                        <button type="button" class="fdb-btn-primary" style="padding: 0.5rem 1rem; font-size: 0.82rem;" onclick={openRecipeResultSelector}>
+                            + Cadastrar Nova Receita
+                        </button>
                     </div>
-                {/each}
-                {#if countCraft === 0}
-                    <div class="fdb-empty-state">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
-                        <p>Nenhuma bancada de craft adicionada.</p>
-                    </div>
-                {/if}
-                <button class="fdb-btn-outline" onclick={() => addStation('craft')}>+ Adicionar Bancada</button>
+
+                    {#if recipes.length === 0}
+                        <div class="fdb-empty-state" style="padding: 2vh;">
+                            <p>Nenhuma receita personalizada cadastrada nesta loja (usará o padrão do template se houver).</p>
+                            <button type="button" class="fdb-btn-outline" style="margin-top: 8px;" onclick={openRecipeResultSelector}>
+                                Escolher Produto para Criar Receita
+                            </button>
+                        </div>
+                    {:else}
+                        <div class="fdb-catalog-list">
+                            {#each recipes as recipe, rIdx (recipe.id || rIdx)}
+                                {@const resMeta = getItemMetadata(recipe.result)}
+                                <div class="fdb-card" style="padding: 1.2vh 1.5vh;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; border-bottom: 1px solid rgba(255,255,255,0.07); padding-bottom: 1vh; margin-bottom: 1vh;">
+                                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                            <div class="fdb-catalog-thumb">
+                                                <img 
+                                                    src={getItemImageUrl(recipe.result)} 
+                                                    alt={recipe.result}
+                                                    onerror={(e) => { e.currentTarget.style.display = 'none'; }}
+                                                />
+                                                <span class="catalog-fallback-icon">⚒️</span>
+                                            </div>
+                                            <div>
+                                                <input 
+                                                    type="text" 
+                                                    bind:value={recipe.label} 
+                                                    placeholder={resMeta.label}
+                                                    style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.12); color: #fff; padding: 4px 8px; border-radius: 3px; font-weight: 700; font-size: 0.92rem;"
+                                                />
+                                                <div style="font-size: 0.72rem; color: var(--fdb-text-muted); margin-top: 2px;">
+                                                    Resultado: <code>{recipe.result}</code>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style="display: flex; align-items: center; gap: 0.8rem;">
+                                            <div style="display: flex; flex-direction: column; font-size: 0.72rem; color: var(--fdb-text-secondary);">
+                                                <span>Qtd. Gerada</span>
+                                                <input 
+                                                    type="number" 
+                                                    min="1" 
+                                                    bind:value={recipe.amount} 
+                                                    style="width: 60px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 4px 6px; border-radius: 3px;"
+                                                />
+                                            </div>
+                                            <div style="display: flex; flex-direction: column; font-size: 0.72rem; color: var(--fdb-text-secondary);">
+                                                <span>Tempo (ms)</span>
+                                                <input 
+                                                    type="number" 
+                                                    min="1000" 
+                                                    step="1000" 
+                                                    bind:value={recipe.time} 
+                                                    style="width: 80px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 4px 6px; border-radius: 3px;"
+                                                />
+                                            </div>
+                                            <button type="button" class="fdb-btn-danger" style="padding: 0.4rem 0.75rem;" onclick={() => removeRecipe(rIdx)} title="Excluir Receita">
+                                                ✕
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Ingredients List -->
+                                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <span style="font-size: 0.78rem; color: var(--fdb-text-secondary); font-weight: 600;">
+                                                Ingredientes Necessários ({recipe.ingredients?.length || 0}):
+                                            </span>
+                                            <button type="button" class="fdb-btn-outline" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;" onclick={() => openRecipeIngredientSelector(rIdx)}>
+                                                + Adicionar Ingrediente
+                                            </button>
+                                        </div>
+
+                                        {#if !recipe.ingredients || recipe.ingredients.length === 0}
+                                            <span style="font-size: 0.78rem; color: #e57373; font-style: italic;">
+                                                Nenhum ingrediente adicionado. Clique em "+ Adicionar Ingrediente".
+                                            </span>
+                                        {:else}
+                                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.25rem;">
+                                                {#each recipe.ingredients as ing}
+                                                    {@const ingMeta = getItemMetadata(ing.name)}
+                                                    <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px;">
+                                                        <span style="font-size: 0.82rem; color: #fff;">{ingMeta.label}</span>
+                                                        <span style="font-size: 0.75rem; color: var(--fdb-text-muted);">x</span>
+                                                        <input 
+                                                            type="number" 
+                                                            min="1" 
+                                                            bind:value={ing.amount} 
+                                                            style="width: 48px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); color: var(--fdb-accent-primary, #c8963e); font-weight: 700; padding: 2px 4px; border-radius: 3px; text-align: center;"
+                                                        />
+                                                        <button 
+                                                            type="button" 
+                                                            style="background: transparent; border: none; color: #ef5350; cursor: pointer; font-weight: 700; padding: 0 4px;"
+                                                            onclick={() => removeIngredient(rIdx, ing.name)}
+                                                            title="Remover ingrediente"
+                                                        >✕</button>
+                                                    </div>
+                                                {/each}
+                                            </div>
+                                        {/if}
+                                    </div>
+                                </div>
+                            {/each}
+                        </div>
+                    {/if}
+                </div>
             {/if}
 
             {#if activeTab === 'npc'}
@@ -636,7 +819,13 @@
     {#if isItemSelectorOpen}
         <ItemSelector 
             items={availableItems} 
-            alreadySelected={catalog.map(c => c.item_name)} 
+            alreadySelected={
+                itemSelectorMode === 'catalog' 
+                    ? catalog.map(c => c.item_name) 
+                    : itemSelectorMode === 'recipe_ingredient' && activeRecipeIdx >= 0 && recipes[activeRecipeIdx]?.ingredients
+                        ? recipes[activeRecipeIdx].ingredients.map(i => i.name)
+                        : []
+            } 
             onConfirm={handleItemsAdded} 
             onCancel={() => isItemSelectorOpen = false} 
         />

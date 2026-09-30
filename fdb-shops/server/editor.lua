@@ -41,6 +41,25 @@ local function OpenEditor(src)
                 })
             end
 
+            -- Get craft recipes for this shop
+            local parsedRecipes = {}
+            local rawRecipes = row.enabled_recipes and json.decode(row.enabled_recipes) or {}
+            if type(rawRecipes) == 'table' then
+                for _, r in ipairs(rawRecipes) do
+                    if type(r) == 'table' and (r.result or r.id) then
+                        table.insert(parsedRecipes, {
+                            id = r.id or ("recipe_" .. tostring(r.result)),
+                            label = r.label or r.result,
+                            result = r.result or r.id,
+                            amount = tonumber(r.amount) or 1,
+                            time = tonumber(r.time) or 5000,
+                            category = r.category or "artesanato",
+                            ingredients = r.ingredients or {}
+                        })
+                    end
+                end
+            end
+
             table.insert(shopsList, {
                 id = row.shop_id,
                 label = row.label,
@@ -49,7 +68,8 @@ local function OpenEditor(src)
                 city = row.city or 'outros',
                 config = row.config and json.decode(row.config) or {},
                 stations = parsedStations,
-                catalog = parsedCatalog
+                catalog = parsedCatalog,
+                recipes = parsedRecipes
             })
         end
     end
@@ -95,7 +115,7 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
     if not FDBCore.Functions.HasPermission(src, 'admin') then return end
     
     local shopId = storeData.id
-    if not shopId or not ShopManager.Shops[shopId] then
+    if not shopId or not ShopManager.GetShop(shopId) then
         exports['fdb-libs']:Notify(src, 'Loja inválida ou não encontrada!', 'error')
         return
     end
@@ -104,7 +124,7 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
         local ownerId = storeData.owner_id
         if ownerId == "" then ownerId = nil end
         local template = (storeData.template and storeData.template ~= '') and storeData.template or 'normal'
-        local currentShop = ShopManager.Shops[shopId]
+        local currentShop = ShopManager.GetShop(shopId)
         local currentCity = (currentShop and currentShop.city) or MySQL.scalar.await('SELECT city FROM shops WHERE shop_id = ?', {shopId}) or 'outros'
         local city = (storeData.city and storeData.city ~= '') and storeData.city or currentCity
         local configStr = storeData.config and json.encode(storeData.config) or nil
@@ -166,6 +186,15 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
         if ShopManager.Shops[shopId] then
             ShopManager.Shops[shopId].buyCatalog = buyCatalogMemory
             ShopManager.Shops[shopId].catalog = storeData.catalog
+        end
+    end
+
+    -- Save Craft Recipes
+    if storeData.recipes and type(storeData.recipes) == 'table' then
+        local recipesJson = json.encode(storeData.recipes)
+        MySQL.update.await('UPDATE shops SET enabled_recipes = ? WHERE shop_id = ?', {recipesJson, shopId})
+        if ShopManager.Shops[shopId] then
+            ShopManager.Shops[shopId].enabledRecipes = storeData.recipes
         end
     end
     

@@ -8,14 +8,20 @@ fdb = fdb or {}
 ---@param title string? Título opcional
 ---@param customBg string? Cor de fundo customizada (ex: '#00ff00' ou 'rgba(0,0,0,0.5)')
 ---@param customBorder string? Cor de borda/progresso customizada
-function fdb.notify(message, type, duration, icon, title, customBg, customBorder)
+function fdb.notify(...)
+    local args = {...}
+    -- If called with colon syntax (exports['fdb-libs']:Notify), args[1] is the exports table
+    if type(args[1]) == 'table' and (type(args[2]) == 'string' or type(args[2]) == 'number') then
+        table.remove(args, 1)
+    end
+    local message, type, duration, icon, title, customBg, customBorder = table.unpack(args)
     if not message then return end
     
     SendNUIMessage({
         action = "SEND_NOTIFICATION",
         type = type or "info",
-        message = message,
-        duration = duration or 5000,
+        message = tostring(message),
+        duration = tonumber(duration) or 5000,
         icon = icon or "",
         title = title or "",
         customBg = customBg or "",
