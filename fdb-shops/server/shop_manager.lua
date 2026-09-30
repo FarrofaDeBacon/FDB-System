@@ -192,13 +192,16 @@ function ShopManager.GetFinalPrice(shopId, itemName)
 end
 
 --- Log a transaction and notify the economy engine
-function ShopManager.LogTransaction(shopId, playerId, txType, itemName, qty, unitPrice, totalPrice, categoryOverride)
+function ShopManager.LogTransaction(shopId, playerId, txType, itemName, qty, unitPrice, totalPrice, categoryOverride, buyerName, paymentMethod, metadata)
     local shop = ShopManager.GetShop(shopId)
     if not shop then return end
 
-    MySQL.insert('INSERT INTO shop_transactions (shop_id, player_id, transaction_type, item_name, quantity, unit_price, total_price, region_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    {
-        shopId, playerId, txType, itemName, qty, unitPrice, totalPrice, shop.regionId
+    local metaStr = metadata and (type(metadata) == 'table' and json.encode(metadata) or tostring(metadata)) or nil
+    MySQL.insert([[
+        INSERT INTO shop_transactions (shop_id, player_id, transaction_type, item_name, quantity, unit_price, total_price, region_id, buyer_name, payment_method, metadata) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ]], {
+        shopId, playerId, txType, itemName, qty, unitPrice, totalPrice, shop.regionId, buyerName, paymentMethod or 'cash', metaStr
     })
 
     -- Notify economy engine

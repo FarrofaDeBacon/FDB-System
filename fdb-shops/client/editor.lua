@@ -133,12 +133,27 @@ RegisterNUICallback("createNewStore", function(data, cb)
     SetNuiFocus(false, false)
     
     local input = lib.inputDialog('Criar Nova Loja', {
-        { type = 'input', label = 'ID da Loja (ex: loja_centro)', required = true },
-        { type = 'input', label = 'Nome da Loja (ex: Loja do Centro)', required = true },
-        { type = 'select', label = 'Template', required = true, options = {
-            { value = 'general', label = 'General Store' },
-            { value = 'saloon', label = 'Saloon' },
-            { value = 'weapons', label = 'Gunsmith' }
+        { type = 'input', label = 'ID da Loja (ex: gs-val)', required = true },
+        { type = 'input', label = 'Nome da Loja (ex: Valentine General Store)', required = true },
+        { type = 'select', label = 'Template / Tipo', required = true, default = 'normal', options = {
+            { value = 'normal', label = 'Armazém Geral (normal)' },
+            { value = 'weapons', label = 'Armeiro (weapons)' },
+            { value = 'saloon', label = 'Saloon (saloon)' },
+            { value = 'armoury', label = 'Arsenal Policial (armoury)' },
+            { value = 'medic', label = 'Farmácia (medic)' },
+            { value = 'prison', label = 'Cantina Prisional (prison)' }
+        }},
+        { type = 'select', label = 'Cidade', required = true, default = 'valentine', options = {
+            { value = 'valentine', label = 'Valentine' },
+            { value = 'saint_denis', label = 'Saint Denis' },
+            { value = 'rhodes', label = 'Rhodes' },
+            { value = 'blackwater', label = 'Blackwater' },
+            { value = 'annesburg', label = 'Annesburg' },
+            { value = 'armadillo', label = 'Armadillo' },
+            { value = 'tumbleweed', label = 'Tumbleweed' },
+            { value = 'van_horn', label = 'Van Horn' },
+            { value = 'strawberry', label = 'Strawberry' },
+            { value = 'outros', label = 'Outros' }
         }},
         { type = 'input', label = 'Citizen ID do Dono (Opcional)', required = false }
     })
@@ -151,14 +166,15 @@ RegisterNUICallback("createNewStore", function(data, cb)
     local shopId = input[1]
     local label = input[2]
     local template = input[3]
-    local ownerId = input[4]
+    local city = input[4]
+    local ownerId = input[5]
     
     if ownerId == "" then ownerId = nil end
 
     -- Formatar o ID para remover espaços
     shopId = string.gsub(string.lower(shopId), "%s+", "_")
 
-    TriggerServerEvent('fdb-shops:server:createShopFromUI', shopId, label, template, ownerId)
+    TriggerServerEvent('fdb-shops:server:createShopFromUI', shopId, label, template, ownerId, city)
     cb('ok')
 end)
 

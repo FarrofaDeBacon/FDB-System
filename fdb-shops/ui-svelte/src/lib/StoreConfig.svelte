@@ -322,6 +322,7 @@
         templateModalOpen = false;
         const payload = {
             id: storeId,
+            originalId: store.id,
             label: storeLabel,
             template: storeTemplate,
             city: storeCity,
@@ -407,8 +408,8 @@
             {#if activeTab === 'geral'}
                 <div class="fdb-group">
                     <label>ID da Loja</label>
-                    <Input id="store-id-input" type="text" bind:value={storeId} disabled={true} />
-                    <span class="fdb-field-hint">O identificador da loja não pode ser alterado após a criação.</span>
+                    <Input id="store-id-input" type="text" bind:value={storeId} />
+                    <span class="fdb-field-hint">Identificador único no banco de dados. Modificá-lo renomeará a loja e seus componentes.</span>
                 </div>
 
                 <div class="fdb-group">

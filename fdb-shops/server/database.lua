@@ -20,6 +20,26 @@ CreateThread(function()
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ]])
 
+    -- Garante que os templates básicos existam para integridade de chaves estrangeiras
+    local baseTemplates = {
+        { id = 'normal', label = 'Armazém Geral' },
+        { id = 'general', label = 'Armazém Geral' },
+        { id = 'weapons', label = 'Armeiro' },
+        { id = 'saloon', label = 'Saloon' },
+        { id = 'armoury', label = 'Arsenal Policial' },
+        { id = 'medic', label = 'Farmácia' },
+        { id = 'prison', label = 'Cantina Prisional' }
+    }
+    for _, t in ipairs(baseTemplates) do
+        pcall(function()
+            MySQL.insert.await([[
+                INSERT INTO shop_templates (template_id, label, sellable_items, default_config)
+                VALUES (?, ?, '[]', '{}')
+                ON DUPLICATE KEY UPDATE label = VALUES(label)
+            ]], { t.id, t.label })
+        end)
+    end
+
     -- Instância de uma loja
     MySQL.query.await([[
         CREATE TABLE IF NOT EXISTS shops (
@@ -158,6 +178,29 @@ CreateThread(function()
             end
             print('^2[' .. resourceName .. '] Migration: Seeded shop_catalog_items from existing shops.buy_catalog.^7')
         end
+    end
+
+    -- Migration idempotente para colunas de cargos e serviço em shop_employees
+    local hasGradeLevel = MySQL.scalar.await("SHOW COLUMNS FROM `shop_employees` LIKE 'grade_level'")
+    if not hasGradeLevel then
+        pcall(function()
+            MySQL.query.await("ALTER TABLE `shop_employees` ADD COLUMN `grade_level` INT DEFAULT 1 AFTER `player_id`")
+            MySQL.query.await("ALTER TABLE `shop_employees` ADD COLUMN `role_name` VARCHAR(50) DEFAULT 'Auxiliar' AFTER `grade_level`")
+            MySQL.query.await("ALTER TABLE `shop_employees` ADD COLUMN `is_duty` TINYINT(1) DEFAULT 0 AFTER `role_name`")
+        end)
+        print('^2[' .. resourceName .. '] Migration: Columns grade_level, role_name, is_duty added to shop_employees.^7')
+    end
+
+    -- Migration idempotente para detalhes em shop_transactions
+    local hasBuyerName = MySQL.scalar.await("SHOW COLUMNS FROM `shop_transactions` LIKE 'buyer_name'")
+    if not hasBuyerName then
+        pcall(function()
+            MySQL.query.await("ALTER TABLE `shop_transactions` MODIFY `transaction_type` VARCHAR(50) NOT NULL")
+            MySQL.query.await("ALTER TABLE `shop_transactions` ADD COLUMN `buyer_name` VARCHAR(100) DEFAULT NULL AFTER `region_id`")
+            MySQL.query.await("ALTER TABLE `shop_transactions` ADD COLUMN `payment_method` VARCHAR(50) DEFAULT 'cash' AFTER `buyer_name`")
+            MySQL.query.await("ALTER TABLE `shop_transactions` ADD COLUMN `metadata` JSON DEFAULT NULL AFTER `payment_method`")
+        end)
+        print('^2[' .. resourceName .. '] Migration: Columns buyer_name, payment_method, metadata added to shop_transactions.^7')
     end
 
     print('^2[' .. resourceName .. '] Database schema initialized.^7')

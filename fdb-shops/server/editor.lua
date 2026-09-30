@@ -114,10 +114,37 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
     local src = source
     if not FDBCore.Functions.HasPermission(src, 'admin') then return end
     
-    local shopId = storeData.id
-    if not shopId or not ShopManager.GetShop(shopId) then
+    local originalId = storeData.originalId or storeData.id
+    local targetId = storeData.id
+    if not originalId or not ShopManager.GetShop(originalId) then
         exports['fdb-libs']:Notify(src, 'Loja inválida ou não encontrada!', 'error')
         return
+    end
+
+    local shopId = originalId
+    if targetId and targetId ~= originalId then
+        targetId = string.gsub(string.lower(targetId), "%s+", "_")
+        local exists = MySQL.scalar.await('SELECT 1 FROM shops WHERE shop_id = ?', {targetId})
+        if exists then
+            exports['fdb-libs']:Notify(src, 'Já existe uma loja com o novo ID informado!', 'error')
+            return
+        end
+
+        MySQL.update.await('SET FOREIGN_KEY_CHECKS = 0')
+        MySQL.update.await('UPDATE shops SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
+        MySQL.update.await('UPDATE shop_stations SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
+        MySQL.update.await('UPDATE shop_employees SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
+        MySQL.update.await('UPDATE shop_catalog_items SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
+        MySQL.update.await('UPDATE shop_transactions SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
+        MySQL.update.await('SET FOREIGN_KEY_CHECKS = 1')
+
+        if ShopManager.Shops[originalId] then
+            ShopManager.Shops[targetId] = ShopManager.Shops[originalId]
+            ShopManager.Shops[targetId].id = targetId
+            ShopManager.Shops[originalId] = nil
+        end
+        shopId = targetId
+        print(("^2[fdb-shops] Loja renomeada: '%s' -> '%s'^7"):format(originalId, targetId))
     end
     
     if storeData.label then
@@ -317,6 +344,9 @@ RegisterNetEvent('fdb-shops:server:createShopFromUI', function(shopId, label, te
     end
 
     local shopCity = (city and city ~= '') and city or 'outros'
+    if template == 'general' then template = 'normal' end
+    if not template or template == '' then template = 'normal' end
+
     MySQL.insert.await('INSERT INTO shops (shop_id, template_id, label, owner_id, city) VALUES (?, ?, ?, ?, ?)', {shopId, template, label, ownerId, shopCity})
     exports['fdb-libs']:Notify(src, 'Loja criada com sucesso! Você já pode configurá-la.', 'success')
     

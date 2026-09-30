@@ -72,11 +72,57 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:requestOwnerMenu', function(sou
     local citizenid = Player.PlayerData.citizenid
     local perms = EmployeeManager.GetPermissions(shopId, citizenid)
 
-    if perms and (perms.isOwner or perms.isAdmin or perms.financeiro or perms.editar_precos or perms.gerenciar_funcionarios or perms.repor_estoque) then
+    if perms and (perms.isOwner or perms.isAdmin or perms.financeiro or perms.editar_precos or perms.gerenciar_funcionarios or perms.repor_estoque or perms.craftar or perms.atender) then
+        local onDuty = EmployeeManager.IsOnDuty(shopId, citizenid)
+        local employees = EmployeeManager.GetEmployees(shopId)
+        local bal = StashManager.GetBalance(shopId)
+        
+        -- Query today's sales
+        local salesQuery = [[
+            SELECT id, buyer_name, payment_method, item_name, quantity, total_price, metadata, created_at 
+            FROM shop_transactions 
+            WHERE shop_id = ? AND transaction_type IN ('venda', 'buy', 'promissoria')
+              AND created_at >= CURDATE()
+            ORDER BY created_at DESC 
+            LIMIT 50
+        ]]
+        local rows = MySQL.query.await(salesQuery, {shopId}) or {}
+        local todaySales = {}
+        local totalDayRevenue = 0.0
+        for _, r in ipairs(rows) do
+            local price = tonumber(r.total_price) or 0.0
+            totalDayRevenue = totalDayRevenue + price
+            local itemsSummary = r.item_name or "Itens Diversos"
+            if r.metadata then
+                local meta = json.decode(r.metadata)
+                if meta and meta.items and #meta.items > 0 then
+                    local names = {}
+                    for _, it in ipairs(meta.items) do
+                        table.insert(names, string.format("%dx %s", it.amount or 1, it.name))
+                    end
+                    itemsSummary = table.concat(names, ", ")
+                end
+            end
+            table.insert(todaySales, {
+                id = r.id,
+                buyerName = r.buyer_name or "Cliente Desconhecido",
+                paymentMethod = r.payment_method or "cash",
+                items = itemsSummary,
+                total = price,
+                createdAt = r.created_at
+            })
+        end
+
+        local shop = ShopManager.GetShop(shopId)
         cb({
             success = true,
             permissions = perms,
-            shopData = ShopManager.GetShop(shopId)
+            shopData = shop,
+            balance = bal,
+            onDuty = onDuty,
+            employees = employees,
+            todaySales = todaySales,
+            totalDayRevenue = totalDayRevenue
         })
     else
         cb({
@@ -84,6 +130,96 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:requestOwnerMenu', function(sou
             message = "Acesso restrito a proprietários, funcionários autorizados ou administradores."
         })
     end
+end)
+
+-- Open Register Callback (determines if employee/owner or customer)
+fdbLibs:RegisterServerCallback('fdb-shops:server:openRegister', function(source, cb, shopId)
+    local Player = FDBCore.Functions.GetPlayer(source)
+    if not Player then return cb({ success = false, message = "Jogador inválido." }) end
+
+    local citizenid = Player.PlayerData.citizenid
+    local shop = ShopManager.GetShop(shopId)
+    if not shop then return cb({ success = false, message = "Loja não encontrada." }) end
+
+    local perms = EmployeeManager.GetPermissions(shopId, citizenid)
+    local isEmployeeOrOwner = perms and (perms.isOwner or perms.isAdmin or perms.financeiro or perms.atender or perms.repor_estoque or perms.craftar or perms.gerenciar_funcionarios)
+
+    if not isEmployeeOrOwner then
+        return cb({
+            success = true,
+            isEmployee = false,
+            canCustomerBuy = true
+        })
+    end
+
+    local bal = StashManager.GetBalance(shopId)
+    local onDuty = EmployeeManager.IsOnDuty(shopId, citizenid)
+
+    local salesQuery = [[
+        SELECT id, buyer_name, payment_method, item_name, quantity, total_price, metadata, created_at 
+        FROM shop_transactions 
+        WHERE shop_id = ? AND transaction_type IN ('venda', 'buy', 'promissoria')
+          AND created_at >= CURDATE()
+        ORDER BY created_at DESC 
+        LIMIT 50
+    ]]
+    local rows = MySQL.query.await(salesQuery, {shopId}) or {}
+    local todaySales = {}
+    local totalDayRevenue = 0.0
+
+    for _, r in ipairs(rows) do
+        local price = tonumber(r.total_price) or 0.0
+        totalDayRevenue = totalDayRevenue + price
+        local itemsSummary = r.item_name or "Itens Diversos"
+        if r.metadata then
+            local meta = json.decode(r.metadata)
+            if meta and meta.items and #meta.items > 0 then
+                local names = {}
+                for _, it in ipairs(meta.items) do
+                    table.insert(names, string.format("%dx %s", it.amount or 1, it.name))
+                end
+                itemsSummary = table.concat(names, ", ")
+            end
+        end
+
+        table.insert(todaySales, {
+            id = r.id,
+            buyerName = r.buyer_name or "Cliente Desconhecido",
+            paymentMethod = r.payment_method or "cash",
+            items = itemsSummary,
+            total = price,
+            createdAt = r.created_at
+        })
+    end
+
+    cb({
+        success = true,
+        isEmployee = true,
+        shopId = shopId,
+        shopLabel = shop.label or "Armazém",
+        balance = bal,
+        totalDayRevenue = totalDayRevenue,
+        onDuty = onDuty,
+        todaySales = todaySales,
+        permissions = perms
+    })
+end)
+
+-- Toggle Duty Callback
+fdbLibs:RegisterServerCallback('fdb-shops:server:toggleDuty', function(source, cb, shopId)
+    local Player = FDBCore.Functions.GetPlayer(source)
+    if not Player then return cb({ success = false }) end
+
+    local citizenid = Player.PlayerData.citizenid
+    local curDuty = EmployeeManager.IsOnDuty(shopId, citizenid)
+    local newDuty = not curDuty
+    EmployeeManager.SetDuty(shopId, citizenid, newDuty)
+
+    local shop = ShopManager.GetShop(shopId)
+    local shopName = shop and shop.label or shopId
+    local statusText = newDuty and "Entrou em serviço" or "Saiu de serviço"
+    fdbLibs:Notify(source, statusText .. " em " .. shopName, newDuty and "success" or "warning", 4000)
+    cb({ success = true, onDuty = newDuty })
 end)
 
 -- Fetch employees for NUI
@@ -97,6 +233,70 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:getEmployees', function(source,
     else
         cb({})
     end
+end)
+
+-- Fetch nearby players to hire
+fdbLibs:RegisterServerCallback('fdb-shops:server:getNearbyPlayers', function(source, cb)
+    local list = EmployeeManager.GetNearbyPlayers(source, 10.0)
+    cb(list)
+end)
+
+-- Hire employee
+RegisterNetEvent('fdb-shops:server:hireEmployee', function(shopId, targetCitizenId, gradeLevel, roleName, perms)
+    local src = source
+    local Player = FDBCore.Functions.GetPlayer(src)
+    if not Player then return end
+
+    if not EmployeeManager.HasPermission(shopId, Player.PlayerData.citizenid, 'gerenciar_funcionarios') then
+        fdbLibs:Notify(src, "Você não tem permissão para contratar funcionários.", "error", 4000)
+        return
+    end
+
+    local success = EmployeeManager.Hire(shopId, targetCitizenId, perms, gradeLevel, roleName)
+    if success then
+        fdbLibs:Notify(src, "Funcionário contratado com sucesso!", "success", 4000)
+        local targetPlayer = FDBCore.Functions.GetPlayerByCitizenId(targetCitizenId)
+        if targetPlayer then
+            fdbLibs:Notify(targetPlayer.PlayerData.source, "Você foi contratado para a loja " .. shopId .. "!", "success", 5000)
+        end
+    else
+        fdbLibs:Notify(src, "Falha ao contratar funcionário.", "error", 4000)
+    end
+end)
+
+-- Fire employee
+RegisterNetEvent('fdb-shops:server:fireEmployee', function(shopId, targetCitizenId)
+    local src = source
+    local Player = FDBCore.Functions.GetPlayer(src)
+    if not Player then return end
+
+    if not EmployeeManager.HasPermission(shopId, Player.PlayerData.citizenid, 'gerenciar_funcionarios') then
+        fdbLibs:Notify(src, "Você não tem permissão para demitir funcionários.", "error", 4000)
+        return
+    end
+
+    EmployeeManager.Fire(shopId, targetCitizenId)
+    fdbLibs:Notify(src, "Funcionário demitido com sucesso.", "warning", 4000)
+
+    local targetPlayer = FDBCore.Functions.GetPlayerByCitizenId(targetCitizenId)
+    if targetPlayer then
+        fdbLibs:Notify(targetPlayer.PlayerData.source, "Você foi dispensado da loja " .. shopId .. ".", "warning", 5000)
+    end
+end)
+
+-- Update employee role / permissions
+RegisterNetEvent('fdb-shops:server:updateEmployeeRole', function(shopId, targetCitizenId, gradeLevel, roleName, perms)
+    local src = source
+    local Player = FDBCore.Functions.GetPlayer(src)
+    if not Player then return end
+
+    if not EmployeeManager.HasPermission(shopId, Player.PlayerData.citizenid, 'gerenciar_funcionarios') then
+        fdbLibs:Notify(src, "Você não tem permissão para alterar cargos.", "error", 4000)
+        return
+    end
+
+    EmployeeManager.UpdatePermissions(shopId, targetCitizenId, perms, gradeLevel, roleName)
+    fdbLibs:Notify(src, "Cargo e permissões atualizados!", "success", 4000)
 end)
 
 -- ==========================================
@@ -160,11 +360,15 @@ RegisterNetEvent('fdb-shops:server:openstore', function(shopId)
         bank = (Player.PlayerData.money and Player.PlayerData.money.bank) or 0.0
     }
 
+    local paymentConfig = (shop.config and shop.config.paymentMethods) or { cash = true, promissoria = false, bank = false }
+    if paymentConfig.cash == nil then paymentConfig.cash = true end
+
     local shopData = {
         shopId = shopId,
         shopLabel = shop.label or "Armazém",
         catalog = catalogList,
-        playerMoney = moneyData
+        playerMoney = moneyData,
+        acceptedPaymentMethods = paymentConfig
     }
 
     TriggerClientEvent('fdb-shops:client:openStoreFront', src, shopData)
@@ -187,6 +391,17 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:checkoutCart', function(source,
     local shop = ShopManager.GetShop(shopId)
     if not shop then
         return cb({ success = false, message = "Loja não encontrada." })
+    end
+
+    -- Validate payment method against store configuration
+    local paymentConfig = (shop.config and shop.config.paymentMethods) or { cash = true, promissoria = false, bank = false }
+    if paymentConfig.cash == nil then paymentConfig.cash = true end
+
+    if paymentMethod == 'bank' and not paymentConfig.bank then
+        return cb({ success = false, message = "Esta loja não aceita transferências bancárias no Velho Oeste!" })
+    end
+    if paymentMethod == 'promissoria' and not paymentConfig.promissoria then
+        return cb({ success = false, message = "Esta loja não aceita notas promissórias!" })
     end
 
     -- Server-side Price & Total Recalculation
@@ -214,16 +429,29 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:checkoutCart', function(source,
         return cb({ success = false, message = "Nenhum item válido no pedido." })
     end
 
-    -- Verify Money
-    local playerBalance = (Player.PlayerData.money and Player.PlayerData.money[paymentMethod]) or 0.0
-    if playerBalance < totalCost then
-        return cb({ success = false, message = ("Saldo insuficiente (%s)."):format(paymentMethod == 'cash' and 'Dinheiro' or 'Banco') })
-    end
+    -- Process payment based on method
+    if paymentMethod == 'promissoria' then
+        local hasItem = Player.Functions.GetItemByName('promissoria') or Player.Functions.GetItemByName('nota_promissoria')
+        if hasItem then
+            Player.Functions.RemoveItem(hasItem.name, 1)
+            TriggerClientEvent('fdb-inventory:client:ItemBox', src, hasItem, "remove")
+        end
+    else
+        local playerBalance = (Player.PlayerData.money and Player.PlayerData.money[paymentMethod]) or 0.0
+        if playerBalance < totalCost then
+            return cb({ success = false, message = ("Saldo insuficiente (%s)."):format(paymentMethod == 'cash' and 'Dinheiro' or 'Banco') })
+        end
 
-    -- Deduct Money
-    local paymentSuccess = Player.Functions.RemoveMoney(paymentMethod, totalCost, "shop-purchase-" .. shopId)
-    if not paymentSuccess then
-        return cb({ success = false, message = "Falha ao debitar valor da conta." })
+        local paymentSuccess = Player.Functions.RemoveMoney(paymentMethod, totalCost, "shop-purchase-" .. shopId)
+        if not paymentSuccess then
+            return cb({ success = false, message = "Falha ao debitar valor da conta." })
+        end
+
+        -- Credit Shop Cash Balance
+        MySQL.update('UPDATE shops SET cash_balance = cash_balance + ? WHERE shop_id = ?', {totalCost, shopId})
+        if shop.cashBalance then
+            shop.cashBalance = shop.cashBalance + totalCost
+        end
     end
 
     -- Add Items to Player Inventory
@@ -232,17 +460,37 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:checkoutCart', function(source,
         TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[itm.name], "add")
     end
 
-    -- Credit Shop Cash Balance
-    MySQL.update('UPDATE shops SET cash_balance = cash_balance + ? WHERE shop_id = ?', {totalCost, shopId})
-    if shop.cashBalance then
-        shop.cashBalance = shop.cashBalance + totalCost
+    -- Buyer name
+    local buyerChar = Player.PlayerData.charinfo
+    local buyerName = (buyerChar.firstname or '') .. ' ' .. (buyerChar.lastname or '')
+    if buyerName:gsub('%s+', '') == '' then buyerName = "Cidadão " .. Player.PlayerData.citizenid end
+
+    local cartSummary = {}
+    for _, vi in ipairs(validatedItems) do
+        table.insert(cartSummary, string.format("%dx %s", vi.amount, vi.name))
     end
+    local itemSummaryStr = table.concat(cartSummary, ", ")
 
-    -- Log Transaction
-    ShopManager.LogTransaction(shopId, Player.PlayerData.citizenid, 'venda', 'carrinho', #validatedItems, totalCost, totalCost, 'produtos')
+    -- Log Transaction with Buyer Name and Payment Method
+    ShopManager.LogTransaction(
+        shopId, 
+        Player.PlayerData.citizenid, 
+        paymentMethod == 'promissoria' and 'promissoria' or 'venda', 
+        itemSummaryStr, 
+        #validatedItems, 
+        totalCost, 
+        totalCost, 
+        'produtos',
+        buyerName,
+        paymentMethod,
+        { items = validatedItems }
+    )
 
-    fdbLibs:Notify(src, ("Compra concluída! Pago: $%s"):format(string.format("%.2f", totalCost)), "success", 4000)
+    local msg = paymentMethod == 'promissoria' and 
+        ("Compra registrada via Nota Promissória! Total: $%s"):format(string.format("%.2f", totalCost)) or
+        ("Compra concluída! Pago: $%s (%s)"):format(string.format("%.2f", totalCost), paymentMethod == 'cash' and 'Dinheiro' or 'Banco')
 
+    fdbLibs:Notify(src, msg, "success", 4000)
     cb({ success = true })
 end)
 
@@ -252,6 +500,15 @@ RegisterNetEvent('fdb-shops:server:openStash', function(shopId)
     local src = source
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
+
+    local shop = ShopManager.GetShop(shopId)
+    if shop and shop.ownerId and shop.ownerId ~= "" then
+        local onDuty = EmployeeManager.IsOnDuty(shopId, Player.PlayerData.citizenid)
+        if not onDuty then
+            fdbLibs:Notify(src, "Você precisa entrar em serviço no Painel da Loja ou Registradora para acessar o estoque!", "error", 4000)
+            return
+        end
+    end
 
     if EmployeeManager.HasPermission(shopId, Player.PlayerData.citizenid, 'repor_estoque') then
         StashManager.OpenStock(src, shopId)
