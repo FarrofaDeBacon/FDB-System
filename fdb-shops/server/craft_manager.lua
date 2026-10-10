@@ -9,6 +9,19 @@ local fdbLibs = exports['fdb-libs']
 -- Memory map for active crafts to prevent timing cheats
 -- Structure: ActiveCrafts[citizenid] = { recipeId = '...', stationId = '...', startedAt = os.time(), timeNeeded = 5 }
 local ActiveCrafts = {}
+local OpLocks = {}
+
+local function AcquireLock(src, action)
+    local key = src .. ':' .. action
+    if OpLocks[key] then return false end
+    OpLocks[key] = true
+    return true
+end
+
+local function ReleaseLock(src, action)
+    local key = src .. ':' .. action
+    OpLocks[key] = nil
+end
 
 -- ==========================================
 -- Helper Functions
@@ -190,30 +203,35 @@ end)
 
 -- Request to start crafting (Pre-check)
 fdbLibs:RegisterServerCallback('fdb-shops:server:requestCraft', function(source, cb, shopId, recipeId, stationId, multiplier)
-    local Player = FDBCore.Functions.GetPlayer(source)
-    if not Player then return cb(false, "Jogador não encontrado.") end
+    local src = source
+    if not AcquireLock(src, 'craft') then
+        return cb(false, "Aguarde a transação anterior.")
+    end
+    local function finish(success, msg, data)
+        ReleaseLock(src, 'craft')
+        return cb(success, msg, data)
+    end
+
+    local Player = FDBCore.Functions.GetPlayer(src)
+    if not Player then return finish(false, "Jogador não encontrado.") end
     local citizenid = Player.PlayerData.citizenid
 
     if not EmployeeManager.HasPermission(shopId, citizenid, 'craftar') then
-        cb(false, "Você não tem permissão para usar esta bancada.")
-        return
+        return finish(false, "Você não tem permissão para usar esta bancada.")
     end
 
     local shop = ShopManager.GetShop(shopId)
     if not shop then
-        cb(false, "Loja não encontrada.")
-        return
+        return finish(false, "Loja não encontrada.")
     end
 
     local station = getStationFromDB(stationId)
     if not station or station.type ~= 'craft' then
-        cb(false, "Bancada inválida.")
-        return
+        return finish(false, "Bancada inválida.")
     end
 
     if station.shop_id ~= shopId then
-        cb(false, "Esta bancada não pertence a esta loja.")
-        return
+        return finish(false, "Esta bancada não pertence a esta loja.")
     end
 
     -- Find the full recipe object
@@ -227,13 +245,11 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:requestCraft', function(source,
     end
 
     if not targetRecipe then
-        cb(false, "Receita não encontrada na loja.")
-        return
+        return finish(false, "Receita não encontrada na loja.")
     end
 
     if station.allowed_recipes and #station.allowed_recipes > 0 and not tableContains(station.allowed_recipes, recipeId) then
-        cb(false, "Receita não permitida nesta bancada.")
-        return
+        return finish(false, "Receita não permitida nesta bancada.")
     end
 
     local mult = math.max(1, math.floor(tonumber(multiplier) or 1))
@@ -248,7 +264,7 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:requestCraft', function(source,
     }
 
     -- Return success to client so it can start the progress bar and animations
-    cb(true, targetRecipe, station)
+    return finish(true, targetRecipe, station)
 end)
 
 -- ==========================================
@@ -258,13 +274,19 @@ end)
 -- Complete Crafting (Atomic Inventory Operation)
 RegisterNetEvent('fdb-shops:server:completeCraft', function(shopId, recipeId, stationId, multiplier)
     local src = source
+    if not AcquireLock(src, 'craft') then return end
+
     local player = FDBCore.Functions.GetPlayer(src)
-    if not player then return end
+    if not player then 
+        ReleaseLock(src, 'craft')
+        return 
+    end
     
     local citizenid = player.PlayerData.citizenid
     
     -- Permissions check
     if not EmployeeManager.HasPermission(shopId, citizenid, 'craftar') then
+        ReleaseLock(src, 'craft')
         fdbLibs:Notify(src, "Sem permissão.", "error")
         return
     end
@@ -272,9 +294,13 @@ RegisterNetEvent('fdb-shops:server:completeCraft', function(shopId, recipeId, st
     local shop = ShopManager.GetShop(shopId)
     local station = getStationFromDB(stationId)
 
-    if not shop or not station then return end
+    if not shop or not station then 
+        ReleaseLock(src, 'craft')
+        return 
+    end
 
     if station.shop_id ~= shopId then
+        ReleaseLock(src, 'craft')
         fdbLibs:Notify(src, "Bancada inválida.", "error")
         return
     end
@@ -282,12 +308,14 @@ RegisterNetEvent('fdb-shops:server:completeCraft', function(shopId, recipeId, st
     -- Anti-Cheat Time Verification
     local activeCraft = ActiveCrafts[citizenid]
     if not activeCraft or activeCraft.recipeId ~= recipeId or activeCraft.stationId ~= stationId then
+        ReleaseLock(src, 'craft')
         fdbLibs:Notify(src, "Fabricação não autorizada ou já processada.", "error")
         return
     end
 
     local timePassed = os.time() - activeCraft.startedAt
     if timePassed < (activeCraft.timeNeeded - 1) then
+        ReleaseLock(src, 'craft')
         fdbLibs:Notify(src, "Fabricação rápida detectada (Anti-Cheat).", "error")
         ActiveCrafts[citizenid] = nil
         return
@@ -301,6 +329,7 @@ RegisterNetEvent('fdb-shops:server:completeCraft', function(shopId, recipeId, st
     local pos = GetEntityCoords(ped)
     local stationPos = vec3(station.position.x, station.position.y, station.position.z)
     if #(pos - stationPos) > 6.0 then
+        ReleaseLock(src, 'craft')
         fdbLibs:Notify(src, "Você se afastou muito da bancada.", "error")
         return
     end
@@ -311,9 +340,13 @@ RegisterNetEvent('fdb-shops:server:completeCraft', function(shopId, recipeId, st
     for _, r in ipairs(rawRecipes) do
         if (r.id or r.result) == recipeId then recipe = r break end
     end
-    if not recipe then return end
+    if not recipe then 
+        ReleaseLock(src, 'craft')
+        return 
+    end
 
     if station.allowed_recipes and #station.allowed_recipes > 0 and not tableContains(station.allowed_recipes, recipeId) then
+        ReleaseLock(src, 'craft')
         fdbLibs:Notify(src, "Receita não permitida nesta bancada.", "error")
         return
     end
@@ -330,6 +363,7 @@ RegisterNetEvent('fdb-shops:server:completeCraft', function(shopId, recipeId, st
     end
 
     if not hasAll then
+        ReleaseLock(src, 'craft')
         fdbLibs:Notify(src, "Materiais insuficientes em seu inventário.", "error")
         return
     end
@@ -348,3 +382,5 @@ RegisterNetEvent('fdb-shops:server:completeCraft', function(shopId, recipeId, st
 
     fdbLibs:Notify(src, "Fabricação concluída com sucesso!", "success")
     ShopManager.LogTransaction(shopId, citizenid, 'craft', recipe.result, yieldAmount, 0, 0, recipe.category or "crafting")
+    ReleaseLock(src, 'craft')
+end)

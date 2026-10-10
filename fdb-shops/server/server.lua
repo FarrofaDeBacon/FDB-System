@@ -24,6 +24,34 @@ local function SanitizeInt(v, min, max)
     return v
 end
 
+local OpLocks = {}
+
+local function AcquireLock(src, action)
+    local key = src .. ':' .. action
+    if OpLocks[key] then return false end
+    OpLocks[key] = true
+    return true
+end
+
+local function ReleaseLock(src, action)
+    local key = src .. ':' .. action
+    OpLocks[key] = nil
+end
+
+local function IsPlayerNearShop(src, shopId, maxDist)
+    local ped = GetPlayerPed(src)
+    if not ped or ped == 0 then return false end
+    local coords = GetEntityCoords(ped)
+    local shop = ShopManager.GetShop(shopId)
+    if not shop or not shop.coords then return true end -- fallback if no coords
+    
+    local sc = type(shop.coords) == 'string' and json.decode(shop.coords) or shop.coords
+    if not sc or not sc.x then return true end
+    
+    local dist = #(coords - vector3(sc.x, sc.y, sc.z))
+    return dist <= (maxDist or 15.0)
+end
+
 -- ==========================================
 -- Callbacks (Client -> Server Requests)
 -- ==========================================
@@ -451,24 +479,62 @@ end)
 -- Process Cart Checkout
 fdbLibs:RegisterServerCallback('fdb-shops:server:checkoutCart', function(source, cb, data)
     local src = source
+    if not AcquireLock(src, 'checkout') then
+        return cb({ success = false, message = "Aguarde a transação anterior terminar." })
+    end
+    local function finish(res)
+        ReleaseLock(src, 'checkout')
+        return cb(res)
+    end
+
     local Player = FDBCore.Functions.GetPlayer(src)
-    if not Player then return cb({ success = false, message = "Jogador não encontrado." }) end
+    if not Player then return finish({ success = false, message = "Jogador não encontrado." }) end
 
     local shopId = data.shopId
+    
+    if not IsPlayerNearShop(src, shopId, 15.0) then
+        return finish({ success = false, message = "Você está muito longe da loja!" })
+    end
+
     local paymentMethod = data.paymentMethod or 'cash'
     local cart = data.cart or {}
 
     if #cart == 0 or #cart > 100 then
-        return cb({ success = false, message = "O carrinho está vazio ou excede o limite." })
+        return finish({ success = false, message = "O carrinho está vazio ou excede o limite." })
     end
 
     if paymentMethod ~= 'cash' and paymentMethod ~= 'bank' and paymentMethod ~= 'promissoria' then
-        return cb({ success = false, message = "Método de pagamento inválido." })
+        return finish({ success = false, message = "Método de pagamento inválido." })
     end
 
     local shop = ShopManager.GetShop(shopId)
     if not shop then
-        return cb({ success = false, message = "Loja não encontrada." })
+        return finish({ success = false, message = "Loja não encontrada." })
+    end
+    
+    -- Gating Achado 5
+    if shop.config then
+        if shop.config.jobRequirement and shop.config.jobRequirement ~= "" then
+            local jobType = (Player.PlayerData.job and Player.PlayerData.job.type) or ''
+            local jobName = (Player.PlayerData.job and Player.PlayerData.job.name) or ''
+            if jobType ~= shop.config.jobRequirement and jobName ~= shop.config.jobRequirement then
+                return finish({ success = false, message = "Você não tem a profissão necessária." })
+            end
+        end
+        if shop.config.openingHour and shop.config.closingHour then
+            local hour = GetClockHours()
+            local openH = tonumber(shop.config.openingHour) or 0
+            local closeH = tonumber(shop.config.closingHour) or 24
+            if closeH > openH then
+                if hour < openH or hour >= closeH then
+                    return finish({ success = false, message = "A loja está fechada." })
+                end
+            else
+                if hour < openH and hour >= closeH then
+                    return finish({ success = false, message = "A loja está fechada." })
+                end
+            end
+        end
     end
 
     -- Validate payment method against store configuration
@@ -476,10 +542,10 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:checkoutCart', function(source,
     if paymentConfig.cash == nil then paymentConfig.cash = true end
 
     if paymentMethod == 'bank' and not paymentConfig.bank then
-        return cb({ success = false, message = "Esta loja não aceita transferências bancárias no Velho Oeste!" })
+        return finish({ success = false, message = "Esta loja não aceita transferências bancárias no Velho Oeste!" })
     end
     if paymentMethod == 'promissoria' and not paymentConfig.promissoria then
-        return cb({ success = false, message = "Esta loja não aceita notas promissórias!" })
+        return finish({ success = false, message = "Esta loja não aceita notas promissórias!" })
     end
 
     -- Server-side Price & Total Recalculation
@@ -493,7 +559,7 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:checkoutCart', function(source,
         if type(itemName) == 'string' and amount and FDBCore.Shared.Items[itemName] then
             local unitPrice = ShopManager.GetFinalPrice(shopId, itemName)
             if not unitPrice or unitPrice <= 0 then
-                return cb({ success = false, message = "Item indisponível nesta loja." })
+                return finish({ success = false, message = "Item indisponível nesta loja." })
             end
             local subtotal = unitPrice * amount
             totalCost = totalCost + subtotal
@@ -507,7 +573,7 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:checkoutCart', function(source,
     end
 
     if #validatedItems == 0 then
-        return cb({ success = false, message = "Nenhum item válido no pedido." })
+        return finish({ success = false, message = "Nenhum item válido no pedido." })
     end
 
     -- Handle Promissoria
@@ -515,29 +581,29 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:checkoutCart', function(source,
     if paymentMethod == 'promissoria' then
         local note = Player.Functions.GetItemByName('promissoria') or Player.Functions.GetItemByName('nota_promissoria')
         if not note then
-            return cb({ success = false, message = "Você não possui uma nota promissória." })
+            return finish({ success = false, message = "Você não possui uma nota promissória." })
         end
         noteSlot = note.slot
         if not Player.Functions.RemoveItem(note.name, 1, noteSlot) then
-            return cb({ success = false, message = "Falha ao utilizar a promissória." })
+            return finish({ success = false, message = "Falha ao utilizar a promissória." })
         end
     else
         if not SanitizeMoney(totalCost) then
-            return cb({ success = false, message = "Valor total inválido." })
+            return finish({ success = false, message = "Valor total inválido." })
         end
         local playerBalance = (Player.PlayerData.money and Player.PlayerData.money[paymentMethod]) or 0.0
         if playerBalance < totalCost then
-            return cb({ success = false, message = ("Saldo insuficiente (%s)."):format(paymentMethod == 'cash' and 'Dinheiro' or 'Banco') })
+            return finish({ success = false, message = ("Saldo insuficiente (%s)."):format(paymentMethod == 'cash' and 'Dinheiro' or 'Banco') })
         end
 
         if not StashManager.UpdateBalance(shopId, totalCost, "sale") then
-            return cb({ success = false, message = "A registradora está cheia ou indisponível." })
+            return finish({ success = false, message = "A registradora está cheia ou indisponível." })
         end
 
         local paymentSuccess = Player.Functions.RemoveMoney(paymentMethod, totalCost, "shop-purchase-" .. shopId)
         if not paymentSuccess then
             StashManager.UpdateBalance(shopId, -totalCost, "sale-rollback")
-            return cb({ success = false, message = "Falha ao debitar valor da conta." })
+            return finish({ success = false, message = "Falha ao debitar valor da conta." })
         end
     end
 
@@ -565,7 +631,7 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:checkoutCart', function(source,
             Player.Functions.AddMoney(paymentMethod, totalCost, "shop-purchase-refund-" .. shopId)
             StashManager.UpdateBalance(shopId, -totalCost, "sale-rollback")
         end
-        return cb({ success = false, message = "Espaço insuficiente no inventário." })
+        return finish({ success = false, message = "Espaço insuficiente no inventário." })
     end
 
     -- Buyer name
@@ -594,7 +660,7 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:checkoutCart', function(source,
         ("Compra concluída! Pago: $%s (%s)"):format(string.format("%.2f", totalCost), paymentMethod == 'cash' and 'Dinheiro' or 'Banco')
 
     fdbLibs:Notify(src, msg, "success", 4000)
-    cb({ success = true })
+    return finish({ success = true })
 end)
 
 -- Owner/Employee Actions
@@ -624,8 +690,16 @@ RegisterNetEvent('fdb-shops:server:depositCash', function(shopId, stationId, amo
     local src = source
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
+    
+    if not IsPlayerNearShop(src, shopId, 15.0) then
+        fdbLibs:Notify(src, "Você está muito longe da loja!", "error")
+        return
+    end
+    
+    if not AcquireLock(src, 'finance') then return end
 
     if not hasStationModule(stationId, shopId, 'finances') then
+        ReleaseLock(src, 'finance')
         fdbLibs:Notify(src, "Este painel não possui módulo financeiro", "error")
         return
     end
@@ -633,6 +707,7 @@ RegisterNetEvent('fdb-shops:server:depositCash', function(shopId, stationId, amo
     if EmployeeManager.HasPermission(shopId, Player.PlayerData.citizenid, 'financeiro') then
         amount = SanitizeMoney(amount)
         if not amount then
+            ReleaseLock(src, 'finance')
             fdbLibs:Notify(src, "Valor inválido.", "error")
             return
         end
@@ -644,14 +719,23 @@ RegisterNetEvent('fdb-shops:server:depositCash', function(shopId, stationId, amo
     else
         fdbLibs:Notify(src, "Você não tem permissão para depositar", "error")
     end
+    ReleaseLock(src, 'finance')
 end)
 
 RegisterNetEvent('fdb-shops:server:withdrawCash', function(shopId, stationId, amount)
     local src = source
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return end
+    
+    if not IsPlayerNearShop(src, shopId, 15.0) then
+        fdbLibs:Notify(src, "Você está muito longe da loja!", "error")
+        return
+    end
+    
+    if not AcquireLock(src, 'finance') then return end
 
     if not hasStationModule(stationId, shopId, 'finances') then
+        ReleaseLock(src, 'finance')
         fdbLibs:Notify(src, "Este painel não possui módulo financeiro", "error")
         return
     end
@@ -659,11 +743,13 @@ RegisterNetEvent('fdb-shops:server:withdrawCash', function(shopId, stationId, am
     if EmployeeManager.HasPermission(shopId, Player.PlayerData.citizenid, 'financeiro') then
         amount = SanitizeMoney(amount)
         if not amount then
+            ReleaseLock(src, 'finance')
             fdbLibs:Notify(src, "Valor inválido.", "error")
             return
         end
         local bal = StashManager.GetBalance(shopId)
         if amount > bal then
+            ReleaseLock(src, 'finance')
             fdbLibs:Notify(src, "O caixa não tem saldo suficiente", "error")
             return
         end
@@ -676,6 +762,7 @@ RegisterNetEvent('fdb-shops:server:withdrawCash', function(shopId, stationId, am
     else
         fdbLibs:Notify(src, "Você não tem permissão para sacar", "error")
     end
+    ReleaseLock(src, 'finance')
 end)
 
 RegisterNetEvent('fdb-shops:server:updatePriceVariation', function(shopId, stationId, variation)
