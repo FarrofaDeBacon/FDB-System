@@ -77,7 +77,7 @@ CreateThread(function()
                 cashBalance = s.cash_balance,
                 ownerPriceVariation = s.owner_price_variation,
                 maxPriceVariation = s.max_price_variation,
-                regionId = s.region_id,
+                regionId = s.region_id or (s.city and Config.CityRegions and Config.CityRegions[string.lower(s.city)]) or 'outros',
                 city = s.city or 'outros',
                 config = json.decode(s.config) or {},
                 stockMode = s.stock_mode or (s.owner_id and s.owner_id ~= "" and 'physical' or 'infinite')
@@ -131,7 +131,7 @@ function ShopManager.GetShop(shopId)
             cashBalance = tonumber(s.cash_balance) or 0.0,
             ownerPriceVariation = tonumber(s.owner_price_variation) or 0.0,
             maxPriceVariation = tonumber(s.max_price_variation) or 0.15,
-            regionId = s.region_id,
+            regionId = s.region_id or (s.city and Config.CityRegions and Config.CityRegions[string.lower(s.city)]) or 'outros',
             city = s.city or 'outros',
             config = json.decode(s.config) or {},
             stockMode = s.stock_mode or (s.owner_id and s.owner_id ~= "" and 'physical' or 'infinite')

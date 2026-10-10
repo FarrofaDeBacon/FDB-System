@@ -574,7 +574,8 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:checkoutCart', function(source,
                 name = itemName,
                 amount = amount,
                 unitPrice = unitPrice,
-                subtotal = subtotal
+                subtotal = subtotal,
+                category = FDBCore.Shared.Items[itemName].category or FDBCore.Shared.Items[itemName].type or 'produtos'
             })
         end
     end
@@ -702,7 +703,7 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:checkoutCart', function(source,
             vi.amount, 
             vi.unitPrice, 
             vi.subtotal, 
-            'produtos',
+            vi.category,
             buyerName,
             paymentMethod,
             { items = {vi} }
