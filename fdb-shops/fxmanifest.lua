@@ -45,7 +45,8 @@ dependencies {
     'fdb-economy',
     'fdb-libs',
     'oxmysql',
-    'ox_target'
+    'ox_target',
+    'ox_lib'
 }
 
 lua54 'yes'

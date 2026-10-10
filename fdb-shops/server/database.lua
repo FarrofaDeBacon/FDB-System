@@ -181,26 +181,46 @@ CreateThread(function()
     end
 
     -- Migration idempotente para colunas de cargos e serviço em shop_employees
-    local hasGradeLevel = MySQL.scalar.await("SHOW COLUMNS FROM `shop_employees` LIKE 'grade_level'")
-    if not hasGradeLevel then
-        pcall(function()
-            MySQL.query.await("ALTER TABLE `shop_employees` ADD COLUMN `grade_level` INT DEFAULT 1 AFTER `player_id`")
-            MySQL.query.await("ALTER TABLE `shop_employees` ADD COLUMN `role_name` VARCHAR(50) DEFAULT 'Auxiliar' AFTER `grade_level`")
-            MySQL.query.await("ALTER TABLE `shop_employees` ADD COLUMN `is_duty` TINYINT(1) DEFAULT 0 AFTER `role_name`")
-        end)
-        print('^2[' .. resourceName .. '] Migration: Columns grade_level, role_name, is_duty added to shop_employees.^7')
+    local empCols = {
+        { name = 'grade_level', sql = "ALTER TABLE `shop_employees` ADD COLUMN `grade_level` INT DEFAULT 1 AFTER `player_id`" },
+        { name = 'role_name',   sql = "ALTER TABLE `shop_employees` ADD COLUMN `role_name` VARCHAR(50) DEFAULT 'Auxiliar' AFTER `grade_level`" },
+        { name = 'is_duty',     sql = "ALTER TABLE `shop_employees` ADD COLUMN `is_duty` TINYINT(1) DEFAULT 0 AFTER `role_name`" }
+    }
+    for _, col in ipairs(empCols) do
+        local exists = MySQL.scalar.await("SHOW COLUMNS FROM `shop_employees` LIKE ?", { col.name })
+        if not exists then
+            local success, err = pcall(function()
+                MySQL.query.await(col.sql)
+            end)
+            if success then
+                print('^2[' .. resourceName .. '] Migration: Column `' .. col.name .. '` added to shop_employees.^7')
+            else
+                print('^1[' .. resourceName .. '] Migration Error adding `' .. col.name .. '` to shop_employees: ' .. tostring(err) .. '^7')
+            end
+        end
     end
 
     -- Migration idempotente para detalhes em shop_transactions
-    local hasBuyerName = MySQL.scalar.await("SHOW COLUMNS FROM `shop_transactions` LIKE 'buyer_name'")
-    if not hasBuyerName then
-        pcall(function()
-            MySQL.query.await("ALTER TABLE `shop_transactions` MODIFY `transaction_type` VARCHAR(50) NOT NULL")
-            MySQL.query.await("ALTER TABLE `shop_transactions` ADD COLUMN `buyer_name` VARCHAR(100) DEFAULT NULL AFTER `region_id`")
-            MySQL.query.await("ALTER TABLE `shop_transactions` ADD COLUMN `payment_method` VARCHAR(50) DEFAULT 'cash' AFTER `buyer_name`")
-            MySQL.query.await("ALTER TABLE `shop_transactions` ADD COLUMN `metadata` JSON DEFAULT NULL AFTER `payment_method`")
-        end)
-        print('^2[' .. resourceName .. '] Migration: Columns buyer_name, payment_method, metadata added to shop_transactions.^7')
+    local txCols = {
+        { name = 'buyer_name',     sql = "ALTER TABLE `shop_transactions` ADD COLUMN `buyer_name` VARCHAR(100) DEFAULT NULL AFTER `region_id`" },
+        { name = 'payment_method', sql = "ALTER TABLE `shop_transactions` ADD COLUMN `payment_method` VARCHAR(50) DEFAULT 'cash' AFTER `buyer_name`" },
+        { name = 'metadata',       sql = "ALTER TABLE `shop_transactions` ADD COLUMN `metadata` JSON DEFAULT NULL AFTER `payment_method`" }
+    }
+    pcall(function()
+        MySQL.query.await("ALTER TABLE `shop_transactions` MODIFY `transaction_type` VARCHAR(50) NOT NULL")
+    end)
+    for _, col in ipairs(txCols) do
+        local exists = MySQL.scalar.await("SHOW COLUMNS FROM `shop_transactions` LIKE ?", { col.name })
+        if not exists then
+            local success, err = pcall(function()
+                MySQL.query.await(col.sql)
+            end)
+            if success then
+                print('^2[' .. resourceName .. '] Migration: Column `' .. col.name .. '` added to shop_transactions.^7')
+            else
+                print('^1[' .. resourceName .. '] Migration Error adding `' .. col.name .. '` to shop_transactions: ' .. tostring(err) .. '^7')
+            end
+        end
     end
 
     print('^2[' .. resourceName .. '] Database schema initialized.^7')
@@ -209,23 +229,34 @@ end)
 Database = Database or {}
 
 function Database.UpdateShopId(originalId, targetId)
-    if not originalId or not targetId or originalId == targetId then return false end
+    if not originalId or not targetId or originalId == targetId then return false, "Invalid IDs" end
     
-    local success, err = pcall(function()
-        MySQL.update.await('SET FOREIGN_KEY_CHECKS = 0')
-        MySQL.update.await('UPDATE shops SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
-        MySQL.update.await('UPDATE shop_stations SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
-        MySQL.update.await('UPDATE shop_employees SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
-        MySQL.update.await('UPDATE shop_catalog_items SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
-        MySQL.update.await('UPDATE shop_transactions SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
-        MySQL.update.await('SET FOREIGN_KEY_CHECKS = 1')
-    end)
+    local queries = {
+        { query = 'SET FOREIGN_KEY_CHECKS = 0' },
+        { query = 'UPDATE shops SET shop_id = ? WHERE shop_id = ?', values = {targetId, originalId} },
+        { query = 'UPDATE shop_stations SET shop_id = ? WHERE shop_id = ?', values = {targetId, originalId} },
+        { query = 'UPDATE shop_employees SET shop_id = ? WHERE shop_id = ?', values = {targetId, originalId} },
+        { query = 'UPDATE shop_catalog_items SET shop_id = ? WHERE shop_id = ?', values = {targetId, originalId} },
+        { query = 'UPDATE shop_transactions SET shop_id = ? WHERE shop_id = ?', values = {targetId, originalId} },
+        { query = 'UPDATE inventories SET identifier = ? WHERE identifier = ?', values = {'shop_stock_' .. targetId, 'shop_stock_' .. originalId} },
+        { query = 'UPDATE inventories SET identifier = ? WHERE identifier = ?', values = {'shop_register_' .. targetId, 'shop_register_' .. originalId} },
+        { query = 'SET FOREIGN_KEY_CHECKS = 1' }
+    }
     
+    local success = MySQL.transaction.await(queries)
     if not success then
-        pcall(function() MySQL.update.await('SET FOREIGN_KEY_CHECKS = 1') end)
-        print('^1[' .. resourceName .. '] Erro ao atualizar shop_id no banco: ' .. tostring(err) .. '^7')
-        return false, err
+        print('^1[' .. resourceName .. '] Erro na transação ao atualizar shop_id no banco!^7')
+        return false, "Transaction failed"
     end
+
+    -- Invalida cache de inventário em memória se fdb-inventory estiver rodando
+    pcall(function()
+        if exports['fdb-inventory'] and exports['fdb-inventory'].DeleteInventory then
+            exports['fdb-inventory']:DeleteInventory('shop_stock_' .. originalId)
+            exports['fdb-inventory']:DeleteInventory('shop_register_' .. originalId)
+        end
+    end)
     
     return true
 end
+
