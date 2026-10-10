@@ -205,3 +205,27 @@ CreateThread(function()
 
     print('^2[' .. resourceName .. '] Database schema initialized.^7')
 end)
+
+Database = Database or {}
+
+function Database.UpdateShopId(originalId, targetId)
+    if not originalId or not targetId or originalId == targetId then return false end
+    
+    local success, err = pcall(function()
+        MySQL.update.await('SET FOREIGN_KEY_CHECKS = 0')
+        MySQL.update.await('UPDATE shops SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
+        MySQL.update.await('UPDATE shop_stations SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
+        MySQL.update.await('UPDATE shop_employees SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
+        MySQL.update.await('UPDATE shop_catalog_items SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
+        MySQL.update.await('UPDATE shop_transactions SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
+        MySQL.update.await('SET FOREIGN_KEY_CHECKS = 1')
+    end)
+    
+    if not success then
+        pcall(function() MySQL.update.await('SET FOREIGN_KEY_CHECKS = 1') end)
+        print('^1[' .. resourceName .. '] Erro ao atualizar shop_id no banco: ' .. tostring(err) .. '^7')
+        return false, err
+    end
+    
+    return true
+end

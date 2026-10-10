@@ -37,7 +37,8 @@ RegisterNUICallback("flipStationHeading", function(data, cb)
 end)
 
 RegisterNUICallback("saveStoreConfig", function(data, cb)
-    TriggerServerEvent('fdb-shops:server:saveStoreConfig', data.store)
+    local storeData = (data and data.store) or data
+    TriggerServerEvent('fdb-shops:server:saveStoreConfig', storeData)
     cb('ok')
 end)
 

@@ -114,6 +114,11 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
     local src = source
     if not FDBCore.Functions.HasPermission(src, 'admin') then return end
     
+    if storeData and storeData.store then
+        storeData = storeData.store
+    end
+    if not storeData or type(storeData) ~= 'table' then return end
+
     local originalId = storeData.originalId or storeData.id
     local targetId = storeData.id
     if not originalId or not ShopManager.GetShop(originalId) then
@@ -130,13 +135,11 @@ RegisterNetEvent('fdb-shops:server:saveStoreConfig', function(storeData)
             return
         end
 
-        MySQL.update.await('SET FOREIGN_KEY_CHECKS = 0')
-        MySQL.update.await('UPDATE shops SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
-        MySQL.update.await('UPDATE shop_stations SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
-        MySQL.update.await('UPDATE shop_employees SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
-        MySQL.update.await('UPDATE shop_catalog_items SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
-        MySQL.update.await('UPDATE shop_transactions SET shop_id = ? WHERE shop_id = ?', {targetId, originalId})
-        MySQL.update.await('SET FOREIGN_KEY_CHECKS = 1')
+        local updated, err = Database.UpdateShopId(originalId, targetId)
+        if not updated then
+            exports['fdb-libs']:Notify(src, 'Erro ao renomear ID da loja no banco!', 'error')
+            return
+        end
 
         if ShopManager.Shops[originalId] then
             ShopManager.Shops[targetId] = ShopManager.Shops[originalId]

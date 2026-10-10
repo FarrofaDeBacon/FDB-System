@@ -155,8 +155,7 @@
 </script>
 
 {#if visible}
-    {#if !isPlacementMode}
-    <div class="fdb-shops-app">
+    <div class="fdb-shops-app" style:display={isPlacementMode ? 'none' : 'flex'}>
         {#if selectedStore}
             <StoreConfig 
                 store={selectedStore} 
@@ -178,7 +177,6 @@
             />
         {/if}
     </div>
-    {/if}
 
     {#if isPlacementMode}
     <div class="noclip-hud noclip-hud--visible" aria-hidden="false">
