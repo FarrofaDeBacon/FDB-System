@@ -15,10 +15,11 @@ ShopManager = {
 CreateThread(function()
     Wait(2000)
     
-    -- Ensure columns are DECIMAL instead of FLOAT (Issue 13)
+    -- Ensure columns are DECIMAL instead of FLOAT (Issue 13) and add stock_mode (Block 2)
     pcall(function()
         MySQL.query.await('ALTER TABLE shops MODIFY COLUMN cash_balance DECIMAL(12,2) DEFAULT 0.00')
         MySQL.query.await('ALTER TABLE shops MODIFY COLUMN owner_price_variation DECIMAL(12,2) DEFAULT 0.00')
+        MySQL.query.await('ALTER TABLE shops ADD COLUMN stock_mode VARCHAR(50) DEFAULT "infinite"')
     end)
     
     local templates = MySQL.query.await('SELECT * FROM shop_templates')
@@ -78,7 +79,8 @@ CreateThread(function()
                 maxPriceVariation = s.max_price_variation,
                 regionId = s.region_id,
                 city = s.city or 'outros',
-                config = json.decode(s.config) or {}
+                config = json.decode(s.config) or {},
+                stockMode = s.stock_mode or (s.owner_id and s.owner_id ~= "" and 'physical' or 'infinite')
             }
         end
         print(('^2[%s] Loaded %d templates and %d shops with catalog items.^7'):format(resourceName, #templates, #shops))
@@ -131,7 +133,8 @@ function ShopManager.GetShop(shopId)
             maxPriceVariation = tonumber(s.max_price_variation) or 0.15,
             regionId = s.region_id,
             city = s.city or 'outros',
-            config = json.decode(s.config) or {}
+            config = json.decode(s.config) or {},
+            stockMode = s.stock_mode or (s.owner_id and s.owner_id ~= "" and 'physical' or 'infinite')
         }
         return ShopManager.Shops[s.shop_id]
     end

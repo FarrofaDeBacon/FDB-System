@@ -479,18 +479,25 @@ end)
 -- Process Cart Checkout
 fdbLibs:RegisterServerCallback('fdb-shops:server:checkoutCart', function(source, cb, data)
     local src = source
+    local shopId = data.shopId
+    local shopLockKey = 'shop_' .. shopId
+    
     if not AcquireLock(src, 'checkout') then
         return cb({ success = false, message = "Aguarde a transação anterior terminar." })
     end
+    if not AcquireLock(shopLockKey, 'checkout') then
+        ReleaseLock(src, 'checkout')
+        return cb({ success = false, message = "Aguarde, outro cliente está comprando nesta loja." })
+    end
+    
     local function finish(res)
         ReleaseLock(src, 'checkout')
+        ReleaseLock(shopLockKey, 'checkout')
         return cb(res)
     end
 
     local Player = FDBCore.Functions.GetPlayer(src)
     if not Player then return finish({ success = false, message = "Jogador não encontrado." }) end
-
-    local shopId = data.shopId
     
     if not IsPlayerNearShop(src, shopId, 15.0) then
         return finish({ success = false, message = "Você está muito longe da loja!" })
@@ -576,33 +583,77 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:checkoutCart', function(source,
         return finish({ success = false, message = "Nenhum item válido no pedido." })
     end
 
-    -- Handle Promissoria
+    -- Handle Physical Stock
+    local isPhysical = (shop.stockMode == 'physical')
+    local stashName = 'shop_stock_' .. shopId
+    local removedFromStash = {}
+
+    if isPhysical then
+        local stashHasAll = true
+        for _, itm in ipairs(validatedItems) do
+            local success = exports['fdb-inventory']:RemoveItem(stashName, itm.name, itm.amount)
+            if success then
+                table.insert(removedFromStash, itm)
+            else
+                stashHasAll = false
+                break
+            end
+        end
+
+        if not stashHasAll then
+            -- Rollback stash
+            for _, itm in ipairs(removedFromStash) do
+                exports['fdb-inventory']:AddItem(stashName, itm.name, itm.amount)
+            end
+            return finish({ success = false, message = "Estoque físico insuficiente na loja." })
+        end
+    end
+
+    -- Handle Promissoria or Money Payment
     local noteSlot = nil
     if paymentMethod == 'promissoria' then
         local note = Player.Functions.GetItemByName('promissoria') or Player.Functions.GetItemByName('nota_promissoria')
         if not note then
+            if isPhysical then
+                for _, itm in ipairs(removedFromStash) do exports['fdb-inventory']:AddItem(stashName, itm.name, itm.amount) end
+            end
             return finish({ success = false, message = "Você não possui uma nota promissória." })
         end
         noteSlot = note.slot
         if not Player.Functions.RemoveItem(note.name, 1, noteSlot) then
+            if isPhysical then
+                for _, itm in ipairs(removedFromStash) do exports['fdb-inventory']:AddItem(stashName, itm.name, itm.amount) end
+            end
             return finish({ success = false, message = "Falha ao utilizar a promissória." })
         end
     else
         if not SanitizeMoney(totalCost) then
+            if isPhysical then
+                for _, itm in ipairs(removedFromStash) do exports['fdb-inventory']:AddItem(stashName, itm.name, itm.amount) end
+            end
             return finish({ success = false, message = "Valor total inválido." })
         end
         local playerBalance = (Player.PlayerData.money and Player.PlayerData.money[paymentMethod]) or 0.0
         if playerBalance < totalCost then
+            if isPhysical then
+                for _, itm in ipairs(removedFromStash) do exports['fdb-inventory']:AddItem(stashName, itm.name, itm.amount) end
+            end
             return finish({ success = false, message = ("Saldo insuficiente (%s)."):format(paymentMethod == 'cash' and 'Dinheiro' or 'Banco') })
         end
 
         if not StashManager.UpdateBalance(shopId, totalCost, "sale") then
+            if isPhysical then
+                for _, itm in ipairs(removedFromStash) do exports['fdb-inventory']:AddItem(stashName, itm.name, itm.amount) end
+            end
             return finish({ success = false, message = "A registradora está cheia ou indisponível." })
         end
 
         local paymentSuccess = Player.Functions.RemoveMoney(paymentMethod, totalCost, "shop-purchase-" .. shopId)
         if not paymentSuccess then
             StashManager.UpdateBalance(shopId, -totalCost, "sale-rollback")
+            if isPhysical then
+                for _, itm in ipairs(removedFromStash) do exports['fdb-inventory']:AddItem(stashName, itm.name, itm.amount) end
+            end
             return finish({ success = false, message = "Falha ao debitar valor da conta." })
         end
     end
@@ -630,6 +681,9 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:checkoutCart', function(source,
         else
             Player.Functions.AddMoney(paymentMethod, totalCost, "shop-purchase-refund-" .. shopId)
             StashManager.UpdateBalance(shopId, -totalCost, "sale-rollback")
+        end
+        if isPhysical then
+            for _, itm in ipairs(removedFromStash) do exports['fdb-inventory']:AddItem(stashName, itm.name, itm.amount) end
         end
         return finish({ success = false, message = "Espaço insuficiente no inventário." })
     end
