@@ -170,7 +170,7 @@ function ShopManager.GetFinalPrice(shopId, itemName)
         end
     end
 
-    if not catalogItem then return 0 end
+    if not catalogItem then return nil end
 
     local basePrice = tonumber(catalogItem.price) or 0.0
     -- Use economy export if region is defined

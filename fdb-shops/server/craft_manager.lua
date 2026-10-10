@@ -231,6 +231,11 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:requestCraft', function(source,
         return
     end
 
+    if station.allowed_recipes and #station.allowed_recipes > 0 and not tableContains(station.allowed_recipes, recipeId) then
+        cb(false, "Receita não permitida nesta bancada.")
+        return
+    end
+
     local mult = math.max(1, math.floor(tonumber(multiplier) or 1))
 
     -- Register the craft in memory to prevent speed hacking
@@ -307,6 +312,11 @@ RegisterNetEvent('fdb-shops:server:completeCraft', function(shopId, recipeId, st
         if (r.id or r.result) == recipeId then recipe = r break end
     end
     if not recipe then return end
+
+    if station.allowed_recipes and #station.allowed_recipes > 0 and not tableContains(station.allowed_recipes, recipeId) then
+        fdbLibs:Notify(src, "Receita não permitida nesta bancada.", "error")
+        return
+    end
 
     -- Verify player materials
     local hasAll = true
