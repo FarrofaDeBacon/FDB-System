@@ -36,7 +36,6 @@ local function tableContains(tbl, val)
     return false
 end
 
--- Find the station config in memory
 local function getStationFromDB(stationId)
     local result = MySQL.query.await('SELECT * FROM shop_stations WHERE id = ?', {stationId})
     if result and result[1] then
@@ -49,7 +48,25 @@ local function getStationFromDB(stationId)
             allowed_recipes = json.decode(row.allowed_recipes) or {},
             prop_model = row.prop_model,
             animation_dict = row.animation_dict,
-            animation_name = row.animation_name
+            animation_name = row.animation_name,
+            metadata = row.metadata and json.decode(row.metadata) or {}
+        }
+    end
+    return nil
+end
+
+local function GetCraftSource(shop, station)
+    if not shop.ownerId or shop.ownerId == "" then
+        return 'player_inventory'
+    end
+    if station.metadata and station.metadata.craftSource then
+        return station.metadata.craftSource
+    end
+    return Config.CraftSourceDefault or 'shop_stash'
+end
+            animation_dict = row.animation_dict,
+            animation_name = row.animation_name,
+            metadata = row.metadata and json.decode(row.metadata) or {}
         }
     end
     return nil
@@ -188,12 +205,36 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:getCraftMenu', function(source,
         return
     end
 
-    -- 3. Gather player's inventory count for materials
+    -- 3. Gather inventory count for materials
     local inventoryData = {}
-    if Player.PlayerData and Player.PlayerData.items then
-        for _, itm in pairs(Player.PlayerData.items) do
-            if itm and itm.name then
-                inventoryData[itm.name] = (inventoryData[itm.name] or 0) + (itm.amount or 1)
+    local craftSource = GetCraftSource(shop, station)
+
+    if craftSource == 'shop_stash' then
+        local stashName = 'shop_stock_' .. shopId
+        -- Attempt to get stash items if the API allows
+        local success, items = pcall(function() return exports['fdb-inventory']:GetInventoryItems(stashName) end)
+        if not success or not items then
+            success, items = pcall(function() return exports['fdb-inventory']:GetItems(stashName) end)
+        end
+        if not success or not items then
+            -- DB Fallback for QB Core style
+            local row = MySQL.single.await('SELECT items FROM stashitems WHERE stash = ?', {stashName})
+            if row and row.items then items = json.decode(row.items) end
+        end
+
+        if type(items) == 'table' then
+            for _, itm in pairs(items) do
+                if type(itm) == 'table' and itm.name then
+                    inventoryData[itm.name] = (inventoryData[itm.name] or 0) + (tonumber(itm.amount) or 1)
+                end
+            end
+        end
+    else
+        if Player.PlayerData and Player.PlayerData.items then
+            for _, itm in pairs(Player.PlayerData.items) do
+                if itm and itm.name then
+                    inventoryData[itm.name] = (inventoryData[itm.name] or 0) + (itm.amount or 1)
+                end
             end
         end
     end
@@ -253,6 +294,7 @@ fdbLibs:RegisterServerCallback('fdb-shops:server:requestCraft', function(source,
     end
 
     local mult = math.max(1, math.floor(tonumber(multiplier) or 1))
+    if mult > 100 then mult = 100 end -- limit multiplier
 
     -- Register the craft in memory to prevent speed hacking
     ActiveCrafts[citizenid] = {
@@ -351,34 +393,87 @@ RegisterNetEvent('fdb-shops:server:completeCraft', function(shopId, recipeId, st
         return
     end
 
-    -- Verify player materials
-    local hasAll = true
-    for _, ing in ipairs(recipe.ingredients or {}) do
-        local needed = (ing.amount or 1) * mult
-        local item = player.Functions.GetItemByName(ing.name)
-        if not item or (item.amount or 0) < needed then
-            hasAll = false
-            break
+    local craftSource = GetCraftSource(shop, station)
+    local stashName = 'shop_stock_' .. shopId
+    
+    if craftSource == 'player_inventory' then
+        -- Verify player materials
+        local hasAll = true
+        for _, ing in ipairs(recipe.ingredients or {}) do
+            local needed = (ing.amount or 1) * mult
+            local item = player.Functions.GetItemByName(ing.name)
+            if not item or (item.amount or 0) < needed then
+                hasAll = false
+                break
+            end
+        end
+
+        if not hasAll then
+            ReleaseLock(src, 'craft')
+            fdbLibs:Notify(src, "Materiais insuficientes em seu inventário.", "error")
+            return
+        end
+
+        -- Remove ingredients from player
+        for _, ing in ipairs(recipe.ingredients or {}) do
+            local needed = (ing.amount or 1) * mult
+            player.Functions.RemoveItem(ing.name, needed)
+            TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[ing.name], "remove")
+        end
+
+        -- Add crafted result
+        local yieldAmount = (recipe.amount or 1) * mult
+        if player.Functions.AddItem(recipe.result, yieldAmount) then
+            TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[recipe.result], "add")
+        else
+            -- Reverse
+            for _, ing in ipairs(recipe.ingredients or {}) do
+                local needed = (ing.amount or 1) * mult
+                player.Functions.AddItem(ing.name, needed)
+            end
+            ReleaseLock(src, 'craft')
+            fdbLibs:Notify(src, "Inventário cheio.", "error")
+            return
+        end
+    else
+        -- shop_stash
+        local removedFromStash = {}
+        local stashHasAll = true
+        for _, ing in ipairs(recipe.ingredients or {}) do
+            local needed = (ing.amount or 1) * mult
+            local success = exports['fdb-inventory']:RemoveItem(stashName, ing.name, needed)
+            if success then
+                table.insert(removedFromStash, {name = ing.name, amount = needed})
+            else
+                stashHasAll = false
+                break
+            end
+        end
+        
+        if not stashHasAll then
+            -- Rollback
+            for _, r in ipairs(removedFromStash) do
+                exports['fdb-inventory']:AddItem(stashName, r.name, r.amount)
+            end
+            ReleaseLock(src, 'craft')
+            fdbLibs:Notify(src, "Materiais insuficientes no baú da loja.", "error")
+            return
+        end
+        
+        local yieldAmount = (recipe.amount or 1) * mult
+        local success = exports['fdb-inventory']:AddItem(stashName, recipe.result, yieldAmount)
+        if not success then
+            -- Rollback
+            for _, r in ipairs(removedFromStash) do
+                exports['fdb-inventory']:AddItem(stashName, r.name, r.amount)
+            end
+            ReleaseLock(src, 'craft')
+            fdbLibs:Notify(src, "Espaço insuficiente no baú da loja para o resultado.", "error")
+            return
         end
     end
 
-    if not hasAll then
-        ReleaseLock(src, 'craft')
-        fdbLibs:Notify(src, "Materiais insuficientes em seu inventário.", "error")
-        return
-    end
-
-    -- Remove ingredients from player
-    for _, ing in ipairs(recipe.ingredients or {}) do
-        local needed = (ing.amount or 1) * mult
-        player.Functions.RemoveItem(ing.name, needed)
-        TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[ing.name], "remove")
-    end
-
-    -- Add crafted result
     local yieldAmount = (recipe.amount or 1) * mult
-    player.Functions.AddItem(recipe.result, yieldAmount)
-    TriggerClientEvent('fdb-inventory:client:ItemBox', src, FDBCore.Shared.Items[recipe.result], "add")
 
     fdbLibs:Notify(src, "Fabricação concluída com sucesso!", "success")
     ShopManager.LogTransaction(shopId, citizenid, 'craft', recipe.result, yieldAmount, 0, 0, recipe.category or "crafting")

@@ -23,6 +23,9 @@ Config.NpcCheckInterval = 5000
 Config.StashMaxWeight = 500000
 Config.StashMaxSlots = 50
 
+-- Craft Source Default ('shop_stash' or 'player_inventory')
+Config.CraftSourceDefault = 'shop_stash'
+
 -- Cash Register Mode
 -- 'numeric' -> Only tracks balance in DB. Players withdraw/deposit via menu.
 -- 'physical' -> Balances are synced with a physical 'cash' item in the register's stash.
