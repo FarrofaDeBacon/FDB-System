@@ -15,6 +15,12 @@ ShopManager = {
 CreateThread(function()
     Wait(2000)
     
+    -- Ensure columns are DECIMAL instead of FLOAT (Issue 13)
+    pcall(function()
+        MySQL.query.await('ALTER TABLE shops MODIFY COLUMN cash_balance DECIMAL(12,2) DEFAULT 0.00')
+        MySQL.query.await('ALTER TABLE shops MODIFY COLUMN owner_price_variation DECIMAL(12,2) DEFAULT 0.00')
+    end)
+    
     local templates = MySQL.query.await('SELECT * FROM shop_templates')
     if templates then
         for _, t in ipairs(templates) do
