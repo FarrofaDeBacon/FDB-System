@@ -56,6 +56,15 @@ function EconomyEngine.ResolveRegionFromZone(zoneName)
     return zoneToRegionMap[string.upper(zoneName)]
 end
 
+--- Resolve a Region ID from a City Name (from fdb-shops Config.CityRegions)
+--- @param cityName string City name
+--- @return string regionId
+function EconomyEngine.ResolveRegionFromCity(cityName)
+    if not cityName then return 'outros' end
+    local c = string.lower(cityName)
+    return (Config.CityRegions and Config.CityRegions[c]) or 'outros'
+end
+
 --- Get final multiplier for a specific item in a region
 --- @param regionId string
 --- @param category string

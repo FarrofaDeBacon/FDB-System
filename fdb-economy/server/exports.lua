@@ -10,6 +10,13 @@ exports('resolveRegion', function(zoneName)
     return EconomyEngine.ResolveRegionFromZone(zoneName)
 end)
 
+--- Resolves a Region ID from a City Name
+--- @param cityName string 
+--- @return string regionId
+exports('resolveRegionFromCity', function(cityName)
+    return EconomyEngine.ResolveRegionFromCity(cityName)
+end)
+
 --- Gets the final multiplier for a specific item in a region
 --- @param regionId string
 --- @param category string

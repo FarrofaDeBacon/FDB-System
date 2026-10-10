@@ -169,7 +169,7 @@ end
 function EmployeeManager.SetDuty(shopId, citizenid, isDuty)
     local perms = EmployeeManager.GetPermissions(shopId, citizenid)
     -- Must be an employee or owner
-    if not perms or (not perms.isOwner and not perms.isAdmin and not perms.atender and not perms.craftar and not perms.repor_estoque and not perms.financeiro and not perms.editar_precos and not perms.gerenciar_funcionarios) then
+    if not perms or perms.isPublic or (not perms.isOwner and not perms.isAdmin and not perms.atender and not perms.craftar and not perms.repor_estoque and not perms.financeiro and not perms.editar_precos and not perms.gerenciar_funcionarios) then
         return false
     end
 
@@ -187,7 +187,7 @@ function EmployeeManager.IsOnDuty(shopId, citizenid)
     if not shop then return false end
     
     local perms = EmployeeManager.GetPermissions(shopId, citizenid)
-    if not perms or (not perms.isOwner and not perms.isAdmin and not perms.atender and not perms.craftar and not perms.repor_estoque and not perms.financeiro and not perms.editar_precos and not perms.gerenciar_funcionarios) then
+    if not perms or perms.isPublic or (not perms.isOwner and not perms.isAdmin and not perms.atender and not perms.craftar and not perms.repor_estoque and not perms.financeiro and not perms.editar_precos and not perms.gerenciar_funcionarios) then
         return false
     end
 

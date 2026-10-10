@@ -292,6 +292,10 @@ RegisterNetEvent('fdb-shops:server:savePlacement', function(shopId, stationId, s
         TriggerClientEvent('fdb-shops:client:updateStationId', src, stationId, newId)
         TriggerClientEvent('fdb-shops:client:refreshStation', -1, newId, shopId, spawnType, targetNpc or targetProp, posTable, heading)
     end
+    
+    if ShopManager.Shops[shopId] then
+        ShopManager.Shops[shopId].stations = MySQL.query.await('SELECT * FROM shop_stations WHERE shop_id = ?', {shopId}) or {}
+    end
 
     exports['fdb-libs']:Notify(src, 'Posição salva com sucesso!', 'success')
     print("^2[fdb-shops] Loja " .. shopId .. " teve sua posição salva.^7")
@@ -318,6 +322,12 @@ RegisterNetEvent('fdb-shops:server:removePlacement', function(shopId, stationId)
     local numStationId = tonumber(stationId)
     if numStationId then
         MySQL.update.await('DELETE FROM shop_stations WHERE id = ?', {numStationId})
+        TriggerClientEvent('fdb-shops:client:removeStation', -1, numStationId)
+        
+        if ShopManager.Shops[shopId] then
+            ShopManager.Shops[shopId].stations = MySQL.query.await('SELECT * FROM shop_stations WHERE shop_id = ?', {shopId}) or {}
+        end
+        
         exports['fdb-libs']:Notify(src, 'Componente removido do banco com sucesso!', 'success')
         TriggerClientEvent('fdb-shops:client:stationDeleted', -1, numStationId)
     end

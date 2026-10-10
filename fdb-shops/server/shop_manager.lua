@@ -49,6 +49,14 @@ CreateThread(function()
     end
 
     local shops = MySQL.query.await('SELECT * FROM shops')
+    local allStations = MySQL.query.await('SELECT * FROM shop_stations') or {}
+    
+    local stationsByShop = {}
+    for _, st in ipairs(allStations) do
+        if not stationsByShop[st.shop_id] then stationsByShop[st.shop_id] = {} end
+        table.insert(stationsByShop[st.shop_id], st)
+    end
+
     if shops then
         for _, s in ipairs(shops) do
             local cat = shopCatalogs[s.shop_id] or {}
@@ -77,10 +85,11 @@ CreateThread(function()
                 cashBalance = s.cash_balance,
                 ownerPriceVariation = s.owner_price_variation,
                 maxPriceVariation = s.max_price_variation,
-                regionId = s.region_id or (s.city and Config.CityRegions and Config.CityRegions[string.lower(s.city)]) or 'outros',
+                regionId = s.region_id or exports['fdb-economy']:resolveRegionFromCity(s.city),
                 city = s.city or 'outros',
                 config = json.decode(s.config) or {},
-                stockMode = s.stock_mode or (s.owner_id and s.owner_id ~= "" and 'physical' or 'infinite')
+                stockMode = s.stock_mode or (s.owner_id and s.owner_id ~= "" and 'physical' or 'infinite'),
+                stations = stationsByShop[s.shop_id] or {}
             }
         end
         print(('^2[%s] Loaded %d templates and %d shops with catalog items.^7'):format(resourceName, #templates, #shops))
@@ -97,6 +106,7 @@ function ShopManager.GetShop(shopId)
     local s = MySQL.single.await('SELECT * FROM shops WHERE shop_id = ?', {shopId})
     if s then
         local catRows = MySQL.query.await('SELECT * FROM shop_catalog_items WHERE shop_id = ?', {shopId}) or {}
+        local stRows = MySQL.query.await('SELECT * FROM shop_stations WHERE shop_id = ?', {shopId}) or {}
         local cat = {}
         for _, row in ipairs(catRows) do
             table.insert(cat, {
@@ -131,10 +141,11 @@ function ShopManager.GetShop(shopId)
             cashBalance = tonumber(s.cash_balance) or 0.0,
             ownerPriceVariation = tonumber(s.owner_price_variation) or 0.0,
             maxPriceVariation = tonumber(s.max_price_variation) or 0.15,
-            regionId = s.region_id or (s.city and Config.CityRegions and Config.CityRegions[string.lower(s.city)]) or 'outros',
+            regionId = s.region_id or exports['fdb-economy']:resolveRegionFromCity(s.city),
             city = s.city or 'outros',
             config = json.decode(s.config) or {},
-            stockMode = s.stock_mode or (s.owner_id and s.owner_id ~= "" and 'physical' or 'infinite')
+            stockMode = s.stock_mode or (s.owner_id and s.owner_id ~= "" and 'physical' or 'infinite'),
+            stations = stRows
         }
         return ShopManager.Shops[s.shop_id]
     end
@@ -184,7 +195,9 @@ function ShopManager.GetFinalPrice(shopId, itemName)
     local basePrice = tonumber(catalogItem.price) or 0.0
     -- Use economy export if region is defined
     if shop.regionId and exports['fdb-economy'] then
-        local cat = catalogItem.category or "materials"
+        local coreItem = FDBCore.Shared.Items[itemName] or {}
+        local rawCat = catalogItem.category or coreItem.category or coreItem.type
+        local cat = MapEconomyCategory(rawCat)
         pcall(function()
             local ecoPrice = exports['fdb-economy']:getPrice(basePrice, shop.regionId, cat)
             if ecoPrice and tonumber(ecoPrice) then
@@ -215,18 +228,19 @@ function ShopManager.LogTransaction(shopId, playerId, txType, itemName, qty, uni
 
     -- Notify economy engine
     if shop.regionId then
-        local cat = categoryOverride
+        local rawCat = categoryOverride
         
-        if not cat then
-            cat = "materials"
+        if not rawCat then
             for _, item in ipairs(shop.buyCatalog) do
                 if item.name == itemName then
-                    cat = item.category or "materials"
+                    rawCat = item.category
                     break
                 end
             end
         end
 
-        exports['fdb-economy']:logTransaction(shop.regionId, shopId, itemName, cat, qty, unitPrice, totalPrice, txType)
+        local coreItem = FDBCore.Shared.Items[itemName] or {}
+        local finalCat = MapEconomyCategory(rawCat or coreItem.category or coreItem.type)
+        exports['fdb-economy']:logTransaction(shop.regionId, shopId, itemName, finalCat, qty, unitPrice, totalPrice, txType)
     end
 end

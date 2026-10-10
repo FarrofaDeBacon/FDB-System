@@ -67,6 +67,18 @@ Config.RegionZones = {
     },
 }
 
+Config.CityRegions = {
+    ['valentine'] = 'new_hanover',
+    ['strawberry'] = 'west_elizabeth',
+    ['blackwater'] = 'west_elizabeth',
+    ['rhodes'] = 'lemoyne',
+    ['saint_denis'] = 'lemoyne',
+    ['annesburg'] = 'new_hanover',
+    ['van_horn'] = 'new_hanover',
+    ['tumbleweed'] = 'new_austin',
+    ['armadillo'] = 'new_austin'
+}
+
 -- ==========================================
 -- MODIFICADORES POR CATEGORIA DE ITEM
 -- ==========================================

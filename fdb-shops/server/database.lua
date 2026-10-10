@@ -142,6 +142,13 @@ CreateThread(function()
         print('^2[' .. resourceName .. '] Migration: Column `city` added to `shops`.^7')
     end
 
+    local hasStockMode = MySQL.scalar.await("SHOW COLUMNS FROM `shops` LIKE 'stock_mode'")
+    if not hasStockMode then
+        MySQL.query.await("ALTER TABLE `shops` ADD COLUMN `stock_mode` VARCHAR(20) DEFAULT 'infinite'")
+        MySQL.query.await("UPDATE `shops` SET `stock_mode` = 'physical' WHERE `owner_id` IS NOT NULL AND `owner_id` != ''")
+        print('^2[' .. resourceName .. '] Migrations for stock_mode applied.^7')
+    end
+
     -- Itens do catálogo de cada loja (preço e ativação específicos por loja)
     MySQL.query.await([[
         CREATE TABLE IF NOT EXISTS shop_catalog_items (

@@ -180,9 +180,36 @@ FDBCore.Commands.Add('shopsetowner', 'Define o dono de uma loja', {
     end
 
     shop.ownerId = citizenid
-    MySQL.update('UPDATE shops SET owner_id = ? WHERE shop_id = ?', {citizenid, shopId})
+    local stockMode = citizenid and 'physical' or 'infinite'
+    shop.stockMode = stockMode
+    MySQL.update('UPDATE shops SET owner_id = ?, stock_mode = ? WHERE shop_id = ?', {citizenid, stockMode, shopId})
 
-    fdbLibs:Notify(source, 'Dono atualizado para: ' .. (citizenid or "Nenhum"), 'success')
+    fdbLibs:Notify(source, 'Dono atualizado para: ' .. (citizenid or "Nenhum") .. " (Estoque: " .. stockMode .. ")", 'success')
+end, 'admin')
+
+-- /shopstockmode [shopId] [mode]
+FDBCore.Commands.Add('shopstockmode', 'Altera o modo de estoque de uma loja', {
+    {name = 'shopId', help = 'ID único da loja'},
+    {name = 'mode', help = 'infinite ou physical'}
+}, true, function(source, args)
+    local shopId = args[1]
+    local mode = args[2]
+
+    if not shopId or not mode then return end
+    if mode ~= 'infinite' and mode ~= 'physical' then
+        fdbLibs:Notify(source, 'Modo inválido. Use infinite ou physical.', 'error')
+        return
+    end
+
+    local shop = ShopManager.GetShop(shopId)
+    if not shop then
+        fdbLibs:Notify(source, 'Loja não encontrada', 'error')
+        return
+    end
+
+    shop.stockMode = mode
+    MySQL.update('UPDATE shops SET stock_mode = ? WHERE shop_id = ?', {mode, shopId})
+    fdbLibs:Notify(source, 'Modo de estoque da loja ' .. shopId .. ' alterado para ' .. mode, 'success')
 end, 'admin')
 
 -- /shopinfo [shopId]
@@ -205,4 +232,5 @@ FDBCore.Commands.Add('shopinfo', 'Exibe informações de debug da loja', {
     print('Region:', shop.regionId or "Nenhuma")
     print('Caixa:', shop.cashBalance)
     print('Variação Dono:', shop.ownerPriceVariation)
+    print('Stock Mode:', shop.stockMode)
 end, 'admin')
